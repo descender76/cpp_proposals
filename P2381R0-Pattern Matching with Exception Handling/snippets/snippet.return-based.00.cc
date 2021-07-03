@@ -1,0 +1,13 @@
+variant<rete, error_code> e() noexcept;
+variant<reto, error_object> o() noexcept;
+
+variant<rete, error_code> temp1 = e();
+inspect(temp1) {
+	<rete> //...
+	<error_code> //...
+}
+variant<reto, error_object> temp2 = o();
+inspect(temp2) {
+	<reto> //...
+	<error_object> //...
+}

@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.after.00.cc.html
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.before.00.cc.html
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.cc.html
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.exception-based.00.cc.html
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.exception-based.01.cc.html
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.given.00.cc.html
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.return-based.00.cc.html
+/P2381R0-Pattern Matching with Exception Handling/snippets/snippet.return-based.01.cc.html

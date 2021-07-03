@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Pattern Matching with Exception Handling</title>
+  <meta name="description" content="Pattern Matching with Exception Handling">
+  <meta name="author" content="Jarrad Waterloo">
+  <style>
+    h1
+	{
+	  text-align : center;
+	}
+	.code
+	{
+	  background-color: AliceBlue;
+	}
+  </style>
+</head>
+<body>
+<!-- emails march 23 to april 6 -->
+<!--  -->
+<h1>Pattern Matching with Exception Handling<!--<br/>i.e.<br/>Statement Level Exception Handling--></h1>
+<table style="width:100%">
+<tr>
+<td>&nbsp;</td>
+<td style="width:60ex">
+  <table>
+  <tr>
+  <td><b>Document #:</b></td><td>P2381R0</td>
+  </tr>
+  <tr>
+  <td><b>Date:</b></td><td>2021-04-25</td>
+  </tr>
+  <tr>
+  <td><b>Project:</b></td><td>Programming Language C++</td>
+  </tr>
+  <tr>
+  <td><b>Audience:</b></td><td>Evolution</td>
+  </tr>
+  <tr>
+  <td><b>Reply-to:</b></td><td>Jarrad J. Waterloo<br/>&lt;<a href="mailto:descender76@gmail.com">descender76@gmail.com</a>&gt;</td>
+  </tr>
+  </table>
+</td>
+</tr>
+</table>
+<h2>Contents</h2>
+<!--
+<h3><a href="#revision_history">1&nbsp;&nbsp;Revision History</a></h3>
+-->
+<h3><a href="#introduction">1&nbsp;&nbsp;Introduction</a></h3>
+<h3><a href="#motivation_scope">2&nbsp;&nbsp;Motivation and Scope</a></h3>
+<h3><a href="#before_after">3&nbsp;&nbsp;Before/After Comparisons</a></h3>
+<h3><a href="#overview">4&nbsp;&nbsp;Design Overview</a></h3>
+<h3><a href="#wording">5&nbsp;&nbsp;Proposed Wording</a></h3>
+<!--
+<h3><a href="#design">7&nbsp;&nbsp;Design Decisions</a></h3>
+<h3><a href="#performance">8&nbsp;&nbsp;Runtime Performance</a></h3>
+<h3><a href="#examples">9&nbsp;&nbsp;Examples</a></h3>
+<h3><a href="#future">10&nbsp;Future Work</a></h3>
+<h3><a href="#acknowledgements">11&nbsp;Acknowledgements</a></h3>
+-->
+<h3><a href="#references">6&nbsp;&nbsp;References</a></h3>
+<!--
+<h2 id="revision_history">Revision History</h2>
+<p>TODO</p>
+-->
+<h2 id="introduction">Introduction</h2>
+<p>Good error handling is important to all programming languages, not just C++. Since this is so fundamental to programming in general, small improvements can have tremendous gains. Likewise regressions, could set a programming language back. C++ is blessed with multiple ways of performing error handling. These range from throwing exceptions which is our standard, returning errors which we inherited from C (also our informal standard) and using globals/registers/thread local storage. The bifurcation in how errors are served up and consumed has caused some problems over the decades and have been the subject of many papers over the past few years. While many of these papers are geared toward healing the divide, they are primary focused on performance and error production instead of error consumption.</p>
+<p>This paper however is evaluating a new feature for C++, pattern matching, and trying to ensure, in the context of error handling, it improves the language instead of indirectly widening the rift and in the process improve sometimes how we consume exceptions.</p>
+<h2 id="motivation_scope">Motivation and Scope</h2>
+<p>It should be noted that is neither the motivation nor the scope of the current <a href="#reference-p1371r2">pattern matching proposal</a> to provide any mechanisms for error handling. However, there are two parts of the pattern matching proposal that has a bearing on error handling.</p>
+<p>The first one starts in section 4.4 Matching Variants. So if the return of a function is a variant of the expected value and the unexpected error code or object than the pattern matching proposal can be used to perform error handling.</p>
+<!-- snippet.return-based.00.cc -->
+<pre class="code"><tt><font color="#008080">variant&lt;rete, error_code&gt;</font> <b><font color="#000000">e</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<font color="#008080">variant&lt;reto, error_object&gt;</font> <b><font color="#000000">o</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+
+<font color="#008080">variant&lt;rete, error_code&gt;</font> temp1 <font color="#990000">=</font> <b><font color="#000000">e</font></b><font color="#990000">();</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font>temp1<font color="#990000">)</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>rete<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_code<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<font color="#008080">variant&lt;reto, error_object&gt;</font> temp2 <font color="#990000">=</font> <b><font color="#000000">o</font></b><font color="#990000">();</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font>temp2<font color="#990000">)</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>reto<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_object<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font></tt></pre>
+<p>The second is that while in most of the examples in the pattern matching proposal the <i>init-statement<sub>opt</sub> condition</i> appears to be a variable it can also be a function call. The one example of this is found in 5.3.2.7 Extractor Pattern: Example "inspect (f()) {". The previous example can be simplified further by removing the temporary variables.</p>
+<!-- snippet.return-based.01.cc -->
+<pre class="code"><tt><font color="#008080">variant&lt;rete, error_code&gt;</font> <b><font color="#000000">e</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<font color="#008080">variant&lt;reto, error_object&gt;</font> <b><font color="#000000">o</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">e</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>rete<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_code<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">o</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>reto<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_object<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font></tt></pre>
+<p>The pattern matching proposal has excellent support for return based error handling. What does exception handling look like with the current pattern matching proposal?</p>
+<!-- snippet.exception-based.00.cc -->
+<pre class="code"><tt><font color="#008080">reta</font> <b><font color="#000000">a</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws b, c, d</font></i>
+
+<b><font color="#0000FF">try</font></b> <font color="#FF0000">{</font>
+	<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">a</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+		<font color="#990000">&lt;</font>reta<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#FF0000">}</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>b<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>c<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>d<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font></tt></pre>
+<p>In other words, pattern matching has no support for exception based error handling. Worse, by indirectly favoring one type of error handling over the other it is widening the rift between return based and exception based error handling. Even worse still, it is favoring return based over the exception based; the non standard over the standard. Ideally, it would be a much more pleasant error handling experience if the exception handlers could be moved inside with the inspect handlers.</p>
+<!-- snippet.exception-based.01.cc -->
+<pre class="code"><tt><font color="#008080">reta</font> <b><font color="#000000">a</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws b, c, d</font></i>
+
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">a</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>reta<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>b<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>c<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>d<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font></tt></pre>
+<p>The value of the conciseness of this request becomes more visually apparent when even more error handling is performed in close proximity. This is especially true when using 3rd party modules and their transitive dependencies. All of which can vary in how errors are produced. See the more complicated example in the next section.</p>
+<h2 id="before_after">Before/After Comparisons</h2>
+<b>Given</b>
+<pre class="code"><tt><font color="#008080">reta</font> <b><font color="#000000">a</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws b, c, d</font></i>
+<font color="#008080">variant&lt;rete, error_code&gt;</font> <b><font color="#000000">e</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<font color="#008080">reti</font> <b><font color="#000000">i</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws f, g, h</font></i>
+<font color="#008080">variant&lt;reto, error_object&gt;</font> <b><font color="#000000">o</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<font color="#008080">retu</font> <b><font color="#000000">u</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws j, k, l</font></i>
+</tt></pre>
+<hr/>
+<table style="width:100%">
+<tr>
+<td style="width:50%;text-align:center">
+<b>Before</b>
+</td>
+<td style="width:50%;text-align:center">
+<b>After</b>
+</td>
+</tr>
+</table>
+<hr/>
+<table style="width:100%">
+<tr>
+<td class="code" style="width:50%">
+<pre><tt><b><font color="#0000FF">try</font></b> <font color="#FF0000">{</font>
+	<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">a</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+		<font color="#990000">&lt;</font>reta<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#FF0000">}</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>b<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>c<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>d<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">e</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>retb<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_code<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<b><font color="#0000FF">try</font></b> <font color="#FF0000">{</font>
+	<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">i</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+		<font color="#990000">&lt;</font>reti<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#FF0000">}</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>f<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>g<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>h<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">o</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>reto<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_object<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<b><font color="#0000FF">try</font></b> <font color="#FF0000">{</font>
+	<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">u</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+		<font color="#990000">&lt;</font>retu<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#FF0000">}</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>j<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>k<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>l<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+</tt></pre>
+</td>
+<td class="code" style="width:50%">
+<pre><tt><b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">a</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>reta<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>b<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>c<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>d<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">e</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>rete<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_code<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">i</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>reti<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>f<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>g<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>h<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">o</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>reto<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>error_object<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font>
+<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">u</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
+	<font color="#990000">&lt;</font>retu<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>j<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>k<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+	<font color="#990000">&lt;</font>l<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
+<font color="#FF0000">}</font></tt></pre>
+</td>
+</tr>
+</table>
+<h2 id="overview">Design Overview</h2>
+<p><b>What are the advantages to allowing inspect to catch exceptions?</b><br/>
+<ol>
+<li>inspect won't widen the error handling bifurcation</li>
+<li>inspect won't widen the error handling bifurcation in favor of the less standard return based over the more standard exception based</li>
+<li>programmers can use a single mechanism to handle return based and exception based error handling at the statement level</li>
+<li>other than for performance reasons, the need to create dual error handling API's is diminished because the consumer can handle it the same way</li>
+</ol>
+</p>
+<p><b>NOTE:</b> If it makes it any easier to implement the desired functionality, the <i>init-statement<sub>opt</sub> condition</i> could be limited to a single function call, "inspect(a()) {", instead of a coumpound call such as "inspect(a() + e() - i() * o() / u()) {". This would be ok from a usability stand point because the programmer could always wrap the more complicated expression into a lamda.</p>
+<p><b>Wouldn't we need some syntax to differentiate a type that could be both returned and thrown?</b><br/>NO. Exceptions typically are derived from the exception base class and are thrown not returned. Returns tend to be error_code or something else which is not derived from exception. Accounting for a rarely used same type in both context scenarios would greatly diminish the majority case as a whole. The whole point of this syntax is the developer in statement based error handling doesn't need to know how the function/expression in question produced the error. Further this fringe outlier can easily be resolved by the implementer of said function. It is much easier for a library writer to refrain from a fringe case than to resort to providing dual interfaces.</p>
+<p>
+<b>"How would we deal with the N+1 problem? Frequently new syntax is introduced as way to get rid of an older syntax, but frequently what happens is that we end up with the new syntax and the old syntax." (source unknown)</b><br/>
+The current pattern matching proposal has already added new syntax which replaces in some circumstances if and switch. This proposal doesn't so much invent a new systax as it removes a perceived limitation or restriction. While some may think this revision puts inspect in competition with try/catch, I assure it doesn't. It is actually complementary. Try/Catch is block based. Return based error handling as well as pattern matching's inspect is statement based. Block based error handling is ideal when dealing with blocks. Statement based error handling is ideal when dealing with statements. Which one the programmer uses depends on the situation at the moment of need! A situation may have try/catch as a catch all for a whole function block. However in that same function, a specific function call is required to handle the error at the moment of the call due to business requirements of the error handling occurring before some other statement. At that moment, programmers reach for a statement based tool even though there is some catch handler catching everything else. I believe there is a misconception that for dual API's programmer's reach for eirther exception or return based API calls. However if your code base uses both than you are more likely to use both.
+</p>
+<h2 id="wording">Proposed Wording</h2>
+<p>If the <i>init-statement<sub>opt</sub> condition</i> can throw an exception, then exceptions can be caught by inspect's <i>alternative-pattern</i>.</p>
+<!--
+<h2 id="design">Design Decisions</h2>
+<p>TODO</p>
+<h2 id="performance">Runtime Performance</h2>
+<p>TODO</p>
+<h2 id="examples">Examples</h2>
+<p>TODO</p>
+<h2 id="future">Future Work</h2>
+<p>TODO</p>
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>TODO</p>
+-->
+<h2 id="references">References</h2>
+<span id="reference-p1371r2">[P1371R2] Pattern Matching</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r2.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r2.pdf</a>
+</body>
+</html>
