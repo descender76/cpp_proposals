@@ -22,15 +22,28 @@ closure_delegate closure_delegate_bind_to_int(int_return_int callback, int* user
 }
 
 // the function to be called polymorphically
-int f(void* userdata, int n)
+int f1(void* userdata, int n)
 {
     return *((int*)userdata) * n;
 }
 
+int f2(void* userdata, int n)
+{
+    return *((int*)userdata) + n;
+}
+
+int f3(void* userdata, int n)
+{
+    return *((int*)userdata) - n;
+}
+
 int main()
 {
-	int userdata = 2;
-    closure_delegate cd = closure_delegate_bind_to_int(f, &userdata);
-    std::cout << closure_delegate_execute(cd, 7) << '\n';// 14
-    std::cout << closure_delegate_execute(cd, 9) << '\n';// 18
+    int userdata = 4;
+    closure_delegate cd = closure_delegate_bind_to_int(f1, &userdata);
+    std::cout << closure_delegate_execute(cd, 7) << '\n';// 28
+    cd = closure_delegate_bind_to_int(f2, &userdata);
+    std::cout << closure_delegate_execute(cd, 7) << '\n';// 11
+    cd = closure_delegate_bind_to_int(f3, &userdata);
+    std::cout << closure_delegate_execute(cd, 7) << '\n';// -3
 }
