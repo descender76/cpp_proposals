@@ -67,14 +67,6 @@ struct delegateTest0
     {
         return 0;
     }
-    long operator()(int i, long l, char c) const
-    {
-        return 0;
-    }
-    long operator()(int i, long l, char c)
-    {
-        return 0;
-    }
 };
 
 struct delegateTest
@@ -85,15 +77,6 @@ struct delegateTest
         return state + i + l;
     }
     long test(int i, long l, char c)
-    {
-        state += i;
-        return state + l;
-    }
-    long operator()(int i, long l, char c) const
-    {
-        return state + i + l;
-    }
-    long operator()(int i, long l, char c)
     {
         state += i;
         return state + l;

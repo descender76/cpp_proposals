@@ -226,15 +226,6 @@ struct delegateTest
         state += i;
         return state + l;
     }
-    long operator()(int i, long l, char c) const
-    {
-        return state + i + l;
-    }
-    long operator()(int i, long l, char c)
-    {
-        state += i;
-        return state + l;
-    }
 };
 
 int main()

@@ -466,8 +466,6 @@ This example like the example test case in the function_ref implementation just 
     <li>member function with type erasure</li>
 </ol>
 <p>While it would be ideal for all construction methodologies to be constructors, due to present limitations in the C++ language, some may need to be make functions.</p>
-<h3>functor/lambda usecase</h3>
-<p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified.</p>
 <h3>Construction Method #1: The Unsafe Constructor</h3>
 <p>Reduce encapsulation some by providing a constructor to function_ref's internal pointers. This requires the function_ref specification to have a specific implementation.</p>
 <!--<p>For function_ref&lt;int(int)&gt; there would be a two parameter constructor function_ref&lt;int(int)&gt;(void* obj_, int(*callback_)(int))</p>-->
@@ -478,6 +476,12 @@ This example like the example test case in the function_ref implementation just 
 <p>This unsafe constructor, actually void* safe, is meant to be the foundation of the remaining and future construction methodologies.</p>
 <div class="code">
 {{> snippets/snippet-cpp-unsafe-constructor-usage.cc}}
+</div>
+<h3>functor/lambda usecase</h3>
+<p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified.</p>
+<!-- snippet-functor-lambda.cc.html -->
+<div class="code">
+{{> snippets/snippet-functor-lambda.cc}}
 </div>
 <h3>function without type erasure usecase</h3>
 <p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified.</p>
@@ -504,8 +508,6 @@ This example like the example test case in the function_ref implementation just 
 <p>...</p>
 <p>...</p>
 <p>add typesafe versions of constructor even though a make function</p>
-<p>add make function for member functions</p>
-<p>add make function for other callable constructs such as constructors, operators, destructors</p>
 <p>little language support via a compiler function traits to provide minimal language support for the method type erasure</p>
 <p>guaranteed inlining by allowing function pointers to be cast into other function points like what happens when using void pointer</p>
 <p>major language upport as a language feature</p>
@@ -516,15 +518,12 @@ This example like the example test case in the function_ref implementation just 
 <p>...</p>
 <p>...</p>
 <p>...</p>
-<s>
 <h2 id="before_after">Before/After Comparisons</h2>
 <b>Given</b>
-<pre class="code"><tt><font color="#008080">reta</font> <b><font color="#000000">a</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws b, c, d</font></i>
-<font color="#008080">variant&lt;rete, error_code&gt;</font> <b><font color="#000000">e</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
-<font color="#008080">reti</font> <b><font color="#000000">i</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws f, g, h</font></i>
-<font color="#008080">variant&lt;reto, error_object&gt;</font> <b><font color="#000000">o</font></b><font color="#990000">()</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
-<font color="#008080">retu</font> <b><font color="#000000">u</font></b><font color="#990000">();</font><i><font color="#9A1900">// throws j, k, l</font></i>
-</tt></pre>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
 <hr/>
 <table style="width:100%">
 <tr>
@@ -536,6 +535,7 @@ This example like the example test case in the function_ref implementation just 
 </td>
 </tr>
 </table>
+<s>
 <hr/>
 <table style="width:100%">
 <tr>
