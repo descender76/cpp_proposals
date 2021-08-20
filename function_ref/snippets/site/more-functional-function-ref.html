@@ -474,36 +474,162 @@ This example like the example test case in the function_ref implementation just 
 {{> snippets/snippet-cpp-unsafe-constructor.cc}}
 </div>
 <p>This unsafe constructor, actually void* safe, is meant to be the foundation of the remaining and future construction methodologies.</p>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
+<!-- snippet-cpp-unsafe-constructor-usage-declarations.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-unsafe-constructor-usage-declarations.cc}}
+</div>
+<!-- snippet-cpp-unsafe-constructor-usage.cc.html -->
 <div class="code">
 {{> snippets/snippet-cpp-unsafe-constructor-usage.cc}}
 </div>
 <h3>functor/lambda usecase</h3>
 <p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified.</p>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
 <!-- snippet-functor-lambda.cc.html -->
 <div class="code">
 {{> snippets/snippet-functor-lambda.cc}}
 </div>
+<!-- snippet-functor-lambda-usage.cc.html -->
+<div class="code">
+{{> snippets/snippet-functor-lambda-usage.cc}}
+</div>
 <h3>function without type erasure usecase</h3>
 <p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified.</p>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
 <!-- snippet-function-without-type-erasure.cc.html -->
 <div class="code">
 {{> snippets/snippet-function-without-type-erasure.cc}}
 </div>
+<!-- snippet-function-without-type-erasure-usage.cc.html -->
+<div class="code">
+{{> snippets/snippet-function-without-type-erasure-usage.cc}}
+</div>
 <h3>function with type erasure usecase</h3>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
 <!-- snippet-function-with-type-erasure.cc.html -->
 <div class="code">
 {{> snippets/snippet-function-with-type-erasure.cc}}
 </div>
+<!-- snippet-function-with-type-erasure-usage.cc.html -->
+<div class="code">
+{{> snippets/snippet-function-with-type-erasure-usage.cc}}
+</div>
 <h3>member function without type erasure usecase</h3>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
 <!-- snippet-member-function-without-type-erasure.cc.html -->
 <div class="code">
 {{> snippets/snippet-member-function-without-type-erasure.cc}}
 </div>
+<!-- snippet-member-function-without-type-erasure-usage.cc.html -->
+<div class="code">
+{{> snippets/snippet-member-function-without-type-erasure-usage.cc}}
+</div>
 <h3>member function with type erasure usecase</h3>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
 <!-- snippet-member-function-with-type-erasure.cc.html -->
 <div class="code">
 {{> snippets/snippet-member-function-with-type-erasure.cc}}
 </div>
+<!-- snippet-member-function-with-type-erasure-usage.cc.html -->
+<div class="code">
+{{> snippets/snippet-member-function-with-type-erasure-usage.cc}}
+</div>
+<h2 id="before_after">Before/After Comparisons</h2>
+<b>Given</b>
+<!-- snippet-function_ref-prime.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-prime.cc}}
+</div>
+<table style="width:100%">
+<tr>
+<td class="code" style="width:50%">
+</td>
+<td class="code" style="width:50%">
+<!-- snippet-functor-lambda.cc.html -->
+<div class="code">
+{{> snippets/snippet-functor-lambda.cc}}
+</div>
+<!-- snippet-function-with-type-erasure.cc.html -->
+<div class="code">
+{{> snippets/snippet-function-with-type-erasure.cc}}
+</div>
+<!-- snippet-function-without-type-erasure.cc.html -->
+<div class="code">
+{{> snippets/snippet-function-without-type-erasure.cc}}
+</div>
+<!-- snippet-member-function-with-type-erasure.cc.html -->
+<div class="code">
+{{> snippets/snippet-member-function-with-type-erasure.cc}}
+</div>
+<!-- snippet-member-function-without-type-erasure.cc.html -->
+<div class="code">
+{{> snippets/snippet-member-function-without-type-erasure.cc}}
+</div>
+</td>
+</tr>
+</table>
+<!-- snippet-cpp-unsafe-constructor-usage-declarations.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-unsafe-constructor-usage-declarations.cc}}
+</div>
+<hr/>
+<table style="width:100%">
+<tr>
+<td style="width:50%;text-align:center">
+<b>Before</b>
+</td>
+<td style="width:50%;text-align:center">
+<b>After</b>
+</td>
+</tr>
+</table>
+<hr/>
+<table style="width:100%">
+<tr>
+<td class="code" style="width:50%">
+<!-- snippet-cpp-unsafe-constructor-usage.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-unsafe-constructor-usage.cc}}
+</div>
+</td>
+<td class="code" style="width:50%">
+<!-- snippet-cpp-unsafe-constructor-usage-alt.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-unsafe-constructor-usage-alt.cc}}
+</div>
+</td>
+</tr>
+</table>
+<!--
+[X] deduplication
+[X] before/after
+[] in between verbiage
+[] rework examples
+[] compiler support
+	[] constructor template parameters
+	[] casting function pointer with pointers to those with void pointers
+	[] member function traits that convert functions into C variants
+	[] alias to parameter packs and typelists
+-->
 <p>...</p>
 <p>...</p>
 <p>...</p>
@@ -518,92 +644,7 @@ This example like the example test case in the function_ref implementation just 
 <p>...</p>
 <p>...</p>
 <p>...</p>
-<h2 id="before_after">Before/After Comparisons</h2>
-<b>Given</b>
-<!-- snippet-function_ref-prime.cc.html -->
-<div class="code">
-{{> snippets/snippet-function_ref-prime.cc}}
-</div>
-<hr/>
-<table style="width:100%">
-<tr>
-<td style="width:50%;text-align:center">
-<b>Before</b>
-</td>
-<td style="width:50%;text-align:center">
-<b>After</b>
-</td>
-</tr>
-</table>
 <s>
-<hr/>
-<table style="width:100%">
-<tr>
-<td class="code" style="width:50%">
-<pre><tt><b><font color="#0000FF">try</font></b> <font color="#FF0000">{</font>
-	<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">a</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-		<font color="#990000">&lt;</font>reta<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#FF0000">}</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>b<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>c<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>d<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font>
-<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">e</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-	<font color="#990000">&lt;</font>retb<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>error_code<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-<font color="#FF0000">}</font>
-<b><font color="#0000FF">try</font></b> <font color="#FF0000">{</font>
-	<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">i</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-		<font color="#990000">&lt;</font>reti<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#FF0000">}</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>f<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>g<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>h<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font>
-<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">o</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-	<font color="#990000">&lt;</font>reto<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>error_object<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-<font color="#FF0000">}</font>
-<b><font color="#0000FF">try</font></b> <font color="#FF0000">{</font>
-	<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">u</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-		<font color="#990000">&lt;</font>retu<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#FF0000">}</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>j<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>k<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font> <b><font color="#0000FF">catch</font></b><font color="#990000">(</font>l<font color="#990000">)</font> <font color="#FF0000">{</font>
-<font color="#FF0000">}</font>
-</tt></pre>
-</td>
-<td class="code" style="width:50%">
-<pre><tt><b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">a</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-	<font color="#990000">&lt;</font>reta<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>b<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>c<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>d<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-<font color="#FF0000">}</font>
-<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">e</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-	<font color="#990000">&lt;</font>rete<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>error_code<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-<font color="#FF0000">}</font>
-<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">i</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-	<font color="#990000">&lt;</font>reti<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>f<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>g<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>h<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-<font color="#FF0000">}</font>
-<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">o</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-	<font color="#990000">&lt;</font>reto<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>error_object<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-<font color="#FF0000">}</font>
-<b><font color="#000000">inspect</font></b><font color="#990000">(</font><b><font color="#000000">u</font></b><font color="#990000">())</font> <font color="#FF0000">{</font>
-	<font color="#990000">&lt;</font>retu<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>j<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>k<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-	<font color="#990000">&lt;</font>l<font color="#990000">&gt;</font> <i><font color="#9A1900">//...</font></i>
-<font color="#FF0000">}</font></tt></pre>
-</td>
-</tr>
-</table>
 <h2 id="overview">Design Overview</h2>
 <p><b>What are the advantages to allowing inspect to catch exceptions?</b><br/>
 <ol>
