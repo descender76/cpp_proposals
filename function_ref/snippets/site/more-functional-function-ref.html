@@ -68,16 +68,17 @@
 -->
 <h3><a href="#introduction">1&nbsp;&nbsp;Introduction</a></h3>
 <h3><a href="#history_prior_work">2&nbsp;&nbsp;History &amp; Prior Work</a></h3>
-<h3><a href="#fall_short">4&nbsp;&nbsp;Where does function_ref fall short?</a></h3>
-<h3><a href="#alternate_realities">5&nbsp;&nbsp;Solutions &amp; Alternate Realities</a></h3>
+<h3><a href="#fall_short">3&nbsp;&nbsp;Where does function_ref fall short?</a></h3>
+<h3><a href="#alternate_realities">4&nbsp;&nbsp;Solutions &amp; Alternate Realities</a></h3>
+<h3><a href="#before_after">5&nbsp;&nbsp;Before/After Comparisons</a></h3>
+<h3><a href="#language_feature">6&nbsp;&nbsp;As a language/compiler feature</a></h3>
 <!--
 <h3><a href="#motivation_scope">2&nbsp;&nbsp;Motivation and Scope</a></h3>
-<h3><a href="#before_after">3&nbsp;&nbsp;Before/After Comparisons</a></h3>
 <h3><a href="#overview">4&nbsp;&nbsp;Design Overview</a></h3>
 <h3><a href="#wording">5&nbsp;&nbsp;Proposed Wording</a></h3>
 <h3><a href="#design">7&nbsp;&nbsp;Design Decisions</a></h3>
--->
 <h3><a href="#performance">6&nbsp;&nbsp;Runtime Performance</a></h3>
+-->
 <!--
 <h3><a href="#examples">9&nbsp;&nbsp;Examples</a></h3>
 <h3><a href="#future">10&nbsp;Future Work</a></h3>
@@ -89,7 +90,7 @@
 <p>TODO</p>
 -->
 <h2 id="introduction">Introduction</h2>
-<p>There are many types of runtime polymorphism each with their PRO's and CON's. These range from single function callbacks to classes with multiple virtual member functions and even those with multiple type erased parameters. Even though C gives us callbacks via function pointers and C++ adds to our support of runtime polymorphism via its virtual functions, their is still considerable interest in other types of runtime polymorphism, as illustrated by just some of the proposals in past years.</p>
+<p>There are many types of runtime polymorphism each with their own PRO's and CON's. These range from single function callbacks to classes with multiple virtual member functions and even those with multiple type erased parameters. Even though C gives us callbacks via function pointers and C++ adds to our support of runtime polymorphism via its virtual functions, their is still considerable interest in other types of runtime polymorphism, as illustrated by just some of the proposals in past years.</p>
 <table class="inline_references">
 <thead>
 <tr>
@@ -242,9 +243,9 @@
 <td>Hal Finkel, Tom Scogland</td>
 </tr>
 </table>
-<p>One such is the single function callback as proposed in the <a href="#reference-p0792r5">function_ref</a> proposals. Upon closer examination, function_ref has some serious limitations and does not handle a common use case. In order to better understand these limitations and the common use case we need to examine callbacks historically and the prior work of others.</p>
+<p>One such is the single function callback as proposed in the <a href="#reference-p0792r5">function_ref</a> proposals. Upon closer examination, function_ref has some serious limitations and also does not handle a common use case. In order to better understand these limitations and the common use case, we need to examine callbacks historically and the prior work of others.</p>
 <h2 id="history_prior_work">History &amp; Prior Work</h2>
-<p><a href="#reference-p0792r5">function_ref</a> is most like <a href="#reference-cpp-pointer-declaration-function">C function pointers</a>. In the following modified <a href="#reference-cpp-pointer-declaration-function">cppreference</a> example, int_return_int is  the type of function pointer that points to function that takes and returns an int.</p>
+<p><a href="#reference-p0792r5">function_ref</a> is most like <a href="#reference-cpp-pointer-declaration-function">C function pointers</a>. In the following example, int_return_int is the type of function pointer that points to a function that takes and returns an int. This example illustrates how a function pointer is declared, initiated and used.</p>
 <!-- snippet-function-pointer-simple.cc.html -->
 <div class="code">
 {{> snippets/snippet-function-pointer-simple.cc}}
@@ -619,24 +620,64 @@ This example like the example test case in the function_ref implementation just 
 </td>
 </tr>
 </table>
+<h2 id="language_feature">As a language/compiler feature</h2>
+<h3>Just let the language/compiler do it all.</h3>
+<p>The is certainly some appeal for the language/compiler to handle everything because it could handle all of the functional bifurcation that has accrued over the decades including the recent noexcept. However, there is also some appeal to a library based solution because it would allow the language to remain simpler with fewer keywords and ultimately easier to master. This is similar in principle to metaclasses and the reflection proposals which would similarly allow us to do more in libraries instead of as language features. At the end of the day, a consumer doesn't care as long as they can easily perform callbacks.</p>
+<h3>constructor template parameters</h3>
+<p>Currently, function_ref with enhancements for all 5 use cases needs at least five unique sets of function parameters. There is the single parameter to a functor. There is the single template parameter to a function. There is the single template parameter to a member function. There are two parameters, one template parameter to a function and one regular type erased pointer. There are two parameters, one template parameter to a member function and one regular type erased pointer. These 5 are mutually exclusive and overloadable. Using constructors are more desirable than using static make functions especially when these functions currently can't be written as a single template free function but requires a class and up to 2 static methods. If constructors could take a template parameter list like any other function does than we would be a step closer to making constructors instead of make functions a reality.</p>
+<h3>[member] function traits</h3>
+The implementation of function_ref is complicated mostly by all the binders to a type erased function pointer that must be created. If we had compiler generated function traits and member function traits than constructor template parameters would not be needed on the function_ref class at all. The 2013/08/05 article <a href="https://functionalcpp.wordpress.com/2013/08/05/function-traits/" target="__blank">Function Traits</a> demonstrates the need of function traits but it doesn't go far enough for function_ref uses. First of all there are no params alias to the parameter pack nor a parameter types alias to the same. This can't be performed currently in C++ because we can't have alias to parameter packs or type lists in C++. Some of the current C++ type traits require compiler based implementations. Similarly, if the compiler provided the following functions pointers than function_ref would become trivial.<br/>
+<br/>
+function_trait&lt;function&gt;::type_erase_first<br/>
+function_trait&lt;function&gt;::add_void_pointer<br/>
+member_function_trait&lt;function&gt;::type_erase_this or function_trait&lt;member_function&gt;::type_erase_this<br/>
+member_function_trait&lt;function&gt;::ref or function_trait&lt;member_function&gt;::ref<br/>
+member_function_trait&lt;function&gt;::cref or function_trait&lt;member_function&gt;::cref<br/>
+member_function_trait&lt;function&gt;::pointer or function_trait&lt;member_function&gt;::pointer<br/>
+member_function_trait&lt;function&gt;::cpointer or function_trait&lt;member_function&gt;::cpointer<br/>
+member_function_trait&lt;function&gt;::value or function_trait&lt;member_function&gt;::value<br/>
+member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_function&gt;::cvalue<br/>
+<br/>
+Also note that the compiler providing at least one of the following subset of the above would mean we would have regained what was lost when CFront became the first C++ standard.<br/>
+<br/>
+member_function_trait&lt;function&gt;::ref or function_trait&lt;member_function&gt;::ref<br/>
+member_function_trait&lt;function&gt;::cref or function_trait&lt;member_function&gt;::cref<br/>
+member_function_trait&lt;function&gt;::pointer or function_trait&lt;member_function&gt;::pointer<br/>
+member_function_trait&lt;function&gt;::cpointer or function_trait&lt;member_function&gt;::cpointer<br/>
+member_function_trait&lt;function&gt;::value or function_trait&lt;member_function&gt;::value<br/>
+member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_function&gt;::cvalue<br/>
+<h3>alias to parameter packs and typelists</h3>
+<p>Function traits and member function traits could be completely created as a library provided we had just the typelist and parameter pack aliasing feature of the <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1858r2.html" target="__blank">Generalized pack declaration and usage</a> proposal.</p>
+<h3>void* composition i.e. guaranteed inlining i.e. advance casting</h3>
+<p>Add some advanced casting to the standard C++ casting. In particular, allow non member function pointers to be explicitly cast to other non member function pointers provided all types and return type of said function pointer are the same and in the exact order except that pointers can be replaced with void pointers.</p>
+<p>Example: allow double(*)(int*, bool, int, float, double) to be cast to double(*)(void*, bool, int, float, double) and the pointer to still callable provided the caller ensures that a void* that points to int is passed to the function pointer.</p>
+<p>This is just an extension of what void pointers can currently do. First by composing void pointers; which this function_ref proposal doesn't need but may be still valuable to other type erasure libraries. Secondly, by applying these void pointer composition to function pointers which this function_ref proposal could benefit from. Ironically this works even now in C++ using a little bit of undefined behavior as the following example shows. In this example, the C++ ability for non member function pointers to be cast explicitly to a void pointer is used. This void pointer is immediately cast to a function pointer with type erased parameters. While logical, the undefined behavior is that the new functional pointer is still callable.</p>
+<!-- snippet-cpp-function-pointer-cast.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-function-pointer-cast.cc}}
+</div>
+<p>This feature could be combined with constructor template parameters to provide a simple and typesafe constructor.</p>
+<!-- snippet-cpp-safe-constructor.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-safe-constructor.cc}}
+</div>
+<p>This void* composition and advance casting would provide a guaranteed inlining and would turn one undefined behavior into a defined behavior.</p>
 <!--
 [X] deduplication
 [X] before/after
 [] in between verbiage
 [] rework examples
 [] compiler support
-	[] constructor template parameters
+	[~] constructor template parameters
+	https://stackoverflow.com/questions/2861839/can-the-template-parameters-of-a-constructor-be-explicitly-specified
 	[] casting function pointer with pointers to those with void pointers
-	[] member function traits that convert functions into C variants
-	[] alias to parameter packs and typelists
+	https://docs.microsoft.com/en-us/cpp/cpp/standard-conversions?view=msvc-160
+	https://stackoverflow.com/questions/2235219/overloading-the-global-type-conversion-operator
+	[~] member function traits that convert functions into C variants
+	[~] alias to parameter packs and typelists
+[] correct references [order] and cache them
 -->
-<p>...</p>
-<p>...</p>
-<p>...</p>
-<p>add typesafe versions of constructor even though a make function</p>
-<p>little language support via a compiler function traits to provide minimal language support for the method type erasure</p>
-<p>guaranteed inlining by allowing function pointers to be cast into other function points like what happens when using void pointer</p>
-<p>major language upport as a language feature</p>
+<!--
 <h2 id="performance">Runtime Performance</h2>
 <p>Things must first work than get optimized.</p>
 <p>Brief mention of code project.</p>
@@ -644,6 +685,8 @@ This example like the example test case in the function_ref implementation just 
 <p>...</p>
 <p>...</p>
 <p>...</p>
+-->
+<!--
 <s>
 <h2 id="overview">Design Overview</h2>
 <p><b>What are the advantages to allowing inspect to catch exceptions?</b><br/>
@@ -663,6 +706,7 @@ The current pattern matching proposal has already added new syntax which replace
 <h2 id="wording">Proposed Wording</h2>
 <p>If the <i>init-statement<sub>opt</sub> condition</i> can throw an exception, then exceptions can be caught by inspect's <i>alternative-pattern</i>.</p>
 </s>
+-->
 <!--
 <h2 id="design">Design Decisions</h2>
 <p>TODO</p>
