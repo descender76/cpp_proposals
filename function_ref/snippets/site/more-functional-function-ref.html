@@ -63,32 +63,15 @@
 </tr>
 </table>
 <h2>Contents</h2>
-<!--
-<h3><a href="#revision_history">1&nbsp;&nbsp;Revision History</a></h3>
--->
 <h3><a href="#introduction">1&nbsp;&nbsp;Introduction</a></h3>
 <h3><a href="#history_prior_work">2&nbsp;&nbsp;History &amp; Prior Work</a></h3>
 <h3><a href="#fall_short">3&nbsp;&nbsp;Where does function_ref fall short?</a></h3>
 <h3><a href="#alternate_realities">4&nbsp;&nbsp;Solutions &amp; Alternate Realities</a></h3>
 <h3><a href="#before_after">5&nbsp;&nbsp;Before/After Comparisons</a></h3>
 <h3><a href="#language_feature">6&nbsp;&nbsp;As a language/compiler feature</a></h3>
-<!--
-<h3><a href="#motivation_scope">2&nbsp;&nbsp;Motivation and Scope</a></h3>
-<h3><a href="#overview">4&nbsp;&nbsp;Design Overview</a></h3>
-<h3><a href="#wording">5&nbsp;&nbsp;Proposed Wording</a></h3>
-<h3><a href="#design">7&nbsp;&nbsp;Design Decisions</a></h3>
-<h3><a href="#performance">6&nbsp;&nbsp;Runtime Performance</a></h3>
--->
-<!--
-<h3><a href="#examples">9&nbsp;&nbsp;Examples</a></h3>
-<h3><a href="#future">10&nbsp;Future Work</a></h3>
-<h3><a href="#acknowledgements">11&nbsp;Acknowledgements</a></h3>
--->
-<h3><a href="#references">7&nbsp;&nbsp;References</a></h3>
-<!--
-<h2 id="revision_history">Revision History</h2>
-<p>TODO</p>
--->
+<h3><a href="#conclusion">7&nbsp;&nbsp;Conclusion</a></h3>
+<h3><a href="#references">8&nbsp;&nbsp;References</a></h3>
+<h3><a href="#ancillary-references">9&nbsp;&nbsp;Ancillary References</a></h3>
 <h2 id="introduction">Introduction</h2>
 <p>There are many types of runtime polymorphism each with their own PRO's and CON's. These range from single function callbacks to classes with multiple virtual member functions and even those with multiple type erased parameters. Even though C gives us callbacks via function pointers and C++ adds to our support of runtime polymorphism via its virtual functions, their is still considerable interest in other types of runtime polymorphism, as illustrated by just some of the proposals in past years.</p>
 <table class="inline_references">
@@ -662,63 +645,8 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 {{> snippets/snippet-cpp-safe-constructor.cc}}
 </div>
 <p>This void* composition and advance casting would provide a guaranteed inlining and would turn one undefined behavior into a defined behavior.</p>
-<!--
-[X] deduplication
-[X] before/after
-[] in between verbiage
-[] rework examples
-[] compiler support
-	[~] constructor template parameters
-	https://stackoverflow.com/questions/2861839/can-the-template-parameters-of-a-constructor-be-explicitly-specified
-	[] casting function pointer with pointers to those with void pointers
-	https://docs.microsoft.com/en-us/cpp/cpp/standard-conversions?view=msvc-160
-	https://stackoverflow.com/questions/2235219/overloading-the-global-type-conversion-operator
-	[~] member function traits that convert functions into C variants
-	[~] alias to parameter packs and typelists
-[] correct references [order] and cache them
--->
-<!--
-<h2 id="performance">Runtime Performance</h2>
-<p>Things must first work than get optimized.</p>
-<p>Brief mention of code project.</p>
-<p>Contrast C implementation versus C++ implementation</p>
-<p>...</p>
-<p>...</p>
-<p>...</p>
--->
-<!--
-<s>
-<h2 id="overview">Design Overview</h2>
-<p><b>What are the advantages to allowing inspect to catch exceptions?</b><br/>
-<ol>
-<li>inspect won't widen the error handling bifurcation</li>
-<li>inspect won't widen the error handling bifurcation in favor of the less standard return based over the more standard exception based</li>
-<li>programmers can use a single mechanism to handle return based and exception based error handling at the statement level</li>
-<li>other than for performance reasons, the need to create dual error handling API's is diminished because the consumer can handle it the same way</li>
-</ol>
-</p>
-<p><b>NOTE:</b> If it makes it any easier to implement the desired functionality, the <i>init-statement<sub>opt</sub> condition</i> could be limited to a single function call, "inspect(a()) {", instead of a coumpound call such as "inspect(a() + e() - i() * o() / u()) {". This would be ok from a usability stand point because the programmer could always wrap the more complicated expression into a lamda.</p>
-<p><b>Wouldn't we need some syntax to differentiate a type that could be both returned and thrown?</b><br/>NO. Exceptions typically are derived from the exception base class and are thrown not returned. Returns tend to be error_code or something else which is not derived from exception. Accounting for a rarely used same type in both context scenarios would greatly diminish the majority case as a whole. The whole point of this syntax is the developer in statement based error handling doesn't need to know how the function/expression in question produced the error. Further this fringe outlier can easily be resolved by the implementer of said function. It is much easier for a library writer to refrain from a fringe case than to resort to providing dual interfaces.</p>
-<p>
-<b>"How would we deal with the N+1 problem? Frequently new syntax is introduced as way to get rid of an older syntax, but frequently what happens is that we end up with the new syntax and the old syntax." (source unknown)</b><br/>
-The current pattern matching proposal has already added new syntax which replaces in some circumstances if and switch. This proposal doesn't so much invent a new systax as it removes a perceived limitation or restriction. While some may think this revision puts inspect in competition with try/catch, I assure it doesn't. It is actually complementary. Try/Catch is block based. Return based error handling as well as pattern matching's inspect is statement based. Block based error handling is ideal when dealing with blocks. Statement based error handling is ideal when dealing with statements. Which one the programmer uses depends on the situation at the moment of need! A situation may have try/catch as a catch all for a whole function block. However in that same function, a specific function call is required to handle the error at the moment of the call due to business requirements of the error handling occurring before some other statement. At that moment, programmers reach for a statement based tool even though there is some catch handler catching everything else. I believe there is a misconception that for dual API's programmer's reach for eirther exception or return based API calls. However if your code base uses both than you are more likely to use both.
-</p>
-<h2 id="wording">Proposed Wording</h2>
-<p>If the <i>init-statement<sub>opt</sub> condition</i> can throw an exception, then exceptions can be caught by inspect's <i>alternative-pattern</i>.</p>
-</s>
--->
-<!--
-<h2 id="design">Design Decisions</h2>
-<p>TODO</p>
-<h2 id="performance">Runtime Performance</h2>
-<p>TODO</p>
-<h2 id="examples">Examples</h2>
-<p>TODO</p>
-<h2 id="future">Future Work</h2>
-<p>TODO</p>
-<h2 id="acknowledgements">Acknowledgements</h2>
-<p>TODO</p>
--->
+<h2 id="conclusion">Conclusion</h2>
+<p>The deficiency of the current function_ref proposal is summed up in its title, "function_ref: a non-owning reference to a Callable". A callable [object] shows ts preferential treatment for functors/stateful lambdas over member functions and at times even regular functions with how it handles type erasure. Fortunately, the state of the existing implementation is well designed and is capable of handling more use cases than what its public interface and specification allows. At a minimum, a refined function_ref only needs nailing down its implentation to a void pointer a free function pointer along with exposing these two via a public constructor. Allowing these minimal changes would open up the provider of function_ref(s) to handle type erased member function use cases akin to delegates in .NET without any unacceptable double indirections. With supporting optional make functions, the propagation of the parameters can be performed explicitly and safely. Further this proposal outlines some minor language enhancements for future proposals given any interest that could make constructors of templates more consistent with other functions and update type erasure with logic extensions that could also remove one undefined behavior by making it logically defined.</p>
 <h2 id="references">References</h2>
 <span id="reference-p0792r0">[P0792R0] function_ref: a non-owning reference to a Callable</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0792r0.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0792r0.html</a><br/>
@@ -741,9 +669,37 @@ The current pattern matching proposal has already added new syntax which replace
 <span id="reference-cpp-pointer-declaration-function">cppreference.com ... Pointer declaration ... Pointers to functions</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://en.cppreference.com/w/cpp/language/pointer#Pointers_to_functions" target="__blank">https://en.cppreference.com/w/cpp/language/pointer#Pointers_to_functions</a><br/>
 <br/>
+<span id="reference-p1371r2">function_ref</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/TartanLlama/function_ref" target="__blank">https://github.com/TartanLlama/function_ref</a><br/>
+<br/>
+<span id="reference-p1371r2">Functional programming</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Functional_programming#First-class_and_higher-order_functions" target="__blank">https://en.wikipedia.org/wiki/Functional_programming#First-class_and_higher-order_functions</a><br/>
+<br/>
+<span id="reference-p1371r2">Swiss cheese</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://freesvg.org/swiss-cheese" target="__blank">https://freesvg.org/swiss-cheese</a><br/>
+<br/>
+<span id="reference-p1371r2">__closure</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" target="__blank">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><br/>
+<br/>
+<span id="reference-p1371r2">Using Delegates (C# Programming Guide)</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" target="__blank">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><br/>
+<br/>
+<span id="reference-p1371r2">Member Function Pointers and the Fastest Possible C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a><br/>
+<br/>
+<span id="reference-p1371r2">The Impossibly Fast C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates" target="__blank">https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates</a><br/>
+<br/>
 <span id="reference-harder">Implementing function_view is harder than you might think</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://www.foonathan.net/2017/01/function-ref-implementation/" target="__blank">https://www.foonathan.net/2017/01/function-ref-implementation/</a><br/>
 <br/>
+<span id="reference-p1371r2">Function Traits</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://functionalcpp.wordpress.com/2013/08/05/function-traits/" target="__blank">https://functionalcpp.wordpress.com/2013/08/05/function-traits/</a><br/>
+<br/>
+<span id="reference-p1858r2">Generalized pack declaration and usage</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1858r2.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1858r2.html</a><br/>
+<br/>
+<h2 id="ancillary-references">Ancillary References</h2>
 <span id="reference-p1371r2">What is a “callback” in C and how are they implemented?</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://stackoverflow.com/questions/142789/what-is-a-callback-in-c-and-how-are-they-implemented" target="__blank">https://stackoverflow.com/questions/142789/what-is-a-callback-in-c-and-how-are-they-implemented</a><br/>
 <br/>
@@ -756,26 +712,11 @@ The current pattern matching proposal has already added new syntax which replace
 <span id="reference-p1371r2">Function object</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Function_object" target="__blank">https://en.wikipedia.org/wiki/Function_object</a><br/>
 <br/>
-<span id="reference-p1371r2">__closure</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" target="__blank">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><br/>
-<br/>
 <span id="reference-p1371r2">C++ Delegates and Borland's C++ Builder Event Handling - Part I</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/44874/C-Delegates-and-Borland-s-C-Builder-Event-Handling" target="__blank">https://www.codeproject.com/Articles/44874/C-Delegates-and-Borland-s-C-Builder-Event-Handling</a><br/>
 <br/>
 <span id="reference-p1371r2">Delegates (C# Programming Guide)</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/" target="__blank">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/</a><br/>
-<br/>
-<span id="reference-p1371r2">Using Delegates (C# Programming Guide)</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" target="__blank">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><br/>
-<br/>
-<span id="reference-p1371r2">The Impossibly Fast C++ Delegates</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates" target="__blank">https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates</a><br/>
-<br/>
-<span id="reference-p1371r2">Member Function Pointers and the Fastest Possible C++ Delegates</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a><br/>
-<br/>
-<span id="reference-p1371r2">function_ref</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="https://github.com/TartanLlama/function_ref" target="__blank">https://github.com/TartanLlama/function_ref</a><br/>
 <br/>
 <span id="reference-p1371r2">On function_ref and string_view</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://quuxplusone.github.io/blog/2019/05/10/function-ref-vs-string-view/" target="__blank">https://quuxplusone.github.io/blog/2019/05/10/function-ref-vs-string-view/</a><br/>
@@ -800,71 +741,5 @@ The current pattern matching proposal has already added new syntax which replace
 <br/>
 <span id="reference-p1371r2">A type trait to detect reference binding to temporary</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2255r0.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2255r0.html</a><br/>
-<!--
-function_ref
-http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0792r0.html
-http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0792r2.html
-https://www.foonathan.net/2017/01/function-ref-implementation/
-All that is just a lot of implementation hassle that is simply not worth it, especially with lambdas. If you want a member function, just use a lambda:
-
-Prior Work
-C function pointer and void pointer callback
-https://stackoverflow.com/questions/142789/what-is-a-callback-in-c-and-how-are-they-implemented
-void *userdata
-...
-struct event_cb {
-    event_cb_t cb;
-    void *data;
-};
-https://embeddedartistry.com/blog/2017/07/10/using-a-c-objects-member-function-with-c-style-callbacks/
-converting member function into regular function
-https://en.wikipedia.org/wiki/Callback_(computer_programming)
-https://en.wikipedia.org/wiki/Function_object
-
-Borland C++ Closure
-http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure
-https://www.codeproject.com/Articles/44874/C-Delegates-and-Borland-s-C-Builder-Event-Handling
-// https://stackoverflow.com/questions/27769401/borland-style-closure-in-gcc
-
-C# delegate
-https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/
-https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates
-
-Code Project
-https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates
-https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible
-
-Other function_ref assessments
-https://github.com/TartanLlama/function_ref
-https://quuxplusone.github.io/blog/2019/05/10/function-ref-vs-string-view/
-https://newbedev.com/how-to-pass-and-execute-anonymous-function-as-parameter-in-c-11
-https://tech.jocodoma.com/2019/02/27/Passing-Functions-to-Functions-in-CPP/
-https://vittorioromeo.info/index/blog/passing_functions_to_functions.html
-https://stackoverflow.com/questions/39087141/alternative-to-stdfunction-for-passing-function-as-argument-callbacks-etc/39087660#39087660
-https://vittorioromeo.info/Misc/fnview0.html
-https://www.foonathan.net/2017/01/function-ref-implementation/
-"just use a lambda"
-The example provided does not type erase the this pointer.
-https://stackoverflow.com/questions/39087141/alternative-to-stdfunction-for-passing-function-as-argument-callbacks-etc
-
-CON
-existing requires double indirection, another lifetime programmer has to manage
-
-WHY
-like C function pointer in C NOT C++ binds to anything VS. C++ swiss cheese
-
-REQUESTS
-language support
-AND/OR
-factories for common cases
-AND/OR
-implementation detail void constructor
-AND/OR
-implementation detail template T constructor
-AND/OR
-constructor template parameters
-AND/OR
-alias of type lists and parameter packs
--->
 </body>
 </html>
