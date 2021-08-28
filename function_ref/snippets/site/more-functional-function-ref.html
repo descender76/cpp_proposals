@@ -233,7 +233,7 @@
 <div class="code">
 {{> snippets/snippet-function-pointer-simple.cc}}
 </div>
-<p>While C function pointers are generally useful they can be temporarily limiting because the behavior of the provided function varies on the parameters passed by the caller of function pointer and not by the provider of the function. This limit is surpassed with a little bit of colaboration between the caller and the provider of the function by making a slight modification to the function pointer type signature that they agree to. Adding a void* to the parameter list of function pointer allows the provider of the to be called function to provide type erased state to influence the desired behavior of the function, provided of course the caller passes this state along.</p>
+<p>While C function pointers are generally useful they can be temporarily limiting because the behavior of the provided function varies on the parameters passed by the caller of function pointer and not by the provider of the function. This limit is surpassed with a little bit of colaboration between the caller and the provider of the function by making a slight modification to the function pointer type signature that they agree to. Adding a void* to the parameter list of function pointer allows the provider of the called function to provide type erased state to influence the desired behavior of the function, provided of course the caller passes this state along. Notice the previous example revised in such a fashion in the following example.</p>
 <!-- snippet-function-pointer-complex.cc.html -->
 <div class="code">
 {{> snippets/snippet-function-pointer-complex.cc}}
@@ -244,13 +244,13 @@
 {{> snippets/snippet-function-pointer-struct.cc}}
 </div>
 <p>Interesting this is comparable to how function_ref was <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html#cb9-6" target="__blank">designed</a> and/or <a href="https://github.com/TartanLlama/function_ref/blob/master/include/tl/function_ref.hpp#L196" target="__blank">implemented</a>.</p>
-<h3>Design</h3>
+<h3>The current design of function_ref</h3>
 <p>Notice the type erased object. Notice also that the specification doesn't mention the type erased parameter passed to the "erased_function". (Just an oversight I guess.)</p>
 <!-- snippet-function_ref-private-spec.cc.html -->
 <div class="code">
 {{> snippets/snippet-function_ref-private-spec.cc}}
 </div>
-<h3>Implementation</h3>
+<h3>The current implementation of function_ref</h3>
 <p>Notice the type erased object and how it is passed to the function pointer.</p>
 <!-- snippet-function_ref-private-impl.cc.html -->
 <div class="code">
@@ -362,14 +362,14 @@
  </g>
 </svg>
 </a>
-<p>The actual cheese represents were a C function pointer can go. Each hole represents a single class, a pocket universe, where only the C++ member function pointer can go. Where is the function pointer that can go <b>ANYWHERE</b>, like in C?</p>
-<p>Ironically, this was not the case or less of an issue in the beginning of C++. Someone correct me if I am wrong. My knowledge of ancient C++ history is second hand. In the beginning of C++, C++ was a preprocessor, C with classes called CFront. The C++ cc files were converted from C++ into C. That would mean constructors, destructors, operators and member functions were converted to C functions which could be assigned to a C function pointer. This translation was never standardized either due to lack of interest or the desire to give compiler writers optimization opportunities. In either case, an important functionality went missing. So, Bjarne Stroustrup had it right all along.<!--Think too of the countless proposals over the decades of writers asking for a C ABI. Think too of recent history were the rush to add a new language feature to the language without providing translation to the existing C++ in the form of classes and the burfication that ensues along with the loss of useful features. Think too of all of the return based exception handling proposals which at the heart want something less implicit and magical and more explicitely defined in terms of existing constructs.--></p>
-<p>"function_ref" tries to bridge this divide but falls short in some key areas. These become apparant by reviewing how function_ref is constructed and the limited test examples that guided its design and creation. "function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_".</p>
+<p>The actual cheese represents were a C function pointer can go. Each hole represents a single class, a pocket universe, where only the C++ member function pointer for just that class can go. Where is the function pointer that can go <b>ANYWHERE</b>, like in C?</p>
+<p>Ironically, this was not the case or at least less of an issue in the beginning of C++. Someone correct me if I am wrong. My knowledge of ancient C++ history is second hand. In the beginning of C++, C++ was a preprocessor, C with classes called CFront. The C++ cc files were converted from C++ into C. That would mean constructors, destructors, operators and member functions were converted to C functions which could be assigned to a C function pointer. This translation was never standardized either due to lack of interest or the desire to give compiler writers optimization opportunities. In either case, an important functionality went missing. So, Bjarne Stroustrup had it right all along.<!--Think too of the countless proposals over the decades of writers asking for a C ABI. Think too of recent history were the rush to add a new language feature to the language without providing translation to the existing C++ in the form of classes and the burfication that ensues along with the loss of useful features. Think too of all of the return based exception handling proposals which at the heart want something less implicit and magical and more explicitely defined in terms of existing constructs.--></p>
+<p>"function_ref" bridges this divide but falls short in some key areas. These become apparant by reviewing how function_ref is constructed and the limited test examples that guided its design and creation. "function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_".</p>
 <!-- snippet-function_ref-constructor.cc.html -->
 <div class="code">
 {{> snippets/snippet-function_ref-constructor.cc}}
 </div>
-<p>It can be created by binding a functor, a C function pointer and a C++ member function pointer.</p>
+<p>"function_ref" can be created by binding a functor, a C function pointer and a C++ member function pointer.</p>
 <!-- snippet-function_ref-constructors.cc.html -->
 <div class="code">
 {{> snippets/snippet-function_ref-constructors.cc}}
@@ -394,13 +394,13 @@
 <td>function_ref&lt;void(void)&gt;</td>
 <td>foo</td>
 <td>There is no erased reference; erased_object/obj_ is unused.</td>
-<td class="problem">While this case should be supported; void(void) binding to type erased void(void*) should also be supported.</td>
+<td class="problem">This case should be supported because function_ref should be able to reference <b>ANY</b> function like construct that takes and return the same parameters. Where is void(void) binding to void(void*) when type erased is needed?</td>
 </tr>
 <tr>
 <td class="problem">function_ref&lt;void(bar)&gt;</td>
 <td>&bar::baz</td>
 <td class="problem">There is no erased reference.</td>
-<td class="problem">NOTE: The signature changed. While the current case maybe should be supported where is the case where bar's this is type erased and the signature stays void(void).</td>
+<td class="problem">NOTE: The signature changed. While the current case maybe should be supported, where is the case where bar's this is type erased and the signature stays void(void)?</td>
 </tr>
 </table>
 <p>In other words, how do I do the following without virtual functions; cleanly.</p>
@@ -418,7 +418,7 @@
 <div class="code">
 {{> snippets/snippet-delegate.cc}}
 </div>
-<p>This has also been the subject of two codeproject articles <a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">"Member Function Pointers and the Fastest Possible C++ Delegates"</a> and <a href="https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates" target="__blank">"The Impossibly Fast C++ Delegates"</a> from 2005 which focused on the runtime performance of solutions.</p>
+<p>This has also been the subject of two codeproject articles <a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">"Member Function Pointers and the Fastest Possible C++ Delegates"</a> and <a href="https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates" target="__blank">"The Impossibly Fast C++ Delegates"</a> from 2005 which focused on the runtime performance of C++ solutions.</p>
 <p>I am not the first to bring up the need for first class support of type erased C++ member function. Jonathan Mueller in his article <a href="https://www.foonathan.net/2017/01/function-ref-implementation/#a-word-about-member-function-pointers" target="__blank">Implementing function_view is harder than you might think</a> said the following:<br/>
 <br/>
 <i>The function_ref implementation presented here does not allow member function pointers, unlike std::function. The reason is simple: member function pointers are weird.<br/>
@@ -437,7 +437,7 @@ This example like the example test case in the function_ref implementation just 
     <li>erased_object/obj_ goes unused as the THIS pointer is stored in the functor/stateful lambda instead of in the function_ref</li>
     <li class="problem">DOUBLE INDIRECTION</li>
 </ol>
-<p>Concerning double direction, function_ref is a ref that points to a stateful lambda that contains a ref to the actual state. This is unsafe potential exhibiting lifetime errors and certainly makes it harder for the caller to reason about because the caller is responsible for keeping the state together with the lambda. Their is no need to impose this cognitive burden on all the users of function_ref when the implementation can be made once to handle it.</p>
+<p>Concerning double direction, function_ref is a ref that points to a stateful lambda that contains a ref to the actual state. This is unsafe, potential exhibiting lifetime errors and certainly makes it harder for the caller to reason about because the caller is responsible for keeping the state together with the lambda. Their is no need to impose this cognitive burden on all the users of function_ref when the implementation can be made once to handle it.</p>
 <h2 id="fall_short">Where does function_ref fall short?</h2>
 <p>The current function_ref specification and implementation has only one constructor that favors functors/lambdas with type erasure and does not provide comparable type erasure functionality to member function and free functions. The former is needed in order to handle the common callback usecase.</p>
 <h2 id="alternate_realities">Solutions &amp; Alternate Realities</h2>
@@ -457,7 +457,7 @@ This example like the example test case in the function_ref implementation just 
 <div class="code">
 {{> snippets/snippet-cpp-unsafe-constructor.cc}}
 </div>
-<p>This unsafe constructor, actually void* safe, is meant to be the foundation of the remaining and future construction methodologies.</p>
+<p>This unsafe constructor, actually void* safe, is meant to be the foundation of the remaining and future construction methodologies. It can be used as is, with care, to handle the missing use cases as illustrated in the following example.</p>
 <!-- snippet-function_ref-prime.cc.html -->
 <div class="code">
 {{> snippets/snippet-function_ref-prime.cc}}
@@ -470,8 +470,9 @@ This example like the example test case in the function_ref implementation just 
 <div class="code">
 {{> snippets/snippet-cpp-unsafe-constructor-usage.cc}}
 </div>
+<p>One can build upon this minimal foundation to provide constructs that can safely create this enhanced function_ref and propagate the parameters accordingly. The following examples of this, for each of the five use cases, were derived from a stack overflow article about using a <a href="#generic_member_function_pointer_as_a_template_parameter">generic member function pointer as a template parameter</a></p>
 <h3>functor/lambda usecase</h3>
-<p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified.</p>
+<p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified. The following is an alternate implementation that is more explicit.</p>
 <!-- snippet-function_ref-prime.cc.html -->
 <div class="code">
 {{> snippets/snippet-function_ref-prime.cc}}
@@ -485,7 +486,7 @@ This example like the example test case in the function_ref implementation just 
 {{> snippets/snippet-functor-lambda-usage.cc}}
 </div>
 <h3>function without type erasure usecase</h3>
-<p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified.</p>
+<p>The current implementation already handles this. Once the four other cases gets segregated out than the current solution may be able to be simplified. The following is an alternate implementation that is more explicit.</p>
 <!-- snippet-function_ref-prime.cc.html -->
 <div class="code">
 {{> snippets/snippet-function_ref-prime.cc}}
@@ -537,6 +538,7 @@ This example like the example test case in the function_ref implementation just 
 <div class="code">
 {{> snippets/snippet-member-function-with-type-erasure-usage.cc}}
 </div>
+<p>Given the preceding construction methods for the 5 use cases, the direct usage can be revised for greater safety and ease of use.</p>
 <h2 id="before_after">Before/After Comparisons</h2>
 <b>Given</b>
 <!-- snippet-function_ref-prime.cc.html -->
@@ -621,7 +623,7 @@ member_function_trait&lt;function&gt;::cpointer or function_trait&lt;member_func
 member_function_trait&lt;function&gt;::value or function_trait&lt;member_function&gt;::value<br/>
 member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_function&gt;::cvalue<br/>
 <br/>
-Also note that the compiler providing at least one of the following subset of the above would mean we would have regained what was lost when CFront became the first C++ standard.<br/>
+Also note that the compiler providing at least one of the following subset of the above would mean we would have regained what was lost when CFront transitioned into the first C++ standard.<br/>
 <br/>
 member_function_trait&lt;function&gt;::ref or function_trait&lt;member_function&gt;::ref<br/>
 member_function_trait&lt;function&gt;::cref or function_trait&lt;member_function&gt;::cref<br/>
@@ -632,8 +634,8 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 <h3>alias to parameter packs and typelists</h3>
 <p>Function traits and member function traits could be completely created as a library provided we had just the typelist and parameter pack aliasing feature of the <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1858r2.html" target="__blank">Generalized pack declaration and usage</a> proposal.</p>
 <h3>void* composition i.e. guaranteed inlining i.e. advance casting</h3>
-<p>Add some advanced casting to the standard C++ casting. In particular, allow non member function pointers to be explicitly cast to other non member function pointers provided all types and return type of said function pointer are the same and in the exact order except that pointers can be replaced with void pointers.</p>
-<p>Example: allow double(*)(int*, bool, int, float, double) to be cast to double(*)(void*, bool, int, float, double) and the pointer to still callable provided the caller ensures that a void* that points to int is passed to the function pointer.</p>
+<p>Add some advanced casting to the standard C++ casting. In particular, allow non member function pointers to be explicitly cast to other non member function pointers provided all types and return type of said function pointer are the same and in the exact order except that pointers and possibly references can be replaced with void pointers.</p>
+<p>Example: allow double(*)(int*, bool, int, float, double) to be explicitly cast to double(*)(void*, bool, int, float, double) and the pointer to still callable provided the caller ensures that a void* that points to int is passed to the function pointer.</p>
 <p>This is just an extension of what void pointers can currently do. First by composing void pointers; which this function_ref proposal doesn't need but may be still valuable to other type erasure libraries. Secondly, by applying these void pointer composition to function pointers which this function_ref proposal could benefit from. Ironically this works even now in C++ using a little bit of undefined behavior as the following example shows. In this example, the C++ ability for non member function pointers to be cast explicitly to a void pointer is used. This void pointer is immediately cast to a function pointer with type erased parameters. While logical, the undefined behavior is that the new functional pointer is still callable.</p>
 <!-- snippet-cpp-function-pointer-cast.cc.html -->
 <div class="code">
@@ -646,7 +648,7 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 </div>
 <p>This void* composition and advance casting would provide a guaranteed inlining and would turn one undefined behavior into a defined behavior.</p>
 <h2 id="conclusion">Conclusion</h2>
-<p>The deficiency of the current function_ref proposal is summed up in its title, "function_ref: a non-owning reference to a Callable". A callable [object] shows ts preferential treatment for functors/stateful lambdas over member functions and at times even regular functions with how it handles type erasure. Fortunately, the state of the existing implementation is well designed and is capable of handling more use cases than what its public interface and specification allows. At a minimum, a refined function_ref only needs nailing down its implentation to a void pointer a free function pointer along with exposing these two via a public constructor. Allowing these minimal changes would open up the provider of function_ref(s) to handle type erased member function use cases akin to delegates in .NET without any unacceptable double indirections. With supporting optional make functions, the propagation of the parameters can be performed explicitly and safely. Further this proposal outlines some minor language enhancements for future proposals given any interest that could make constructors of templates more consistent with other functions and update type erasure with logic extensions that could also remove one undefined behavior by making it logically defined.</p>
+<p>The deficiency of the current function_ref proposal is summed up in its title, "function_ref: a non-owning reference to a Callable". A callable [object] shows its preferential treatment for functors/stateful lambdas over member functions and at times even regular functions with how it handles type erasure. Fortunately, the state of the existing implementation is well designed and is capable of handling more use cases than what its public interface and specification allows. At a minimum, a refined function_ref only needs nailing down its implentation to a void pointer a free function pointer along with exposing these two via a public constructor. Allowing these minimal changes would open up the provider of function_ref(s) to handle type erased member function use cases akin to delegates in .NET without any unacceptable double indirections. With supporting optional make functions, the propagation of the parameters can be performed explicitly and safely. Further this proposal outlines some minor language enhancements for future proposals, given any interest, that could make constructors of templates more consistent with other functions and update type erasure with logic extensions that could also remove one undefined behavior by making it logically defined.</p>
 <h2 id="references">References</h2>
 <span id="reference-p0792r0">[P0792R0] function_ref: a non-owning reference to a Callable</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0792r0.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0792r0.html</a><br/>
@@ -693,6 +695,9 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 <span id="reference-harder">Implementing function_view is harder than you might think</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://www.foonathan.net/2017/01/function-ref-implementation/" target="__blank">https://www.foonathan.net/2017/01/function-ref-implementation/</a><br/>
 <br/>
+<span id="generic_member_function_pointer_as_a_template_parameter">generic member function pointer as a template parameter</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://stackoverflow.com/questions/9779105/generic-member-function-pointer-as-a-template-parameter" target="__blank">https://stackoverflow.com/questions/9779105/generic-member-function-pointer-as-a-template-parameter</a><br/>
+<br/>
 <span id="reference-p1371r2">Function Traits</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://functionalcpp.wordpress.com/2013/08/05/function-traits/" target="__blank">https://functionalcpp.wordpress.com/2013/08/05/function-traits/</a><br/>
 <br/>
@@ -703,9 +708,11 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 <span id="reference-p1371r2">What is a “callback” in C and how are they implemented?</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://stackoverflow.com/questions/142789/what-is-a-callback-in-c-and-how-are-they-implemented" target="__blank">https://stackoverflow.com/questions/142789/what-is-a-callback-in-c-and-how-are-they-implemented</a><br/>
 <br/>
+<!--
 <span id="reference-p1371r2">Using A C++ Object’s Member Function with C-style Callbacks</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://embeddedartistry.com/blog/2017/07/10/using-a-c-objects-member-function-with-c-style-callbacks/" target="__blank">https://embeddedartistry.com/blog/2017/07/10/using-a-c-objects-member-function-with-c-style-callbacks/</a><br/>
 <br/>
+-->
 <span id="reference-p1371r2">Callback (computer programming)</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://en.wikipedia.org/wiki/Callback_(computer_programming)" target="__blank">https://en.wikipedia.org/wiki/Callback_(computer_programming)</a><br/>
 <br/>
@@ -721,21 +728,25 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 <span id="reference-p1371r2">On function_ref and string_view</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://quuxplusone.github.io/blog/2019/05/10/function-ref-vs-string-view/" target="__blank">https://quuxplusone.github.io/blog/2019/05/10/function-ref-vs-string-view/</a><br/>
 <br/>
+<!--
 <span id="reference-p1371r2">How to pass and execute anonymous function as parameter in C++11?</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://newbedev.com/how-to-pass-and-execute-anonymous-function-as-parameter-in-c-11" target="__blank">https://newbedev.com/how-to-pass-and-execute-anonymous-function-as-parameter-in-c-11</a><br/>
 <br/>
 <span id="reference-p1371r2">Passing Functions to Functions in C++</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://tech.jocodoma.com/2019/02/27/Passing-Functions-to-Functions-in-CPP/" target="__blank">https://tech.jocodoma.com/2019/02/27/Passing-Functions-to-Functions-in-CPP/</a><br/>
 <br/>
+-->
 <span id="reference-p1371r2">passing functions to functions</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://vittorioromeo.info/index/blog/passing_functions_to_functions.html">https://vittorioromeo.info/index/blog/passing_functions_to_functions.html</a><br/>
 <br/>
 <span id="reference-p1371r2">function_view: a non-owning reference to a Callable</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://vittorioromeo.info/Misc/fnview0.html" target="__blank">https://vittorioromeo.info/Misc/fnview0.html</a><br/>
 <br/>
+<!--
 <span id="reference-p1371r2">Alternative to std::function for passing function as argument (callbacks, etc.)</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://stackoverflow.com/questions/39087141/alternative-to-stdfunction-for-passing-function-as-argument-callbacks-etc" target="__blank">https://stackoverflow.com/questions/39087141/alternative-to-stdfunction-for-passing-function-as-argument-callbacks-etc</a><br/>
 <br/>
+-->
 <span id="reference-p1371r2">Packs outside of Templates</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2277r0.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2277r0.html</a><br/>
 <br/>
