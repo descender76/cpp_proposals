@@ -14,16 +14,16 @@
 	{
 	  background-color: AliceBlue;
 	}
-	table.inline_references
+	table.simple
 	{
 		border: 1px solid black;
 		border-collapse: collapse;
 	}
-	table.inline_references > thead > tr > th
+	table.simple > thead > tr > th
 	{
 		border: 1px solid black;
 	}
-	table.inline_references > tbody > tr > td
+	table.simple > tbody > tr > td
 	{
 		border: 1px solid black;
 	}
@@ -32,8 +32,6 @@
 		font-weight : bold;
 		color : red;
 	}
-	/*
-	*/
   </style>
 </head>
 <body>
@@ -74,7 +72,7 @@
 <h3><a href="#ancillary-references">9&nbsp;&nbsp;Ancillary References</a></h3>
 <h2 id="introduction">Introduction</h2>
 <p>There are many types of runtime polymorphism each with their own PRO's and CON's. These range from single function callbacks to classes with multiple virtual member functions and even those with multiple type erased parameters. Even though C gives us callbacks via function pointers and C++ adds to our support of runtime polymorphism via its virtual functions, their is still considerable interest in other types of runtime polymorphism, as illustrated by just some of the proposals in past years.</p>
-<table class="inline_references">
+<table class="simple">
 <thead>
 <tr>
 <th>Document Date</th>
@@ -260,107 +258,8 @@
 <p><span class="problem">Function pointers are not the same in C as they are in C++</span>, even though C++ is somewhat a superset of C, at least in the case when it comes to support for C function pointers.</b>
 <p>I am not talking about member function pointers, that is a whole other beast<!--subject-->. In C, int (*)(int) can point to <b>ANY</b> function that takes a int and returns an int. That is both easy and very useful. In C++, a "C" function pointer can not point to a constructor, a destructor, an operator or a member function without having to create binders i.e. translation functions. By adding constructors, destructors, operators and member functions to the language a manifold bifurcation ensued especially since there was no implicit or explicit conversions of the new language constructs to the prior language feature of function pointers. What was once easy is now tedious! C function pointers in C++ is like swiss cheese.</p>
 <a href="https://freesvg.org/swiss-cheese" target="__blank">
-<svg style="shape-rendering:geometricPrecision;text-rendering:geometricPrecision;image-rendering:optimizeQuality" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" xml:space="preserve" height="130.64mm" width="177.46mm" version="1.1" clip-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17746 13064">
- <defs>
-  <style type="text/css">
-   <![CDATA[
-    .fil3 {fill:#FEFEFE}
-    .fil4 {fill:#FFF688}
-    .fil0 {fill:#FCF4A7}
-    .fil11 {fill:url(#id0)}
-    .fil10 {fill:url(#id1)}
-    .fil1 {fill:url(#id2)}
-    .fil12 {fill:url(#id3)}
-    .fil13 {fill:url(#id4)}
-    .fil9 {fill:url(#id5)}
-    .fil14 {fill:url(#id6)}
-    .fil6 {fill:url(#id7)}
-    .fil7 {fill:url(#id8)}
-    .fil5 {fill:url(#id9)}
-    .fil8 {fill:url(#id10)}
-    .fil2 {fill:url(#id11)}
-   ]]>
-  </style>
-  <linearGradient id="id0" y2="12552" gradientUnits="userSpaceOnUse" x2="13808" y1="12552" x1="11857">
-   <stop stop-color="#EACD40" offset="0"/>
-   <stop stop-color="#EFD635" offset=".43922"/>
-   <stop stop-color="#F9E867" offset="1"/>
-  </linearGradient>
-  <linearGradient id="id1" y2="1579.8" gradientUnits="userSpaceOnUse" x2="12688" y1="2093" x1="9655.1">
-   <stop stop-color="#F3E038" offset="0"/>
-   <stop stop-color="#FCF4A3" offset=".47059"/>
-   <stop stop-color="#FCF29A" offset="1"/>
-  </linearGradient>
-  <linearGradient id="id2" y2="1489.4" gradientUnits="userSpaceOnUse" x2="16741" y1="4309.8" x1="333.23">
-   <stop stop-color="#FFCC29" offset="0"/>
-   <stop stop-color="#FFFDAD" offset=".61176"/>
-   <stop stop-color="#FFDD53" offset="1"/>
-  </linearGradient>
-  <linearGradient id="id3" y2="11744" gradientUnits="userSpaceOnUse" x2="6596.5" y1="12387" x1="6618.6">
-   <stop stop-color="#F3E689" offset="0"/>
-   <stop stop-color="#F7EA89" offset="1"/>
-  </linearGradient>
-  <linearGradient id="id4" y2="6225.7" gradientUnits="userSpaceOnUse" x2="10150" y1="5198.5" x1="7512.3">
-   <stop stop-color="#F8E44F" offset="0"/>
-   <stop stop-color="#F9EA72" offset=".43922"/>
-   <stop stop-color="#FBF095" offset="1"/>
-  </linearGradient>
-  <linearGradient id="id5" y2="3804.8" gradientUnits="userSpaceOnUse" x2="13169" y1="4058" x1="14480">
-   <stop stop-color="#F9E85B" offset="0"/>
-   <stop stop-color="#ECD631" offset=".47059"/>
-   <stop stop-color="#D2B42F" offset="1"/>
-  </linearGradient>
-  <linearGradient id="id6" y2="7748.1" xlink:href="#id0" gradientUnits="userSpaceOnUse" x2="2089.3" y1="7927.2" x1="1099">
-  </linearGradient>
-  <linearGradient id="id7" y2="6501.6" xlink:href="#id5" gradientUnits="userSpaceOnUse" x2="11623" y1="7722.2" x1="12208">
-  </linearGradient>
-  <linearGradient id="id8" y2="8990.8" xlink:href="#id5" gradientUnits="userSpaceOnUse" x2="14985" y1="10524" x1="15719">
-  </linearGradient>
-  <linearGradient id="id9" y2="8103.8" xlink:href="#id5" gradientUnits="userSpaceOnUse" x2="5339.9" y1="9054.5" x1="6799.6">
-  </linearGradient>
-  <linearGradient id="id10" y2="4273.1" gradientUnits="userSpaceOnUse" x2="3537.4" y1="4901.2" x1="5163">
-   <stop stop-color="#F9E96B" offset="0"/>
-   <stop stop-color="#F9E652" offset=".47059"/>
-   <stop stop-color="#D2B42F" offset="1"/>
-  </linearGradient>
-  <radialGradient id="id11" cy="40%" cx="9%">
-   <stop stop-color="#F9E95C" offset="0"/>
-   <stop stop-color="#FBF5AA" offset=".25882"/>
-   <stop stop-color="#FFF688" offset=".50196"/>
-   <stop stop-color="#FDF552" offset=".69020"/>
-   <stop stop-color="#FFCC29" offset="1"/>
-  </radialGradient>
- </defs>
- <g id="Camada_x0020_1">
-  <g id="_1071194208">
-   <path class="fil0" d="m9010 1857c-2740 1067-5559 2022-8728 2491-208 38-282 218-282 477 187 2049 685 4001 1211 5945 518 940 4425 1462 5527 1659 1012 117 2024 234 3036 350 473-40 929-14 1362 102 2097 181 4176 185 6247 107 225-35 447-115 331-589-243-2566-425-5150-764-7687-294-762-587-1524-881-2287-96-175-210-331-384-428-335-259-699-492-584-1148-32-410-171-717-501-842-619-112-3641 928-5590 1849z"/>
-   <path class="fil1" d="m393 4636c3711-551 7595-2089 10599-3505 1209-570 2495-801 3581-990 216 90 273 359 372 656-323 370 94 856 784 1382l954 2277c-2053 499-4204 835-6412 1075-764-367-1437-927-2870 126-2739-110-5098-459-7006-1022z"/>
-   <path class="fil2" d="m16813 4782c258 2590 516 5180 774 7770 5 180-78 273-248 277-4801 270-11914-426-15262-1620-394-186-728-437-837-934l-1041-5352c-28-212 8-366 331-253 2210 621 4504 937 6870 988 572 721 1755 984 2890 15 2074-331 4148-662 6223-992 179-24 290-31 302 102z"/>
-   <ellipse ry="415" rx="532" class="fil3" transform="matrix(1.2713 1.1973 -1.0478 1.2828 15458 9821.8)"/>
-   <ellipse ry="415" rx="532" class="fil4" transform="matrix(.90018 -.16281 .35044 1.8335 1637.9 7978.7)"/>
-   <path class="fil3" d="m5467 4396c-55 851-1705 962-1878 170-122-713 1500-749 1878-170z"/>
-   <ellipse ry="415" rx="532" class="fil3" transform="matrix(1.2881 -.23151 .086090 1.3339 13922 3928.3)"/>
-   <ellipse ry="415" rx="532" class="fil4" transform="matrix(1.7381 .36791 -.32329 1.641 6230.6 8691.4)"/>
-   <path class="fil3" d="m9981 1895c586 951 2700 186 2233-895-516-280-2358 633-2233 895z"/>
-   <path class="fil5" d="m6248 7903c511 108 864 501 790 877s-548 594-1059 486-864-501-790-877 548-594 1059-486z"/>
-   <ellipse ry="415" rx="532" class="fil3" transform="matrix(1.0124 .95346 -.83436 1.0215 12014 7214.1)"/>
-   <path class="fil6" d="m12292 6692c297 280 383 697 192 931s-588 197-885-83-383-697-192-931 588-197 885 83z"/>
-   <path class="fil7" d="m15826 9231c373 352 481 875 241 1170-240 294-738 248-1111-104s-481-875-241-1170c240-294 738-248 1111 104z"/>
-   <ellipse ry="415" rx="532" class="fil3" transform="matrix(.90018 -.16281 .35044 1.8335 1628.2 7930.1)"/>
-   <path class="fil8" d="m5350 4396c-55 851-1705 962-1878 170-122-713 1500-749 1878-170z"/>
-   <path class="fil9" d="m13821 3381c378-68 701 125 721 431s-271 609-649 677-701-125-721-431 271-609 649-677z"/>
-   <path class="fil10" d="m9884 1948c586 951 2700 186 2233-895-516-280-2358 633-2233 895z"/>
-   <path class="fil3" d="m6867 8246c192 171 292 394 249 612-74 376-548 594-1059 486-258-55-476-182-619-343 139 124 326 220 541 265 511 108 984-110 1059-486 37-186-31-377-171-534z"/>
-   <path class="fil3" d="m11950 12913c742-902 1280-699 1951 122-662-131-1314-185-1951-122z"/>
-   <path class="fil11" d="m11857 12942c742-902 1280-699 1951 122-662-131-1314-185-1951-122z"/>
-   <path class="fil0" d="m5636 12084c9-11 1771 279 1942 298 4-10-3 5 0-6-258-675-1662-644-1942-292z"/>
-   <path class="fil12" d="m5725 12100c-4 9 1611 255 1765 271 3-9-10-20-7-29-233-581-1505-544-1758-242z"/>
-   <ellipse cy="5712" cx="8953" rx="1413" class="fil0" ry="706"/>
-   <ellipse cy="5712" cx="8831" rx="1413" class="fil13" ry="705"/>
-   <path class="fil14" d="m1449 7076c264-48 544 254 624 675s-69 800-333 848-544-254-624-675 69-800 333-848z"/>
-  </g>
- </g>
-</svg>
+<!-- Swiss-Cheese.svg.html -->
+{{> snippets/Swiss-Cheese.svg}}
 </a>
 <p>The actual cheese represents were a C function pointer can go. Each hole represents a single class, a pocket universe, where only the C++ member function pointer for just that class can go. Where is the function pointer that can go <b>ANYWHERE</b>, like in C?</p>
 <p>Ironically, this was not the case or at least less of an issue in the beginning of C++. Someone correct me if I am wrong. My knowledge of ancient C++ history is second hand. In the beginning of C++, C++ was a preprocessor, C with classes called CFront. The C++ cc files were converted from C++ into C. That would mean constructors, destructors, operators and member functions were converted to C functions which could be assigned to a C function pointer. This translation was never standardized either due to lack of interest or the desire to give compiler writers optimization opportunities. In either case, an important functionality went missing. So, Bjarne Stroustrup had it right all along.<!--Think too of the countless proposals over the decades of writers asking for a C ABI. Think too of recent history were the rush to add a new language feature to the language without providing translation to the existing C++ in the form of classes and the burfication that ensues along with the loss of useful features. Think too of all of the return based exception handling proposals which at the heart want something less implicit and magical and more explicitely defined in terms of existing constructs.--></p>
@@ -375,7 +274,7 @@
 {{> snippets/snippet-function_ref-constructors.cc}}
 </div>
 <p>This gives the impression that it can bind to <i>anything</i> but it is only an illusion. There are important differences between these 3 use cases. Simply put, where is the type erasure? What is "erased_object/obj_" pointing to?</p>
-<table class="inline_references">
+<table class="simple">
 <thead>
 <tr>
 <th>Signature</th>
@@ -607,36 +506,77 @@ This example like the example test case in the function_ref implementation just 
 </table>
 <h2 id="language_feature">As a language/compiler feature</h2>
 <h3>Just let the language/compiler do it all.</h3>
-<p>The is certainly some appeal for the language/compiler to handle everything because it could handle all of the functional bifurcation that has accrued over the decades including the recent noexcept. However, there is also some appeal to a library based solution because it would allow the language to remain simpler with fewer keywords and ultimately easier to master. This is similar in principle to metaclasses and the reflection proposals which would similarly allow us to do more in libraries instead of as language features. At the end of the day, a consumer doesn't care as long as they can easily perform callbacks.</p>
+<p>There is certainly some appeal for the language/compiler to handle everything because it could handle all of the functional bifurcation that has accrued over the decades including the recent noexcept. However, there is also some appeal to a library based solution because it would allow the language to remain simpler with fewer keywords and ultimately easier to master. This is similar in principle to metaclasses and the reflection proposals which would similarly allow us to do more in libraries instead of as language features. At the end of the day, many consumer wouldn't care whether it was a language or library or hybrid based solution as long as they had a solution. Something is better than nothing.</p>
 <h3>constructor template parameters</h3>
-<p>Currently, function_ref with enhancements for all 5 use cases needs at least five unique sets of function parameters. There is the single parameter to a functor. There is the single template parameter to a function. There is the single template parameter to a member function. There are two parameters, one template parameter to a function and one regular type erased pointer. There are two parameters, one template parameter to a member function and one regular type erased pointer. These 5 are mutually exclusive and overloadable. Using constructors are more desirable than using static make functions especially when these functions currently can't be written as a single template free function but requires a class and up to 2 static methods. If constructors could take a template parameter list like any other function does than we would be a step closer to making constructors instead of make functions a reality.</p>
+<p>Currently, function_ref with enhancements for all 5 use cases needs at least five unique sets of construction parameters.</p>
+<table class="simple">
+<thead>
+<tr>
+<th>Use Case</th>
+<th># of function template parameter</th>
+<th># of member function template parameter</th>
+<th># of type erased parameter</th>
+</tr>
+</thead>
+<tr>
+<td>functor/lambda</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>function without type erasure</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>member function without type erasure</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>function with type erasure</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>member function with type erasure</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</table>
+<p>These 5 are mutually exclusive and thus overloadable. Using constructors are more desirable than using static make functions especially when these functions currently can't be written as a single template free function but requires a class and up to 2 static methods. If constructors could take a template parameter list like any other function does than we would be a step closer to making constructors, instead of make functions, a reality. Class template argument deduction could also be enhanced to take advantage of the constructor template parameters.</p>
+<h3>member function pointer initializations should be castable to non member function pointers</h3>
+<p>Member function pointer initializations should be explicitly castable to non member function pointers via the static_cast operator. In some of the examples above the desired function needed to be explicitly selected and differentiated between their const and non const versions with static_cast.</p>
+<!-- snippet-cpp-member-function-pointer-to-function-pointer-cast.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-member-function-pointer-to-function-pointer-cast.cc}}
+</div>
+<p>Why? As mentioned earlier, C++ likely had a similar capability during the days of CFront that was never standardized. Since, we don't have a symbol to the generated function, the free function need to be pulled from the member function pointer. Why have this at all? In C, we could take the address of any function. In C++ we can't, <span class="problem">the member function pointer does not point to the function that the programmer defined.</span> Let that sink in for a while. In the Digital Mars compiler, the member function pointer does point to a free function, a thunk/binder, that does casting and translation before calling the programmer defined function. In non Digital Mars compilers, the member function pointer is a fat pointer of metadata that the compiler inline performs casting and translation. So where is the ability to call the programmer defined function at runtime when you already have the parameters and don't need the additional translation layer. The provider of a function_ref is not calling a function through a vtable. The provider explicitly states which function desired to be called at costruction time and provide the needed this pointer performing any casting once and not on each call. Having this capability back would partially lessen the need to even have the more transformative this_as_pointer, this_as_cpointer, this_as_ref and this_as_cref variants of the member function without type erasure usecase. Further, even though C++ will not anytime soon get unified function call syntax due to existing argument dependent lookup rules, this feature would provide a unified function pointer since a free function pointer would be allowed to point to the actual member function.</p>
 <h3>[member] function traits</h3>
 The implementation of function_ref is complicated mostly by all the binders to a type erased function pointer that must be created. If we had compiler generated function traits and member function traits than constructor template parameters would not be needed on the function_ref class at all. The 2013/08/05 article <a href="https://functionalcpp.wordpress.com/2013/08/05/function-traits/" target="__blank">Function Traits</a> demonstrates the need of function traits but it doesn't go far enough for function_ref uses. First of all there are no params alias to the parameter pack nor a parameter types alias to the same. This can't be performed currently in C++ because we can't have alias to parameter packs or type lists in C++. Some of the current C++ type traits require compiler based implementations. Similarly, if the compiler provided the following functions pointers than function_ref would become trivial.<br/>
 <br/>
 function_trait&lt;function&gt;::type_erase_first<br/>
-function_trait&lt;function&gt;::add_void_pointer<br/>
-member_function_trait&lt;function&gt;::type_erase_this or function_trait&lt;member_function&gt;::type_erase_this<br/>
-member_function_trait&lt;function&gt;::ref or function_trait&lt;member_function&gt;::ref<br/>
-member_function_trait&lt;function&gt;::cref or function_trait&lt;member_function&gt;::cref<br/>
-member_function_trait&lt;function&gt;::pointer or function_trait&lt;member_function&gt;::pointer<br/>
-member_function_trait&lt;function&gt;::cpointer or function_trait&lt;member_function&gt;::cpointer<br/>
-member_function_trait&lt;function&gt;::value or function_trait&lt;member_function&gt;::value<br/>
-member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_function&gt;::cvalue<br/>
+function_trait&lt;function&gt;::prepend_void_pointer<br/>
+member_function_trait&lt;function&gt;::type_erase_this <b>or</b> function_trait&lt;member_function&gt;::type_erase_this<br/>
+member_function_trait&lt;function&gt;::this_as_ref <b>or</b> function_trait&lt;member_function&gt;::this_as_ref<br/>
+member_function_trait&lt;function&gt;::this_as_cref <b>or</b> function_trait&lt;member_function&gt;::this_as_cref<br/>
+member_function_trait&lt;function&gt;::this_as_pointer <b>or</b> function_trait&lt;member_function&gt;::this_as_pointer<br/>
+member_function_trait&lt;function&gt;::this_as_cpointer <b>or</b> function_trait&lt;member_function&gt;::this_as_cpointer<br/>
+member_function_trait&lt;function&gt;::this_as_value <b>or</b> function_trait&lt;member_function&gt;::this_as_value<br/>
+member_function_trait&lt;function&gt;::this_as_cvalue <b>or</b> function_trait&lt;member_function&gt;::this_as_cvalue<br/>
 <br/>
-Also note that the compiler providing at least one of the following subset of the above would mean we would have regained what was lost when CFront transitioned into the first C++ standard.<br/>
-<br/>
-member_function_trait&lt;function&gt;::ref or function_trait&lt;member_function&gt;::ref<br/>
-member_function_trait&lt;function&gt;::cref or function_trait&lt;member_function&gt;::cref<br/>
-member_function_trait&lt;function&gt;::pointer or function_trait&lt;member_function&gt;::pointer<br/>
-member_function_trait&lt;function&gt;::cpointer or function_trait&lt;member_function&gt;::cpointer<br/>
-member_function_trait&lt;function&gt;::value or function_trait&lt;member_function&gt;::value<br/>
-member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_function&gt;::cvalue<br/>
+Granted this just relocates where most of the actual work is performed but would allow the code to be used by libraries that add RUST like traits to C++.
 <h3>alias to parameter packs and typelists</h3>
 <p>Function traits and member function traits could be completely created as a library provided we had just the typelist and parameter pack aliasing feature of the <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1858r2.html" target="__blank">Generalized pack declaration and usage</a> proposal.</p>
 <h3>void* composition i.e. guaranteed inlining i.e. advance casting</h3>
 <p>Add some advanced casting to the standard C++ casting. In particular, allow non member function pointers to be explicitly cast to other non member function pointers provided all types and return type of said function pointer are the same and in the exact order except that pointers and possibly references can be replaced with void pointers.</p>
-<p>Example: allow double(*)(int*, bool, int, float, double) to be explicitly cast to double(*)(void*, bool, int, float, double) and the pointer to still callable provided the caller ensures that a void* that points to int is passed to the function pointer.</p>
-<p>This is just an extension of what void pointers can currently do. First by composing void pointers; which this function_ref proposal doesn't need but may be still valuable to other type erasure libraries. Secondly, by applying these void pointer composition to function pointers which this function_ref proposal could benefit from. Ironically this works even now in C++ using a little bit of undefined behavior as the following example shows. In this example, the C++ ability for non member function pointers to be cast explicitly to a void pointer is used. This void pointer is immediately cast to a function pointer with type erased parameters. While logical, the undefined behavior is that the new functional pointer is still callable.</p>
+<p>Example: allow double(*)(int*, bool, int, float, double) to be explicitly cast to double(*)(void*, bool, int, float, double) and the pointer must still be callable provided the caller ensures that a void* that points to int is passed to the function pointer.</p>
+<p>This is just an extension of what void pointers can currently do. First by composing void pointers; which this function_ref proposal doesn't need but may be still be valuable to other libraries that uses type erasure. Secondly, by applying these void pointer composition to function pointers which this function_ref proposal could benefit from. Ironically this works even now in C++ using a little bit of undefined behavior as the following example shows. In this example, the C++ ability for non member function pointers to be cast explicitly to a void pointer is used. This void pointer is immediately cast to a function pointer with type erased parameters. While logical, the undefined behavior is that the new functional pointer is still callable.</p>
 <!-- snippet-cpp-function-pointer-cast.cc.html -->
 <div class="code">
 {{> snippets/snippet-cpp-function-pointer-cast.cc}}
@@ -648,7 +588,7 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 </div>
 <p>This void* composition and advance casting would provide a guaranteed inlining and would turn one undefined behavior into a defined behavior.</p>
 <h2 id="conclusion">Conclusion</h2>
-<p>The deficiency of the current function_ref proposal is summed up in its title, "function_ref: a non-owning reference to a Callable". A callable [object] shows its preferential treatment for functors/stateful lambdas over member functions and at times even regular functions with how it handles type erasure. Fortunately, the state of the existing implementation is well designed and is capable of handling more use cases than what its public interface and specification allows. At a minimum, a refined function_ref only needs nailing down its implentation to a void pointer a free function pointer along with exposing these two via a public constructor. Allowing these minimal changes would open up the provider of function_ref(s) to handle type erased member function use cases akin to delegates in .NET without any unacceptable double indirections. With supporting optional make functions, the propagation of the parameters can be performed explicitly and safely. Further this proposal outlines some minor language enhancements for future proposals, given any interest, that could make constructors of templates more consistent with other functions and update type erasure with logic extensions that could also remove one undefined behavior by making it logically defined.</p>
+<p>The deficiency of the current function_ref proposal is summed up in its title, "function_ref: a non-owning reference to a Callable". A callable [object] shows its preferential treatment for functors/stateful lambdas over member functions and at times even regular functions with how it handles type erasure. Fortunately, the state of the existing implementation is well designed and is capable of handling more use cases than what its public interface and specification allows. At a minimum, a refined function_ref only needs nailing down its implentation to a void pointer and a free function pointer along with exposing these two via a public constructor. Allowing these minimal changes would open up the provider of function_ref(s) to handle type erased member function use cases akin to delegates in .NET without any unacceptable double indirections. With supporting optional make functions, the propagation of the parameters can be performed explicitly and safely. Further this proposal outlines some minor language enhancements for future proposals, given any interest, that could make constructors of templates more consistent with other functions and update type erasure with logic extensions that could also remove one undefined behavior by making it logically defined.</p>
 <h2 id="references">References</h2>
 <span id="reference-p0792r0">[P0792R0] function_ref: a non-owning reference to a Callable</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0792r0.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0792r0.html</a><br/>
@@ -752,5 +692,17 @@ member_function_trait&lt;function&gt;::cvalue or function_trait&lt;member_functi
 <br/>
 <span id="reference-p1371r2">A type trait to detect reference binding to temporary</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2255r0.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2255r0.html</a><br/>
+<br/>
+<span id="reference-p1371r2">CALLBACKS IN C++ USING TEMPLATE FUNCTORS</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.tutok.sk/fastgl/callback.html" target="__blank">http://www.tutok.sk/fastgl/callback.html</a><br/>
+<br/>
+<span id="reference-p1371r2">c++ - How are member function pointers implemented by DMC?</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.digitalmars.com/archives/cplusplus/3802.html" target="__blank">https://www.digitalmars.com/archives/cplusplus/3802.html</a><br/>
+<br/>
+<span id="reference-p1371r2">Impossibly fast delegate in C++11</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11" target="__blank">https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11</a><br/>
+<br/>
+<span id="reference-p1371r2">Obscure C++ Features</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://madebyevan.com/obscure-cpp-features/" target="__blank">http://madebyevan.com/obscure-cpp-features/</a><br/>
 </body>
 </html>
