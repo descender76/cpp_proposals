@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A More Functional function_ref (lite)</title>
+  <meta name="description" content="A More Functional function_ref (lite)">
+  <meta name="author" content="Jarrad Waterloo">
+  <style>
+    h1
+	{
+	  text-align : center;
+	}
+	.code
+	{
+	  background-color: AliceBlue;
+	}
+	table.simple
+	{
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	table.simple > thead > tr > th
+	{
+		border: 1px solid black;
+	}
+	table.simple > tbody > tr > td
+	{
+		border: 1px solid black;
+	}
+	.problem
+	{
+		font-weight : bold;
+		color : red;
+	}
+  </style>
+</head>
+<body>
+<h1>A More Functional function_ref (lite)</h1>
+<table style="width:100%">
+<tr>
+<td>&nbsp;</td>
+<td style="width:60ex">
+  <table>
+  <tr>
+  <td><b>Document #:</b></td><td>PTODOR0</td>
+  </tr>
+  <tr>
+  <td><b>Date:</b></td><td>2021-07-30</td>
+  </tr>
+  <tr>
+  <td><b>Project:</b></td><td>Programming Language C++</td>
+  </tr>
+  <tr>
+  <td><b>Audience:</b></td><td>Library Evolution Working Group (LEWG)</td>
+  </tr>
+  <tr>
+  <td><b>Reply-to:</b></td><td>Jarrad J. Waterloo<br/>&lt;<a href="mailto:descender76@gmail.com">descender76@gmail.com</a>&gt;</td>
+  </tr>
+  </table>
+</td>
+</tr>
+</table>
+<h2>Contents</h2>
+<h3><a href="#problem_solution">1&nbsp;&nbsp;Problem and Solution</a></h3>
+<h3><a href="#references">2&nbsp;&nbsp;References</a></h3>
+<h2 id="problem_solution">Problem and Solution</h2>
+<p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_".</p>
+<!-- snippet-function_ref-constructor.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-constructor.cc}}
+</div>
+<p>"function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer.</p>
+<!-- snippet-function_ref-constructors.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-constructors.cc}}
+</div>
+<p>There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state.</p>
+<!-- snippet-function_ref-constructors-te.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-constructors-te.cc}}
+</div>
+<p>This additional allocation could be gotten rid of if the reference to the state could be passed in the same pointer that the functor/stateful lambda use case uses.</p>
+<!-- snippet-function_ref-constructors-te-alt.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-constructors-te-alt.cc}}
+</div>
+<p>This only requires adding one public constructor to function_ref's internal two pointers. Using this new constructor is easier for these two type erased use cases because the programmer doesn't need to take another object into consideration and its dependency upon the state. While the unnecessary stateful lambda is safer, any safety concern's can be mitigated by using make functions that delegate to this new constructor and would have the added benefit of propagating the function's parameters. Such make functions are not a part of this proposal. This proposal is not just about the optimization of removing a single stack based allocation. The type erased member function use case is comparable to Embarcardio C++'s __closure, .NET's single cast delegate and an optimized special case of a single function RUST trait; a valuable type of runtime polymorphism.</p>
+<h2 id="references">References</h2>
+<span id="reference-p0792r5">[P0792R5] function_ref: a non-owning reference to a Callable</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html</a><br/>
+<br/>
+<span id="reference-github">function_ref</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/TartanLlama/function_ref" target="__blank">https://github.com/TartanLlama/function_ref</a><br/>
+</body>
+</html>
