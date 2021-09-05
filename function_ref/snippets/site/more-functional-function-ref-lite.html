@@ -61,9 +61,10 @@
 </tr>
 </table>
 <h2>Contents</h2>
-<h3><a href="#problem_solution">1&nbsp;&nbsp;Problem and Solution</a></h3>
-<h3><a href="#references">2&nbsp;&nbsp;References</a></h3>
-<h2 id="problem_solution">Problem and Solution</h2>
+<h3><a href="#problem">1&nbsp;&nbsp;Problem</a></h3>
+<h3><a href="#solution">2&nbsp;&nbsp;Solution</a></h3>
+<h3><a href="#references">3&nbsp;&nbsp;References</a></h3>
+<h2 id="problem">Problem</h2>
 <p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_".</p>
 <!-- snippet-function_ref-constructor.cc.html -->
 <div class="code">
@@ -84,12 +85,55 @@
 <div class="code">
 {{> snippets/snippet-function_ref-constructors-te-alt.cc}}
 </div>
-<p>This only requires adding one public constructor to function_ref's internal two pointers. Using this new constructor is easier for these two type erased use cases because the programmer doesn't need to take another object into consideration and its dependency upon the state. While the unnecessary stateful lambda is safer, any safety concern's can be mitigated by using make functions that delegate to this new constructor and would have the added benefit of propagating the function's parameters. Such make functions are not a part of this proposal. This proposal is not just about the optimization of removing a single stack based allocation. The type erased member function use case is comparable to Embarcardio C++'s __closure, .NET's single cast delegate and an optimized special case of a single function RUST trait; a valuable type of runtime polymorphism.</p>
+<p>This only requires adding one public constructor to function_ref's internal two pointers. Using this new constructor is easier for these two type erased use cases because the programmer doesn't need to take another object into consideration and its dependency upon the state. While the unnecessary stateful lambda is safer, any safety concern's can be mitigated by using make functions that delegate to this new constructor and would have the added benefit of propagating the function's parameters. Such make functions are not a part of this proposal. This proposal is not just about the optimization of removing a single stack based allocation. The type erased member function use case is comparable to <a href="#reference-closure">Embarcadero C++'s __closure</a>, <a href="#reference-delegate">.NET's single cast delegate</a> and an optimized special case of a single function RUST trait; a valuable type of runtime polymorphism.</p>
+<h2 id="solution">Solution</h2>
+<p>Add a public constructor that exposes the two internal pointers; erased_object/obj_ and erased_function/callback_.</p>
+<!-- snippet-cpp-unsafe-constructor.cc.html -->
+<div class="code">
+{{> snippets/snippet-cpp-unsafe-constructor.cc}}
+</div>
+<p>Make the following revisions to the "Class synopsis" of the specification. Remove the to "// exposition only" since there will need to be a concrete implementation and make sure to add the void* as the first parameter of the "erased_function".</p>
+<hr/>
+<table style="width:100%">
+<tr>
+<td style="width:50%;text-align:center">
+<b>Before</b>
+</td>
+<td style="width:50%;text-align:center">
+<b>After</b>
+</td>
+</tr>
+</table>
+<hr/>
+<table style="width:100%">
+<tr>
+<td class="code" style="width:50%">
+<!-- snippet-function_ref-spec.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-spec.cc}}
+</div>
+</td>
+<td class="code" style="width:50%">
+<!-- snippet-function_ref-spec-rev.cc.html -->
+<div class="code">
+{{> snippets/snippet-function_ref-spec-rev.cc}}
+</div>
+</td>
+</tr>
+</table>
+
 <h2 id="references">References</h2>
 <span id="reference-p0792r5">[P0792R5] function_ref: a non-owning reference to a Callable</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html</a><br/>
 <br/>
 <span id="reference-github">function_ref</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="https://github.com/TartanLlama/function_ref" target="__blank">https://github.com/TartanLlama/function_ref</a><br/>
+<br/>
+<span id="reference-closure">__closure</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" target="__blank">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><br/>
+<br/>
+<span id="reference-delegate">Using Delegates (C# Programming Guide)</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" target="__blank">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><br/>
+<br/>
 </body>
 </html>
