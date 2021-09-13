@@ -123,6 +123,29 @@ using is_invocable_r = is_invocable_r_impl<std::true_type, R, F, Args...>;
 } // namespace detail
 } // namespace fnref
 
+template <typename T, T> struct internal_member_function_traits;
+
+template <typename T, typename R, typename ...Args, R (T::*mf)(Args...)>
+struct internal_member_function_traits<R (T::*)(Args...), mf>
+{
+    static R type_erase_this(void * obj, Args ... args)
+    {
+        return (static_cast<T*>(obj)->*mf)(std::forward<Args>(args)...);
+    }
+};
+
+template <typename T, typename R, typename ...Args, R (T::*mf)(Args...) const>
+struct internal_member_function_traits<R (T::*)(Args...) const, mf>
+{
+    static R type_erase_this(void * obj, Args ... args)
+    {
+        return (static_cast<const T*>(obj)->*mf)(std::forward<Args>(args)...);
+    }
+};
+
+template<auto MFP>
+using member_function_traits = internal_member_function_traits<decltype(MFP), MFP>;
+
 /// A lightweight non-owning reference to a callable.
 ///
 /// Example usage:
@@ -191,7 +214,11 @@ public:
     return callback_(obj_, std::forward<Args>(args)...);
   }
 
-  function_ref(void* obj_, R (*callback_)(void*,Args...)) noexcept : obj_{obj_}, callback_{callback_} {}
+  //function_ref(void* obj_, R (*callback_)(void*,Args...)) noexcept : obj_{obj_}, callback_{callback_} {}
+  template<class I, auto MFP>
+  function_ref(I& instance, internal_member_function_traits<decltype(MFP), MFP>) noexcept
+    : obj_(&instance), callback_(internal_member_function_traits<decltype(MFP), MFP>::type_erase_this) {
+  }
 private:
   void *obj_ = nullptr;
   R (*callback_)(void *, Args...) = nullptr;
