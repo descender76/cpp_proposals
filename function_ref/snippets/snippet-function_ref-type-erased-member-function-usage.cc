@@ -35,5 +35,6 @@ int main()
     third_party_lib_function3(b, temp);
     // member function with type erased state: b
     third_party_lib_function1([&b](bool b1, int i, float f){b.baz(b1, i, f);});// current way
+    third_party_lib_function1([&b](auto... args){b.baz(args...);});// current way
     third_party_lib_function1({b, tl::member_function_traits<&bar::baz>()});// proposed way
 }
