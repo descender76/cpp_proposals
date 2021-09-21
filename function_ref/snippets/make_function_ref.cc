@@ -133,25 +133,10 @@ template <typename R, typename ...Args, R (*f)(Args...)>
 struct internal_function_traits<R (*)(Args...), f>
 {
 	typedef R (function_signature)(Args ... args);
-	//typedef R (*function_pointer) (Args ... args);
-	//typedef R (prepend_void_pointer_function_signature)(void*, Args ... args);
-	//typedef R (*prepend_void_pointer_function_pointer) (void*, Args ... args);
-	//typedef R (this_as_ref_function_signature)(T&, Args ... args);
-	//typedef R (*this_as_ref_function_pointer) (T&, Args ... args);
     static R prepend_void_pointer(void * obj, Args ... args)
     {
         return f(std::forward<Args>(args)...);
     }
-    /*
-    static R type_erase_this(void * obj, Args ... args)
-    {
-        return (static_cast<T*>(obj)->*mf)(std::forward<Args>(args)...);
-    }
-    static R this_as_ref(void * obj, T& first, Args ... args)
-    {
-        return (first.*mf)(std::forward<Args>(args)...);
-    }
-    */
 };
 
 template<auto FP>
@@ -166,7 +151,6 @@ struct internal_member_function_traits<R (T::*)(Args...), mf>
 	//typedef R (*function_pointer) (Args ... args);
 	//typedef R (T::*member_function_pointer)(Args ... args);
 	typedef R (this_as_ref_function_signature)(T&, Args ... args);
-	//typedef R (*this_as_ref_function_pointer) (T&, Args ... args);
 	typedef R (this_as_pointer_function_signature)(T*, Args ... args);
 	typedef R (this_as_value_function_signature)(T, Args ... args);
     static R type_erase_this(void * obj, Args ... args)
@@ -194,7 +178,6 @@ struct internal_member_function_traits<R (T::*)(Args...) const, mf>
 	//typedef R (*function_pointer) (Args ... args);
 	//typedef R (T::*member_function_pointer)(Args ... args) const;
 	typedef R (this_as_ref_function_signature)(const T&, Args ... args);
-	//typedef R (*this_as_ref_function_pointer) (const T&, Args ... args);
 	typedef R (this_as_pointer_function_signature)(const T*, Args ... args);
 	typedef R (this_as_value_function_signature)(const T, Args ... args);
     static R type_erase_this(void * obj, Args ... args)
@@ -279,12 +262,6 @@ using type_erase_first = internal_type_erase_first<decltype(FP), FP>;
 /// foo([](int i) { return i*2; });
 template <class F> class function_ref;
 
-//template <typename T>
-//function_ref<T> make_function_ref(T t);
-
-//template<auto mf, typename T>
-//auto make_function_ref(T& obj);
-
 /// Specialization for function types.
 template <class R, class... Args> class function_ref<R(Args...)> {
 public:
@@ -341,27 +318,10 @@ public:
     return callback_(obj_, std::forward<Args>(args)...);
   }
 
-  //template<class I, auto MFP>
-  //function_ref(I& instance, internal_member_function_traits<decltype(MFP), MFP>) noexcept
-  //  : obj_(&instance), callback_(internal_member_function_traits<decltype(MFP), MFP>::type_erase_this) {
-  //}
-  //template<class I, R (I::*MFP)(Args...)>
-  //function_ref(I& instance, R (I::*mfp)(Args...)) noexcept
-  //  : obj_(&instance), callback_(internal_member_function_traits<decltype(MFP), MFP>::type_erase_this) {
-  //}
-  //template<class C>
-  //function_ref(C& instance, R (C::*MFP)(Args...)) noexcept
-  //  : obj_(&instance), callback_(internal_member_function_traits<decltype(MFP), MFP>::type_erase_this) {
-  //}
   function_ref(void* obj_, R (*callback_)(void*,Args...)) noexcept : obj_{obj_}, callback_{callback_} {}
 private:
   void *obj_ = nullptr;
   R (*callback_)(void *, Args...) = nullptr;
-  //friend function_ref make_function_ref<R(Args...)>(T t);
-  //template<auto mf, typename T>
-  //auto make_function_ref(T& obj);
-  //template<typename T>
-  //friend function_ref<R(Args...)> make_function_ref<R(T::*)(Args...)>(T& obj);
 };
 
 /// Swaps the referred callables of `lhs` and `rhs`.
@@ -396,27 +356,27 @@ auto make_function_ref()
     return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref_function_signature>{nullptr, tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref};
 }
 
-enum /*class*/ this_as {
-	ref,
-	pointer,
-	value
-};
+class ref {};
+class pointer {};
+class value {};
 
-template <this_as ta>
-struct this_as_selector;
-
-template <ref>
-struct this_as_selector
-{
-
-};
-
-template<auto mf, this_as ta> requires std::is_member_function_pointer<decltype(mf)>::value
+template<auto mf, typename T> requires std::is_member_function_pointer<decltype(mf)>::value && std::is_same<T, ref>::value
 auto make_function_ref()
 {
     return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref_function_signature>{nullptr, tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref};
 }
 
+template<auto mf, typename T> requires std::is_member_function_pointer<decltype(mf)>::value && std::is_same<T, pointer>::value
+auto make_function_ref()
+{
+    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::this_as_pointer_function_signature>{nullptr, tl::internal_member_function_traits<decltype(mf), mf>::this_as_pointer};
+}
+
+template<auto mf, typename T> requires std::is_member_function_pointer<decltype(mf)>::value && std::is_same<T, value>::value
+auto make_function_ref()
+{
+    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::this_as_value_function_signature>{nullptr, tl::internal_member_function_traits<decltype(mf), mf>::this_as_value};
+}
 
 template<typename testType>
 struct is_function_pointer
@@ -473,7 +433,17 @@ struct bar {
     }
 };
 
-void application_function1(tl::function_ref<void(bar&, bool, int, float)> callback) {
+void application_function_ref(tl::function_ref<void(bar&, bool, int, float)> callback) {
+    bar b;
+    callback(b, true, 11, 3.1459f);
+}
+
+void application_function_pointer(tl::function_ref<void(bar*, bool, int, float)> callback) {
+    bar b;
+    callback(&b, true, 11, 3.1459f);
+}
+
+void application_function_value(tl::function_ref<void(bar, bool, int, float)> callback) {
     bar b;
     callback(b, true, 11, 3.1459f);
 }
@@ -521,12 +491,19 @@ int main()
     //auto temp = make_function_ref<void, bar, bool, int, float, &bar::baz>();
     ///*auto temp =*/ make_function_ref<&bar::baz>(b)(true, 11, 3.1459f);
     // member function with type erasure usecase
+    // i.e. delegate, closure, OOP callback, event
     third_party_lib_function1(make_function_ref<&bar::baz>(b));
-    // one of many member function without type erasure usecases
-    application_function1(make_function_ref<&bar::baz>());
+    // member function without type erasure usecases
+    // i.e. unified function pointer
+    application_function_ref(make_function_ref<&bar::baz>());
+    application_function_ref(make_function_ref<&bar::baz, ref>());
+    application_function_pointer(make_function_ref<&bar::baz, pointer>());
+    application_function_value(make_function_ref<&bar::baz, value>());
     // function without type erasure usecase
+    // i.e. C callback without user data
     third_party_lib_function1(make_function_ref<free_baz>());
     // function with type erasure usecase
+    // i.e. C callback with user data
     third_party_lib_function1(make_function_ref<free_bar_baz1>(b));
     third_party_lib_function1(make_function_ref<free_bar_baz2>(b));
     third_party_lib_function1(make_function_ref<free_bar_baz3>(b));
