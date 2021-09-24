@@ -615,9 +615,6 @@ int main()
     third_party_lib_function1([&b](auto... args){b.caz(args...);});// current way
     //third_party_lib_function1({b, tl::member_function_traits<static_cast<void(bar::*)(bool b, int i, float f)>(&bar::caz)>()});// proposed way
     //third_party_lib_function1({b, tl::member_function_traits<static_cast<void(bar::*)(bool b, int i, float f) const>(&bar::caz)>()});// proposed way
-    //third_party_lib_function1({b, &bar::baz});// proposed way
-    //auto temp = make_function_ref<void, bar, bool, int, float, &bar::baz>();
-    ///*auto temp =*/ make_function_ref<&bar::baz>(b)(true, 11, 3.1459f);
     // member function with type erasure usecase
     // i.e. delegate/closure/OOP callback/event
     third_party_lib_function1(make_function_ref<&bar::baz>(b));
