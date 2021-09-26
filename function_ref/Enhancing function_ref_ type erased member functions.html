@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Enhancing function_ref: type erased member functions</title>
+  <meta name="description" content="Enhancing function_ref: type erased member functions">
+  <meta name="author" content="Jarrad Waterloo">
+  <style>
+    h1
+	{
+	  text-align : center;
+	}
+	.code
+	{
+	  background-color: AliceBlue;
+	}
+	table.simple
+	{
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	table.simple > thead > tr > th
+	{
+		border: 1px solid black;
+	}
+	table.simple > tbody > tr > td
+	{
+		border: 1px solid black;
+	}
+	.problem
+	{
+		font-weight : bold;
+		color : red;
+	}
+  </style>
+</head>
+<body>
+<h1>Enhancing function_ref: type erased member functions</h1>
+<table style="width:100%">
+<tr>
+<td>&nbsp;</td>
+<td style="width:60ex">
+  <table>
+  <tr>
+  <td><b>Document #:</b></td><td>PTODOR0</td>
+  </tr>
+  <tr>
+  <td><b>Date:</b></td><td>2021-09-13</td>
+  </tr>
+  <tr>
+  <td><b>Project:</b></td><td>Programming Language C++</td>
+  </tr>
+  <tr>
+  <td><b>Audience:</b></td><td>Library Evolution Working Group (LEWG)</td>
+  </tr>
+  <tr>
+  <td><b>Reply-to:</b></td><td>Jarrad J. Waterloo<br/>&lt;<a href="mailto:descender76@gmail.com">descender76@gmail.com</a>&gt;</td>
+  </tr>
+  </table>
+</td>
+</tr>
+</table>
+<h2>Contents</h2>
+<h3><a href="#enhancement">1&nbsp;&nbsp;Enhancement</a></h3>
+<h3><a href="#solution">2&nbsp;&nbsp;Solution</a></h3>
+<h3><a href="#references">3&nbsp;&nbsp;References</a></h3>
+<h2 id="enhancement">Enhancement</h2>
+<p>Type erased member functions is a common usecase. This type of single function runtime polymorphism is found throughout the programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer. Even if the signature of a function_ref and a member function are the same, the current implementation requires the programmer to create a capturing lambda and manually forward each parameter. This is demonstrated below.</p>
+<!-- snippet-function_ref-type-erased-member-function-usage.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><i><font color="#9A1900">//#include &lt;https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp&gt;</font></i>
+<b><font color="#000080">#include</font></b> <font color="#FF0000">&lt;https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp&gt;</font>
+
+<font color="#009900">void</font> <b><font color="#000000">foo</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+<font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+
+<b><font color="#0000FF">struct</font></b> <font color="#008080">bar</font> <font color="#FF0000">{</font>
+    <font color="#009900">void</font> <b><font color="#000000">baz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<font color="#009900">void</font> <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bool, int, float)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">third_party_lib_function2</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar, bool, int, float)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(</font>b<font color="#990000">,</font> <b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">third_party_lib_function3</font></b><font color="#990000">(</font><font color="#008080">bar</font> b<font color="#990000">,</font> tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar, bool, int, float)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(</font>b<font color="#990000">,</font> <b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">int</font> <b><font color="#000000">main</font></b><font color="#990000">()</font>
+<font color="#FF0000">{</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">([](</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font><font color="#FF0000">{}</font><font color="#990000">);</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>foo<font color="#990000">);</font>
+    <i><font color="#9A1900">// member function with out type erased state</font></i>
+    <b><font color="#0000FF">auto</font></b> temp <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font><i><font color="#9A1900">// needed to prevent immediate dangling</font></i>
+    <b><font color="#000000">third_party_lib_function2</font></b><font color="#990000">(</font>temp<font color="#990000">);</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <b><font color="#000000">third_party_lib_function3</font></b><font color="#990000">(</font>b<font color="#990000">,</font> temp<font color="#990000">);</font>
+    <i><font color="#9A1900">// member function with type erased state: b</font></i>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">([&amp;</font>b<font color="#990000">](</font><font color="#009900">bool</font> b1<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font><font color="#FF0000">{</font>b<font color="#990000">.</font><b><font color="#000000">baz</font></b><font color="#990000">(</font>b1<font color="#990000">,</font> i<font color="#990000">,</font> f<font color="#990000">);</font><font color="#FF0000">}</font><font color="#990000">);</font><i><font color="#9A1900">// current way</font></i>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font><font color="#FF0000">{</font>b<font color="#990000">,</font> tl<font color="#990000">::</font>member_function_traits<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">&gt;()</font><font color="#FF0000">}</font><font color="#990000">);</font><i><font color="#9A1900">// proposed way</font></i>
+<font color="#FF0000">}</font>
+</tt></pre>
+
+</div>
+<h2 id="solution">Solution</h2>
+<p>In order to make this possible an additional constructor must be created, specifically for this common type erased member function use case, that just takes two parameters and automatically forward the parameters along.</p>
+<!-- snippet-function_ref-type-erased-member-function-constructor.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">;</font>
+
+<i><font color="#9A1900">/// Specialization for function types.</font></i>
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)&gt;</font> <font color="#FF0000">{</font>
+<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+  <b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">I</font><font color="#990000">,</font> <b><font color="#0000FF">auto</font></b> MFP<font color="#990000">&gt;</font>
+  <b><font color="#000000">function_ref</font></b><font color="#990000">(</font>I<font color="#990000">&amp;</font> instance<font color="#990000">,</font> internal_member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>MFP<font color="#990000">),</font> MFP<font color="#990000">&gt;)</font> <b><font color="#0000FF">noexcept</font></b>
+    <font color="#990000">:</font> <b><font color="#000000">obj_</font></b><font color="#990000">(&amp;</font>instance<font color="#990000">),</font> <b><font color="#000000">callback_</font></b><font color="#990000">(</font>internal_member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>MFP<font color="#990000">),</font> MFP<font color="#990000">&gt;::</font>type_erase_this<font color="#990000">)</font> <font color="#FF0000">{</font>
+  <font color="#FF0000">}</font>
+<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
+  <font color="#009900">void</font> <font color="#990000">*</font>obj_ <font color="#990000">=</font> nullptr<font color="#990000">;</font>
+  <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font> <font color="#990000">*,</font> Args<font color="#990000">...)</font> <font color="#990000">=</font> nullptr<font color="#990000">;</font>
+<font color="#FF0000">}</font><font color="#990000">;</font></tt></pre>
+
+</div>
+<p>This is also dependent upon a zero size tag class that not only allows the programmer to explicitly pass the member function pointer as a constructor template parameter but also provides the binder, "type_erase_this", needed to make things work.</p>
+<!-- snippet-function_ref-type-erased-member-function-tag.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> T<font color="#990000">&gt;</font> <b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#990000">...</font>Args<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*</font>mf<font color="#990000">)(</font>Args<font color="#990000">...)&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*)(</font>Args<font color="#990000">...),</font> mf<font color="#990000">&gt;</font>
+<font color="#FF0000">{</font>
+    <b><font color="#0000FF">static</font></b> <font color="#008080">R</font> <b><font color="#000000">type_erase_this</font></b><font color="#990000">(</font><font color="#009900">void</font> <font color="#990000">*</font> obj<font color="#990000">,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+        <b><font color="#0000FF">return</font></b> <font color="#990000">(</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font>T<font color="#990000">*&gt;(</font>obj<font color="#990000">)-&gt;*</font>mf<font color="#990000">)(</font>std<font color="#990000">::</font>forward<font color="#990000">&lt;</font>Args<font color="#990000">&gt;(</font>args<font color="#990000">)...);</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#990000">...</font>Args<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*</font>mf<font color="#990000">)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">const</font></b><font color="#990000">&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">const</font></b><font color="#990000">,</font> mf<font color="#990000">&gt;</font>
+<font color="#FF0000">{</font>
+    <b><font color="#0000FF">static</font></b> <font color="#008080">R</font> <b><font color="#000000">type_erase_this</font></b><font color="#990000">(</font><font color="#009900">void</font> <font color="#990000">*</font> obj<font color="#990000">,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+        <b><font color="#0000FF">return</font></b> <font color="#990000">(</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">const</font></b> T<font color="#990000">*&gt;(</font>obj<font color="#990000">)-&gt;*</font>mf<font color="#990000">)(</font>std<font color="#990000">::</font>forward<font color="#990000">&lt;</font>Args<font color="#990000">&gt;(</font>args<font color="#990000">)...);</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> MFP<font color="#990000">&gt;</font>
+<b><font color="#0000FF">using</font></b> member_function_traits <font color="#990000">=</font> internal_member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>MFP<font color="#990000">),</font> MFP<font color="#990000">&gt;;</font></tt></pre>
+
+</div>
+<p>This tag class could also be useful to create a multi function function_ref/RUST dynamic trait/Golang interface whether that is manually or by libraries such as <a href="#reference-dyno">Dyno: Runtime polymorphism done right</a> and <a href="#reference-te">[Boost::ext].TE</a>.</p>
+<h2 id="references">References</h2>
+<span id="reference-p0792r5">[P0792R5] function_ref: a non-owning reference to a Callable</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html</a><br/>
+<br/>
+<span id="reference-github">function_ref</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/TartanLlama/function_ref" target="__blank">https://github.com/TartanLlama/function_ref</a><br/>
+<br/>
+<span id="reference-delegate">Using Delegates (C# Programming Guide)</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" target="__blank">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><br/>
+<br/>
+<span id="reference-closure">__closure</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" target="__blank">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><br/>
+<br/>
+<span id="reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a><br/>
+<br/>
+<span id="reference-fast">The Impossibly Fast C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates" target="__blank">https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates</a><br/>
+<br/>
+<span id="reference-impossibly">Impossibly fast delegate in C++11</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11" target="__blank">https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11</a><br/>
+<br/>
+<span id="reference-dyno">Dyno: Runtime polymorphism done right</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/ldionne/dyno" target="__blank">https://github.com/ldionne/dyno</a><br/>
+<br/>
+<span id="reference-te">[Boost::ext].TE</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/boost-ext/te" target="__blank">https://github.com/boost-ext/te</a><br/>
+<br/>
+</body>
+</html>

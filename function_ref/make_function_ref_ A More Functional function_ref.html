@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>make_function_ref: A More Functional function_ref</title>
+  <meta name="description" content="make_function_ref: A More Functional function_ref">
+  <meta name="author" content="Jarrad Waterloo">
+  <style>
+    h1
+	{
+	  text-align : center;
+	}
+	.code
+	{
+	  background-color: AliceBlue;
+	}
+	table.simple
+	{
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	table.simple > thead > tr > th
+	{
+		border: 1px solid black;
+	}
+	table.simple > tbody > tr > td
+	{
+		border: 1px solid black;
+	}
+	.problem
+	{
+		font-weight : bold;
+		color : red;
+	}
+  </style>
+</head>
+<body>
+<h1>make_function_ref: A More Functional function_ref</h1>
+<table style="width:100%">
+<tr>
+<td>&nbsp;</td>
+<td style="width:60ex">
+  <table>
+  <tr>
+  <td><b>Document #:</b></td><td>PTODOR0</td>
+  </tr>
+  <tr>
+  <td><b>Date:</b></td><td>2021-09-13</td>
+  </tr>
+  <tr>
+  <td><b>Project:</b></td><td>Programming Language C++</td>
+  </tr>
+  <tr>
+  <td><b>Audience:</b></td><td>Library Evolution Working Group (LEWG)</td>
+  </tr>
+  <tr>
+  <td><b>Reply-to:</b></td><td>Jarrad J. Waterloo<br/>&lt;<a href="mailto:descender76@gmail.com">descender76@gmail.com</a>&gt;</td>
+  </tr>
+  </table>
+</td>
+</tr>
+</table>
+<h2>Contents</h2>
+<h3><a href="#enhancement">1&nbsp;&nbsp;Enhancement</a></h3>
+<h3><a href="#solution">2&nbsp;&nbsp;Solution</a></h3>
+<h3><a href="#references">3&nbsp;&nbsp;References</a></h3>
+<h2 id="enhancement">Enhancement</h2>
+<p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
+<p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
+<p>Similarly too, the use case of type erased functions has been instrumental in the functional programming world for decades in C and other programming languages. The utility of simplifying the construction of these common use cases are demonstrated below.</p>
+<!-- make_function_ref-usage.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000080">#include</font></b> <font color="#FF0000">&lt;iostream&gt;</font>
+<i><font color="#9A1900">//#include &lt;https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp&gt;</font></i>
+<b><font color="#000080">#include</font></b> <font color="#FF0000">&lt;https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp&gt;</font>
+
+<font color="#009900">void</font> <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bool, int, float)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">double</font> <b><font color="#000000">third_party_lib_function2</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;double(int, float, bool)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <b><font color="#0000FF">return</font></b> <b><font color="#000000">callback</font></b><font color="#990000">(</font><font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">,</font> <b><font color="#0000FF">true</font></b><font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">third_party_lib_function3</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bool, int, float) noexcept&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">double</font> <b><font color="#000000">third_party_lib_function4</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;double(int, float, bool) noexcept&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <b><font color="#0000FF">return</font></b> <b><font color="#000000">callback</font></b><font color="#990000">(</font><font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">,</font> <b><font color="#0000FF">true</font></b><font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<b><font color="#0000FF">struct</font></b> <font color="#008080">bar</font> <font color="#FF0000">{</font>
+    <font color="#009900">void</font> <b><font color="#000000">baz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+        std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"bar::baz"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">double</font> <b><font color="#000000">buz</font></b><font color="#990000">(</font><font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">,</font> <font color="#009900">bool</font> b<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+        std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"bar::buz"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+        <b><font color="#0000FF">return</font></b> i <font color="#990000">+</font> f <font color="#990000">+</font> <font color="#990000">(</font>b <font color="#990000">?</font> <font color="#993399">1</font> <font color="#990000">:</font> <font color="#993399">0</font><font color="#990000">);</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">void</font> <b><font color="#000000">baznoe</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+    <font color="#FF0000">{</font>
+        std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"bar::baznoe"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">double</font> <b><font color="#000000">buznoe</font></b><font color="#990000">(</font><font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">,</font> <font color="#009900">bool</font> b<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+    <font color="#FF0000">{</font>
+        std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"bar::buznoe"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+        <b><font color="#0000FF">return</font></b> i <font color="#990000">+</font> f <font color="#990000">+</font> <font color="#990000">(</font>b <font color="#990000">?</font> <font color="#993399">1</font> <font color="#990000">:</font> <font color="#993399">0</font><font color="#990000">);</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">void</font> <b><font color="#000000">caz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+        std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"bar::caz"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">void</font> <b><font color="#000000">caz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">const</font></b>
+    <font color="#FF0000">{</font>
+        std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"bar::caz const"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<font color="#009900">void</font> <b><font color="#000000">application_function_ref</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar&amp;, bool, int, float)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(</font>b<font color="#990000">,</font> <b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">application_function_pointer</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar*, bool, int, float)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(&amp;</font>b<font color="#990000">,</font> <b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">application_function_value</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar, bool, int, float)&gt;</font> callback<font color="#990000">)</font> <font color="#FF0000">{</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <b><font color="#000000">callback</font></b><font color="#990000">(</font>b<font color="#990000">,</font> <b><font color="#0000FF">true</font></b><font color="#990000">,</font> <font color="#993399">11</font><font color="#990000">,</font> <font color="#993399">3</font><font color="#990000">.</font>1459f<font color="#990000">);</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_baz1</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_baz1"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz1</font></b><font color="#990000">(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz1"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz2</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz2"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz3</font></b><font color="#990000">(</font>bar<font color="#990000">*,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz3"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz4</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">*,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz4"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_baz2</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_baz2"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz5</font></b><font color="#990000">(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz5"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz6</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz6"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz7</font></b><font color="#990000">(</font>bar<font color="#990000">*,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz7"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz8</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">*,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+<font color="#FF0000">{</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <font color="#FF0000">"free_bar_baz8"</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">int</font> <b><font color="#000000">main</font></b><font color="#990000">()</font>
+<font color="#FF0000">{</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <i><font color="#9A1900">// member function with type erased state: b</font></i>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">([&amp;</font>b<font color="#990000">](</font><font color="#009900">bool</font> b1<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font><font color="#FF0000">{</font>b<font color="#990000">.</font><b><font color="#000000">baz</font></b><font color="#990000">(</font>b1<font color="#990000">,</font> i<font color="#990000">,</font> f<font color="#990000">);</font><font color="#FF0000">}</font><font color="#990000">);</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">([&amp;</font>b<font color="#990000">](</font><b><font color="#0000FF">auto</font></b><font color="#990000">...</font> args<font color="#990000">)</font><font color="#FF0000">{</font>b<font color="#990000">.</font><b><font color="#000000">baz</font></b><font color="#990000">(</font>args<font color="#990000">...);</font><font color="#FF0000">}</font><font color="#990000">);</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <b><font color="#000000">third_party_lib_function2</font></b><font color="#990000">([&amp;</font>b<font color="#990000">](</font><font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">,</font> <font color="#009900">bool</font> b1<font color="#990000">)</font><font color="#FF0000">{</font><b><font color="#0000FF">return</font></b> b<font color="#990000">.</font><b><font color="#000000">buz</font></b><font color="#990000">(</font>i<font color="#990000">,</font> f<font color="#990000">,</font> b1<font color="#990000">);</font><font color="#FF0000">}</font><font color="#990000">)</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <b><font color="#000000">third_party_lib_function2</font></b><font color="#990000">([&amp;</font>b<font color="#990000">](</font><b><font color="#0000FF">auto</font></b><font color="#990000">...</font> args<font color="#990000">)</font><font color="#FF0000">{</font><b><font color="#0000FF">return</font></b> b<font color="#990000">.</font><b><font color="#000000">buz</font></b><font color="#990000">(</font>args<font color="#990000">...);</font><font color="#FF0000">}</font><font color="#990000">)</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    <i><font color="#9A1900">// member function with type erasure usecase</font></i>
+    <i><font color="#9A1900">// i.e. delegate/closure/OOP callback/event</font></i>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <b><font color="#000000">third_party_lib_function2</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>buz<font color="#990000">&gt;(</font>b<font color="#990000">))</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    <b><font color="#000000">third_party_lib_function3</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baznoe<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    std<font color="#990000">::</font>cout <font color="#990000">&lt;&lt;</font> <b><font color="#000000">third_party_lib_function4</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>buznoe<font color="#990000">&gt;(</font>b<font color="#990000">))</font> <font color="#990000">&lt;&lt;</font> std<font color="#990000">::</font>endl<font color="#990000">;</font>
+    <i><font color="#9A1900">// member function without type erasure usecases</font></i>
+    <i><font color="#9A1900">// i.e. unified function pointer</font></i>
+    <b><font color="#000000">application_function_ref</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">&gt;());</font>
+    <b><font color="#000000">application_function_ref</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">,</font> tl<font color="#990000">::</font>ref<font color="#990000">&gt;());</font>
+    <b><font color="#000000">application_function_pointer</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">,</font> tl<font color="#990000">::</font>pointer<font color="#990000">&gt;());</font>
+    <b><font color="#000000">application_function_value</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">,</font> tl<font color="#990000">::</font>value<font color="#990000">&gt;());</font>
+    <b><font color="#000000">application_function_ref</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baznoe<font color="#990000">&gt;());</font>
+    <b><font color="#000000">application_function_ref</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baznoe<font color="#990000">,</font> tl<font color="#990000">::</font>ref<font color="#990000">&gt;());</font>
+    <b><font color="#000000">application_function_pointer</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baznoe<font color="#990000">,</font> tl<font color="#990000">::</font>pointer<font color="#990000">&gt;());</font>
+    <b><font color="#000000">application_function_value</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baznoe<font color="#990000">,</font> tl<font color="#990000">::</font>value<font color="#990000">&gt;());</font>
+    <i><font color="#9A1900">// function without type erasure usecase</font></i>
+    <i><font color="#9A1900">// i.e. C callback without user data</font></i>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_baz1<font color="#990000">&gt;());</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(*)(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)&gt;(</font>free_baz1<font color="#990000">)&gt;());</font><i><font color="#9A1900">// explicit</font></i>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_baz2<font color="#990000">&gt;());</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(*)(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)&gt;(</font>free_baz2<font color="#990000">)&gt;());</font><i><font color="#9A1900">// explicit</font></i>
+    <i><font color="#9A1900">// function with type erasure usecase</font></i>
+    <i><font color="#9A1900">// i.e. C callback with user data</font></i>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz1<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz2<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz3<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz4<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    <b><font color="#000000">third_party_lib_function3</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz5<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz6<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz7<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+    <b><font color="#000000">third_party_lib_function1</font></b><font color="#990000">(</font>tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;</font>free_bar_baz8<font color="#990000">&gt;(</font>b<font color="#990000">));</font>
+<font color="#FF0000">}</font>
+</tt></pre>
+
+</div>
+<h2 id="solution">Solution</h2>
+<p>In order to make this possible, multiple overloaded make_function_ref functions need to be added. All of these functions delegate to a new public constructor that exposes the two inner pointers of the function_ref implementation.</p>
+<!-- make_function_ref-spec.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">;</font>
+
+<i><font color="#9A1900">/// Specializations for function types.</font></i>
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)&gt;</font> <font color="#FF0000">{</font>
+<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+  <b><font color="#000000">function_ref</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b> <font color="#990000">:</font> obj_<font color="#FF0000">{</font>obj_<font color="#FF0000">}</font><font color="#990000">,</font> callback_<font color="#FF0000">{</font>callback_<font color="#FF0000">}</font> <font color="#FF0000">{}</font>
+<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
+  <font color="#009900">void</font> <font color="#990000">*</font>obj_ <font color="#990000">=</font> nullptr<font color="#990000">;</font>
+  <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font> <font color="#990000">*,</font> Args<font color="#990000">...)</font> <font color="#990000">=</font> nullptr<font color="#990000">;</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">&gt;</font> <font color="#FF0000">{</font>
+<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+  <b><font color="#000000">function_ref</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b> <font color="#990000">:</font> obj_<font color="#FF0000">{</font>obj_<font color="#FF0000">}</font><font color="#990000">,</font> callback_<font color="#FF0000">{</font>callback_<font color="#FF0000">}</font> <font color="#FF0000">{}</font>
+<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
+  <font color="#009900">void</font> <font color="#990000">*</font>obj_ <font color="#990000">=</font> nullptr<font color="#990000">;</font>
+  <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font> <font color="#990000">*,</font> Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b> <font color="#990000">=</font> nullptr<font color="#990000">;</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font>
+
+<b><font color="#0000FF">class</font></b> <font color="#008080">ref</font> <font color="#FF0000">{}</font><font color="#990000">;</font>
+<b><font color="#0000FF">class</font></b> <font color="#008080">pointer</font> <font color="#FF0000">{}</font><font color="#990000">;</font>
+<b><font color="#0000FF">class</font></b> <font color="#008080">value</font> <font color="#FF0000">{}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value <font color="#990000">&amp;&amp;</font> std<font color="#990000">::</font>is_same<font color="#990000">&lt;</font>T<font color="#990000">,</font> ref<font color="#990000">&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value <font color="#990000">&amp;&amp;</font> std<font color="#990000">::</font>is_same<font color="#990000">&lt;</font>T<font color="#990000">,</font> pointer<font color="#990000">&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value <font color="#990000">&amp;&amp;</font> std<font color="#990000">::</font>is_same<font color="#990000">&lt;</font>T<font color="#990000">,</font> value<font color="#990000">&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">testType</font><font color="#990000">&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">is_function_pointer</font>
+<font color="#FF0000">{</font>
+    <b><font color="#0000FF">static</font></b> <b><font color="#0000FF">const</font></b> <font color="#009900">bool</font> value <font color="#990000">=</font>
+        std<font color="#990000">::</font>is_pointer<font color="#990000">&lt;</font>testType<font color="#990000">&gt;::</font>value <font color="#990000">?</font>
+        std<font color="#990000">::</font>is_function<font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">std</font><font color="#990000">::</font>remove_pointer<font color="#990000">&lt;</font>testType<font color="#990000">&gt;::</font>type<font color="#990000">&gt;::</font>value <font color="#990000">:</font>
+        <b><font color="#0000FF">false</font></b><font color="#990000">;</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font></tt></pre>
+
+</div>
+<h2 id="references">References</h2>
+<span id="reference-p0792r5">[P0792R5] function_ref: a non-owning reference to a Callable</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html</a><br/>
+<br/>
+<span id="reference-github">function_ref</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/TartanLlama/function_ref" target="__blank">https://github.com/TartanLlama/function_ref</a><br/>
+<br/>
+<span id="reference-delegate">Using Delegates (C# Programming Guide)</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" target="__blank">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><br/>
+<br/>
+<span id="reference-closure">__closure</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" target="__blank">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><br/>
+<br/>
+<span id="reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a><br/>
+<br/>
+<span id="reference-fast">The Impossibly Fast C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates" target="__blank">https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates</a><br/>
+<br/>
+<span id="reference-impossibly">Impossibly fast delegate in C++11</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11" target="__blank">https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11</a><br/>
+<br/>
+<span id="reference-dyno">Dyno: Runtime polymorphism done right</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/ldionne/dyno" target="__blank">https://github.com/ldionne/dyno</a><br/>
+<br/>
+<span id="reference-te">[Boost::ext].TE</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/boost-ext/te" target="__blank">https://github.com/boost-ext/te</a><br/>
+<br/>
+</body>
+</html>

@@ -136,12 +136,12 @@ struct internal_function_traits<R (*)(Args...), f>
     }
 };
 
-template <typename R, typename ...Args, R (*f)(Args...)>
+template <typename R, typename ...Args, R (*f)(Args...) noexcept>
 struct internal_function_traits<R (*)(Args...) noexcept, f>
 {
     static const bool is_noexcept = true;
-	typedef R (function_signature)(Args ... args);
-    static R prepend_void_pointer(void * obj, Args ... args)
+	typedef R (function_signature)(Args ... args) noexcept;
+    static R prepend_void_pointer(void * obj, Args ... args) noexcept
     {
         return f(std::forward<Args>(args)...);
     }
@@ -442,10 +442,77 @@ private:
   R (*callback_)(void *, Args...) = nullptr;
 };
 
+template <class R, class... Args> class function_ref<R(Args...) noexcept> {
+public:
+  constexpr function_ref() noexcept = delete;
+
+  /// Creates a `function_ref` which refers to the same callable as `rhs`.
+    constexpr function_ref(const function_ref<R(Args...) noexcept> &rhs) noexcept = default;
+
+  /// Constructs a `function_ref` referring to `f`.
+  ///
+  /// \synopsis template <typename F> constexpr function_ref(F &&f) noexcept
+  template <typename F,
+            detail::fnref::enable_if_t<
+                !std::is_same<detail::fnref::decay_t<F>, function_ref>::value &&
+                detail::fnref::is_invocable_r<R, F &&, Args...>::value> * = nullptr>
+  TL_FUNCTION_REF_11_CONSTEXPR function_ref(F &&f) noexcept
+      : obj_(const_cast<void*>(reinterpret_cast<const void *>(std::addressof(f)))) {
+    callback_ = [](void *obj, Args... args) noexcept -> R {
+      return detail::fnref::invoke(
+          *reinterpret_cast<typename std::add_pointer<F>::type>(obj),
+          std::forward<Args>(args)...);
+    };
+  }
+
+  /// Makes `*this` refer to the same callable as `rhs`.
+  TL_FUNCTION_REF_11_CONSTEXPR function_ref<R(Args...) noexcept> &
+  operator=(const function_ref<R(Args...) noexcept> &rhs) noexcept = default;
+
+  /// Makes `*this` refer to `f`.
+  ///
+  /// \synopsis template <typename F> constexpr function_ref &operator=(F &&f) noexcept;
+  template <typename F,
+            detail::fnref::enable_if_t<detail::fnref::is_invocable_r<R, F &&, Args...>::value>
+                * = nullptr>
+  TL_FUNCTION_REF_11_CONSTEXPR function_ref<R(Args...)> &operator=(F &&f) noexcept {
+    obj_ = reinterpret_cast<void *>(std::addressof(f));
+    callback_ = [](void *obj, Args... args) {
+      return detail::fnref::invoke(
+          *reinterpret_cast<typename std::add_pointer<F>::type>(obj),
+          std::forward<Args>(args)...);
+    };
+
+    return *this;
+  }
+
+  /// Swaps the referred callables of `*this` and `rhs`.
+  constexpr void swap(function_ref<R(Args...) noexcept> &rhs) noexcept {
+    std::swap(obj_, rhs.obj_);
+    std::swap(callback_, rhs.callback_);
+  }
+
+  /// Call the stored callable with the given arguments.
+  R operator()(Args... args) const noexcept {
+    return callback_(obj_, std::forward<Args>(args)...);
+  }
+
+  function_ref(void* obj_, R (*callback_)(void*,Args...) noexcept) noexcept : obj_{obj_}, callback_{callback_} {}
+private:
+  void *obj_ = nullptr;
+  R (*callback_)(void *, Args...) noexcept = nullptr;
+};
+
 /// Swaps the referred callables of `lhs` and `rhs`.
 template <typename R, typename... Args>
 constexpr void swap(function_ref<R(Args...)> &lhs,
                     function_ref<R(Args...)> &rhs) noexcept {
+  lhs.swap(rhs);
+}
+
+template <typename R, typename... Args>
+constexpr void swap(function_ref<R(Args...) noexcept> &lhs,
+                    function_ref<R(Args...) noexcept> &rhs) noexcept {
   lhs.swap(rhs);
 }
 
@@ -457,7 +524,7 @@ function_ref(R (*)(Args...))->function_ref<R(Args...)>;
 // template <typename F>
 // function_ref(F) -> function_ref</* deduced if possible */>;
 #endif
-
+// member function with type erasure
 template<auto mf, typename T> requires std::is_member_function_pointer<decltype(mf)>::value
 auto make_function_ref(T& obj)
 {
@@ -469,7 +536,7 @@ auto make_function_ref(const T& obj)
 {
     return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::function_signature>{&obj, tl::internal_member_function_traits<decltype(mf), mf>::type_erase_this};
 }
-
+// member function without type erasure
 template<auto mf> requires std::is_member_function_pointer<decltype(mf)>::value
 auto make_function_ref()
 {
@@ -507,6 +574,7 @@ struct is_function_pointer
         false;
 };
 
+// function with type erasure
 template<auto f, typename T> requires is_function_pointer<decltype(f)>::value
 auto make_function_ref(T& obj)
 {
@@ -519,6 +587,7 @@ auto make_function_ref(const T& obj)
     return tl::function_ref<typename tl::internal_type_erase_first<decltype(f), f>::function_signature>{nullptr, tl::internal_type_erase_first<decltype(f), f>::type_erased_function};
 }
 
+// function without type erasure
 template<auto f> requires is_function_pointer<decltype(f)>::value
 auto make_function_ref()
 {

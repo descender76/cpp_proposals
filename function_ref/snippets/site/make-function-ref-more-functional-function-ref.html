@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>make_function_ref: A More Functional function_ref</title>
+  <meta name="description" content="make_function_ref: A More Functional function_ref">
+  <meta name="author" content="Jarrad Waterloo">
+  <style>
+    h1
+	{
+	  text-align : center;
+	}
+	.code
+	{
+	  background-color: AliceBlue;
+	}
+	table.simple
+	{
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	table.simple > thead > tr > th
+	{
+		border: 1px solid black;
+	}
+	table.simple > tbody > tr > td
+	{
+		border: 1px solid black;
+	}
+	.problem
+	{
+		font-weight : bold;
+		color : red;
+	}
+  </style>
+</head>
+<body>
+<h1>make_function_ref: A More Functional function_ref</h1>
+<table style="width:100%">
+<tr>
+<td>&nbsp;</td>
+<td style="width:60ex">
+  <table>
+  <tr>
+  <td><b>Document #:</b></td><td>PTODOR0</td>
+  </tr>
+  <tr>
+  <td><b>Date:</b></td><td>2021-09-13</td>
+  </tr>
+  <tr>
+  <td><b>Project:</b></td><td>Programming Language C++</td>
+  </tr>
+  <tr>
+  <td><b>Audience:</b></td><td>Library Evolution Working Group (LEWG)</td>
+  </tr>
+  <tr>
+  <td><b>Reply-to:</b></td><td>Jarrad J. Waterloo<br/>&lt;<a href="mailto:descender76@gmail.com">descender76@gmail.com</a>&gt;</td>
+  </tr>
+  </table>
+</td>
+</tr>
+</table>
+<h2>Contents</h2>
+<h3><a href="#enhancement">1&nbsp;&nbsp;Enhancement</a></h3>
+<h3><a href="#solution">2&nbsp;&nbsp;Solution</a></h3>
+<h3><a href="#references">3&nbsp;&nbsp;References</a></h3>
+<h2 id="enhancement">Enhancement</h2>
+<p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
+<p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
+<p>Similarly too, the use case of type erased functions has been instrumental in the functional programming world for decades in C and other programming languages. The utility of simplifying the construction of these common use cases are demonstrated below.</p>
+<!-- make_function_ref-usage.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-usage.cc}}
+</div>
+<h2 id="solution">Solution</h2>
+<p>In order to make this possible, multiple overloaded make_function_ref functions need to be added. All of these functions delegate to a new public constructor that exposes the two inner pointers of the function_ref implementation.</p>
+<!-- make_function_ref-spec.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-spec.cc}}
+</div>
+<h2 id="references">References</h2>
+<span id="reference-p0792r5">[P0792R5] function_ref: a non-owning reference to a Callable</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html</a><br/>
+<br/>
+<span id="reference-github">function_ref</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/TartanLlama/function_ref" target="__blank">https://github.com/TartanLlama/function_ref</a><br/>
+<br/>
+<span id="reference-delegate">Using Delegates (C# Programming Guide)</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" target="__blank">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><br/>
+<br/>
+<span id="reference-closure">__closure</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" target="__blank">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><br/>
+<br/>
+<span id="reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a><br/>
+<br/>
+<span id="reference-fast">The Impossibly Fast C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates" target="__blank">https://www.codeproject.com/Articles/11015/The-Impossibly-Fast-C-Delegates</a><br/>
+<br/>
+<span id="reference-impossibly">Impossibly fast delegate in C++11</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11" target="__blank">https://codereview.stackexchange.com/questions/14730/impossibly-fast-delegate-in-c11</a><br/>
+<br/>
+<span id="reference-dyno">Dyno: Runtime polymorphism done right</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/ldionne/dyno" target="__blank">https://github.com/ldionne/dyno</a><br/>
+<br/>
+<span id="reference-te">[Boost::ext].TE</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://github.com/boost-ext/te" target="__blank">https://github.com/boost-ext/te</a><br/>
+<br/>
+</body>
+</html>
