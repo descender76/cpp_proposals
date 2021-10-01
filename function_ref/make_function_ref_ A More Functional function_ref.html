@@ -45,7 +45,7 @@
   <td><b>Document #:</b></td><td>PTODOR0</td>
   </tr>
   <tr>
-  <td><b>Date:</b></td><td>2021-09-13</td>
+  <td><b>Date:</b></td><td>2021-09-30</td>
   </tr>
   <tr>
   <td><b>Project:</b></td><td>Programming Language C++</td>
@@ -63,7 +63,11 @@
 <h2>Contents</h2>
 <h3><a href="#enhancement">1&nbsp;&nbsp;Enhancement</a></h3>
 <h3><a href="#solution">2&nbsp;&nbsp;Solution</a></h3>
-<h3><a href="#references">3&nbsp;&nbsp;References</a></h3>
+<h3><a href="#acknowledgments">3&nbsp;&nbsp;Acknowledgments</a></h3>
+<h3><a href="#controversial">4&nbsp;&nbsp;Annex: controversial design decisions</a></h3>
+<h4><a href="#auto">4.1&nbsp;&nbsp;&nbsp;auto</a></h4>
+<h4><a href="#general-purpose-callable-library">4.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
+<h3><a href="#references">5&nbsp;&nbsp;References</a></h3>
 <h2 id="enhancement">Enhancement</h2>
 <p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
 <p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
@@ -300,6 +304,26 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font></tt></pre>
 
 </div>
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>Thanks to Arthur O'Dwyer and Tomasz Kamiński for providing very valuable feedback on earlier drafts of this proposal.</p>
+<h2 id="controversial">Annex: controversial design decisions</h2>
+<h3 id="auto">Why not just use [&b](auto... args){b.baz(args...);}?</h3>
+<p>While succinct, this does have some undesirable consequences.</p>
+<ul>
+<li>It is more complex; at least cognitively speaking. The only pieces the end user really cares about is either "=baz" or "=b.baz". The capture, the parameter propagation even with auto and the occassional return are all superfluous.</li>
+<li>If this was a C function pointer would the end user be happy with that versus just assigning with "= some_function". In this case the public wrapper interface is more complicated than the internals. Shouldn't that be reversed i.e. abstraction.</li>
+<li>Using a functor or stateful lambda does require creating a object and type even if anonymous that has a lifetime that must be managed making things more complicated.</li>
+<li>Construction which should be one step has now been broken into two which is more cumbersome; see the next decision.</li>
+</ul>
+<h3 id="general-purpose-callable-library">Why not just use bind_front and turn the remaining make_function_ref implementations into a general purpose functors library?</h3>
+<p>I actually agree that C++ could use a separate function transformation library for the general cases but I don't think that should negate function_ref supporting compatible signatures; i.e. first class support. Such a general purpose library would turn what should be a one step construction process into a two step process; first create a functor and then assign it to the function_ref. Personally I prefer one step and here is why. function_ref is to function pointer, in C, as std::array is to C/C++ array. It is more intuitive/familiar to the end user. a function pointer is simply assigned for compatible/comparable signatures and the end user must create a new function for incompatible signatures in order to do conversions or reordering of parameters and in the case of functors, adding more parameters. This two phase construction is more verbose. make_function_ref is less so and the same name regardless of what is being assigned. It is also similar to make_pair, make_shared_ptr and the other single step make functions; again familiar. I would hesitate to say that end users expect a simple construction methodology based on the prevalence of simpler solutions in other languages and there is no good reason why we should make things deliberately harder especially for common cases when it is not needed to be so.</p>
+<p>It should also be noted that their are current C++ limitations that restrict our implementation choices.</p>
+<ul>
+<li>C++ template constructors do not support explicit template parameters meaning having to resort to tag classes which make things more verbose.</li>
+<li>Template functions do not support partial specialization meaning such things that should simply be performed by functions has to be performed by whole partially specialized classes making things more verbose.</li>
+<li>Making heavily templatized make_function_ref functions into FRIEND functions of function_ref is borderline impossible, if not so. This is why I still need my public double pointer constructor. I am still for having this constructor anyway for advance end users to prototype other compatible signatures for operators and other function like constructs in C++ that currently don't have a natural binding.</li>
+</ul>
+<p>At present, my current make_function_ref solution seems to provide a very concise single step construction that enhances function_ref to support better the 4 use cases: [non] type erased [member/free] functions.</p>
 <h2 id="references">References</h2>
 <span id="reference-p0792r5">[P0792R5] function_ref: a non-owning reference to a Callable</span><br/>
 &nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html</a><br/>
