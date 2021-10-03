@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>In C ALL functions are assignable to some function pointer</title>
+  <meta name="description" content="In C ALL functions are assignable to some function pointer">
+  <meta name="author" content="Jarrad Waterloo">
+  <style>
+    h1
+	{
+	  text-align : center;
+	}
+	.code
+	{
+	  background-color: AliceBlue;
+	}
+	table.simple
+	{
+		border: 1px solid black;
+		border-collapse: collapse;
+	}
+	table.simple > thead > tr > th
+	{
+		border: 1px solid black;
+	}
+	table.simple > tbody > tr > td
+	{
+		border: 1px solid black;
+	}
+	.problem
+	{
+		font-weight : bold;
+		color : red;
+	}
+  </style>
+</head>
+<body>
+<h1>In C ALL functions are assignable to some function pointer</h1>
+<table style="width:100%">
+<tr>
+<td>&nbsp;</td>
+<td style="width:60ex">
+  <table>
+  <tr>
+  <td><b>Document #:</b></td><td>PTODOR0</td>
+  </tr>
+  <tr>
+  <td><b>Date:</b></td><td>2021-10-03</td>
+  </tr>
+  <tr>
+  <td><b>Project:</b></td><td>Programming Language C++</td>
+  </tr>
+  <tr>
+  <td><b>Audience:</b></td><td>Evolution Working Group (EWG)</td>
+  </tr>
+  <tr>
+  <td><b>Reply-to:</b></td><td>Jarrad J. Waterloo<br/>&lt;<a href="mailto:descender76@gmail.com">descender76@gmail.com</a>&gt;</td>
+  </tr>
+  </table>
+</td>
+</tr>
+</table>
+<h2>Contents</h2>
+<h3><a href="#problem">1&nbsp;&nbsp;Problem</a></h3>
+<h3><a href="#solution">2&nbsp;&nbsp;Solution</a></h3>
+<h3><a href="#why">3&nbsp;&nbsp;Why bother? What do we gain?</a></h3>
+<!--
+<h3><a href="#acknowledgments">3&nbsp;&nbsp;Acknowledgments</a></h3>
+-->
+<h3><a href="#faq">4&nbsp;&nbsp;Frequently Asked Questions</a></h3>
+<h4><a href="#ecx">4.1&nbsp;&nbsp;&nbsp;What about ECX?</a></h4>
+<h4><a href="#deducing-this">4.2&nbsp;&nbsp;&nbsp;How does this relate to Deducing this?</a></h4>
+<h4><a href="#void">4.3&nbsp;&nbsp;&nbsp;How might this combine with composite void*/guaranteed inlining?</a></h4>
+<h3><a href="#references">5&nbsp;&nbsp;References</a></h3>
+<h2 id="problem">Problem</h2>
+<p>In C ALL functions are assignable to some function pointer. In C++ ALL free functions are assignable to some function pointer and ALL member functions are assignable to some member function pointer. These two statements are no where near synonymous and consequently the usefulness of function pointers as a whole have been crippled. This has limited the effectiveness of performing functional programming in C++ because it effects being able to pass usable function pointers [types] as parameters to functions and being able to return them. Any given function pointer type is less useful because they are limited to which functions they can point to. The current bifurcation segregates the functional programming world from the object oriented programming world where in one paradigm you'll favor function pointer over member function pointer or vice versa. This can be likened to swiss cheese.</p>
+<a href="https://freesvg.org/swiss-cheese" target="__blank">
+<!-- Swiss-Cheese.svg.html -->
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg style="shape-rendering:geometricPrecision;text-rendering:geometricPrecision;image-rendering:optimizeQuality" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" xml:space="preserve" height="130.64mm" width="177.46mm" version="1.1" clip-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17746 13064">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil3 {fill:#FEFEFE}
+    .fil4 {fill:#FFF688}
+    .fil0 {fill:#FCF4A7}
+    .fil11 {fill:url(#id0)}
+    .fil10 {fill:url(#id1)}
+    .fil1 {fill:url(#id2)}
+    .fil12 {fill:url(#id3)}
+    .fil13 {fill:url(#id4)}
+    .fil9 {fill:url(#id5)}
+    .fil14 {fill:url(#id6)}
+    .fil6 {fill:url(#id7)}
+    .fil7 {fill:url(#id8)}
+    .fil5 {fill:url(#id9)}
+    .fil8 {fill:url(#id10)}
+    .fil2 {fill:url(#id11)}
+   ]]>
+  </style>
+  <linearGradient id="id0" y2="12552" gradientUnits="userSpaceOnUse" x2="13808" y1="12552" x1="11857">
+   <stop stop-color="#EACD40" offset="0"/>
+   <stop stop-color="#EFD635" offset=".43922"/>
+   <stop stop-color="#F9E867" offset="1"/>
+  </linearGradient>
+  <linearGradient id="id1" y2="1579.8" gradientUnits="userSpaceOnUse" x2="12688" y1="2093" x1="9655.1">
+   <stop stop-color="#F3E038" offset="0"/>
+   <stop stop-color="#FCF4A3" offset=".47059"/>
+   <stop stop-color="#FCF29A" offset="1"/>
+  </linearGradient>
+  <linearGradient id="id2" y2="1489.4" gradientUnits="userSpaceOnUse" x2="16741" y1="4309.8" x1="333.23">
+   <stop stop-color="#FFCC29" offset="0"/>
+   <stop stop-color="#FFFDAD" offset=".61176"/>
+   <stop stop-color="#FFDD53" offset="1"/>
+  </linearGradient>
+  <linearGradient id="id3" y2="11744" gradientUnits="userSpaceOnUse" x2="6596.5" y1="12387" x1="6618.6">
+   <stop stop-color="#F3E689" offset="0"/>
+   <stop stop-color="#F7EA89" offset="1"/>
+  </linearGradient>
+  <linearGradient id="id4" y2="6225.7" gradientUnits="userSpaceOnUse" x2="10150" y1="5198.5" x1="7512.3">
+   <stop stop-color="#F8E44F" offset="0"/>
+   <stop stop-color="#F9EA72" offset=".43922"/>
+   <stop stop-color="#FBF095" offset="1"/>
+  </linearGradient>
+  <linearGradient id="id5" y2="3804.8" gradientUnits="userSpaceOnUse" x2="13169" y1="4058" x1="14480">
+   <stop stop-color="#F9E85B" offset="0"/>
+   <stop stop-color="#ECD631" offset=".47059"/>
+   <stop stop-color="#D2B42F" offset="1"/>
+  </linearGradient>
+  <linearGradient id="id6" y2="7748.1" xlink:href="#id0" gradientUnits="userSpaceOnUse" x2="2089.3" y1="7927.2" x1="1099">
+  </linearGradient>
+  <linearGradient id="id7" y2="6501.6" xlink:href="#id5" gradientUnits="userSpaceOnUse" x2="11623" y1="7722.2" x1="12208">
+  </linearGradient>
+  <linearGradient id="id8" y2="8990.8" xlink:href="#id5" gradientUnits="userSpaceOnUse" x2="14985" y1="10524" x1="15719">
+  </linearGradient>
+  <linearGradient id="id9" y2="8103.8" xlink:href="#id5" gradientUnits="userSpaceOnUse" x2="5339.9" y1="9054.5" x1="6799.6">
+  </linearGradient>
+  <linearGradient id="id10" y2="4273.1" gradientUnits="userSpaceOnUse" x2="3537.4" y1="4901.2" x1="5163">
+   <stop stop-color="#F9E96B" offset="0"/>
+   <stop stop-color="#F9E652" offset=".47059"/>
+   <stop stop-color="#D2B42F" offset="1"/>
+  </linearGradient>
+  <radialGradient id="id11" cy="40%" cx="9%">
+   <stop stop-color="#F9E95C" offset="0"/>
+   <stop stop-color="#FBF5AA" offset=".25882"/>
+   <stop stop-color="#FFF688" offset=".50196"/>
+   <stop stop-color="#FDF552" offset=".69020"/>
+   <stop stop-color="#FFCC29" offset="1"/>
+  </radialGradient>
+ </defs>
+ <g id="Camada_x0020_1">
+  <g id="_1071194208">
+   <path class="fil0" d="m9010 1857c-2740 1067-5559 2022-8728 2491-208 38-282 218-282 477 187 2049 685 4001 1211 5945 518 940 4425 1462 5527 1659 1012 117 2024 234 3036 350 473-40 929-14 1362 102 2097 181 4176 185 6247 107 225-35 447-115 331-589-243-2566-425-5150-764-7687-294-762-587-1524-881-2287-96-175-210-331-384-428-335-259-699-492-584-1148-32-410-171-717-501-842-619-112-3641 928-5590 1849z"/>
+   <path class="fil1" d="m393 4636c3711-551 7595-2089 10599-3505 1209-570 2495-801 3581-990 216 90 273 359 372 656-323 370 94 856 784 1382l954 2277c-2053 499-4204 835-6412 1075-764-367-1437-927-2870 126-2739-110-5098-459-7006-1022z"/>
+   <path class="fil2" d="m16813 4782c258 2590 516 5180 774 7770 5 180-78 273-248 277-4801 270-11914-426-15262-1620-394-186-728-437-837-934l-1041-5352c-28-212 8-366 331-253 2210 621 4504 937 6870 988 572 721 1755 984 2890 15 2074-331 4148-662 6223-992 179-24 290-31 302 102z"/>
+   <ellipse ry="415" rx="532" class="fil3" transform="matrix(1.2713 1.1973 -1.0478 1.2828 15458 9821.8)"/>
+   <ellipse ry="415" rx="532" class="fil4" transform="matrix(.90018 -.16281 .35044 1.8335 1637.9 7978.7)"/>
+   <path class="fil3" d="m5467 4396c-55 851-1705 962-1878 170-122-713 1500-749 1878-170z"/>
+   <ellipse ry="415" rx="532" class="fil3" transform="matrix(1.2881 -.23151 .086090 1.3339 13922 3928.3)"/>
+   <ellipse ry="415" rx="532" class="fil4" transform="matrix(1.7381 .36791 -.32329 1.641 6230.6 8691.4)"/>
+   <path class="fil3" d="m9981 1895c586 951 2700 186 2233-895-516-280-2358 633-2233 895z"/>
+   <path class="fil5" d="m6248 7903c511 108 864 501 790 877s-548 594-1059 486-864-501-790-877 548-594 1059-486z"/>
+   <ellipse ry="415" rx="532" class="fil3" transform="matrix(1.0124 .95346 -.83436 1.0215 12014 7214.1)"/>
+   <path class="fil6" d="m12292 6692c297 280 383 697 192 931s-588 197-885-83-383-697-192-931 588-197 885 83z"/>
+   <path class="fil7" d="m15826 9231c373 352 481 875 241 1170-240 294-738 248-1111-104s-481-875-241-1170c240-294 738-248 1111 104z"/>
+   <ellipse ry="415" rx="532" class="fil3" transform="matrix(.90018 -.16281 .35044 1.8335 1628.2 7930.1)"/>
+   <path class="fil8" d="m5350 4396c-55 851-1705 962-1878 170-122-713 1500-749 1878-170z"/>
+   <path class="fil9" d="m13821 3381c378-68 701 125 721 431s-271 609-649 677-701-125-721-431 271-609 649-677z"/>
+   <path class="fil10" d="m9884 1948c586 951 2700 186 2233-895-516-280-2358 633-2233 895z"/>
+   <path class="fil3" d="m6867 8246c192 171 292 394 249 612-74 376-548 594-1059 486-258-55-476-182-619-343 139 124 326 220 541 265 511 108 984-110 1059-486 37-186-31-377-171-534z"/>
+   <path class="fil3" d="m11950 12913c742-902 1280-699 1951 122-662-131-1314-185-1951-122z"/>
+   <path class="fil11" d="m11857 12942c742-902 1280-699 1951 122-662-131-1314-185-1951-122z"/>
+   <path class="fil0" d="m5636 12084c9-11 1771 279 1942 298 4-10-3 5 0-6-258-675-1662-644-1942-292z"/>
+   <path class="fil12" d="m5725 12100c-4 9 1611 255 1765 271 3-9-10-20-7-29-233-581-1505-544-1758-242z"/>
+   <ellipse cy="5712" cx="8953" rx="1413" class="fil0" ry="706"/>
+   <ellipse cy="5712" cx="8831" rx="1413" class="fil13" ry="705"/>
+   <path class="fil14" d="m1449 7076c264-48 544 254 624 675s-69 800-333 848-544-254-624-675 69-800 333-848z"/>
+  </g>
+ </g>
+</svg>
+
+</a>
+<p>The actual cheese represents were a C function pointer can go. Each hole represents a single class, a pocket universe, where only the C++ member function pointer for just that class can go. Where is the function pointer that can go <b>ANYWHERE</b>, like in C?</p>
+<p>Ironically, this was not the case or at least less of an issue in the beginning of C++. Someone correct me if I am wrong. My knowledge of ancient C++ history is second hand. In the beginning of C++, C++ was a preprocessor, C with classes called CFront. The C++ cc files were converted from C++ into C. That would mean constructors, destructors, operators and member functions were converted to C functions which could be assigned to a C function pointer. This translation was never standardized either due to lack of interest or the desire to give compiler writers optimization opportunities. In either case, an important functionality went missing. So, Bjarne Stroustrup had it right all along.</p>
+<p>Member function pointer was never the solution. In most compilers, the member function pointer is a <a href="#reference-obscure">fat pointer</a> that has additional data to perform tasks/transformations related to virtual inheritance and multiple inheritance. Even in the case of the Digital Mars compiler their is a <a href="#reference-obscure">thunk function</a> that perform these translations. The cost of virtual inheritance is unnecessary when the function is not being called virtually because you know exactly which function you want to call. That is not to say that the member function isn't virtual. Rather there is desire to call that specific function at runtime via function pointer non virtually. Further the repeated cost of multiple inheritance is not needed everytime a function is called when the instance type has already been cast to the correct type and the function is being called multiple times. Also the member function pointer is usually dependent upon a reference to an object in order to determine which function is being called because the instance has the pointer to the vtable when virtual polymorphism is involved.</p>
+<h2 id="solution">Solution</h2>
+<p>Member function pointer initializer, NOT member function pointer, SHOULD be assignable to a free function.<p>
+<!-- mfpi2fp.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#000080">#include</font></b> <font color="#FF0000">&lt;functional&gt;</font>
+
+<b><font color="#0000FF">struct</font></b> <font color="#008080">bar</font> <font color="#FF0000">{</font>
+    <font color="#009900">void</font> <b><font color="#000000">baz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">void</font> <b><font color="#000000">baz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">void</font> <b><font color="#000000">buz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+    <font color="#FF0000">}</font>
+    <font color="#009900">void</font> <b><font color="#000000">buz</font></b><font color="#990000">(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz</font></b><font color="#990000">(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font>
+<font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_baz</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font>
+<font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_buz</font></b><font color="#990000">(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font>
+<font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+
+<font color="#009900">void</font> <b><font color="#000000">free_bar_buz</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font>
+<font color="#FF0000">{</font>
+<font color="#FF0000">}</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> T<font color="#990000">&gt;</font> <b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#990000">...</font>Args<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*</font>mf<font color="#990000">)(</font>Args<font color="#990000">...)&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*)(</font>Args<font color="#990000">...),</font> mf<font color="#990000">&gt;</font>
+<font color="#FF0000">{</font>
+	<b><font color="#0000FF">typedef</font></b> <b><font color="#000000">R</font></b> <font color="#990000">(</font>this_as_ref_function_signature<font color="#990000">)(</font>T<font color="#990000">&amp;,</font> Args <font color="#990000">...</font> args<font color="#990000">);</font>
+    <b><font color="#0000FF">static</font></b> <font color="#008080">R</font> <b><font color="#000000">this_as_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> first<font color="#990000">,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+        <b><font color="#0000FF">return</font></b> <font color="#990000">(</font>first<font color="#990000">.*</font>mf<font color="#990000">)(</font>std<font color="#990000">::</font>forward<font color="#990000">&lt;</font>Args<font color="#990000">&gt;(</font>args<font color="#990000">)...);</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#990000">...</font>Args<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*</font>mf<font color="#990000">)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">const</font></b><font color="#990000">&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">const</font></b><font color="#990000">,</font> mf<font color="#990000">&gt;</font>
+<font color="#FF0000">{</font>
+	<b><font color="#0000FF">typedef</font></b> <b><font color="#000000">R</font></b> <font color="#990000">(</font>this_as_ref_function_signature<font color="#990000">)(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;,</font> Args <font color="#990000">...</font> args<font color="#990000">);</font>
+    <b><font color="#0000FF">static</font></b> <font color="#008080">R</font> <b><font color="#000000">this_as_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> first<font color="#990000">,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font>
+    <font color="#FF0000">{</font>
+        <b><font color="#0000FF">return</font></b> <font color="#990000">(</font>first<font color="#990000">.*</font>mf<font color="#990000">)(</font>std<font color="#990000">::</font>forward<font color="#990000">&lt;</font>Args<font color="#990000">&gt;(</font>args<font color="#990000">)...);</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#990000">...</font>Args<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*</font>mf<font color="#990000">)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">,</font> mf<font color="#990000">&gt;</font>
+<font color="#FF0000">{</font>
+	<b><font color="#0000FF">typedef</font></b> <b><font color="#000000">R</font></b> <font color="#990000">(</font>this_as_ref_function_signature<font color="#990000">)(</font>T<font color="#990000">&amp;,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+    <b><font color="#0000FF">static</font></b> <font color="#008080">R</font> <b><font color="#000000">this_as_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> first<font color="#990000">,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+    <font color="#FF0000">{</font>
+        <b><font color="#0000FF">return</font></b> <font color="#990000">(</font>first<font color="#990000">.*</font>mf<font color="#990000">)(</font>std<font color="#990000">::</font>forward<font color="#990000">&lt;</font>Args<font color="#990000">&gt;(</font>args<font color="#990000">)...);</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#990000">...</font>Args<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*</font>mf<font color="#990000">)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">internal_member_function_traits</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b> <font color="#990000">(</font>T<font color="#990000">::*)(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">,</font> mf<font color="#990000">&gt;</font>
+<font color="#FF0000">{</font>
+	<b><font color="#0000FF">typedef</font></b> <b><font color="#000000">R</font></b> <font color="#990000">(</font>this_as_ref_function_signature<font color="#990000">)(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+    <b><font color="#0000FF">static</font></b> <font color="#008080">R</font> <b><font color="#000000">this_as_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> first<font color="#990000">,</font> Args <font color="#990000">...</font> args<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b>
+    <font color="#FF0000">{</font>
+        <b><font color="#0000FF">return</font></b> <font color="#990000">(</font>first<font color="#990000">.*</font>mf<font color="#990000">)(</font>std<font color="#990000">::</font>forward<font color="#990000">&lt;</font>Args<font color="#990000">&gt;(</font>args<font color="#990000">)...);</font>
+    <font color="#FF0000">}</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> MFP<font color="#990000">&gt;</font>
+<b><font color="#0000FF">using</font></b> member_function_traits <font color="#990000">=</font> internal_member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>MFP<font color="#990000">),</font> MFP<font color="#990000">&gt;;</font>
+
+<font color="#009900">int</font> <b><font color="#000000">main</font></b><font color="#990000">()</font>
+<font color="#FF0000">{</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <i><font color="#9A1900">// currently allowed initialization of member function pointer</font></i>
+    <font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*</font>mfp1<font color="#990000">)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">);</font>
+    <font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*</font>mfp2<font color="#990000">)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">);</font>
+    <font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*</font>mfp3<font color="#990000">)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>buz<font color="#990000">);</font>
+    <font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*</font>mfp4<font color="#990000">)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>buz<font color="#990000">);</font>
+    <i><font color="#9A1900">// currently allowed initialization of function pointer</font></i>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp1<font color="#990000">)(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font> <font color="#990000">(*)(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)&gt;(</font>free_bar_baz<font color="#990000">);</font>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp2<font color="#990000">)(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font> <font color="#990000">(*)(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)&gt;(</font>free_bar_baz<font color="#990000">);</font>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp3<font color="#990000">)(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(*)(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)&gt;(</font>free_bar_buz<font color="#990000">);</font>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp4<font color="#990000">)(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font> <font color="#990000">=</font> <b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(*)(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)&gt;(</font>free_bar_buz<font color="#990000">);</font>
+    <i><font color="#9A1900">// currently disallowed but DESIRED initialization of function pointer via member function pointer initializer</font></i>
+    <i><font color="#9A1900">// example error: address of overloaded function 'baz' cannot be static_cast to type 'void (*)(bar &amp;, bool, int, float) noexcept(false)'</font></i>
+    <i><font color="#9A1900">//void (*fp5)(bar&amp;, bool, int, float) noexcept(false) = static_cast&lt;void (*)(bar&amp;, bool, int, float) noexcept(false)&gt;(&amp;bar::baz);</font></i>
+    <i><font color="#9A1900">//void (*fp6)(const bar&amp;, bool, int, float) noexcept(false) = static_cast&lt;void (*)(const bar&amp;, bool, int, float) noexcept(false)&gt;(&amp;bar::baz);</font></i>
+    <i><font color="#9A1900">//void (*fp7)(bar&amp;, bool, int, float) noexcept(true) = static_cast&lt;void(*)(bar&amp;, bool b, int i, float f) noexcept(true)&gt;(&amp;bar::buz);</font></i>
+    <i><font color="#9A1900">//void (*fp8)(const bar&amp;, bool, int, float) noexcept(true) = static_cast&lt;void(*)(const bar&amp;, bool b, int i, float f) noexcept(true)&gt;(&amp;bar::buz);</font></i>
+    <i><font color="#9A1900">// just be clear this is NOT DESIRED, NOT BEING ASKED FOR, because it doesn't make sense</font></i>
+    <i><font color="#9A1900">// and seems to be impossible since</font></i>
+    <i><font color="#9A1900">// member function pointer is dependent upon an instance in order to lookup the function</font></i>
+    <i><font color="#9A1900">// example error: cannot cast from type 'void (bar::*)(bool, int, float) noexcept(false)' to pointer type 'void (*)(bar &amp;, bool, int, float) noexcept(false)'</font></i>
+    <i><font color="#9A1900">//void (*fp9)(bar&amp;, bool, int, float) noexcept(false) = static_cast&lt;void (*)(bar&amp;, bool, int, float) noexcept(false)&gt;(mfp1);</font></i>
+    <i><font color="#9A1900">//void (*fp10)(const bar&amp;, bool, int, float) noexcept(false) = static_cast&lt;void (*)(const bar&amp;, bool, int, float) noexcept(false)&gt;(mfp2);</font></i>
+    <i><font color="#9A1900">//void (*fp11)(bar&amp;, bool, int, float) noexcept(true) = static_cast&lt;void(*)(bar&amp;, bool b, int i, float f) noexcept(true)&gt;(mfp3);</font></i>
+    <i><font color="#9A1900">//void (*fp12)(const bar&amp;, bool, int, float) noexcept(true) = static_cast&lt;void(*)(const bar&amp;, bool b, int i, float f) noexcept(true)&gt;(mfp4);</font></i>
+    <i><font color="#9A1900">// binding via templates</font></i>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp5<font color="#990000">)(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font> <font color="#990000">=</font> member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">)&gt;::</font>this_as_ref<font color="#990000">;</font>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp6<font color="#990000">)(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)</font> <font color="#990000">=</font> member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font> <font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">false</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">)&gt;::</font>this_as_ref<font color="#990000">;</font>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp7<font color="#990000">)(</font>bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font> <font color="#990000">=</font> member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>buz<font color="#990000">)&gt;::</font>this_as_ref<font color="#990000">;</font>
+    <font color="#009900">void</font> <font color="#990000">(*</font>fp8<font color="#990000">)(</font><b><font color="#0000FF">const</font></b> bar<font color="#990000">&amp;,</font> <font color="#009900">bool</font><font color="#990000">,</font> <font color="#009900">int</font><font color="#990000">,</font> <font color="#009900">float</font><font color="#990000">)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)</font> <font color="#990000">=</font> member_function_traits<font color="#990000">&lt;</font><b><font color="#0000FF">static_cast</font></b><font color="#990000">&lt;</font><font color="#009900">void</font><font color="#990000">(</font>bar<font color="#990000">::*)(</font><font color="#009900">bool</font> b<font color="#990000">,</font> <font color="#009900">int</font> i<font color="#990000">,</font> <font color="#009900">float</font> f<font color="#990000">)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><b><font color="#0000FF">true</font></b><font color="#990000">)&gt;(&amp;</font>bar<font color="#990000">::</font>buz<font color="#990000">)&gt;::</font>this_as_ref<font color="#990000">;</font>
+<font color="#FF0000">}</font></tt></pre>
+
+</div>
+<p>Here, I demonstrated the desired usage via the explicit static_cast. This proposal is focused on the explicit cast in order to restore this missing functionality. Explicit is required regardless in order to allow the end user to resolve overloads, as demonstrated. It is my believe that explicit cast would not be a breaking change. However if compilers can implement this proposal as a C cast and/or implicit cast than that could also make things easier for direct users versus library writers who would use this in their private implementations. The important thing is to restore the missing functionality.</p>
+<h2 id="why">Why bother? What do we gain?</h2>
+<ol>
+<li>sanding of some rough edges of C++ by making it more uniform and consistent</li>
+<li>completing some unfinished work that is as old as C++ itself</li>
+<li>undoing a bifurcation when member function pointers were standardized</li>
+<li>restoring the power of free function pointers back to the C and proto C++ era</li>
+<li>unified function pointers; free functions can reference free and member functions; argument dependent lookup is less of an issue when you are explicitly telling which function is to be selected</li>
+<li>There is no need for the end user to create a binder to convert a member function into a free function effectively tying the object oriented and functional paradigms back together.</li>
+<li>No need to resort to templates to provide something the core language is already providing in other places in C++ thus making things even easier.</li>
+</ol>
+<p>Concerning the last two, the "// binding via templates" portion of the example illustrates what library writers and end users have to do today to work around this limitation. Even if the explicit template example can be reduced with an implicit auto... solution, it would still be a verbose unintuitive resolution that depends on templates unnecessarily.</p>
+<!--
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>Thanks to TODO and TODOfor providing very valuable feedback on earlier drafts of this proposal.</p>
+-->
+<h2 id="faq">Frequently Asked Questions</h2>
+<h3 id="ecx">What about ECX?</h3>
+<p>In Microsoft C++ compilers, the this pointer is stored in the ECX register when calling a member function instead of being passed on the stack. Worse case a C++ compiler would need to provide both implementations or one calling the other. One implementation could be elided based on end user usage patterns. In reality this is little different than an inline function. A function could be kept around if the function was ever assigned to a function pointer and in other cases the stack frame could be elided altogether. Further, any compiler can choose to store any parameter in a register. Compiler optimizations should not limit the reasonable functionality provided by the language.</p>
+<h3 id="deducing-this">How does this relate to <a href="#reference-deducing-this">Deducing this</a>?</h3>
+<p>In Deducing this, deducing this member functions are implicit cast to function pointers already and do not cast implicitly or explicitly to member function pointers. So in reality there is no change. This proposal would actually be complimentary in that regard and even more so if this proposed explicit cast could be made implicit without any breaking changes. The only difference is the type of this pointer in the free function. In this proposal it would be a variation of a reference always. In deducing this, there is the option of it be a value, especially for small types.</p>
+<h3 id="void">How might this combine with composite void*/guaranteed inlining?</h3>
+<p>A future proposal, composite void*, would explore enhancing void* conversions in more advanced aggregated types. One variation of this would allow function pointers with pointers and/or lvalue references to be cast to other function pointers with those pointers and references being swapped out with a void pointer and still be callable without any undefined behavior. This proposal would be complementary with such a future proposal allowing simple type erased pointers to member functions.</p>
+<h2 id="references">References</h2>
+<span id="reference-dmc">c++ - How are member function pointers implemented by DMC?</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.digitalmars.com/archives/cplusplus/3802.html" target="__blank">https://www.digitalmars.com/archives/cplusplus/3802.html</a><br/>
+<br/>
+<span id="reference-obscure">Obscure C++ Features</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://madebyevan.com/obscure-cpp-features/" target="__blank">http://madebyevan.com/obscure-cpp-features/</a><br/>
+<br/>
+<span id="reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a><br/>
+<br/>
+<span id="reference-generic_member_function_pointer_as_a_template_parameter">generic member function pointer as a template parameter</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://stackoverflow.com/questions/9779105/generic-member-function-pointer-as-a-template-parameter" target="__blank">https://stackoverflow.com/questions/9779105/generic-member-function-pointer-as-a-template-parameter</a><br/>
+<br/>
+<span id="reference-deducing-this">Deducing this</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html</a><br/>
+<br/>
+</body>
+</html>
