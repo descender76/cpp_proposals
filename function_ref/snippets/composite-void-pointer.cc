@@ -105,8 +105,7 @@ int main()
     strongfs fp1 = fully_typed_f3;
     fp1(b, &b, b, i, &i, i, f, &f, f);
     // error: address of overloaded function 'fully_typed_f' does not match required type 'void (bool, void *, void *, int, void *, void *, float, void *, void *)'
-    // desired behavior
-    //weakfs fp2 = fully_typed_f3;
+    //weakfs fp2 = fully_typed_f3;// desired behavior
     // workaround
     weakfs fp2 = (weakfs)((void*)fully_typed_f3);
     fp2(b, &b, &b, i, &i, &i, f, &f, &f);// definable undefined behavior

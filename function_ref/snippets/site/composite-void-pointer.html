@@ -45,7 +45,7 @@
   <td><b>Document #:</b></td><td>PTODOR0</td>
   </tr>
   <tr>
-  <td><b>Date:</b></td><td>2021-10-03</td>
+  <td><b>Date:</b></td><td>2021-10-10</td>
   </tr>
   <tr>
   <td><b>Project:</b></td><td>Programming Language C++</td>
@@ -65,22 +65,13 @@
 <h3><a href="#usage">2&nbsp;&nbsp;Usage</a></h3>
 <h3><a href="#why">3&nbsp;&nbsp;Why bother? What do we gain?</a></h3>
 <h3><a href="#between">4&nbsp;&nbsp;The great between</a></h3>
-<!--
-<h3><a href="#acknowledgments">3&nbsp;&nbsp;Acknowledgments</a></h3>
--->
-<!--
-<h3><a href="#faq">4&nbsp;&nbsp;Frequently Asked Questions</a></h3>
-<h4><a href="#ecx">4.1&nbsp;&nbsp;&nbsp;What about ECX?</a></h4>
-<h4><a href="#deducing-this">4.2&nbsp;&nbsp;&nbsp;How does this relate to Deducing this?</a></h4>
-<h4><a href="#void">4.3&nbsp;&nbsp;&nbsp;How might this combine with composite void*/guaranteed inlining?</a></h4>
--->
 <h3><a href="#references">5&nbsp;&nbsp;References</a></h3>
 <h2 id="request">Request</h2>
 <p>Following current void* semantics, allow the following:</p>
 <ol>
 <li>free function pointers can be implicitly cast to other free function pointer types where one or more of its parameters or return value types that are pointers or lvalue references has been replaced with void*</li>
 <li>free function pointers can be explicitly cast to other free function pointer types where one or more of its parameters or return value types that are void pointers has been replaced with any other pointer or lvalue reference type</li>
-<li>it is not undefined behavior that the type erased free function pointers can called provided the caller ensures the correct parameter types are passed</li>
+<li>it is not undefined behavior that the type erased free function pointers can be called provided the caller ensures the correct parameter types are passed</li>
 </ol>
 <h2 id="usage">Usage: type erased free functions</h2>
 <!-- composite-void-pointer-usage.cc.html -->
@@ -90,61 +81,26 @@
 <h2 id="why">Why bother? What do we gain?</h2>
 <ol>
 <li>Core language support for type erased free functions</li>
-<li>Removing some of the need to manually create binders for compatible types</li>
+<li>Removing some of the need to manually create binders for compatible free function pointer types; guaranteed inlining</li>
 <li>Ease of use for not having to resort to templactes unnecessarily</li>
 <li>Replace some undefined behavior in C++ with defined behavior</li>
+<li>A logical and natural extension to the purpose of void*</li>
 </ol>
 <h2 id="between">The great between</h2>
+<p>While this proposal is exclusively focused on free function pointer and their types, this paper is called "void* composition" because the expansion of void* use cases is considered in general. C++ inherited void* from C because some [runtime] problems are better solved by dropping compiler checks. C++ is a [mostly] strongly typed language. Our community as a whole values compile time and stongly typed solutions to our daily problems. So it is not a stretch to realize that most proposals since C++'s inception is focused on type safe solutions instead of reducing type safety such as improving how void* can be used. Consequently, when new features are added to the language perhaps, little consideration is given to how void* could be benefited by it.</p>
+<p>Consider for a moment lvalue reference. It is basically a slightly smarter pointer; no nullptrs(s) and a single level of indirection that is easier to use because it behaves like a value by default. Since it is a pointer, couldn't it also be type erased; implicitly converted to void*, explicity to NON void* with the same binary representation. While by themselves the value is minor however if allowed to aggregate they can be invaluable.</p>
+<p>What about pointer to aggregate types that contains typed pointers! Could these pointers be cast to other pointers of <a href="https://en.cppreference.com/w/c/language/type#Compatible_types" target="__blank">compatible types</a> with the only change that some of the type pointers has been replaced with untyped void pointers. Ironically C NOT C++ already have a similar feature that does NOT work with void* type erasure called <a href="https://en.cppreference.com/w/c/language/type#Compatible_types" target="__blank">compatible types</a>. This proposal is not advocating for or against adding compatible types as a whole and latter enhancing it to support void*. That sounds like a bigger endeavor. What is more, it is probably less intuitive to do so because at the end of the day you are casting the pointers between two unrelated types. Note that phrase "two unrelated types". What about two related types where both types are template instantiations of a common template where in one case a template is passed a non void type parameter and in another case a void type parameter. Perhaps since the two types are related their could be a minimal compatible type feature which in reality would do noting more than consistently guarantee size, alignment and layout of an aggregated type.</p>
+<p>If void* use cases could be enhanced to support aggregated types, what about a free function pointer type that logically accepts and returns aggregates of types. This latter use case is what this proposal is laser focused on. At the end of the day, this proposal is all about consistency of size, alignment and layout. Ironically, our current compilers are remarkably consistent. As such this feature is supported today in some compilers as undefined behavior which is clearly definable. As such we just need to standardize the consistency that compilers are already doing. In the following working example, all of these use cases are explored.</p>
 <!-- composite-void-pointer.cc.html -->
 <div class="code">
 {{> snippets/composite-void-pointer.cc}}
 </div>
-<!-- mfpi2fp.cc.html -->
-<div class="code">
-{{> snippets/mfpi2fp.cc}}
-</div>
-<!--
-<p>Here, I demonstrated the desired usage via the explicit static_cast. This proposal is focused on the explicit cast in order to restore this missing functionality. Explicit is required regardless in order to allow the end user to resolve overloads, as demonstrated. It is my believe that explicit cast would not be a breaking change. However if compilers can implement this proposal as a C cast and/or implicit cast than that could also make things easier for direct users versus library writers who would use this in their private implementations. The important thing is to restore the missing functionality.</p>
-<h2 id="why">Why bother? What do we gain?</h2>
-<ol>
-<li>sanding of some rough edges of C++ by making it more uniform and consistent</li>
-<li>completing some unfinished work that is as old as C++ itself</li>
-<li>undoing a bifurcation when member function pointers were standardized</li>
-<li>restoring the power of free function pointers back to the C and proto C++ era</li>
-<li>unified function pointers; free functions can reference free and member functions; argument dependent lookup is less of an issue when you are explicitly telling which function is to be selected</li>
-<li>There is no need for the end user to create a binder to convert a member function into a free function effectively tying the object oriented and functional paradigms back together.</li>
-<li>No need to resort to templates to provide something the core language is already providing in other places in C++ thus making things even easier.</li>
-</ol>
-<p>Concerning the last two, the "// binding via templates" portion of the example illustrates what library writers and end users have to do today to work around this limitation. Even if the explicit template example can be reduced with an implicit auto... solution, it would still be a verbose unintuitive resolution that depends on templates unnecessarily.</p>
--->
-<!--
-<h2 id="acknowledgments">Acknowledgments</h2>
-<p>Thanks to TODO and TODOfor providing very valuable feedback on earlier drafts of this proposal.</p>
--->
-<!--
-<h2 id="faq">Frequently Asked Questions</h2>
-<h3 id="ecx">What about ECX?</h3>
-<p>In Microsoft C++ compilers, the this pointer is stored in the ECX register when calling a member function instead of being passed on the stack. Worse case a C++ compiler would need to provide both implementations or one calling the other. One implementation could be elided based on end user usage patterns. In reality this is little different than an inline function. A function could be kept around if the function was ever assigned to a function pointer and in other cases the stack frame could be elided altogether. Further, any compiler can choose to store any parameter in a register. Compiler optimizations should not limit the reasonable functionality provided by the language.</p>
-<h3 id="deducing-this">How does this relate to <a href="#reference-deducing-this">Deducing this</a>?</h3>
-<p>In Deducing this, deducing this member functions are implicit cast to function pointers already and do not cast implicitly or explicitly to member function pointers. So in reality there is no change. This proposal would actually be complimentary in that regard and even more so if this proposed explicit cast could be made implicit without any breaking changes. The only difference is the type of this pointer in the free function. In this proposal it would be a variation of a reference always. In deducing this, there is the option of it be a value, especially for small types.</p>
-<h3 id="void">How might this combine with composite void*/guaranteed inlining?</h3>
-<p>A future proposal, composite void*, would explore enhancing void* conversions in more advanced aggregated types. One variation of this would allow function pointers with pointers and/or lvalue references to be cast to other function pointers with those pointers and references being swapped out with a void pointer and still be callable without any undefined behavior. This proposal would be complementary with such a future proposal allowing simple type erased pointers to member functions.</p>
--->
 <h2 id="references">References</h2>
-<span id="reference-dmc">c++ - How are member function pointers implemented by DMC?</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="https://www.digitalmars.com/archives/cplusplus/3802.html" target="__blank">https://www.digitalmars.com/archives/cplusplus/3802.html</a><br/>
+<span id="reference-void-pointers">Pointers to void</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://en.cppreference.com/w/cpp/language/pointer#Pointers_to_void" target="__blank">https://en.cppreference.com/w/cpp/language/pointer#Pointers_to_void</a><br/>
 <br/>
-<span id="reference-obscure">Obscure C++ Features</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="http://madebyevan.com/obscure-cpp-features/" target="__blank">http://madebyevan.com/obscure-cpp-features/</a><br/>
-<br/>
-<span id="reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible" target="__blank">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a><br/>
-<br/>
-<span id="reference-generic_member_function_pointer_as_a_template_parameter">generic member function pointer as a template parameter</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="https://stackoverflow.com/questions/9779105/generic-member-function-pointer-as-a-template-parameter" target="__blank">https://stackoverflow.com/questions/9779105/generic-member-function-pointer-as-a-template-parameter</a><br/>
-<br/>
-<span id="reference-deducing-this">Deducing this</span><br/>
-&nbsp;&nbsp;&nbsp;<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html" target="__blank">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html</a><br/>
+<span id="reference-compatible-types">Compatible types</span><br/>
+&nbsp;&nbsp;&nbsp;<a href="https://en.cppreference.com/w/c/language/type#Compatible_types" target="__blank">https://en.cppreference.com/w/c/language/type#Compatible_types</a><br/>
 <br/>
 </body>
 </html>
