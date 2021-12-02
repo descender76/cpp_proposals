@@ -1,0 +1,65 @@
+#include <iostream>
+//#include <https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp>
+#include <https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp>
+
+void third_party_lib_function1(tl::function_ref<void(bool, int, float)> callback) {
+    callback(true, 11, 3.1459f);
+}
+
+double third_party_lib_function2(tl::function_ref<double(int, float, bool)> callback) {
+    return callback(11, 3.1459f, true);
+}
+
+void third_party_lib_function3(tl::function_ref<void(bool, int, float) noexcept> callback) {
+    callback(true, 11, 3.1459f);
+}
+
+double third_party_lib_function4(tl::function_ref<double(int, float, bool) noexcept> callback) {
+    return callback(11, 3.1459f, true);
+}
+
+struct bar {
+    void baz(bool b, int i, float f)
+    {
+        std::cout << "bar::baz" << std::endl;
+    }
+    double buz(int i, float f, bool b)
+    {
+        std::cout << "bar::buz" << std::endl;
+        return i + f + (b ? 1 : 0);
+    }
+    void baznoe(bool b, int i, float f) noexcept
+    {
+        std::cout << "bar::baznoe" << std::endl;
+    }
+    double buznoe(int i, float f, bool b) noexcept
+    {
+        std::cout << "bar::buznoe" << std::endl;
+        return i + f + (b ? 1 : 0);
+    }
+    void caz(bool b, int i, float f)
+    {
+        std::cout << "bar::caz" << std::endl;
+    }
+    void caz(bool b, int i, float f) const
+    {
+        std::cout << "bar::caz const" << std::endl;
+    }
+};
+
+int main()
+{
+    bar b;
+    // function_ref: a non-owning reference to a Callable
+    third_party_lib_function1([&b](bool b1, int i, float f){b.baz(b1, i, f);});
+    third_party_lib_function1([&b](auto... args){b.baz(args...);});
+    std::cout << third_party_lib_function2([&b](int i, float f, bool b1){return b.buz(i, f, b1);}) << std::endl;
+    std::cout << third_party_lib_function2([&b](auto... args){return b.buz(args...);}) << std::endl;
+	// make_function_ref: A More Functional function_ref
+    // member function with type erasure usecase
+    // i.e. delegate/closure/OOP callback/event
+    third_party_lib_function1(tl::make_function_ref<&bar::baz>(b));
+    std::cout << third_party_lib_function2(tl::make_function_ref<&bar::buz>(b)) << std::endl;
+    third_party_lib_function3(tl::make_function_ref<&bar::baznoe>(b));
+    std::cout << third_party_lib_function4(tl::make_function_ref<&bar::buznoe>(b)) << std::endl;
+}

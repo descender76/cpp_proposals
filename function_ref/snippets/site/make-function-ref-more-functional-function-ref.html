@@ -61,20 +61,31 @@
 </tr>
 </table>
 <h2>Contents</h2>
-<h3><a href="#enhancement">1&nbsp;&nbsp;Enhancement</a></h3>
-<h3><a href="#solution">2&nbsp;&nbsp;Solution</a></h3>
-<h3><a href="#acknowledgments">3&nbsp;&nbsp;Acknowledgments</a></h3>
-<h3><a href="#controversial">4&nbsp;&nbsp;Annex: controversial design decisions</a></h3>
-<h4><a href="#auto">4.1&nbsp;&nbsp;&nbsp;auto</a></h4>
-<h4><a href="#general-purpose-callable-library">4.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
-<h3><a href="#references">5&nbsp;&nbsp;References</a></h3>
-<h2 id="enhancement">Enhancement</h2>
+<h3><a href="#abstract">1&nbsp;&nbsp;Abstract</a></h3>
+<h3><a href="#overview">2&nbsp;&nbsp;Overview</a></h3>
+<h3><a href="#motivating-examples">3&nbsp;&nbsp;Motivating examples</a></h3>
+<h3><a href="#solution">4&nbsp;&nbsp;Solution</a></h3>
+<h3><a href="#acknowledgments">5&nbsp;&nbsp;Acknowledgments</a></h3>
+<h3><a href="#controversial">6&nbsp;&nbsp;Annex: controversial design decisions</a></h3>
+<h4><a href="#auto">6.1&nbsp;&nbsp;&nbsp;auto</a></h4>
+<h4><a href="#general-purpose-callable-library">6.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
+<h3><a href="#references">7&nbsp;&nbsp;References</a></h3>
+<h2 id="abstract">Abstract</h2>
+<p>This paper proposes the addition of two make_function_ref functions to the current <a href="#reference-p0792r5">function_ref</a> proposal to better handle "member function with type erasure" and "free function with type erasure" usecases.</p>
+<h2 id="overview">Overview</h2>
 <p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
 <p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
 <p>Similarly too, the use case of type erased functions has been instrumental in the functional programming world for decades in C and other programming languages. The utility of simplifying the construction of these common use cases are demonstrated below.</p>
-<!-- make_function_ref-usage.cc.html -->
+<h2 id="motivating-examples">Motivating examples</h2>
+<h3 id="member-function-type-erasure-yes">member function with type erasure</h3>
+<!-- make_function_ref-usage-mf-te-y.cc.html -->
 <div class="code">
-{{> snippets/make_function_ref-usage.cc}}
+{{> snippets/make_function_ref-usage-mf-te-y.cc}}
+</div>
+<h3 id="free-function-type-erasure-yes">free function with type erasure</h3>
+<!-- make_function_ref-usage-ff-te-y.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-usage-ff-te-y.cc}}
 </div>
 <h2 id="solution">Solution</h2>
 <p>In order to make this possible, multiple overloaded make_function_ref functions need to be added. All of these functions delegate to a new public constructor that exposes the two inner pointers of the function_ref implementation.</p>
