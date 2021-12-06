@@ -42,10 +42,10 @@
 <td style="width:60ex">
   <table>
   <tr>
-  <td><b>Document #:</b></td><td>PTODOR0</td>
+  <td><b>Document #:</b></td><td>P2472R1</td>
   </tr>
   <tr>
-  <td><b>Date:</b></td><td>2021-09-30</td>
+  <td><b>Date:</b></td><td>2021-12-05</td>
   </tr>
   <tr>
   <td><b>Project:</b></td><td>Programming Language C++</td>
@@ -71,22 +71,64 @@
 <h4><a href="#general-purpose-callable-library">6.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
 <h3><a href="#references">7&nbsp;&nbsp;References</a></h3>
 <h2 id="abstract">Abstract</h2>
+<!--
 <p>This paper proposes the addition of two make_function_ref functions to the current <a href="#reference-p0792r5">function_ref</a> proposal to better handle "member function with type erasure" and "free function with type erasure" usecases.</p>
+-->
+<p>The current <a href="#reference-p0792r5">function_ref</a> proposal is closely modeled as a drop in replacement for std::function. It is assumed that it works the same but is referenced based instead of copy based. As such the current proposal provides little direction as to how it may be constructed and used safely. While std::function is more intuitive, function_ref is less so. Further with the change to reference based, function_ref is capable of so much more than what is provided, since it being modeled after std::function.</p>
 <h2 id="overview">Overview</h2>
+<!--
 <p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
 <p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
 <p>Similarly too, the use case of type erased functions has been instrumental in the functional programming world for decades in C and other programming languages. The utility of simplifying the construction of these common use cases are demonstrated below.</p>
+-->
+<p>In order to be able to identify such areas of improvement, we need to look at the <a href="#reference-github">reference implementation</a> for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers.</p>
+<h3 id="the-given">The given</h3>
+<!-- make_function_ref-constructor-only.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-constructor-only.cc}}
+</div>
+<p>All examples unless stated otherwise were compiled on <a href="https://www.godbolt.org/">godbolt.org</a> using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.</p>
 <h2 id="motivating-examples">Motivating examples</h2>
-<h3 id="member-function-type-erasure-yes">member function with type erasure</h3>
-<!-- make_function_ref-usage-mf-te-y.cc.html -->
+<h3 id="function_ref-construction-usage">function_ref construction and usage</h3>
+<h3 id="function_ref-stateless">free function and member function without type erasure use cases</h3>
+<!-- function_ref-immediate-dangle.cc.html -->
 <div class="code">
-{{> snippets/make_function_ref-usage-mf-te-y.cc}}
+{{> snippets/function_ref-immediate-dangle.cc}}
 </div>
-<h3 id="free-function-type-erasure-yes">free function with type erasure</h3>
-<!-- make_function_ref-usage-ff-te-y.cc.html -->
+<p>There are two things to note from the previous example. First, std::function works as expected in all three scenarios. The comparable function_ref has immediate dangling in two of the three. Second, when you compare function_ref to itself, there is a scenario where free function works but member function doesn't. This treats object oriented programming with less support than functional programming. Its been said that this is the incorrect usage of function_ref, in effect blaming the user instead of the specification and implementation. Those that believe such may give the following example as proof as it is ok to standardize something that can immediately dangle.</p>
+<!-- string_view-immediate-dangle.cc.html -->
 <div class="code">
-{{> snippets/make_function_ref-usage-ff-te-y.cc}}
+{{> snippets/string_view-immediate-dangle.cc}}
 </div>
+<p>While I normally would agree with such sentiment, in this scenario I whole heartedly disagree. Dangling occurs when you still have a reference to state that has gone out of scope, no longer exists. In this string_view example, it is clear that sv is a reference and ""s is state. It is totally unclear in the case of function_ref initialization. Dangling is not what the end user is intending on doing when a function is assigned whether free or member. Functions are stateless and also global, so they don't go out of scope. This implementation stores a free function pointer as the void* state of function_ref and because a member function pointer is larger than void* it is treated just like a capturing lambda or functor of size greater than a void*. In essence, implementation details are bleeding through function_ref's public interface and effecting how users are to use function_ref. The current function_ref specification is currently silent on how implementations should behave and how end users should consume.</p>
+<p>Another example given by the current proponents of function_ref is how the users of function_ref should fix the dangling.</p>
+<!-- function_ref-dangling-corrected-by-user.cc.html -->
+<div class="code">
+{{> snippets/function_ref-dangling-corrected-by-user.cc}}
+</div>
+<p>Where is this usage specified in the specification? Proponents advocate for not even messing with the WORKAROUND, i.e. sort of how one currently deals with dangling today, and that the correct usage is for just the initializing parameter to be passed directly to the function parameter in question. I would argue that we should still be able to initialize first because I may provide the same function_ref instantiation to multiple parameters across multiple function calls otherwise duplicating an exact same lambda in more complicated scenarios more than once thus increase verbosity and violating in programming the one definition rule. This usage is also plagued with the superfluous workaround line. Why initialize with 2 lines of code when it should just be one! Again, it is not like std::function or how we initialize in C++. Why force end users to work around dangling needlessly when the library implementation is more than capable of handling this? By fixing these trivial dangling noise, we leave the remaining dangling cases to be as clear as the std::string_view example. So, how do we fix some of this dangling in the implementation!</p>
+<h3 id="reference-power">the true power of the reference side</h3>
+<p>Given the new constructor mentioned in the "<a href="#overview">Overview</a>" we can construct an example that does not dangle.</p>
+<!-- function_ref-dangling-corrected-by-user2.cc.html -->
+<div class="code">
+{{> snippets/function_ref-dangling-corrected-by-user2.cc}}
+</div>
+<p>This set of examples shows how free function and member function without type erasure use cases can be handled without any dangling and without the syntax of having to put function_ref initialization parameter on a seperate temporary line. The pair of examples that uses the new constructor is clear that their is no dangling because their is no state is by the nullptr and the lambda used doesn't capture i.e. stateless. Similarly, the lambda examples that uses the current function_ref constructor is similarly non capturing stateless. The problem with these two solutions is the lack of clarity because we can't simple assign a function with a known compatible signature. This means we have [], (), forwarded aparmeters and possibly return statement. The new constructor examples are also not type safe though in a stateless scenario that is a little less of an issue. However, by nailing down the specification and providing the new constructor, we can do much better.</p>
+<!-- make_function_ref-stateless.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-stateless.cc}}
+</div>
+<p>These make_function_ref examples provides the best of both worlds. No dangling for member and free functions without type erasure and a reasonably concise syntax that explicitly states what the user intends to do.</p>
+<h3 id="function_ref-construction-missing">the missing function_ref construction use cases</h3>
+<p>Adding the new constructor, mentioned in the "<a href="#overview">Overview</a>", makes the implementation of function_ref capable of so much more functionality then is currently available. The current function_ref implentation only type erases state for callables such as capturing lambdas but what if your functions or member functions could benefit from type erasure. Instead of making these latter two use cases easy, current users have to use a lambda even if there were no changes in their callable parameters. This too can be improved.</p>
+<h3 id="function_ref-stateful">free function and member function with type erasure use cases</h3>
+<!-- make_function_ref-stateful.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-stateful.cc}}
+</div>
+<p>...</p>
+<p>...</p>
+<p>...</p>
 <h2 id="solution">Solution</h2>
 <p>In order to make this possible, multiple overloaded make_function_ref functions need to be added. All of these functions delegate to a new public constructor that exposes the two inner pointers of the function_ref implementation.</p>
 <!-- make_function_ref-spec.cc.html -->

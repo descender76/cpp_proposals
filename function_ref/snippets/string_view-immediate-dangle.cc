@@ -1,0 +1,1 @@
+std::string_view sv = "hello world"s;  // immediately dangling
