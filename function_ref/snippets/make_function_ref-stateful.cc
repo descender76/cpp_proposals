@@ -3,23 +3,25 @@
 
 struct bar {
     void baz(){}
+    void operator()(){}
 };
 
 void foo(bar&) {
 }
 
 // side by side examples
-void examples(tl::function_ref<void()> fr) {
+void examples() {
     bar b;
-    fr = [&b](){b.baz();};
-    fr = [&b](){foo(b);};
+    tl::function_ref<void()> fr1 = [&b](){b.baz();};
+    tl::function_ref<void()> fr2 = [&b](){foo(b);};
     // using the new constructor
-    fr = {&b, [](void* obj){static_cast<bar*>(obj)->baz();}};
-    fr = {&b, [](void* obj){foo(*static_cast<bar*>(obj));}};
+    tl::function_ref<void()> fr3 = {&b, [](void* obj){static_cast<bar*>(obj)->baz();}};
+    tl::function_ref<void()> fr4 = {&b, [](void* obj){foo(*static_cast<bar*>(obj));}};
     // using make_function_ref which uses new constructor
-    fr = tl::make_function_ref<foo>(b);
-    fr = tl::make_function_ref<&foo>(b);
-    fr = tl::make_function_ref<&bar::baz>(b);
+    tl::function_ref<void()> fr5 = tl::make_function_ref<foo>(b);
+    tl::function_ref<void()> fr6 = tl::make_function_ref<&foo>(b);
+    tl::function_ref<void()> fr7 = tl::make_function_ref<&bar::baz>(b);
+    tl::function_ref<void()> fr8 = tl::make_function_ref<&bar::operator()>(b);
     // C#
     // delegate void some_name();
     // some_name fr = foo;
@@ -30,7 +32,14 @@ void examples(tl::function_ref<void()> fr) {
     // fr = foo
     // fr = b.baz
 
-    fr();
+    fr1();
+    fr2();
+    fr3();
+    fr4();
+    fr5();
+    fr6();
+    fr7();
+    fr8();
 }
 
 int main() {

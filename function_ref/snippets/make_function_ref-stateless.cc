@@ -9,17 +9,23 @@ void foo(bar&) {
 }
 
 // side by side examples
-void examples(tl::function_ref<void(bar&)> fr) {
-    fr = {nullptr, [](void*, bar& b){b.baz();}};
-    fr = {nullptr, [](void*, bar& b){foo(b);}};
-    fr = [](bar& b){b.baz();};
-    fr = [](bar& b){foo(b);};
-    fr = tl::make_function_ref<foo>();
-    fr = tl::make_function_ref<&foo>();
-    fr = tl::make_function_ref<&bar::baz>();
+void examples() {
+    tl::function_ref<void(bar&)> fr1 = {nullptr, [](void*, bar& b){b.baz();}};
+    tl::function_ref<void(bar&)> fr2 = {nullptr, [](void*, bar& b){foo(b);}};
+    tl::function_ref<void(bar&)> fr3 = [](bar& b){b.baz();};
+    tl::function_ref<void(bar&)> fr4 = [](bar& b){foo(b);};
+    tl::function_ref<void(bar&)> fr5 = tl::make_function_ref<foo>();
+    tl::function_ref<void(bar&)> fr6 = tl::make_function_ref<&foo>();
+    tl::function_ref<void(bar&)> fr7 = tl::make_function_ref<&bar::baz>();
 
     bar b;
-    fr(b);
+    fr1(b);
+    fr2(b);
+    fr3(b);
+    fr4(b);
+    fr5(b);
+    fr6(b);
+    fr7(b);
 }
 
 int main() {
