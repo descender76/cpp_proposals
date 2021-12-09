@@ -8,54 +8,24 @@ struct bar {
 void foo(bar) {
 }
 
-// member function immediately dangle
-void function_ref_member_function_dangling() {
-    tl::function_ref<void(bar)> fr3 = &bar::baz;
-
-    bar b;
-    fr3(b);  // UB, fr3 is already dangling
-}
-
-// free function immediately dangle
-void function_ref_free_function_dangling() {
-    tl::function_ref<void(bar)> fr3 = &foo;
-
-    bar b;
-    fr3(b);  // UB, fr3 is already dangling
-}
-
-// member function without dangle via new constructor
-void function_ref_member_function_new() {
-    tl::function_ref<void(bar)> fr3 = {nullptr, [](void*, bar b){b.baz();}};
-
-    bar b;
-    fr3(b);  // UB, fr3 is NOT already dangling
-}
-
-// member function without dangle via new constructor
-void function_ref_free_function_new() {
-    tl::function_ref<void(bar)> fr3 = {nullptr, [](void*, bar b){foo(b);}};
-
-    bar b;
-    fr3(b);  // UB, fr3 is NOT already dangling
-}
-
-// member function without dangle via stateless lambda
-void function_ref_member_function_lambda() {
-    tl::function_ref<void(bar)> fr3 = [](bar b){b.baz();};
-
-    bar b;
-    fr3(b);  // UB, fr3 is NOT already dangling
-}
-
-// free function without dangle via stateless lambda
-void function_ref_free_function_lambda() {
-    tl::function_ref<void(bar)> fr3 = [](bar b){foo(b);};
-
-    bar b;
-    fr3(b);  // UB, fr3 is NOT already dangling
-}
-
 int main() {
+    tl::function_ref<void(bar)> fr1 = &bar::baz;// immediately dangle
+    tl::function_ref<void(bar)> fr2 = &foo;// immediately dangle
+    // no dangling, this proposal via new constructor
+    tl::function_ref<void(bar)> fr3 = {nullptr, [](void*, bar b){b.baz();}};
+    tl::function_ref<void(bar)> fr4 = {nullptr, [](void*, bar b){foo(b);}};
+    // no dangling, original proposal via stateless lambda
+    tl::function_ref<void(bar)> fr5 = [](bar b){b.baz();};
+    tl::function_ref<void(bar)> fr6 = [](bar b){foo(b);};
+
+    bar b;
+
+    fr1(b);
+    fr2(b);
+    fr3(b);
+    fr4(b);
+    fr5(b);
+    fr6(b);
+
     return 42;
 }

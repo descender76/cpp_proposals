@@ -19,6 +19,7 @@ void examples() {
     tl::function_ref<void(bar&)> fr7 = tl::make_function_ref<&bar::baz>();
 
     bar b;
+
     fr1(b);
     fr2(b);
     fr3(b);

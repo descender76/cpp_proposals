@@ -115,8 +115,11 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <p>All examples unless stated otherwise were compiled on <a href="https://www.godbolt.org/">godbolt.org</a> using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.</p>
 <h2 id="motivating-examples">Motivating examples</h2>
+<!--
 <h3 id="function_ref-construction-usage">function_ref construction and usage</h3>
 <h3 id="function_ref-stateless">free function and member function without type erasure use cases</h3>
+-->
+<p>In the following examples, function_ref is compared to std::function in order to identify it behaving unexpectedly. "function_ref" is also compared with itself to highlight inconsistencies in its own interface.</p>
 <!-- function_ref-immediate-dangle.cc.html -->
 <div class="code">
 <!-- Generator: GNU source-highlight 3.1.9
@@ -133,55 +136,21 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#009900">void</font> <b><font color="#000000">foo</font></b><font color="#990000">(</font>bar<font color="#990000">)</font> <font color="#FF0000">{</font>
 <font color="#FF0000">}</font>
 
-<i><font color="#9A1900">// member function immediately dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_member_function_dangle</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is already dangling</font></i>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// free function does not dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_free_function</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> foo<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// free function dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_free_function_dangle</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// member function does not dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_member_function_dangle</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    std<font color="#990000">::</font><font color="#008080">function&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// free function does not dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_free_function</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    std<font color="#990000">::</font><font color="#008080">function&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> foo<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// free function does not dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_free_function_dangle</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    std<font color="#990000">::</font><font color="#008080">function&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
-<font color="#FF0000">}</font>
-
 <font color="#009900">int</font> <b><font color="#000000">main</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr1 <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font><i><font color="#9A1900">// immediately dangle</font></i>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr2 <font color="#990000">=</font> foo<font color="#990000">;</font><i><font color="#9A1900">// does not dangle</font></i>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font><i><font color="#9A1900">// immediately dangle</font></i>
+    <i><font color="#9A1900">// the following behaves as expected</font></i>
+    std<font color="#990000">::</font><font color="#008080">function&lt;void(bar)&gt;</font> fr4 <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font>
+    std<font color="#990000">::</font><font color="#008080">function&lt;void(bar)&gt;</font> fr5 <font color="#990000">=</font> foo<font color="#990000">;</font>
+    std<font color="#990000">::</font><font color="#008080">function&lt;void(bar)&gt;</font> fr6 <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font>
+    <b><font color="#000000">fr1</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr2</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr4</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr5</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr6</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
     <b><font color="#0000FF">return</font></b> <font color="#993399">42</font><font color="#990000">;</font>
 <font color="#FF0000">}</font></tt></pre>
 
@@ -214,41 +183,30 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#009900">void</font> <b><font color="#000000">foo</font></b><font color="#990000">(</font>bar<font color="#990000">)</font> <font color="#FF0000">{</font>
 <font color="#FF0000">}</font>
 
-<i><font color="#9A1900">// member function immediately dangle WORKAROUND</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_member_function_workaround</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    <b><font color="#0000FF">auto</font></b> temp <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font><i><font color="#9A1900">// WORKAROUND</font></i>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> temp<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is NOT already dangling</font></i>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// free function dangle WORKAROUND</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_free_function_workaround</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    <b><font color="#0000FF">auto</font></b> temp <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font><i><font color="#9A1900">// WORKAROUND</font></i>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> temp<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
-<font color="#FF0000">}</font>
-
-<font color="#009900">void</font> <b><font color="#000000">correct_usage_of_current_function_ref_some_work</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt; fr1, tl::function_ref&lt;void(bar)&gt;</font> fr2<font color="#990000">)</font> <font color="#FF0000">{</font>
+<font color="#009900">void</font> <b><font color="#000000">correct_usage_of_current_function_ref</font></b><font color="#990000">(</font>tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt; fr1, tl::function_ref&lt;void(bar)&gt;</font> fr2<font color="#990000">)</font> <font color="#FF0000">{</font>
     <font color="#008080">bar</font> b<font color="#990000">;</font>
     <b><font color="#000000">fr1</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
     <b><font color="#000000">fr2</font></b><font color="#990000">(</font>b<font color="#990000">);</font>    
 <font color="#FF0000">}</font>
 
-<font color="#009900">void</font> <b><font color="#000000">correct_usage_of_current_function_ref</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    <b><font color="#000000">correct_usage_of_current_function_ref_some_work</font></b><font color="#990000">(&amp;</font>foo<font color="#990000">,</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">);</font>
-<font color="#FF0000">}</font>
-
 <font color="#009900">int</font> <b><font color="#000000">main</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
+    <b><font color="#0000FF">auto</font></b> temp <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font><i><font color="#9A1900">// WORKAROUND</font></i>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr1 <font color="#990000">=</font> temp<font color="#990000">;</font>
+    <b><font color="#0000FF">auto</font></b> temp <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font><i><font color="#9A1900">// WORKAROUND</font></i>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr2 <font color="#990000">=</font> temp<font color="#990000">;</font>
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+    <b><font color="#000000">fr1</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr2</font></b><font color="#990000">(</font>b<font color="#990000">);</font>    
+
+    <b><font color="#000000">correct_usage_of_current_function_ref</font></b><font color="#990000">(&amp;</font>foo<font color="#990000">,</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">);</font>
     <b><font color="#0000FF">return</font></b> <font color="#993399">42</font><font color="#990000">;</font>
 <font color="#FF0000">}</font></tt></pre>
 
 </div>
 <p>Where is this usage specified in the specification? Proponents advocate for not even messing with the WORKAROUND, i.e. sort of how one currently deals with dangling today, and that the correct usage is for just the initializing parameter to be passed directly to the function parameter in question. I would argue that we should still be able to initialize first because I may provide the same function_ref instantiation to multiple parameters across multiple function calls. Otherwise, duplicating an exact same lambda, in more complicated scenarios, would increase verbosity and violating in programming the one definition rule or don't repeat yourself. This usage is also plagued with the superfluous workaround line. Why initialize with 2 lines of code when it should just be one! Again, it is not like std::function or how we initialize in C++. Why force end users to work around dangling needlessly when the library implementation is more than capable of handling this? By fixing these trivial dangling noise, we leave the remaining dangling cases to be as clear as the std::string_view example. So, how do we fix some of this dangling in the implementation!</p>
+<!--
 <h3 id="reference-power">the true power of the reference side</h3>
+-->
 <p>Given the new constructor mentioned in the "<a href="#overview">Overview</a>" we can construct an example that does not dangle.</p>
 <!-- function_ref-dangling-corrected-by-user2.cc.html -->
 <div class="code">
@@ -266,55 +224,25 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#009900">void</font> <b><font color="#000000">foo</font></b><font color="#990000">(</font>bar<font color="#990000">)</font> <font color="#FF0000">{</font>
 <font color="#FF0000">}</font>
 
-<i><font color="#9A1900">// member function immediately dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_member_function_dangling</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is already dangling</font></i>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// free function immediately dangle</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_free_function_dangling</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is already dangling</font></i>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// member function without dangle via new constructor</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_member_function_new</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#FF0000">{</font>nullptr<font color="#990000">,</font> <font color="#990000">[](</font><font color="#009900">void</font><font color="#990000">*,</font> <font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font>b<font color="#990000">.</font><b><font color="#000000">baz</font></b><font color="#990000">();</font><font color="#FF0000">}}</font><font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is NOT already dangling</font></i>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// member function without dangle via new constructor</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_free_function_new</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#FF0000">{</font>nullptr<font color="#990000">,</font> <font color="#990000">[](</font><font color="#009900">void</font><font color="#990000">*,</font> <font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font><b><font color="#000000">foo</font></b><font color="#990000">(</font>b<font color="#990000">);</font><font color="#FF0000">}}</font><font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is NOT already dangling</font></i>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// member function without dangle via stateless lambda</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_member_function_lambda</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">[](</font><font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font>b<font color="#990000">.</font><b><font color="#000000">baz</font></b><font color="#990000">();</font><font color="#FF0000">}</font><font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is NOT already dangling</font></i>
-<font color="#FF0000">}</font>
-
-<i><font color="#9A1900">// free function without dangle via stateless lambda</font></i>
-<font color="#009900">void</font> <b><font color="#000000">function_ref_free_function_lambda</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
-    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#990000">[](</font><font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font><b><font color="#000000">foo</font></b><font color="#990000">(</font>b<font color="#990000">);</font><font color="#FF0000">}</font><font color="#990000">;</font>
-
-    <font color="#008080">bar</font> b<font color="#990000">;</font>
-    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>  <i><font color="#9A1900">// UB, fr3 is NOT already dangling</font></i>
-<font color="#FF0000">}</font>
-
 <font color="#009900">int</font> <b><font color="#000000">main</font></b><font color="#990000">()</font> <font color="#FF0000">{</font>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr1 <font color="#990000">=</font> <font color="#990000">&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">;</font><i><font color="#9A1900">// immediately dangle</font></i>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr2 <font color="#990000">=</font> <font color="#990000">&amp;</font>foo<font color="#990000">;</font><i><font color="#9A1900">// immediately dangle</font></i>
+    <i><font color="#9A1900">// no dangling, this proposal via new constructor</font></i>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr3 <font color="#990000">=</font> <font color="#FF0000">{</font>nullptr<font color="#990000">,</font> <font color="#990000">[](</font><font color="#009900">void</font><font color="#990000">*,</font> <font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font>b<font color="#990000">.</font><b><font color="#000000">baz</font></b><font color="#990000">();</font><font color="#FF0000">}}</font><font color="#990000">;</font>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr4 <font color="#990000">=</font> <font color="#FF0000">{</font>nullptr<font color="#990000">,</font> <font color="#990000">[](</font><font color="#009900">void</font><font color="#990000">*,</font> <font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font><b><font color="#000000">foo</font></b><font color="#990000">(</font>b<font color="#990000">);</font><font color="#FF0000">}}</font><font color="#990000">;</font>
+    <i><font color="#9A1900">// no dangling, original proposal via stateless lambda</font></i>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr5 <font color="#990000">=</font> <font color="#990000">[](</font><font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font>b<font color="#990000">.</font><b><font color="#000000">baz</font></b><font color="#990000">();</font><font color="#FF0000">}</font><font color="#990000">;</font>
+    tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar)&gt;</font> fr6 <font color="#990000">=</font> <font color="#990000">[](</font><font color="#008080">bar</font> b<font color="#990000">)</font><font color="#FF0000">{</font><b><font color="#000000">foo</font></b><font color="#990000">(</font>b<font color="#990000">);</font><font color="#FF0000">}</font><font color="#990000">;</font>
+
+    <font color="#008080">bar</font> b<font color="#990000">;</font>
+
+    <b><font color="#000000">fr1</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr2</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr4</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr5</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+    <b><font color="#000000">fr6</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
+
     <b><font color="#0000FF">return</font></b> <font color="#993399">42</font><font color="#990000">;</font>
 <font color="#FF0000">}</font></tt></pre>
 
@@ -347,6 +275,7 @@ http://www.gnu.org/software/src-highlite -->
     tl<font color="#990000">::</font><font color="#008080">function_ref&lt;void(bar&amp;)&gt;</font> fr7 <font color="#990000">=</font> tl<font color="#990000">::</font>make_function_ref<font color="#990000">&lt;&amp;</font>bar<font color="#990000">::</font>baz<font color="#990000">&gt;();</font>
 
     <font color="#008080">bar</font> b<font color="#990000">;</font>
+
     <b><font color="#000000">fr1</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
     <b><font color="#000000">fr2</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
     <b><font color="#000000">fr3</font></b><font color="#990000">(</font>b<font color="#990000">);</font>
@@ -362,9 +291,13 @@ http://www.gnu.org/software/src-highlite -->
 
 </div>
 <p>These make_function_ref examples provides the best of both worlds. No dangling for member and free functions without type erasure and a reasonably concise syntax that explicitly states what the user intends to do.</p>
+<!--
 <h3 id="function_ref-construction-missing">the missing function_ref construction use cases</h3>
+-->
 <p>Adding the new constructor, mentioned in the "<a href="#overview">Overview</a>", makes the implementation of function_ref capable of so much more functionality then is currently available. The current function_ref implentation only type erases state for callables such as capturing lambdas but what if your functions or member functions could benefit from type erasure. Instead of making these latter two use cases easy, current users have to use a lambda even if there were no changes in their callable parameters. This too can be improved.</p>
+<!--
 <h3 id="function_ref-stateful">free function and member function with type erasure use cases</h3>
+-->
 <!-- make_function_ref-stateful.cc.html -->
 <div class="code">
 <!-- Generator: GNU source-highlight 3.1.9
