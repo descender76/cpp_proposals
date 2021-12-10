@@ -25,13 +25,13 @@ auto make_function_ref(T& obj);
 template<auto mf, typename T> requires std::is_member_function_pointer<decltype(mf)>::value
 auto make_function_ref(const T& obj);
 
+template<auto mf> requires std::is_member_function_pointer<decltype(mf)>::value
+auto make_function_ref();
+
 template<typename testType>
 struct is_function_pointer
 {
-    static const bool value =
-        std::is_pointer<testType>::value ?
-        std::is_function<typename std::remove_pointer<testType>::type>::value :
-        false;
+    static const bool value = std::is_function_v<std::remove_pointer_t<testType>>;
 };
 
 template<auto f, typename T> requires is_function_pointer<decltype(f)>::value
@@ -39,3 +39,6 @@ auto make_function_ref(T& obj);
 
 template<auto f, typename T> requires is_function_pointer<decltype(f)>::value
 auto make_function_ref(const T& obj);
+
+template<auto f> requires is_function_pointer<decltype(f)>::value
+auto make_function_ref();

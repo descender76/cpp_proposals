@@ -63,15 +63,16 @@
 <h2>Contents</h2>
 <h3><a href="#abstract">1&nbsp;&nbsp;Abstract</a></h3>
 <h3><a href="#overview">2&nbsp;&nbsp;Overview</a></h3>
-<h3><a href="#motivating-examples">3&nbsp;&nbsp;Motivating examples</a></h3>
-<h3><a href="#solution">4&nbsp;&nbsp;Solution</a></h3>
-<h3><a href="#ftm">5&nbsp;&nbsp;Feature test macro</a></h3>
-<h3><a href="#implementation">6&nbsp;&nbsp;Example implementation</a></h3>
-<h3><a href="#acknowledgments">7&nbsp;&nbsp;Acknowledgments</a></h3>
-<h3><a href="#alternative">8&nbsp;&nbsp;Annex: alternative design decisions</a></h3>
-<h4><a href="#auto">8.1&nbsp;&nbsp;&nbsp;auto</a></h4>
-<h4><a href="#general-purpose-callable-library">8.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
-<h3><a href="#references">9&nbsp;&nbsp;References</a></h3>
+<h3><a href="#motivating-overview">3&nbsp;&nbsp;Motivating overview</a></h3>
+<h3><a href="#motivating-examples">4&nbsp;&nbsp;Motivating examples</a></h3>
+<h3><a href="#solution">5&nbsp;&nbsp;Solution</a></h3>
+<h3><a href="#ftm">6&nbsp;&nbsp;Feature test macro</a></h3>
+<h3><a href="#implementation">7&nbsp;&nbsp;Example implementation</a></h3>
+<h3><a href="#acknowledgments">8&nbsp;&nbsp;Acknowledgments</a></h3>
+<h3><a href="#alternative">9&nbsp;&nbsp;Annex: alternative design decisions</a></h3>
+<h4><a href="#auto">9.1&nbsp;&nbsp;&nbsp;auto</a></h4>
+<h4><a href="#general-purpose-callable-library">9.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
+<h3><a href="#references">10&nbsp;&nbsp;References</a></h3>
 <h2 id="abstract">Abstract</h2>
 <!--
 <p>This paper proposes the addition of two make_function_ref functions to the current <a href="#reference-p0792r5">function_ref</a> proposal to better handle "member function with type erasure" and "free function with type erasure" usecases.</p>
@@ -114,6 +115,14 @@ http://www.gnu.org/software/src-highlite -->
 
 </div>
 <p>All examples unless stated otherwise were compiled on <a href="https://www.godbolt.org/">godbolt.org</a> using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.</p>
+<h2 id="motivating-overview">Motivating overview</h2>
+<p>
+<ul>
+<li>std::function_ref has an api similar to that of std::function. However, its constructors are hard to use correctly with pointer-to-member-function and other common use cases.</li>
+<li>std::function_ref currently has no interface to allow it to store the this pointer. This is an intentional design choice of P0792 (which tries to be consistent with the language-syntax of pointer-to-member-function). However I found that interface to be surprising, and often leading to access to dangling objects.</li>
+<li>Because function_ref is expected to be a reference to a callable, we can support proper pointer-to-member-function usage without increasing the size of the std::function_ref (no copy needs to be made).</li>
+</ul>
+</p>
 <h2 id="motivating-examples">Motivating examples</h2>
 <!--
 <h3 id="function_ref-construction-usage">function_ref construction and usage</h3>
@@ -203,7 +212,7 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#FF0000">}</font></tt></pre>
 
 </div>
-<p>Where is this usage specified in the specification? Proponents advocate for not even messing with the WORKAROUND, i.e. sort of how one currently deals with dangling today, and that the correct usage is for just the initializing parameter to be passed directly to the function parameter in question. I would argue that we should still be able to initialize first because I may provide the same function_ref instantiation to multiple parameters across multiple function calls. Otherwise, duplicating an exact same lambda, in more complicated scenarios, would increase verbosity and violating in programming the one definition rule or don't repeat yourself. This usage is also plagued with the superfluous workaround line. Why initialize with 2 lines of code when it should just be one! Again, it is not like std::function or how we initialize in C++. Why force end users to work around dangling needlessly when the library implementation is more than capable of handling this? By fixing these trivial dangling noise, we leave the remaining dangling cases to be as clear as the std::string_view example. So, how do we fix some of this dangling in the implementation!</p>
+<p><!--Where is this usage specified in the specification?-->Some proponents of the current function_ref proposal advocate for not even messing with the WORKAROUND which is sort of how one currently deals with dangling today and that the correct usage is to just initialize the function_ref directly in the function parameter in question. I would argue that we should still be able to initialize first because I may provide the same function_ref instantiation to multiple parameters across multiple function calls. Otherwise, duplicating an exact same lambda, in more complicated scenarios, would increase verbosity and violating in programming the one definition rule or don't repeat yourself. This usage is also plagued with the superfluous workaround line. Why initialize with 2 lines of code when it should just be one! Again, it is not like std::function or how we initialize in C++. Why force end users to work around dangling needlessly when the library implementation is more than capable of handling this? By fixing these trivial dangling noise, we leave the remaining dangling cases to be as clear as the std::string_view example. So, how do we fix some of this dangling in the implementation!</p>
 <!--
 <h3 id="reference-power">the true power of the reference side</h3>
 -->
@@ -247,7 +256,7 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#FF0000">}</font></tt></pre>
 
 </div>
-<p>This set of examples shows how free function and member function without type erasure use cases can be handled without any dangling and without the syntax of having to put function_ref initialization parameter on a seperate temporary line. The pair of examples that uses the new constructor is clear that their is no dangling because their is no state is by the nullptr and the lambda used doesn't capture i.e. stateless. Similarly, the lambda examples that uses the current function_ref constructor is similarly non capturing stateless. The problem with these two solutions is the lack of clarity because we can't simple assign a function with a known compatible signature. This means we have [], (), forwarded aparmeters and possibly return statement. The new constructor examples are also not type safe though in a stateless scenario that is a little less of an issue. However, by nailing down the specification and providing the new constructor, we can do much better.</p>
+<p>This set of examples shows how free function and member function without type erasure use cases can be handled without any dangling and without the syntax of having to put function_ref initialization parameter on a seperate temporary line. The pair of examples that uses the new constructor is clear that their is no dangling because their is no state, both by the nullptr and the lambda used doesn't capture i.e. stateless. Similarly, the lambda examples that uses the current function_ref constructor is similarly non capturing, stateless. The problem with these two solutions is the lack of clarity because we can't simply assign a function with a known compatible signature. This means we have [], (), forwarded aparmeters and possibly return statement. The new constructor examples are also not type safe, though in a stateless scenario, that is a little less of an issue. However, by nailing down the specification and providing the new constructor, we can do much better. Using the new constructor, "make_function_ref" factory functions can be created that type safely creates function_ref from member or free functions without any dangling.</p>
 <!-- make_function_ref-stateless.cc.html -->
 <div class="code">
 <!-- Generator: GNU source-highlight 3.1.9
@@ -294,7 +303,7 @@ http://www.gnu.org/software/src-highlite -->
 <!--
 <h3 id="function_ref-construction-missing">the missing function_ref construction use cases</h3>
 -->
-<p>Adding the new constructor, mentioned in the "<a href="#overview">Overview</a>", makes the implementation of function_ref capable of so much more functionality then is currently available. The current function_ref implentation only type erases state for callables such as capturing lambdas but what if your functions or member functions could benefit from type erasure. Instead of making these latter two use cases easy, current users have to use a lambda even if there were no changes in their callable parameters. This too can be improved.</p>
+<p>Adding the new constructor, mentioned in the "<a href="#overview">Overview</a>", makes the implementation of function_ref capable of so much more functionality then is currently available. The current function_ref implentation only type erases state for callables such as capturing lambdas but what if your functions or member functions could benefit from type erasure. Instead of making these latter two use cases easy, current users have to use a lambda even if there were no changes in their callable parameters. This too can be improved. Using the new constructor, "make_function_ref" factory functions can be created that type safely creates function_ref from member or free functions with type erased state, as is common in both functional and object oriented programming. Since the usage of these factory functions are intended for objects that already exist, than in this scenario too there is significantly less dangling that a user has to deal with.</p>
 <!--
 <h3 id="function_ref-stateful">free function and member function with type erasure use cases</h3>
 -->
@@ -353,7 +362,7 @@ http://www.gnu.org/software/src-highlite -->
 <font color="#FF0000">}</font></tt></pre>
 
 </div>
-<p>Here, the type erased free and member function use cases are consistent with the free and member use cases that do not have type erasure. It is concise. Conveys the intent of the user and provides a feature found in other proramming languages that C++ users have been clamoring for well over a decade. There is an additional reason that goes to ease of use. When you use a stateful lambda to needlessly tie the type erased state to a method, you are in essence creating a new anonymous type and instance which has its own lifetime that must be managed by the user. Superflous code is being added which the optimizer has to remove. Usage of function_ref becomes harder to reason about. You in essense have a function_ref which is a reference, refering to a lambda which is a reference that references the actual object in question. This makes it harder to reason about any remaining dangling. A reference to a reference is not a reference. It is rather a pointer which has multiple levels of indirection. A reference was always a collapsable single level of indirection.</p>
+<p>Here, the type erased free and member function use cases are consistent with the free and member use cases that do not have type erasure. It is concise. Conveys the intent of the user and provides a feature found in other proramming languages that C++ users have been clamoring for decades. There is an additional reason that goes to ease of use. When you use a stateful lambda to needlessly tie the type erased state to a method, you are in essence creating a new anonymous type and instance which has its own lifetime that must be managed by the user. Superflous code is being added which the optimizer has to remove. Usage of function_ref becomes harder to reason about. You in essense have a function_ref which is a reference, refering to a lambda which is a reference that references the actual object in question. This makes it harder to reason about any remaining dangling. A reference to a reference is not a reference. It is rather a pointer which has multiple levels of indirection. A reference was always a collapsable single level of indirection.</p>
 <h2 id="solution">Solution</h2>
 <p>This version of make_function_ref proposal speaks more to the deficiencies of the original function_ref proposal. This has not been done to provide ammunition for delaying function_ref further. Rather function_ref is API/module boundary fundamental data type which is long over do. If for any tragic reason the standardization process decides function_ref should not go forward, I beg that to whom it may concern reconsider. The problematic current constructor could be stripped out and only the internal 2 pointer constructor be provided. Even a trivial implementation where construction is left to the end user is still of abundant value. However, what is hoped that some version of the current function_ref constructor is retained and better specified. The implementation is locked to the two pointer solution and the two pointer constructor is changed to a static factory function perhaps called "construct_from_type_erased" to discourage its use but for it to be used by future or user defined construction methods such as make_function_ref.</p>
 <p>The following are the minimal changes needed to support make_function_ref and other author's proposals in the future.</p>
@@ -419,20 +428,23 @@ http://www.gnu.org/software/src-highlite -->
 <b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
 <b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
 
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font>
+
 <b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">testType</font><font color="#990000">&gt;</font>
 <b><font color="#0000FF">struct</font></b> <font color="#008080">is_function_pointer</font>
 <font color="#FF0000">{</font>
-    <b><font color="#0000FF">static</font></b> <b><font color="#0000FF">const</font></b> <font color="#009900">bool</font> value <font color="#990000">=</font>
-        std<font color="#990000">::</font>is_pointer<font color="#990000">&lt;</font>testType<font color="#990000">&gt;::</font>value <font color="#990000">?</font>
-        std<font color="#990000">::</font>is_function<font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">std</font><font color="#990000">::</font>remove_pointer<font color="#990000">&lt;</font>testType<font color="#990000">&gt;::</font>type<font color="#990000">&gt;::</font>value <font color="#990000">:</font>
-        <b><font color="#0000FF">false</font></b><font color="#990000">;</font>
+    <b><font color="#0000FF">static</font></b> <b><font color="#0000FF">const</font></b> <font color="#009900">bool</font> value <font color="#990000">=</font> std<font color="#990000">::</font>is_function_v<font color="#990000">&lt;</font>std<font color="#990000">::</font>remove_pointer_t<font color="#990000">&lt;</font>testType<font color="#990000">&gt;&gt;;</font>
 <font color="#FF0000">}</font><font color="#990000">;</font>
 
 <b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
 <b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
 
 <b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
-<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font></tt></pre>
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font></tt></pre>
 
 </div>
 <h2 id="ftm">Feature test macro</h2>
@@ -440,7 +452,7 @@ http://www.gnu.org/software/src-highlite -->
 <h2 id="implementation">Example implementation</h2>
 <p>The most up-to-date implementation, created by Jarrad Waterloo, is available on <a href="#make_function_ref-implementation">Github</a></p>
 <h2 id="acknowledgments">Acknowledgments</h2>
-<p>Thanks to Arthur O'Dwyer and Tomasz Kamiński for providing very valuable feedback on earlier drafts of this proposal.</p>
+<p>Thanks to Arthur O'Dwyer, Tomasz Kamiński and Corentin Jabot for providing very valuable feedback on <!--earlier drafts of--> this proposal.</p>
 <h2 id="alternative">Annex: alternative design decisions</h2>
 <h3 id="auto">Why not just use [&b](auto... args){b.baz(args...);}?</h3>
 <p>While succinct, this does have some undesirable consequences.</p>
