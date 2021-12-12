@@ -62,36 +62,23 @@
 </table>
 <h2>Contents</h2>
 <h3><a href="#abstract">1&nbsp;&nbsp;Abstract</a></h3>
-<h3><a href="#overview">2&nbsp;&nbsp;Overview</a></h3>
-<h3><a href="#motivating-overview">3&nbsp;&nbsp;Motivating overview</a></h3>
+<h3><a href="#motivating-overview">2&nbsp;&nbsp;Motivating overview</a></h3>
+<h3><a href="#solution">3&nbsp;&nbsp;Solution</a></h3>
+<!--<h3><a href="#overview">4&nbsp;&nbsp;Overview</a></h3>-->
 <h3><a href="#motivating-examples">4&nbsp;&nbsp;Motivating examples</a></h3>
-<h3><a href="#solution">5&nbsp;&nbsp;Solution</a></h3>
-<h3><a href="#ftm">6&nbsp;&nbsp;Feature test macro</a></h3>
-<h3><a href="#implementation">7&nbsp;&nbsp;Example implementation</a></h3>
-<h3><a href="#acknowledgments">8&nbsp;&nbsp;Acknowledgments</a></h3>
-<h3><a href="#alternative">9&nbsp;&nbsp;Annex: alternative design decisions</a></h3>
-<h4><a href="#auto">9.1&nbsp;&nbsp;&nbsp;auto</a></h4>
-<h4><a href="#general-purpose-callable-library">9.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
-<h3><a href="#references">10&nbsp;&nbsp;References</a></h3>
+<h3><a href="#ftm">5&nbsp;&nbsp;Feature test macro</a></h3>
+<h3><a href="#implementation">6&nbsp;&nbsp;Example implementation</a></h3>
+<h3><a href="#acknowledgments">7&nbsp;&nbsp;Acknowledgments</a></h3>
+<h3><a href="#alternative">8&nbsp;&nbsp;Annex: alternative design decisions</a></h3>
+<h4><a href="#auto">8.1&nbsp;&nbsp;&nbsp;auto</a></h4>
+<h4><a href="#general-purpose-callable-library">8.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
+<h3><a href="#references">9&nbsp;&nbsp;References</a></h3>
 <h2 id="abstract">Abstract</h2>
 <!--
 <p>This paper proposes the addition of two make_function_ref functions to the current <a href="#reference-p0792r5">function_ref</a> proposal to better handle "member function with type erasure" and "free function with type erasure" usecases.</p>
 <p>The current <a href="#reference-p0792r5">function_ref</a> proposal is closely modeled as a drop in replacement for std::function. It is assumed that it works the same but is referenced based instead of copy based. As such the current proposal provides little direction as to how it may be constructed and used safely. While std::function is more intuitive, function_ref is less so. Further with the change to reference based, function_ref is capable of so much more than what is provided, since it being modeled after std::function which was designed with copying in mind.</p>
 -->
 <p>I propose to make <a href="#reference-p0792r5">function_ref</a> easier and safer to use with pointer-to-member-functions by adding a std::make_function_ref factory function. Also the pointer-to-free-function and pointer-to-member-function cases should be expanded to easily and safely include type erased state just like functors and capturing lambdas has.</p>
-<h2 id="overview">Overview</h2>
-<!--
-<p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
-<p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
-<p>Similarly too, the use case of type erased functions has been instrumental in the functional programming world for decades in C and other programming languages. The utility of simplifying the construction of these common use cases are demonstrated below.</p>
--->
-<p>In order to be able to identify such areas of improvement, we need to look at the <a href="#reference-github">reference implementation</a> for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers.</p>
-<h3 id="the-given">The given</h3>
-<!-- make_function_ref-constructor-only.cc.html -->
-<div class="code">
-{{> snippets/make_function_ref-constructor-only.cc}}
-</div>
-<p>All examples unless stated otherwise were compiled on <a href="https://www.godbolt.org/">godbolt.org</a> using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.</p>
 <h2 id="motivating-overview">Motivating overview</h2>
 <p>
 <ul>
@@ -100,7 +87,38 @@
 <li>Because function_ref is expected to be a reference to a callable, we can support proper pointer-to-member-function usage without increasing the size of the std::function_ref (no copy needs to be made).</li>
 </ul>
 </p>
+<h2 id="solution">Solution</h2>
+<p>This version of make_function_ref proposal speaks more to the deficiencies of the original function_ref proposal. This has not been done to provide ammunition for delaying function_ref further. Rather function_ref is API/module boundary fundamental data type which is long over do. If for any tragic reason the standardization process decides function_ref should not go forward, I beg that to whom it may concern reconsider. The problematic current constructor could be stripped out and only the internal 2 pointer constructor be provided. Even a trivial implementation where construction is left to the end user is still of abundant value. However, what is hoped that some version of the current function_ref constructor is retained and better specified. The implementation is locked to the two pointer solution and the two pointer constructor is changed to a static factory function perhaps called "construct_from_type_erased" to discourage its use but for it to be used by future or user defined construction methods such as make_function_ref.</p>
+<h3 id="solution">Proposal #1 - The minimal proposal</h3>
+<p>The following are the minimal changes needed to support make_function_ref and other author's proposals in the future.</p>
+<!-- make_function_ref-spec-min.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-spec-min.cc}}
+</div>
+<h3 id="solution">Proposal #2 - The make_function_ref proposal</h3>
+<p>The following are all the changes needed to adopt make_function_ref into the current function_ref proposal.</p>
+<!-- make_function_ref-spec-max.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-spec-max.cc}}
+</div>
+<h3 id="solution">Proposal #2++ - The make_function_ref proposal</h3>
+<p>TODO</p>
+<h3 id="solution">Proposal #3 - The scorched Earth/nuclear option</h3>
+<p>TODO</p>
+<!--
+<h2 id="overview">Overview</h2>
+<p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
+<p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
+<p>Similarly too, the use case of type erased functions has been instrumental in the functional programming world for decades in C and other programming languages. The utility of simplifying the construction of these common use cases are demonstrated below.</p>
+-->
 <h2 id="motivating-examples">Motivating examples</h2>
+<p>In order to be able to identify such areas of improvement, we need to look at the <a href="#reference-github">reference implementation</a> for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers. This constructor serves the same purpose as the proposed static factory function named "construct_from_type_erased" in the previous solution. A constructor is instead used here to reduce the additional syntax in order to ensure we are making a fair comparison between the varying construction methods.</p>
+<h3 id="the-given">The given</h3>
+<!-- make_function_ref-constructor-only.cc.html -->
+<div class="code">
+{{> snippets/make_function_ref-constructor-only.cc}}
+</div>
+<p>All examples unless stated otherwise were compiled on <a href="https://www.godbolt.org/">godbolt.org</a> using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.</p>
 <!--
 <h3 id="function_ref-construction-usage">function_ref construction and usage</h3>
 <h3 id="function_ref-stateless">free function and member function without type erasure use cases</h3>
@@ -148,18 +166,6 @@
 {{> snippets/make_function_ref-stateful.cc}}
 </div>
 <p>Here, the type erased free and member function use cases are consistent with the free and member use cases that do not have type erasure. It is concise. Conveys the intent of the user and provides a feature found in other proramming languages that C++ users have been clamoring for decades. There is an additional reason that goes to ease of use. When you use a stateful lambda to needlessly tie the type erased state to a method, you are in essence creating a new anonymous type and instance which has its own lifetime that must be managed by the user. Superflous code is being added which the optimizer has to remove. Usage of function_ref becomes harder to reason about. You in essense have a function_ref which is a reference, refering to a lambda which is a reference that references the actual object in question. This makes it harder to reason about any remaining dangling. A reference to a reference is not a reference. It is rather a pointer which has multiple levels of indirection. A reference was always a collapsable single level of indirection.</p>
-<h2 id="solution">Solution</h2>
-<p>This version of make_function_ref proposal speaks more to the deficiencies of the original function_ref proposal. This has not been done to provide ammunition for delaying function_ref further. Rather function_ref is API/module boundary fundamental data type which is long over do. If for any tragic reason the standardization process decides function_ref should not go forward, I beg that to whom it may concern reconsider. The problematic current constructor could be stripped out and only the internal 2 pointer constructor be provided. Even a trivial implementation where construction is left to the end user is still of abundant value. However, what is hoped that some version of the current function_ref constructor is retained and better specified. The implementation is locked to the two pointer solution and the two pointer constructor is changed to a static factory function perhaps called "construct_from_type_erased" to discourage its use but for it to be used by future or user defined construction methods such as make_function_ref.</p>
-<p>The following are the minimal changes needed to support make_function_ref and other author's proposals in the future.</p>
-<!-- make_function_ref-spec-min.cc.html -->
-<div class="code">
-{{> snippets/make_function_ref-spec-min.cc}}
-</div>
-<p>The following are all the changes needed to adopt make_function_ref into the current function_ref proposal.</p>
-<!-- make_function_ref-spec-max.cc.html -->
-<div class="code">
-{{> snippets/make_function_ref-spec-max.cc}}
-</div>
 <h2 id="ftm">Feature test macro</h2>
 <p>We do not need a feature macro, because we intend for this paper to modify std::function_ref before it ships.</p>
 <h2 id="implementation">Example implementation</h2>
