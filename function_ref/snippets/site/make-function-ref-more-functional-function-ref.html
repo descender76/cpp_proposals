@@ -67,12 +67,13 @@
 <!--<h3><a href="#overview">4&nbsp;&nbsp;Overview</a></h3>-->
 <h3><a href="#motivating-examples">4&nbsp;&nbsp;Motivating examples</a></h3>
 <h3><a href="#ftm">5&nbsp;&nbsp;Feature test macro</a></h3>
-<h3><a href="#implementation">6&nbsp;&nbsp;Example implementation</a></h3>
-<h3><a href="#acknowledgments">7&nbsp;&nbsp;Acknowledgments</a></h3>
-<h3><a href="#alternative">8&nbsp;&nbsp;Annex: alternative design decisions</a></h3>
-<h4><a href="#auto">8.1&nbsp;&nbsp;&nbsp;auto</a></h4>
-<h4><a href="#general-purpose-callable-library">8.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
-<h3><a href="#references">9&nbsp;&nbsp;References</a></h3>
+<h3><a href="#other-languages">6&nbsp;&nbsp;Other Languages</a></h3>
+<h3><a href="#implementation">7&nbsp;&nbsp;Example implementation</a></h3>
+<h3><a href="#acknowledgments">8&nbsp;&nbsp;Acknowledgments</a></h3>
+<h3><a href="#alternative">9&nbsp;&nbsp;Annex: alternative design decisions</a></h3>
+<h4><a href="#auto">9.1&nbsp;&nbsp;&nbsp;auto</a></h4>
+<h4><a href="#general-purpose-callable-library">9.2&nbsp;&nbsp;&nbsp;General Purpose Callable Library</a></h4>
+<h3><a href="#references">10&nbsp;&nbsp;References</a></h3>
 <h2 id="abstract">Abstract</h2>
 <!--
 <p>This paper proposes the addition of two make_function_ref functions to the current <a href="#reference-p0792r5">function_ref</a> proposal to better handle "member function with type erasure" and "free function with type erasure" usecases.</p>
@@ -88,23 +89,77 @@
 </ul>
 </p>
 <h2 id="solution">Solution</h2>
+<!--
 <p>This version of make_function_ref proposal speaks more to the deficiencies of the original function_ref proposal. This has not been done to provide ammunition for delaying function_ref further. Rather function_ref is API/module boundary fundamental data type which is long over do. If for any tragic reason the standardization process decides function_ref should not go forward, I beg that to whom it may concern reconsider. The problematic current constructor could be stripped out and only the internal 2 pointer constructor be provided. Even a trivial implementation where construction is left to the end user is still of abundant value. However, what is hoped that some version of the current function_ref constructor is retained and better specified. The implementation is locked to the two pointer solution and the two pointer constructor is changed to a static factory function perhaps called "construct_from_type_erased" to discourage its use but for it to be used by future or user defined construction methods such as make_function_ref.</p>
+-->
 <h3 id="solution">Proposal #1 - The minimal proposal</h3>
-<p>The following are the minimal changes needed to support make_function_ref and other author's proposals in the future.</p>
+<p>The following are the minimal changes needed to support make_function_ref and other author's proposals in the future. It consists of 2 changes to the current function_ref proposal.</p>
+<p>
+<ol>
+<li>Tie down the specification to a double pointer implementation; a void* of state and a free function pointer that takes that state as its first perameter. In short, remove the exposition only from the class definition in the current function_ref proposal.</li>
+<li>Add a static factory function, named "construct_from_type_erased", that trivially initialize the two aforementioned pointers.</li>
+</ol>
+</p>
+<p>Not making this change in C++23 would constitute a breaking change because it would require implementations that did not use the two pointer solution to have to change.</p>
 <!-- make_function_ref-spec-min.cc.html -->
 <div class="code">
 {{> snippets/make_function_ref-spec-min.cc}}
 </div>
 <h3 id="solution">Proposal #2 - The make_function_ref proposal</h3>
-<p>The following are all the changes needed to adopt make_function_ref into the current function_ref proposal.</p>
+<!--<p>The following are all the changes needed to adopt make_function_ref into the current function_ref proposal.</p>-->
+<p>The make_function_ref proposal is a superset of the minimal proposal. It utilizes the "construct_from_type_erased" plumbing function to create the type safe "make_function_ref" factory functions. These functions DO NOT replace the current constructor. While, the current function_ref proposal is focused on callables, callable objects, such as functors and lambda functions, make_function_ref is focused on functions in general. While the current function_ref constructor handles implicit conversion of parameters, make_function_ref handles explicit simple assignment of ~exact signatures. This focus of make_function_ref makes it easier in general and safer when it comes to dangling. Other than when these two construction methodologies overlap with the stateless free and member function pointers, they are largely complimentary.</p>
 <!-- make_function_ref-spec-max.cc.html -->
 <div class="code">
 {{> snippets/make_function_ref-spec-max.cc}}
 </div>
-<h3 id="solution">Proposal #2++ - The make_function_ref proposal</h3>
-<p>TODO</p>
+<h3 id="solution">Proposal #2++ - The make_function_ref++ proposal</h3>
+<p>"function_ref" and "make_function_ref" overlap when it comes to [stateless] assigning of a free or member function.</p>
+<p>
+<table class="simple">
+<tr>
+<td colspan="3" style="text-align:center">make_function_ref</td>
+<td style="text-align:center">vs</td>
+<td colspan="3" style="text-align:center">function_ref</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>Stateless</td>
+<td>Stateful</td>
+<td>&nbsp;</td>
+<td>Stateless</td>
+<td>Stateful</td>
+</tr>
+<tr>
+<td>Free Function</td>
+<td>&#x2713;</td>
+<td>&#x2713;</td>
+<td>&nbsp;</td>
+<td>&#x2713; different</td>
+<td>&#x2717; use capturing lambda</td>
+</tr>
+<tr>
+<td>Member Function</td>
+<td>&#x2713;</td>
+<td>&#x2713;</td>
+<td>&nbsp;</td>
+<td>&#x2717; dangle</td>
+<td>&#x2717; use capturing lambda</td>
+</tr>
+</table>
+</p>
+<p>The questions are should either free or member function assignment be removed from function_ref or make_function_ref!</p>
+<h4>Should the make_function_ref proposal or the function_ref proposal drop initialization from a free function?</h4>
+<p>The make_function_ref implementation is not the same as the function_ref implementation. In make_function_ref, a free function is passed as a template parameter making it more compile time. The internal state pointer goes unused and likely initialized to nullptr. The function_ref implementation is more runtime by storing the function pointer in the internal state pointer member of function_ref. In this case, the function_ref proposal is easier in the sense of a constructor over a factory function. It is also more flexible in the sense a user can wait latter in their code to bind the function pointer to the function_ref. make_function_ref is more consistent with the other three use case where it is clearly better. Also just like strongly typed primitive types such as email alias type vs the string it is based upon, code quality improves by using function_ref sooner rather than latter. Despite these differences, the gains of having both out weigh the small overlap in functionality.</p>
+<h4>Should the make_function_ref proposal drop initialization from a member function?</h4>
+<p>Perish the thought. "make_function_ref" does not dangle, the current function_ref proposal can. "make_function_ref" is consistent with its other three use cases.</p>
+<h4>Should the function_ref proposal drop initialization from a member function?</h4>
+<p>That depends. Should the standardization process go with just the minimal interface i.e. without make_function_ref, than it should remain. Having it is just clunky and users can just learn the multiple right ways of doing things and be on guard against the easy wrong way of doing things that lead to dangling. However, if the standardization does go with the make_function_ref factory functions then MAYBE. Removing it would just be a matter of adding something like " requires !std::is_member_function_pointer<decltype(mf)>::value" to the constructor in the current function_ref proposal. However, for consistency sake, since function_ref can take a free function pointer it could be argued to keep it in. In either case, it doesn't negate the need of the make_function_ref factory functions to address the four free and member, stateless and stateful function pointer use cases.</p>
 <h3 id="solution">Proposal #3 - The scorched Earth/nuclear option</h3>
-<p>TODO</p>
+<p>For all the advantages mentioned in the current function_ref proposal, function_ref is an important vocabulary type that like v-table interfaces or traits live and breath on the API/module boundary. If there is any hint of function_ref, with or without make_function_ref, NOT being stanardized in C++23 than I would hope the following is considered instead. Don't have the make_function_ref factory functions. Don't have the current constructor in the current function_ref proposal. Rather, just have the explicit double pointer implementation and the construct_from_type_erased factory function. There is still value in a trivial function_ref even while its construction methodologies gets straightened out in C++26.</p>
+<!-- function_ref-trivial.cc.html -->
+<div class="code">
+{{> snippets/function_ref-trivial.cc}}
+</div>
 <!--
 <h2 id="overview">Overview</h2>
 <p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
@@ -168,6 +223,18 @@
 <p>Here, the type erased free and member function use cases are consistent with the free and member use cases that do not have type erasure. It is concise. Conveys the intent of the user and provides a feature found in other proramming languages that C++ users have been clamoring for decades. There is an additional reason that goes to ease of use. When you use a stateful lambda to needlessly tie the type erased state to a method, you are in essence creating a new anonymous type and instance which has its own lifetime that must be managed by the user. Superflous code is being added which the optimizer has to remove. Usage of function_ref becomes harder to reason about. You in essense have a function_ref which is a reference, refering to a lambda which is a reference that references the actual object in question. This makes it harder to reason about any remaining dangling. A reference to a reference is not a reference. It is rather a pointer which has multiple levels of indirection. A reference was always a collapsable single level of indirection.</p>
 <h2 id="ftm">Feature test macro</h2>
 <p>We do not need a feature macro, because we intend for this paper to modify std::function_ref before it ships.</p>
+<h2 id="other-languages">Other Languages</h2>
+<p>C# and the .NET family of languages provide this via delegates.</p>
+<!-- other-language-c-sharp.cc.html -->
+<div class="code">
+{{> snippets/other-language-c-sharp.cc}}
+</div>
+<p>Borland C++ now embarcadero provide this via __closure.</p>
+<!-- other-language-borland-cpp.cc.html -->
+<div class="code">
+{{> snippets/other-language-borland-cpp.cc}}
+</div>
+<p>Since make_function_ref handles all 4 statess/stateful free/member use cases, it is more feature rich than either of the above.</p>
 <h2 id="implementation">Example implementation</h2>
 <p>The most up-to-date implementation, created by Jarrad Waterloo, is available on <a href="#make_function_ref-implementation">Github</a></p>
 <h2 id="acknowledgments">Acknowledgments</h2>

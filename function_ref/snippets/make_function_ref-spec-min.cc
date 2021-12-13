@@ -20,5 +20,5 @@ public:
   static function_ref<R(Args...)> construct_from_type_erased(void* obj_, R (*callback_)(void*,Args...)) noexcept;
 private:
   void* erased_object;
-  R(*erased_function)(Args...);
+  R(*erased_function)(void*, Args...);
 };

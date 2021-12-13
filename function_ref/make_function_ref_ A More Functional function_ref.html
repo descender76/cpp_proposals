@@ -62,11 +62,12 @@
 </table>
 <h2>Contents</h2>
 <h3><a href="#abstract">1&nbsp;&nbsp;Abstract</a></h3>
-<h3><a href="#overview">2&nbsp;&nbsp;Overview</a></h3>
-<h3><a href="#motivating-overview">3&nbsp;&nbsp;Motivating overview</a></h3>
+<h3><a href="#motivating-overview">2&nbsp;&nbsp;Motivating overview</a></h3>
+<h3><a href="#solution">3&nbsp;&nbsp;Solution</a></h3>
+<!--<h3><a href="#overview">4&nbsp;&nbsp;Overview</a></h3>-->
 <h3><a href="#motivating-examples">4&nbsp;&nbsp;Motivating examples</a></h3>
-<h3><a href="#solution">5&nbsp;&nbsp;Solution</a></h3>
-<h3><a href="#ftm">6&nbsp;&nbsp;Feature test macro</a></h3>
+<h3><a href="#ftm">5&nbsp;&nbsp;Feature test macro</a></h3>
+<h3><a href="#other-languages">6&nbsp;&nbsp;Other Languages</a></h3>
 <h3><a href="#implementation">7&nbsp;&nbsp;Example implementation</a></h3>
 <h3><a href="#acknowledgments">8&nbsp;&nbsp;Acknowledgments</a></h3>
 <h3><a href="#alternative">9&nbsp;&nbsp;Annex: alternative design decisions</a></h3>
@@ -79,13 +80,213 @@
 <p>The current <a href="#reference-p0792r5">function_ref</a> proposal is closely modeled as a drop in replacement for std::function. It is assumed that it works the same but is referenced based instead of copy based. As such the current proposal provides little direction as to how it may be constructed and used safely. While std::function is more intuitive, function_ref is less so. Further with the change to reference based, function_ref is capable of so much more than what is provided, since it being modeled after std::function which was designed with copying in mind.</p>
 -->
 <p>I propose to make <a href="#reference-p0792r5">function_ref</a> easier and safer to use with pointer-to-member-functions by adding a std::make_function_ref factory function. Also the pointer-to-free-function and pointer-to-member-function cases should be expanded to easily and safely include type erased state just like functors and capturing lambdas has.</p>
-<h2 id="overview">Overview</h2>
+<h2 id="motivating-overview">Motivating overview</h2>
+<p>
+<ul>
+<li>std::function_ref has an api similar to that of std::function. However, its constructors are hard to use correctly with pointer-to-member-function and other common use cases.</li>
+<li>std::function_ref currently has no interface to allow it to store the this pointer. This is an intentional design choice of P0792 (which tries to be consistent with the language-syntax of pointer-to-member-function). However I found that interface to be surprising, and often leading to access to dangling objects.</li>
+<li>Because function_ref is expected to be a reference to a callable, we can support proper pointer-to-member-function usage without increasing the size of the std::function_ref (no copy needs to be made).</li>
+</ul>
+</p>
+<h2 id="solution">Solution</h2>
 <!--
+<p>This version of make_function_ref proposal speaks more to the deficiencies of the original function_ref proposal. This has not been done to provide ammunition for delaying function_ref further. Rather function_ref is API/module boundary fundamental data type which is long over do. If for any tragic reason the standardization process decides function_ref should not go forward, I beg that to whom it may concern reconsider. The problematic current constructor could be stripped out and only the internal 2 pointer constructor be provided. Even a trivial implementation where construction is left to the end user is still of abundant value. However, what is hoped that some version of the current function_ref constructor is retained and better specified. The implementation is locked to the two pointer solution and the two pointer constructor is changed to a static factory function perhaps called "construct_from_type_erased" to discourage its use but for it to be used by future or user defined construction methods such as make_function_ref.</p>
+-->
+<h3 id="solution">Proposal #1 - The minimal proposal</h3>
+<p>The following are the minimal changes needed to support make_function_ref and other author's proposals in the future. It consists of 2 changes to the current function_ref proposal.</p>
+<p>
+<ol>
+<li>Tie down the specification to a double pointer implementation; a void* of state and a free function pointer that takes that state as its first perameter. In short, remove the exposition only from the class definition in the current function_ref proposal.</li>
+<li>Add a static factory function, named "construct_from_type_erased", that trivially initialize the two aforementioned pointers.</li>
+</ol>
+</p>
+<p>Not making this change in C++23 would constitute a breaking change because it would require implementations that did not use the two pointer solution to have to change.</p>
+<!-- make_function_ref-spec-min.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">;</font>
+
+<i><font color="#9A1900">/// Specializations for function types.</font></i>
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)&gt;</font> <font color="#FF0000">{</font>
+<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
+  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
+  <font color="#009900">void</font><font color="#990000">*</font> erased_object<font color="#990000">;</font>
+  <b><font color="#000000">R</font></b><font color="#990000">(*</font>erased_function<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font> Args<font color="#990000">...);</font>
+  <i><font color="#9A1900">// NOTE:</font></i>
+  <i><font color="#9A1900">// 1) The following has been removed: // exposition only</font></i>
+  <i><font color="#9A1900">// 2) "void*, " was added to erased_function</font></i>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<i><font color="#9A1900">// NOTE: noexcept version was added</font></i>
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">&gt;</font> <font color="#FF0000">{</font>
+<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
+  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
+  <font color="#009900">void</font><font color="#990000">*</font> erased_object<font color="#990000">;</font>
+  <b><font color="#000000">R</font></b><font color="#990000">(*</font>erased_function<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font> Args<font color="#990000">...);</font>
+<font color="#FF0000">}</font><font color="#990000">;</font></tt></pre>
+
+</div>
+<h3 id="solution">Proposal #2 - The make_function_ref proposal</h3>
+<!--<p>The following are all the changes needed to adopt make_function_ref into the current function_ref proposal.</p>-->
+<p>The make_function_ref proposal is a superset of the minimal proposal. It utilizes the "construct_from_type_erased" plumbing function to create the type safe "make_function_ref" factory functions. These functions DO NOT replace the current constructor. While, the current function_ref proposal is focused on callables, callable objects, such as functors and lambda functions, make_function_ref is focused on functions in general. While the current function_ref constructor handles implicit conversion of parameters, make_function_ref handles explicit simple assignment of ~exact signatures. This focus of make_function_ref makes it easier in general and safer when it comes to dangling. Other than when these two construction methodologies overlap with the stateless free and member function pointers, they are largely complimentary.</p>
+<!-- make_function_ref-spec-max.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">;</font>
+
+<i><font color="#9A1900">/// Specializations for function types.</font></i>
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)&gt;</font> <font color="#FF0000">{</font>
+<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
+  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
+  <font color="#009900">void</font><font color="#990000">*</font> erased_object<font color="#990000">;</font>
+  <b><font color="#000000">R</font></b><font color="#990000">(*</font>erased_function<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font> Args<font color="#990000">...);</font>
+  <i><font color="#9A1900">// NOTE:</font></i>
+  <i><font color="#9A1900">// 1) The following has been removed: // exposition only</font></i>
+  <i><font color="#9A1900">// 2) "void*, " was added to erased_function</font></i>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<i><font color="#9A1900">// NOTE: noexcept version was added</font></i>
+<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">&gt;</font> <font color="#FF0000">{</font>
+<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
+  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
+  <font color="#009900">void</font><font color="#990000">*</font> erased_object<font color="#990000">;</font>
+  <b><font color="#000000">R</font></b><font color="#990000">(*</font>erased_function<font color="#990000">)(</font>Args<font color="#990000">...);</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">testType</font><font color="#990000">&gt;</font>
+<b><font color="#0000FF">struct</font></b> <font color="#008080">is_function_pointer</font>
+<font color="#FF0000">{</font>
+    <b><font color="#0000FF">static</font></b> <b><font color="#0000FF">const</font></b> <font color="#009900">bool</font> value <font color="#990000">=</font> std<font color="#990000">::</font>is_function_v<font color="#990000">&lt;</font>std<font color="#990000">::</font>remove_pointer_t<font color="#990000">&lt;</font>testType<font color="#990000">&gt;&gt;;</font>
+<font color="#FF0000">}</font><font color="#990000">;</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
+
+<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
+<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font></tt></pre>
+
+</div>
+<h3 id="solution">Proposal #2++ - The make_function_ref++ proposal</h3>
+<p>"function_ref" and "make_function_ref" overlap when it comes to [stateless] assigning of a free or member function.</p>
+<p>
+<table class="simple">
+<tr>
+<td colspan="3" style="text-align:center">make_function_ref</td>
+<td style="text-align:center">vs</td>
+<td colspan="3" style="text-align:center">function_ref</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>Stateless</td>
+<td>Stateful</td>
+<td>&nbsp;</td>
+<td>Stateless</td>
+<td>Stateful</td>
+</tr>
+<tr>
+<td>Free Function</td>
+<td>&#x2713;</td>
+<td>&#x2713;</td>
+<td>&nbsp;</td>
+<td>&#x2713; different</td>
+<td>&#x2717; use capturing lambda</td>
+</tr>
+<tr>
+<td>Member Function</td>
+<td>&#x2713;</td>
+<td>&#x2713;</td>
+<td>&nbsp;</td>
+<td>&#x2717; dangle</td>
+<td>&#x2717; use capturing lambda</td>
+</tr>
+</table>
+</p>
+<p>The questions are should either free or member function assignment be removed from function_ref or make_function_ref!</p>
+<h4>Should the make_function_ref proposal or the function_ref proposal drop initialization from a free function?</h4>
+<p>The make_function_ref implementation is not the same as the function_ref implementation. In make_function_ref, a free function is passed as a template parameter making it more compile time. The internal state pointer goes unused and likely initialized to nullptr. The function_ref implementation is more runtime by storing the function pointer in the internal state pointer member of function_ref. In this case, the function_ref proposal is easier in the sense of a constructor over a factory function. It is also more flexible in the sense a user can wait latter in their code to bind the function pointer to the function_ref. make_function_ref is more consistent with the other three use case where it is clearly better. Also just like strongly typed primitive types such as email alias type vs the string it is based upon, code quality improves by using function_ref sooner rather than latter. Despite these differences, the gains of having both out weigh the small overlap in functionality.</p>
+<h4>Should the make_function_ref proposal drop initialization from a member function?</h4>
+<p>Perish the thought. "make_function_ref" does not dangle, the current function_ref proposal can. "make_function_ref" is consistent with its other three use cases.</p>
+<h4>Should the function_ref proposal drop initialization from a member function?</h4>
+<p>That depends. Should the standardization process go with just the minimal interface i.e. without make_function_ref, than it should remain. Having it is just clunky and users can just learn the multiple right ways of doing things and be on guard against the easy wrong way of doing things that lead to dangling. However, if the standardization does go with the make_function_ref factory functions then MAYBE. Removing it would just be a matter of adding something like " requires !std::is_member_function_pointer<decltype(mf)>::value" to the constructor in the current function_ref proposal. However, for consistency sake, since function_ref can take a free function pointer it could be argued to keep it in. In either case, it doesn't negate the need of the make_function_ref factory functions to address the four free and member, stateless and stateful function pointer use cases.</p>
+<h3 id="solution">Proposal #3 - The scorched Earth/nuclear option</h3>
+<p>For all the advantages mentioned in the current function_ref proposal, function_ref is an important vocabulary type that like v-table interfaces or traits live and breath on the API/module boundary. If there is any hint of function_ref, with or without make_function_ref, NOT being stanardized in C++23 than I would hope the following is considered instead. Don't have the make_function_ref factory functions. Don't have the current constructor in the current function_ref proposal. Rather, just have the explicit double pointer implementation and the construct_from_type_erased factory function. There is still value in a trivial function_ref even while its construction methodologies gets straightened out in C++26.</p>
+<!-- function_ref-trivial.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><b><font color="#0000FF">namespace</font></b> std
+<font color="#FF0000">{</font>
+    <b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">Signature</font><font color="#990000">&gt;</font>
+    <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font>
+    <font color="#FF0000">{</font>
+        <font color="#009900">void</font><font color="#990000">*</font> erased_object<font color="#990000">;</font>
+
+        <b><font color="#000000">R</font></b><font color="#990000">(*</font>erased_function<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font> Args<font color="#990000">...);</font>
+        <i><font color="#9A1900">// `R`, and `Args...` are the return type, and the parameter-type-list,</font></i>
+        <i><font color="#9A1900">// of the function type `Signature`, respectively.</font></i>
+
+    <b><font color="#0000FF">public</font></b><font color="#990000">:</font>
+        <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
+        <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+
+        <b><font color="#000000">function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> function_ref<font color="#990000">&amp;)</font> <b><font color="#0000FF">noexcept</font></b> <font color="#990000">=</font> <b><font color="#0000FF">default</font></b><font color="#990000">;</font>
+
+        <b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font>
+        <b><font color="#000000">function_ref</font></b><font color="#990000">(</font>F<font color="#990000">&amp;&amp;);</font>
+
+        function_ref<font color="#990000">&amp;</font> <b><font color="#0000FF">operator</font></b><font color="#990000">=(</font><b><font color="#0000FF">const</font></b> function_ref<font color="#990000">&amp;)</font> <b><font color="#0000FF">noexcept</font></b> <font color="#990000">=</font> <b><font color="#0000FF">default</font></b><font color="#990000">;</font>
+
+        <b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font>
+        function_ref<font color="#990000">&amp;</font> <b><font color="#0000FF">operator</font></b><font color="#990000">=(</font>F<font color="#990000">&amp;&amp;);</font>
+
+        <font color="#009900">void</font> <b><font color="#000000">swap</font></b><font color="#990000">(</font>function_ref<font color="#990000">&amp;)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+
+        <font color="#008080">R</font> <b><font color="#0000FF">operator</font></b><font color="#990000">()(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">const</font></b> <b><font color="#0000FF">noexcept</font></b><font color="#990000">(</font><font color="#008080">see</font> below<font color="#990000">);</font>
+        <i><font color="#9A1900">// `R` and `Args...` are the return type and the parameter-type-list</font></i>
+        <i><font color="#9A1900">// of the function type `Signature`, respectively.</font></i>
+    <font color="#FF0000">}</font><font color="#990000">;</font>
+
+    <b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">Signature</font><font color="#990000">&gt;</font>
+    <font color="#009900">void</font> <b><font color="#000000">swap</font></b><font color="#990000">(</font>function_ref<font color="#990000">&lt;</font>Signature<font color="#990000">&gt;&amp;,</font> function_ref<font color="#990000">&lt;</font>Signature<font color="#990000">&gt;&amp;)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
+<font color="#FF0000">}</font></tt></pre>
+
+</div>
+<!--
+<h2 id="overview">Overview</h2>
 <p>"function_ref" <b>ONLY</b> has <b>ONE</b>, non copy, constructor which takes a const reference to a functor. The "erased_object/obj_" points to the functor and the "erased_function/callback_" points to a binding function that calls the functor's call operator receiving not only the operator parameters but also the "erased_object/obj_". "function_ref" can be created by binding a functor/stateful lambda, a C function pointer/stateless lambda and a C++ member function pointer. There are important differences between these 3 use cases. The functor/stateful lambda use case supports type erased state while the C function pointer/stateless lambda and a C++ member function pointer use cases do not. In order to type erase one parameter of a free function or the this parameter of a member function a functor/stateful lambda must be created to hold the reference to the desired state. This exposes some of the limitations of the current function_ref's proposal. "std::array" is to the C array AS function_ref is to the C function pointer. function_ref is tedious when it comes to being to assign functional things of ~exact function signature while C function pointers are not. Usage of NON typed erased [member] functions is easier to construct than using type erased [member] functions. Type erased [member] functions is generally more common and definitely more useful than their NON type erased counterparts.</p>
 <p>Consider for a moment the use case of type erased member functions. This type of single function runtime polymorphism is found throughout the OOP programming world. For instance, in the .NET world, such as C#, has <a href="#reference-delegate">single and multi cast delegates</a>. Embarcadero C++'s has it via their<a href="#reference-closure">__closure</a>. This has also been peddled in the standard C++ world via articles such as <a href="#reference-fastest">Member Function Pointers and the Fastest Possible C++ Delegates</a>, <a href="#reference-fast">The Impossibly Fast C++ Delegate</a> and <a href="#reference-impossibly">Impossibly fast delegate in C++11</a>. One thing all of these implementations have in common is the ability to easily create these delegates via a constructor with two parameters; the instance to be type erased and the member function pointer.</p>
 <p>Similarly too, the use case of type erased functions has been instrumental in the functional programming world for decades in C and other programming languages. The utility of simplifying the construction of these common use cases are demonstrated below.</p>
 -->
-<p>In order to be able to identify such areas of improvement, we need to look at the <a href="#reference-github">reference implementation</a> for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers.</p>
+<h2 id="motivating-examples">Motivating examples</h2>
+<p>In order to be able to identify such areas of improvement, we need to look at the <a href="#reference-github">reference implementation</a> for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers. This constructor serves the same purpose as the proposed static factory function named "construct_from_type_erased" in the previous solution. A constructor is instead used here to reduce the additional syntax in order to ensure we are making a fair comparison between the varying construction methods.</p>
 <h3 id="the-given">The given</h3>
 <!-- make_function_ref-constructor-only.cc.html -->
 <div class="code">
@@ -115,15 +316,6 @@ http://www.gnu.org/software/src-highlite -->
 
 </div>
 <p>All examples unless stated otherwise were compiled on <a href="https://www.godbolt.org/">godbolt.org</a> using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.</p>
-<h2 id="motivating-overview">Motivating overview</h2>
-<p>
-<ul>
-<li>std::function_ref has an api similar to that of std::function. However, its constructors are hard to use correctly with pointer-to-member-function and other common use cases.</li>
-<li>std::function_ref currently has no interface to allow it to store the this pointer. This is an intentional design choice of P0792 (which tries to be consistent with the language-syntax of pointer-to-member-function). However I found that interface to be surprising, and often leading to access to dangling objects.</li>
-<li>Because function_ref is expected to be a reference to a callable, we can support proper pointer-to-member-function usage without increasing the size of the std::function_ref (no copy needs to be made).</li>
-</ul>
-</p>
-<h2 id="motivating-examples">Motivating examples</h2>
 <!--
 <h3 id="function_ref-construction-usage">function_ref construction and usage</h3>
 <h3 id="function_ref-stateless">free function and member function without type erasure use cases</h3>
@@ -363,92 +555,36 @@ http://www.gnu.org/software/src-highlite -->
 
 </div>
 <p>Here, the type erased free and member function use cases are consistent with the free and member use cases that do not have type erasure. It is concise. Conveys the intent of the user and provides a feature found in other proramming languages that C++ users have been clamoring for decades. There is an additional reason that goes to ease of use. When you use a stateful lambda to needlessly tie the type erased state to a method, you are in essence creating a new anonymous type and instance which has its own lifetime that must be managed by the user. Superflous code is being added which the optimizer has to remove. Usage of function_ref becomes harder to reason about. You in essense have a function_ref which is a reference, refering to a lambda which is a reference that references the actual object in question. This makes it harder to reason about any remaining dangling. A reference to a reference is not a reference. It is rather a pointer which has multiple levels of indirection. A reference was always a collapsable single level of indirection.</p>
-<h2 id="solution">Solution</h2>
-<p>This version of make_function_ref proposal speaks more to the deficiencies of the original function_ref proposal. This has not been done to provide ammunition for delaying function_ref further. Rather function_ref is API/module boundary fundamental data type which is long over do. If for any tragic reason the standardization process decides function_ref should not go forward, I beg that to whom it may concern reconsider. The problematic current constructor could be stripped out and only the internal 2 pointer constructor be provided. Even a trivial implementation where construction is left to the end user is still of abundant value. However, what is hoped that some version of the current function_ref constructor is retained and better specified. The implementation is locked to the two pointer solution and the two pointer constructor is changed to a static factory function perhaps called "construct_from_type_erased" to discourage its use but for it to be used by future or user defined construction methods such as make_function_ref.</p>
-<p>The following are the minimal changes needed to support make_function_ref and other author's proposals in the future.</p>
-<!-- make_function_ref-spec-min.cc.html -->
-<div class="code">
-<!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">;</font>
-
-<i><font color="#9A1900">/// Specializations for function types.</font></i>
-<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)&gt;</font> <font color="#FF0000">{</font>
-<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
-  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
-  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
-<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
-  <font color="#009900">void</font> <font color="#990000">*</font>obj_ <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-  <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font> <font color="#990000">*,</font> Args<font color="#990000">...)</font> <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-<font color="#FF0000">}</font><font color="#990000">;</font>
-
-<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">&gt;</font> <font color="#FF0000">{</font>
-<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
-  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
-  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
-<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
-  <font color="#009900">void</font> <font color="#990000">*</font>obj_ <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-  <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font> <font color="#990000">*,</font> Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b> <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-<font color="#FF0000">}</font><font color="#990000">;</font></tt></pre>
-
-</div>
-<p>The following are all the changes needed to adopt make_function_ref into the current function_ref proposal.</p>
-<!-- make_function_ref-spec-max.cc.html -->
-<div class="code">
-<!-- Generator: GNU source-highlight 3.1.9
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">F</font><font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">;</font>
-
-<i><font color="#9A1900">/// Specializations for function types.</font></i>
-<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)&gt;</font> <font color="#FF0000">{</font>
-<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
-  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
-  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
-<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
-  <font color="#009900">void</font> <font color="#990000">*</font>obj_ <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-  <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font> <font color="#990000">*,</font> Args<font color="#990000">...)</font> <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-<font color="#FF0000">}</font><font color="#990000">;</font>
-
-<b><font color="#0000FF">template</font></b> <font color="#990000">&lt;</font><b><font color="#0000FF">class</font></b> <font color="#008080">R</font><font color="#990000">,</font> <b><font color="#0000FF">class</font></b><font color="#990000">...</font> Args<font color="#990000">&gt;</font> <b><font color="#0000FF">class</font></b> <font color="#008080">function_ref</font><font color="#990000">&lt;</font><b><font color="#000000">R</font></b><font color="#990000">(</font>Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">&gt;</font> <font color="#FF0000">{</font>
-<b><font color="#0000FF">public</font></b><font color="#990000">:</font>
-  <i><font color="#9A1900">// factory function to be used by make_function_ref and other user defined construction methods</font></i>
-  <b><font color="#0000FF">static</font></b> <font color="#008080">function_ref&lt;R(Args...)&gt;</font> <b><font color="#000000">construct_from_type_erased</font></b><font color="#990000">(</font><font color="#009900">void</font><font color="#990000">*</font> obj_<font color="#990000">,</font> <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font><font color="#990000">*,</font>Args<font color="#990000">...))</font> <b><font color="#0000FF">noexcept</font></b><font color="#990000">;</font>
-<b><font color="#0000FF">private</font></b><font color="#990000">:</font>
-  <font color="#009900">void</font> <font color="#990000">*</font>obj_ <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-  <b><font color="#000000">R</font></b> <font color="#990000">(*</font>callback_<font color="#990000">)(</font><font color="#009900">void</font> <font color="#990000">*,</font> Args<font color="#990000">...)</font> <b><font color="#0000FF">noexcept</font></b> <font color="#990000">=</font> nullptr<font color="#990000">;</font><i><font color="#9A1900">// NOT exposition only</font></i>
-<font color="#FF0000">}</font><font color="#990000">;</font>
-
-<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
-<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
-
-<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
-<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
-
-<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> mf<font color="#990000">&gt;</font> <font color="#008080">requires</font> std<font color="#990000">::</font>is_member_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>mf<font color="#990000">)&gt;::</font>value
-<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font>
-
-<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">typename</font></b> <font color="#008080">testType</font><font color="#990000">&gt;</font>
-<b><font color="#0000FF">struct</font></b> <font color="#008080">is_function_pointer</font>
-<font color="#FF0000">{</font>
-    <b><font color="#0000FF">static</font></b> <b><font color="#0000FF">const</font></b> <font color="#009900">bool</font> value <font color="#990000">=</font> std<font color="#990000">::</font>is_function_v<font color="#990000">&lt;</font>std<font color="#990000">::</font>remove_pointer_t<font color="#990000">&lt;</font>testType<font color="#990000">&gt;&gt;;</font>
-<font color="#FF0000">}</font><font color="#990000">;</font>
-
-<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
-<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font>T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
-
-<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">,</font> <b><font color="#0000FF">typename</font></b> <font color="#008080">T</font><font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
-<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">(</font><b><font color="#0000FF">const</font></b> T<font color="#990000">&amp;</font> obj<font color="#990000">);</font>
-
-<b><font color="#0000FF">template</font></b><font color="#990000">&lt;</font><b><font color="#0000FF">auto</font></b> f<font color="#990000">&gt;</font> <font color="#008080">requires</font> is_function_pointer<font color="#990000">&lt;</font><b><font color="#0000FF">decltype</font></b><font color="#990000">(</font>f<font color="#990000">)&gt;::</font>value
-<b><font color="#0000FF">auto</font></b> <b><font color="#000000">make_function_ref</font></b><font color="#990000">();</font></tt></pre>
-
-</div>
 <h2 id="ftm">Feature test macro</h2>
 <p>We do not need a feature macro, because we intend for this paper to modify std::function_ref before it ships.</p>
+<h2 id="other-languages">Other Languages</h2>
+<p>C# and the .NET family of languages provide this via delegates.</p>
+<!-- other-language-c-sharp.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><i><font color="#9A1900">// C#</font></i>
+delegate <font color="#008080">void</font> <b><font color="#000000">some_name</font></b><font color="#990000">();</font>
+<font color="#008080">some_name</font> fr <font color="#990000">=</font> foo<font color="#990000">;</font><i><font color="#9A1900">// the stateless free function use case</font></i>
+<font color="#008080">some_name</font> fr <font color="#990000">=</font> b<font color="#990000">.</font>baz<font color="#990000">;</font><i><font color="#9A1900">// the stateful member function use case</font></i></tt></pre>
+
+</div>
+<p>Borland C++ now embarcadero provide this via __closure.</p>
+<!-- other-language-borland-cpp.cc.html -->
+<div class="code">
+<!-- Generator: GNU source-highlight 3.1.9
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><i><font color="#9A1900">// Borland C++, embarcadero __closure</font></i>
+<font color="#009900">void</font><font color="#990000">(</font>__closure <font color="#990000">*</font> fr<font color="#990000">)();</font>
+fr <font color="#990000">=</font> foo<font color="#990000">;</font><i><font color="#9A1900">// the stateless free function use case</font></i>
+fr <font color="#990000">=</font> b<font color="#990000">.</font>baz<font color="#990000">;</font><i><font color="#9A1900">// the stateful member function use case</font></i></tt></pre>
+
+</div>
+<p>Since make_function_ref handles all 4 statess/stateful free/member use cases, it is more feature rich than either of the above.</p>
 <h2 id="implementation">Example implementation</h2>
 <p>The most up-to-date implementation, created by Jarrad Waterloo, is available on <a href="#make_function_ref-implementation">Github</a></p>
 <h2 id="acknowledgments">Acknowledgments</h2>
