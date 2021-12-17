@@ -436,7 +436,12 @@ public:
     return callback_(obj_, std::forward<Args>(args)...);
   }
 
+  // TODO move to private section, public currently used deliberately in proposal examples
   function_ref(void* obj_, R (*callback_)(void*,Args...)) noexcept : obj_{obj_}, callback_{callback_} {}
+
+  static function_ref<R(Args...)> construct_from_type_erased(void* obj_, R (*callback_)(void*,Args...)) {
+      return {obj_, callback_};
+  }
 private:
   void *obj_ = nullptr;
   R (*callback_)(void *, Args...) = nullptr;
@@ -497,7 +502,12 @@ public:
     return callback_(obj_, std::forward<Args>(args)...);
   }
 
+  // TODO move to private section, public currently used deliberately in proposal examples
   function_ref(void* obj_, R (*callback_)(void*,Args...) noexcept) noexcept : obj_{obj_}, callback_{callback_} {}
+
+  static function_ref<R(Args...) noexcept> construct_from_type_erased(void* obj_, R (*callback_)(void*,Args...)noexcept) {
+      return {obj_, callback_};
+  }
 private:
   void *obj_ = nullptr;
   R (*callback_)(void *, Args...) noexcept = nullptr;
@@ -528,21 +538,21 @@ function_ref(R (*)(Args...))->function_ref<R(Args...)>;
 template<auto mf, typename T> requires std::is_member_function_pointer<decltype(mf)>::value
 auto make_function_ref(T& obj)
 {
-    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::function_signature>{&obj, tl::internal_member_function_traits<decltype(mf), mf>::type_erase_this};
+    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::function_signature>::construct_from_type_erased(std::addressof(obj), tl::internal_member_function_traits<decltype(mf), mf>::type_erase_this);
 }
 
 template<auto mf, typename T> requires std::is_member_function_pointer<decltype(mf)>::value
 auto make_function_ref(const T& obj)
 {
-    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::function_signature>{&obj, tl::internal_member_function_traits<decltype(mf), mf>::type_erase_this};
+    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::function_signature>::construct_from_type_erased(std::addressof(obj), tl::internal_member_function_traits<decltype(mf), mf>::type_erase_this);
 }
 // member function without type erasure
 template<auto mf> requires std::is_member_function_pointer<decltype(mf)>::value
 auto make_function_ref()
 {
-    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref_function_signature>{nullptr, tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref};
+    return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref_function_signature>::construct_from_type_erased(nullptr, tl::internal_member_function_traits<decltype(mf), mf>::this_as_ref);
 }
-
+/*
 class ref {};
 class pointer {};
 class value {};
@@ -564,7 +574,7 @@ auto make_function_ref()
 {
     return tl::function_ref<typename tl::internal_member_function_traits<decltype(mf), mf>::this_as_value_function_signature>{nullptr, tl::internal_member_function_traits<decltype(mf), mf>::this_as_value};
 }
-
+*/
 template<typename testType>
 struct is_function_pointer
 {
@@ -578,20 +588,20 @@ struct is_function_pointer
 template<auto f, typename T> requires is_function_pointer<decltype(f)>::value
 auto make_function_ref(T& obj)
 {
-    return tl::function_ref<typename tl::internal_type_erase_first<decltype(f), f>::function_signature>{nullptr, tl::internal_type_erase_first<decltype(f), f>::type_erased_function};
+    return tl::function_ref<typename tl::internal_type_erase_first<decltype(f), f>::function_signature>::construct_from_type_erased(std::addressof(obj), tl::internal_type_erase_first<decltype(f), f>::type_erased_function);
 }
 
 template<auto f, typename T> requires is_function_pointer<decltype(f)>::value
 auto make_function_ref(const T& obj)
 {
-    return tl::function_ref<typename tl::internal_type_erase_first<decltype(f), f>::function_signature>{nullptr, tl::internal_type_erase_first<decltype(f), f>::type_erased_function};
+    return tl::function_ref<typename tl::internal_type_erase_first<decltype(f), f>::function_signature>::construct_from_type_erased(std::addressof(obj), tl::internal_type_erase_first<decltype(f), f>::type_erased_function);
 }
 
 // function without type erasure
 template<auto f> requires is_function_pointer<decltype(f)>::value
 auto make_function_ref()
 {
-    return tl::function_ref<typename tl::internal_function_traits<decltype(f), f>::function_signature>{nullptr, tl::internal_function_traits<decltype(f), f>::prepend_void_pointer};
+    return tl::function_ref<typename tl::internal_function_traits<decltype(f), f>::function_signature>::construct_from_type_erased(nullptr, tl::internal_function_traits<decltype(f), f>::prepend_void_pointer);
 }
 
 } // namespace tl
