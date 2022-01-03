@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>make_function_ref_more_functional</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">make_function_ref_more_functional</h1>
+</header>
+<table>
+<tbody>
+<tr class="odd">
+<td>Document number</td>
+<td>P2472R2</td>
+</tr>
+<tr class="even">
+<td>Date</td>
+<td>2022-01-02</td>
+</tr>
+<tr class="odd">
+<td>Reply-to</td>
+<td>Jarrad J. Waterloo &lt;<a href="mailto:descender76@gmail.com" class="email">descender76@gmail.com</a>&gt;</td>
+</tr>
+<tr class="even">
+<td>Audience</td>
+<td>Library Evolution Working Group (LEWG)</td>
+</tr>
+<tr class="odd">
+<td>Project</td>
+<td>ISO JTC1/SC22/WG21: Programming Language C++</td>
+</tr>
+</tbody>
+</table>
+<h1 id="make-function_ref-more-functional">make <code>function_ref</code> more functional</h1>
+<style>
+.inline-link
+{
+    font-size: small;
+    margin-top: -2.8em;
+    margin-right: 4px;
+    text-align: right;
+    font-weight: bold;
+}
+
+code
+{
+    font-family: "Fira Code", monospace !important;
+    font-size: 0.87em;
+}
+
+.sourceCode
+{
+    font-size: 0.95em;
+}
+
+a code
+{
+    color: #0645ad;
+}
+</style>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#make-functionref-more-functional">make <code>function_ref</code> more functional</a>
+<ul>
+<li><a href="#abstract">Abstract</a></li>
+<li><a href="#motivating-overview">Motivating overview</a></li>
+<li><a href="#solution">Solution</a></li>
+<li><a href="#motivating-examples">Motivating examples</a></li>
+<li><a href="#feature-test-macro">Feature test macro</a></li>
+<li><a href="#other-languages">Other Languages</a></li>
+<li><a href="#example-implementation">Example implementation</a></li>
+<li><a href="#acknowledgments">Acknowledgments</a></li>
+<li><a href="#annex-alternative-design-decisions">Annex: alternative design decisions</a>
+<ul>
+<li><a href="#auto">auto</a></li>
+<li><a href="#general-purpose-callable-library">General Purpose Callable Library</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+</ul></li>
+</ul>
+<h2 id="abstract">Abstract</h2>
+<p>I propose to make <code>function_ref</code> <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> easier and safer to use with pointer-to-member-functions by adding a std::make_function_ref factory function. Also the pointer-to-free-function and pointer-to-member-function cases should be expanded to easily and safely include type erased state just like functors and capturing lambdas has.</p>
+<h2 id="motivating-overview">Motivating overview</h2>
+<ul>
+<li>std::function_ref has an api similar to that of std::function. However, its constructors are hard to use correctly with pointer-to-member-function and other common use cases.</li>
+<li>std::function_ref currently has no interface to allow it to store the this pointer. This is an intentional design choice of P0792 (which tries to be consistent with the language-syntax of pointer-to-member-function). However I found that interface to be surprising, and often leading to access to dangling objects.</li>
+<li>Because function_ref is expected to be a reference to a callable, we can support proper pointer-to-member-function usage without increasing the size of the std::function_ref (no copy needs to be made).</li>
+</ul>
+<h2 id="solution">Solution</h2>
+<h3 id="proposal-1---the-minimal-proposal">Proposal #1 - The minimal proposal</h3>
+<p>The following are the minimal changes needed to support make_function_ref and other author’s proposals in the future. It consists of 2 changes to the current function_ref proposal.</p>
+<ol type="1">
+<li>Tie down the specification to a double pointer implementation; a void* of state and a free function pointer that takes that state as its first perameter. In short, remove the exposition only from the class definition in the current function_ref proposal.</li>
+<li>Add a static factory function, named “construct_from_type_erased”, that trivially initialize the two aforementioned pointers.</li>
+</ol>
+<p>Not making this change in C++23 would constitute a breaking change because it would require implementations that did not use the two pointer solution to have to change.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> F<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">/// Specializations for function types.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> R<span class="op">,</span> <span class="kw">class</span><span class="op">...</span> Args<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">// factory function to be used by make_function_ref and other user defined construction methods</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> construct_from_type_erased<span class="op">(</span><span class="dt">void</span><span class="op">*</span> <span class="va">obj_</span><span class="op">,</span> R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span><span class="op">*,</span>Args<span class="op">...))</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> erased_object<span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  R<span class="op">(*</span>erased_function<span class="op">)(</span><span class="dt">void</span><span class="op">*,</span> Args<span class="op">...);</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// </span><span class="al">NOTE</span><span class="co">:</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 1) The following has been removed: // exposition only</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 2) &quot;void*, &quot; was added to erased_function</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">// </span><span class="al">NOTE</span><span class="co">: noexcept version was added</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> R<span class="op">,</span> <span class="kw">class</span><span class="op">...</span> Args<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)</span> <span class="kw">noexcept</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// factory function to be used by make_function_ref and other user defined construction methods</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> construct_from_type_erased<span class="op">(</span><span class="dt">void</span><span class="op">*</span> <span class="va">obj_</span><span class="op">,</span> R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span><span class="op">*,</span>Args<span class="op">...))</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> erased_object<span class="op">;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  R<span class="op">(*</span>erased_function<span class="op">)(</span><span class="dt">void</span><span class="op">*,</span> Args<span class="op">...);</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<h3 id="proposal-2---the-make_function_ref-proposal">Proposal #2 - The make_function_ref proposal</h3>
+<p>The make_function_ref proposal is a superset of the minimal proposal. It utilizes the “construct_from_type_erased” plumbing function to create the type safe “make_function_ref” factory functions. These functions DO NOT replace the current constructor. While, the current function_ref proposal is focused on callables, callable objects, such as functors and lambda functions, make_function_ref is focused on functions in general. While the current function_ref constructor handles implicit conversion of parameters, make_function_ref handles explicit simple assignment of ~exact signatures. This focus of make_function_ref makes it easier in general and safer when it comes to dangling. Other than when these two construction methodologies overlap with the stateless free and member function pointers, they are largely complimentary.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> F<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">/// Specializations for function types.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> R<span class="op">,</span> <span class="kw">class</span><span class="op">...</span> Args<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">// factory function to be used by make_function_ref and other user defined construction methods</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> construct_from_type_erased<span class="op">(</span><span class="dt">void</span><span class="op">*</span> <span class="va">obj_</span><span class="op">,</span> R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span><span class="op">*,</span>Args<span class="op">...))</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> erased_object<span class="op">;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  R<span class="op">(*</span>erased_function<span class="op">)(</span><span class="dt">void</span><span class="op">*,</span> Args<span class="op">...);</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// </span><span class="al">NOTE</span><span class="co">:</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 1) The following has been removed: // exposition only</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 2) &quot;void*, &quot; was added to erased_function</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">// </span><span class="al">NOTE</span><span class="co">: noexcept version was added</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> R<span class="op">,</span> <span class="kw">class</span><span class="op">...</span> Args<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)</span> <span class="kw">noexcept</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// factory function to be used by make_function_ref and other user defined construction methods</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> construct_from_type_erased<span class="op">(</span><span class="dt">void</span><span class="op">*</span> <span class="va">obj_</span><span class="op">,</span> R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span><span class="op">*,</span>Args<span class="op">...))</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> erased_object<span class="op">;</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  R<span class="op">(*</span>erased_function<span class="op">)(</span>Args<span class="op">...);</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> mf<span class="op">,</span> <span class="kw">typename</span> T<span class="op">&gt;</span> <span class="kw">requires</span> <span class="bu">std::</span>is_member_function_pointer<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>mf<span class="op">)&gt;::</span>value</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> make_function_ref<span class="op">(</span>T<span class="op">&amp;</span> obj<span class="op">);</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> mf<span class="op">,</span> <span class="kw">typename</span> T<span class="op">&gt;</span> <span class="kw">requires</span> <span class="bu">std::</span>is_member_function_pointer<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>mf<span class="op">)&gt;::</span>value</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> make_function_ref<span class="op">(</span><span class="at">const</span> T<span class="op">&amp;</span> obj<span class="op">);</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> mf<span class="op">&gt;</span> <span class="kw">requires</span> <span class="bu">std::</span>is_member_function_pointer<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>mf<span class="op">)&gt;::</span>value</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> make_function_ref<span class="op">();</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> testType<span class="op">&gt;</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> is_function_pointer</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> <span class="at">const</span> <span class="dt">bool</span> value <span class="op">=</span> <span class="bu">std::</span>is_function_v<span class="op">&lt;</span><span class="bu">std::</span>remove_pointer_t<span class="op">&lt;</span>testType<span class="op">&gt;&gt;;</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">,</span> <span class="kw">typename</span> T<span class="op">&gt;</span> <span class="kw">requires</span> is_function_pointer<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f<span class="op">)&gt;::</span>value</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> make_function_ref<span class="op">(</span>T<span class="op">&amp;</span> obj<span class="op">);</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">,</span> <span class="kw">typename</span> T<span class="op">&gt;</span> <span class="kw">requires</span> is_function_pointer<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f<span class="op">)&gt;::</span>value</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> make_function_ref<span class="op">(</span><span class="at">const</span> T<span class="op">&amp;</span> obj<span class="op">);</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">&gt;</span> <span class="kw">requires</span> is_function_pointer<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f<span class="op">)&gt;::</span>value</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> make_function_ref<span class="op">();</span></span></code></pre></div>
+<h3 id="proposal-2---the-make_function_ref-proposal-1">Proposal #2++ - The make_function_ref++ proposal</h3>
+<p>“function_ref” and “make_function_ref” overlap when it comes to [stateless] assigning of a free or member function.</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>make_function_ref</th>
+<th>vs</th>
+<th>function_ref</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td></td>
+<td>Stateless</td>
+<td>Stateful</td>
+<td></td>
+<td>Stateless</td>
+<td>Stateful</td>
+</tr>
+<tr class="even">
+<td>Free Function</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓ different</td>
+<td>✗ use capturing lambda</td>
+</tr>
+<tr class="odd">
+<td>Member Function</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✗ dangle</td>
+<td>✗ use capturing lambda</td>
+</tr>
+</tbody>
+</table>
+<p>The questions are should either free or member function assignment be removed from function_ref or make_function_ref!</p>
+<h4 id="should-the-make_function_ref-proposal-or-the-function_ref-proposal-drop-initialization-from-a-free-function">Should the make_function_ref proposal or the function_ref proposal drop initialization from a free function?</h4>
+<p>The make_function_ref implementation is not the same as the function_ref implementation. In make_function_ref, a free function is passed as a template parameter making it more compile time. The internal state pointer goes unused and likely initialized to nullptr. The function_ref implementation is more runtime by storing the function pointer in the internal state pointer member of function_ref. In this case, the function_ref proposal is easier in the sense of a constructor over a factory function. It is also more flexible in the sense a user can wait latter in their code to bind the function pointer to the function_ref. make_function_ref is more consistent with the other three use case where it is clearly better. Also just like strongly typed primitive types such as email alias type vs the string it is based upon, code quality improves by using function_ref sooner rather than latter. Despite these differences, the gains of having both out weigh the small overlap in functionality.</p>
+<h4 id="should-the-make_function_ref-proposal-drop-initialization-from-a-member-function">Should the make_function_ref proposal drop initialization from a member function?</h4>
+<p>Perish the thought. “make_function_ref” does not dangle, the current function_ref proposal can. “make_function_ref” is consistent with its other three use cases.</p>
+<h4 id="should-the-function_ref-proposal-drop-initialization-from-a-member-function">Should the function_ref proposal drop initialization from a member function?</h4>
+<p>That depends. Should the standardization process go with just the minimal interface i.e. without make_function_ref, than it should remain. Having it is just clunky and users can just learn the multiple right ways of doing things and be on guard against the easy wrong way of doing things that lead to dangling. However, if the standardization does go with the make_function_ref factory functions then MAYBE. Removing it would just be a matter of adding something like ” requires !std::is_member_function_pointer::value” to the constructor in the current function_ref proposal. However, for consistency sake, since function_ref can take a free function pointer it could be argued to keep it in. In either case, it doesn’t negate the need of the make_function_ref factory functions to address the four free and member, stateless and stateful function pointer use cases.</p>
+<h3 id="proposal-3---the-scorched-earthnuclear-option">Proposal #3 - The scorched Earth/nuclear option</h3>
+<p>For all the advantages mentioned in the current function_ref proposal, function_ref is an important vocabulary type that like v-table interfaces or traits live and breath on the API/module boundary. If there is any hint of function_ref, with or without make_function_ref, NOT being stanardized in C++23 than I would hope the following is considered instead. Don’t have the make_function_ref factory functions. Don’t have the current constructor in the current function_ref proposal. Rather, just have the explicit double pointer implementation and the construct_from_type_erased factory function. There is still value in a trivial function_ref even while its construction methodologies gets straightened out in C++26.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> std</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> Signature<span class="op">&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">class</span> function_ref</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">void</span><span class="op">*</span> erased_object<span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        R<span class="op">(*</span>erased_function<span class="op">)(</span><span class="dt">void</span><span class="op">*,</span> Args<span class="op">...);</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// `R`, and `Args...` are the return type, and the parameter-type-list,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// of the function type `Signature`, respectively.</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// factory function to be used by make_function_ref and other user defined construction methods</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">static</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> construct_from_type_erased<span class="op">(</span><span class="dt">void</span><span class="op">*</span> <span class="va">obj_</span><span class="op">,</span> R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span><span class="op">*,</span>Args<span class="op">...))</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        function_ref<span class="op">(</span><span class="at">const</span> function_ref<span class="op">&amp;)</span> <span class="kw">noexcept</span> <span class="op">=</span> <span class="cf">default</span><span class="op">;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> F<span class="op">&gt;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        function_ref<span class="op">(</span>F<span class="op">&amp;&amp;);</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        function_ref<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">=(</span><span class="at">const</span> function_ref<span class="op">&amp;)</span> <span class="kw">noexcept</span> <span class="op">=</span> <span class="cf">default</span><span class="op">;</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> F<span class="op">&gt;</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        function_ref<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">=(</span>F<span class="op">&amp;&amp;);</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        <span class="dt">void</span> swap<span class="op">(</span>function_ref<span class="op">&amp;)</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        R <span class="kw">operator</span><span class="op">()(</span>Args<span class="op">...)</span> <span class="at">const</span> <span class="kw">noexcept</span><span class="op">(</span>see below<span class="op">);</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">// `R` and `Args...` are the return type and the parameter-type-list</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// of the function type `Signature`, respectively.</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> Signature<span class="op">&gt;</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> swap<span class="op">(</span>function_ref<span class="op">&lt;</span>Signature<span class="op">&gt;&amp;,</span> function_ref<span class="op">&lt;</span>Signature<span class="op">&gt;&amp;)</span> <span class="kw">noexcept</span><span class="op">;</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="motivating-examples">Motivating examples</h2>
+<p>In order to be able to identify such areas of improvement, we need to look at the <code>reference implementation</code> <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers. This constructor serves the same purpose as the proposed static factory function named “construct_from_type_erased” in the previous solution. A constructor is instead used here to reduce the additional syntax in order to ensure we are making a fair comparison between the varying construction methods.</p>
+<h3 id="the-given">The given</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> F<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">/// Specializations for function types.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> R<span class="op">,</span> <span class="kw">class</span><span class="op">...</span> Args<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)&gt;</span> <span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  function_ref<span class="op">(</span><span class="dt">void</span><span class="op">*</span> <span class="va">obj_</span><span class="op">,</span> R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span><span class="op">*,</span>Args<span class="op">...))</span> <span class="kw">noexcept</span> <span class="op">:</span> <span class="va">obj_</span><span class="op">{</span><span class="va">obj_</span><span class="op">},</span> <span class="va">callback_</span><span class="op">{</span><span class="va">callback_</span><span class="op">}</span> <span class="op">{}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="op">*</span><span class="va">obj_</span> <span class="op">=</span> <span class="kw">nullptr</span><span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span> <span class="op">*,</span> Args<span class="op">...)</span> <span class="op">=</span> <span class="kw">nullptr</span><span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> R<span class="op">,</span> <span class="kw">class</span><span class="op">...</span> Args<span class="op">&gt;</span> <span class="kw">class</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>Args<span class="op">...)</span> <span class="kw">noexcept</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  function_ref<span class="op">(</span><span class="dt">void</span><span class="op">*</span> <span class="va">obj_</span><span class="op">,</span> R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span><span class="op">*,</span>Args<span class="op">...))</span> <span class="kw">noexcept</span> <span class="op">:</span> <span class="va">obj_</span><span class="op">{</span><span class="va">obj_</span><span class="op">},</span> <span class="va">callback_</span><span class="op">{</span><span class="va">callback_</span><span class="op">}</span> <span class="op">{}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="op">*</span><span class="va">obj_</span> <span class="op">=</span> <span class="kw">nullptr</span><span class="op">;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  R <span class="op">(*</span><span class="va">callback_</span><span class="op">)(</span><span class="dt">void</span> <span class="op">*,</span> Args<span class="op">...)</span> <span class="kw">noexcept</span> <span class="op">=</span> <span class="kw">nullptr</span><span class="op">;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<p>All examples unless stated otherwise were compiled on <a href="https://www.godbolt.org/">godbolt.org</a> using “x86-64 clang (trunk)” with “-std=c++20 -O2” in order to identify dangling.</p>
+<p>In the following examples, function_ref is compared to std::function in order to identify it behaving unexpectedly. “function_ref” is also compared with itself to highlight inconsistencies in its own interface.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">//#include &lt;https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> bar <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> baz<span class="op">(){}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> foo<span class="op">(</span>bar<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    bar b<span class="op">;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr1 <span class="op">=</span> <span class="op">&amp;</span>bar<span class="op">::</span>baz<span class="op">;</span><span class="co">// immediately dangle</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr2 <span class="op">=</span> foo<span class="op">;</span><span class="co">// does not dangle</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr3 <span class="op">=</span> <span class="op">&amp;</span>foo<span class="op">;</span><span class="co">// immediately dangle</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the following behaves as expected</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>function<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr4 <span class="op">=</span> <span class="op">&amp;</span>bar<span class="op">::</span>baz<span class="op">;</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>function<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr5 <span class="op">=</span> foo<span class="op">;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>function<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr6 <span class="op">=</span> <span class="op">&amp;</span>foo<span class="op">;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    fr1<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    fr2<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    fr3<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    fr4<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    fr5<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    fr6<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">42</span><span class="op">;</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>There are two things to note from the previous example. First, std::function works as expected in all three scenarios. The comparable function_ref has immediate dangling in two of the three. Second, when you compare function_ref to itself, there is a scenario where free function works but member function doesn’t. This treats object oriented programming with less support than functional programming. Its been said that this is the incorrect usage of function_ref, in effect blaming the user instead of the specification and implementation. Those that believe such may give the following example as proof as it is ok to standardize something that can immediately dangle.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>string_view<span class="op"> </span>sv <span class="op">=</span> <span class="st">&quot;hello world&quot;</span><span class="bu">s</span><span class="op">;</span>  <span class="co">// immediately dangling</span></span></code></pre></div>
+<p>While I normally would agree with such sentiment, in this scenario I whole heartedly disagree. Dangling occurs when you still have a reference to state that has gone out of scope, no longer exists. In this string_view example, it is clear that sv is a reference and ““s is state. It is totally unclear in the case of function_ref initialization. Dangling is not what the end user is intending on doing when a function is assigned whether free or member. Functions are stateless and also global, so they don’t go out of scope. This implementation stores a free function pointer as the void* state of function_ref and because a member function pointer is larger than void* it is treated just like a capturing lambda or functor of size greater than a void*. In essence, implementation details are bleeding through function_ref’s public interface and effecting how users are to use function_ref. The current function_ref specification is currently silent on how implementations should behave and how end users should consume in light of its differences with std::function.</p>
+<p>Another example given by the current proponents of function_ref is how the users of function_ref should fix the dangling.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">//#include &lt;https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> bar <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> baz<span class="op">(){}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> foo<span class="op">(</span>bar<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> correct_usage_of_current_function_ref<span class="op">(</span>tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr1<span class="op">,</span> tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr2<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    bar b<span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    fr1<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    fr2<span class="op">(</span>b<span class="op">);</span>    </span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> temp <span class="op">=</span> <span class="op">&amp;</span>bar<span class="op">::</span>baz<span class="op">;</span><span class="co">// WORKAROUND</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr1 <span class="op">=</span> temp<span class="op">;</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> temp <span class="op">=</span> <span class="op">&amp;</span>foo<span class="op">;</span><span class="co">// WORKAROUND</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr2 <span class="op">=</span> temp<span class="op">;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    bar b<span class="op">;</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    fr1<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    fr2<span class="op">(</span>b<span class="op">);</span>    </span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    correct_usage_of_current_function_ref<span class="op">(&amp;</span>foo<span class="op">,</span> <span class="op">&amp;</span>bar<span class="op">::</span>baz<span class="op">);</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">42</span><span class="op">;</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Some proponents of the current function_ref proposal advocate for not even messing with the WORKAROUND which is sort of how one currently deals with dangling today and that the correct usage is to just initialize the function_ref directly in the function parameter in question. I would argue that we should still be able to initialize first because I may provide the same function_ref instantiation to multiple parameters across multiple function calls. Otherwise, duplicating an exact same lambda, in more complicated scenarios, would increase verbosity and violating in programming the one definition rule or don’t repeat yourself. This usage is also plagued with the superfluous workaround line. Why initialize with 2 lines of code when it should just be one! Again, it is not like std::function or how we initialize in C++. Why force end users to work around dangling needlessly when the library implementation is more than capable of handling this? By fixing these trivial dangling noise, we leave the remaining dangling cases to be as clear as the std::string_view example. So, how do we fix some of this dangling in the implementation!</p>
+<p>Given the new constructor mentioned in the <a href="#overview">Overview</a> we can construct an example that does not dangle.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">//#include &lt;https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> bar <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> baz<span class="op">(){}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> foo<span class="op">(</span>bar<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr1 <span class="op">=</span> <span class="op">&amp;</span>bar<span class="op">::</span>baz<span class="op">;</span><span class="co">// immediately dangle</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr2 <span class="op">=</span> <span class="op">&amp;</span>foo<span class="op">;</span><span class="co">// immediately dangle</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// no dangling, this proposal via new constructor</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr3 <span class="op">=</span> <span class="op">{</span><span class="kw">nullptr</span><span class="op">,</span> <span class="op">[](</span><span class="dt">void</span><span class="op">*,</span> bar b<span class="op">){</span>b<span class="op">.</span>baz<span class="op">();}};</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr4 <span class="op">=</span> <span class="op">{</span><span class="kw">nullptr</span><span class="op">,</span> <span class="op">[](</span><span class="dt">void</span><span class="op">*,</span> bar b<span class="op">){</span>foo<span class="op">(</span>b<span class="op">);}};</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// no dangling, original proposal via stateless lambda</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr5 <span class="op">=</span> <span class="op">[](</span>bar b<span class="op">){</span>b<span class="op">.</span>baz<span class="op">();};</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">)&gt;</span> fr6 <span class="op">=</span> <span class="op">[](</span>bar b<span class="op">){</span>foo<span class="op">(</span>b<span class="op">);};</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    bar b<span class="op">;</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    fr1<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    fr2<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    fr3<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    fr4<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    fr5<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    fr6<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">42</span><span class="op">;</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This set of examples shows how free function and member function without type erasure use cases can be handled without any dangling and without the syntax of having to put function_ref initialization parameter on a seperate temporary line. The pair of examples that uses the new constructor is clear that their is no dangling because their is no state, both by the nullptr and the lambda used doesn’t capture i.e. stateless. Similarly, the lambda examples that uses the current function_ref constructor is similarly non capturing, stateless. The problem with these two solutions is the lack of clarity because we can’t simply assign a function with a known compatible signature. This means we have [], (), forwarded aparmeters and possibly return statement. The new constructor examples are also not type safe, though in a stateless scenario, that is a little less of an issue. However, by nailing down the specification and providing the new constructor, we can do much better. Using the new constructor, “make_function_ref” factory functions can be created that type safely creates function_ref from member or free functions without any dangling.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">//#include &lt;https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> bar <span class="op">{</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> baz<span class="op">(){}</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> foo<span class="op">(</span>bar<span class="op">&amp;)</span> <span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">// side by side examples</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> examples<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">&amp;)&gt;</span> fr1 <span class="op">=</span> <span class="op">{</span><span class="kw">nullptr</span><span class="op">,</span> <span class="op">[](</span><span class="dt">void</span><span class="op">*,</span> bar<span class="op">&amp;</span> b<span class="op">){</span>b<span class="op">.</span>baz<span class="op">();}};</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">&amp;)&gt;</span> fr2 <span class="op">=</span> <span class="op">{</span><span class="kw">nullptr</span><span class="op">,</span> <span class="op">[](</span><span class="dt">void</span><span class="op">*,</span> bar<span class="op">&amp;</span> b<span class="op">){</span>foo<span class="op">(</span>b<span class="op">);}};</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">&amp;)&gt;</span> fr3 <span class="op">=</span> <span class="op">[](</span>bar<span class="op">&amp;</span> b<span class="op">){</span>b<span class="op">.</span>baz<span class="op">();};</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">&amp;)&gt;</span> fr4 <span class="op">=</span> <span class="op">[](</span>bar<span class="op">&amp;</span> b<span class="op">){</span>foo<span class="op">(</span>b<span class="op">);};</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">&amp;)&gt;</span> fr5 <span class="op">=</span> tl<span class="op">::</span>make_function_ref<span class="op">&lt;</span>foo<span class="op">&gt;();</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">&amp;)&gt;</span> fr6 <span class="op">=</span> tl<span class="op">::</span>make_function_ref<span class="op">&lt;&amp;</span>foo<span class="op">&gt;();</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>bar<span class="op">&amp;)&gt;</span> fr7 <span class="op">=</span> tl<span class="op">::</span>make_function_ref<span class="op">&lt;&amp;</span>bar<span class="op">::</span>baz<span class="op">&gt;();</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    bar b<span class="op">;</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    fr1<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    fr2<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    fr3<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    fr4<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    fr5<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    fr6<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    fr7<span class="op">(</span>b<span class="op">);</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">42</span><span class="op">;</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>These make_function_ref examples provides the best of both worlds. No dangling for member and free functions without type erasure and a reasonably concise syntax that explicitly states what the user intends to do.</p>
+<p>Adding the new constructor, mentioned in the <a href="#overview">Overview</a>, makes the implementation of function_ref capable of so much more functionality then is currently available. The current function_ref implentation only type erases state for callables such as capturing lambdas but what if your functions or member functions could benefit from type erasure. Instead of making these latter two use cases easy, current users have to use a lambda even if there were no changes in their callable parameters. This too can be improved. Using the new constructor, “make_function_ref” factory functions can be created that type safely creates function_ref from member or free functions with type erased state, as is common in both functional and object oriented programming. Since the usage of these factory functions are intended for objects that already exist, than in this scenario too there is significantly less dangling that a user has to deal with.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">//#include &lt;https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> bar <span class="op">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> baz<span class="op">(){}</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="kw">operator</span><span class="op">()(){}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> foo<span class="op">(</span>bar<span class="op">&amp;)</span> <span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">// side by side examples</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> examples<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    bar b<span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr1 <span class="op">=</span> <span class="op">[&amp;</span>b<span class="op">](){</span>b<span class="op">.</span>baz<span class="op">();};</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr2 <span class="op">=</span> <span class="op">[&amp;</span>b<span class="op">](){</span>foo<span class="op">(</span>b<span class="op">);};</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// using the new constructor</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr3 <span class="op">=</span> <span class="op">{&amp;</span>b<span class="op">,</span> <span class="op">[](</span><span class="dt">void</span><span class="op">*</span> obj<span class="op">){</span><span class="kw">static_cast</span><span class="op">&lt;</span>bar<span class="op">*&gt;(</span>obj<span class="op">)-&gt;</span>baz<span class="op">();}};</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr4 <span class="op">=</span> <span class="op">{&amp;</span>b<span class="op">,</span> <span class="op">[](</span><span class="dt">void</span><span class="op">*</span> obj<span class="op">){</span>foo<span class="op">(*</span><span class="kw">static_cast</span><span class="op">&lt;</span>bar<span class="op">*&gt;(</span>obj<span class="op">));}};</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// using make_function_ref which uses new constructor</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr5 <span class="op">=</span> tl<span class="op">::</span>make_function_ref<span class="op">&lt;</span>foo<span class="op">&gt;(</span>b<span class="op">);</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr6 <span class="op">=</span> tl<span class="op">::</span>make_function_ref<span class="op">&lt;&amp;</span>foo<span class="op">&gt;(</span>b<span class="op">);</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr7 <span class="op">=</span> tl<span class="op">::</span>make_function_ref<span class="op">&lt;&amp;</span>bar<span class="op">::</span>baz<span class="op">&gt;(</span>b<span class="op">);</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    tl<span class="op">::</span>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr8 <span class="op">=</span> tl<span class="op">::</span>make_function_ref<span class="op">&lt;&amp;</span>bar<span class="op">::</span><span class="kw">operator</span><span class="op">()&gt;(</span>b<span class="op">);</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// C#</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// delegate void some_name();</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// some_name fr = foo;</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// some_name fr = b.baz;</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">///////////////////////////////</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Borland C++, embarcadero __closure</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// void(__closure * fr)();</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// fr = foo</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// fr = b.baz</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    fr1<span class="op">();</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    fr2<span class="op">();</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    fr3<span class="op">();</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    fr4<span class="op">();</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    fr5<span class="op">();</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    fr6<span class="op">();</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    fr7<span class="op">();</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    fr8<span class="op">();</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">42</span><span class="op">;</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Here, the type erased free and member function use cases are consistent with the free and member use cases that do not have type erasure. It is concise. Conveys the intent of the user and provides a feature found in other proramming languages that C++ users have been clamoring for decades. There is an additional reason that goes to ease of use. When you use a stateful lambda to needlessly tie the type erased state to a method, you are in essence creating a new anonymous type and instance which has its own lifetime that must be managed by the user. Superflous code is being added which the optimizer has to remove. Usage of function_ref becomes harder to reason about. You in essense have a function_ref which is a reference, refering to a lambda which is a reference that references the actual object in question. This makes it harder to reason about any remaining dangling. A reference to a reference is not a reference. It is rather a pointer which has multiple levels of indirection. A reference was always a collapsable single level of indirection.</p>
+<h2 id="feature-test-macro">Feature test macro</h2>
+<p>We do not need a feature macro, because we intend for this paper to modify std::function_ref before it ships.</p>
+<h2 id="other-languages">Other Languages</h2>
+<p>C# and the .NET family of languages provide this via <code>delegates</code> <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// C#</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>delegate <span class="dt">void</span> some_name<span class="op">();</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>some_name fr <span class="op">=</span> foo<span class="op">;</span><span class="co">// the stateless free function use case</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>some_name fr <span class="op">=</span> b<span class="op">.</span>baz<span class="op">;</span><span class="co">// the stateful member function use case</span></span></code></pre></div>
+<p>Borland C++ now embarcadero provide this via <code>__closure</code> <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Borland C++, embarcadero __closure</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">(</span>__closure <span class="op">*</span> fr<span class="op">)();</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>fr <span class="op">=</span> foo<span class="op">;</span><span class="co">// the stateless free function use case</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>fr <span class="op">=</span> b<span class="op">.</span>baz<span class="op">;</span><span class="co">// the stateful member function use case</span></span></code></pre></div>
+<p>Since make_function_ref handles all 4 statess/stateful free/member use cases, it is more feature rich than either of the above.</p>
+<h2 id="example-implementation">Example implementation</h2>
+<p>The most up-to-date implementation, created by Jarrad Waterloo, is available on <code>Github</code> <a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>Thanks to Arthur O’Dwyer, Tomasz Kamiński and Corentin Jabot for providing very valuable feedback on this proposal.</p>
+<h2 id="annex-alternative-design-decisions">Annex: alternative design decisions</h2>
+<h3 id="why-not-just-use-bauto...-argsb.bazargs...">Why not just use <code>[&amp;b](auto... args){b.baz(args...);}</code>?</h3>
+<p>While succinct, this does have some undesirable consequences.</p>
+<ul>
+<li>It is more complex; at least cognitively speaking. The only pieces the end user really cares about is either “=baz” or “=b.baz”. The capture, the parameter propagation even with auto and the occassional return are all superfluous.</li>
+<li>If this was a C function pointer would the end user be happy with that versus just assigning with “= some_function”. In this case the public wrapper interface is more complicated than the internals. Shouldn’t that be reversed i.e. abstraction.</li>
+<li>Using a functor or stateful lambda does require creating a object and type even if anonymous that has a lifetime that must be managed making things more complicated.</li>
+<li>Construction which should be one step has now been broken into two which is more cumbersome; see the next decision.</li>
+</ul>
+<h3 id="why-not-just-use-bind_front-and-turn-the-remaining-make_function_ref-implementations-into-a-general-purpose-functors-library">Why not just use bind_front and turn the remaining make_function_ref implementations into a general purpose functors library?</h3>
+<p>I actually agree that C++ could use a separate function transformation library for the general cases but I don’t think that should negate function_ref supporting compatible signatures; i.e. first class support. Such a general purpose library would turn what should be a one step construction process into a two step process; first create a functor and then assign it to the function_ref. Personally I prefer one step and here is why. function_ref is to function pointer, in C, as std::array is to C/C++ array. It is more intuitive/familiar to the end user. a function pointer is simply assigned for compatible/comparable signatures and the end user must create a new function for incompatible signatures in order to do conversions or reordering of parameters and in the case of functors, adding more parameters. This two phase construction is more verbose. make_function_ref is less so and the same name regardless of what is being assigned. It is also similar to make_pair, make_shared_ptr and the other single step make functions; again familiar. I would hesitate to say that end users expect a simple construction methodology based on the prevalence of simpler solutions in other languages and there is no good reason why we should make things deliberately harder especially for common cases when it is not needed to be so.</p>
+<p>It should also be noted that their are current C++ limitations that restrict our implementation choices.</p>
+<ul>
+<li>C++ template constructors do not support explicit template parameters meaning having to resort to tag classes which make things more verbose.</li>
+<li>Template functions do not support partial specialization meaning such things that should simply be performed by functions has to be performed by whole partially specialized classes making things more verbose.</li>
+<li>Making heavily templatized make_function_ref functions into FRIEND functions of function_ref is borderline impossible, if not so. This is why I still need my public double pointer constructor. I am still for having this constructor anyway for advance end users to prototype other compatible signatures for operators and other function like constructs in C++ that currently don’t have a natural binding.</li>
+</ul>
+<p>At present, my current make_function_ref solution seems to provide a very concise single step construction that enhances function_ref to support better the 4 use cases: [non] type erased [member/free] functions.</p>
+<h2 id="references">References</h2>
+<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html" class="uri">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2" role="doc-endnote"><p><a href="https://github.com/TartanLlama/function_ref" class="uri">https://github.com/TartanLlama/function_ref</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3" role="doc-endnote"><p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" class="uri">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4" role="doc-endnote"><p><a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" class="uri">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5" role="doc-endnote"><p><a href="https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp" class="uri">https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp</a><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>

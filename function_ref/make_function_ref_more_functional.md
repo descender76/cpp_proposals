@@ -40,7 +40,7 @@ a code
 - [make `function_ref` more functional](#make-functionref-more-functional)
   - [Abstract](#abstract)
   - [Motivating overview](#motivating-overview)
-  - [Specification](#specification)
+  - [Solution](#solution)
   - [Motivating examples](#motivating-examples)
   - [Feature test macro](#feature-test-macro)
   - [Other Languages](#other-languages)
@@ -57,11 +57,9 @@ I propose to make `function_ref` [^p0792r5] easier and safer to use with pointer
 
 ## Motivating overview
 
-std::function_ref has an api similar to that of std::function. However, its constructors are hard to use correctly with pointer-to-member-function and other common use cases.
-
-std::function_ref currently has no interface to allow it to store the this pointer. This is an intentional design choice of P0792 (which tries to be consistent with the language-syntax of pointer-to-member-function). However I found that interface to be surprising, and often leading to access to dangling objects.
-
-Because function_ref is expected to be a reference to a callable, we can support proper pointer-to-member-function usage without increasing the size of the std::function_ref (no copy needs to be made).
+* std::function_ref has an api similar to that of std::function. However, its constructors are hard to use correctly with pointer-to-member-function and other common use cases.
+* std::function_ref currently has no interface to allow it to store the this pointer. This is an intentional design choice of P0792 (which tries to be consistent with the language-syntax of pointer-to-member-function). However I found that interface to be surprising, and often leading to access to dangling objects.
+* Because function_ref is expected to be a reference to a callable, we can support proper pointer-to-member-function usage without increasing the size of the std::function_ref (no copy needs to be made).
 
 ## Solution
 
@@ -69,9 +67,8 @@ Because function_ref is expected to be a reference to a callable, we can support
 
 The following are the minimal changes needed to support make_function_ref and other author's proposals in the future. It consists of 2 changes to the current function_ref proposal.
 
-Tie down the specification to a double pointer implementation; a void* of state and a free function pointer that takes that state as its first perameter. In short, remove the exposition only from the class definition in the current function_ref proposal.
-
-Add a static factory function, named "construct_from_type_erased", that trivially initialize the two aforementioned pointers.
+1. Tie down the specification to a double pointer implementation; a void* of state and a free function pointer that takes that state as its first perameter. In short, remove the exposition only from the class definition in the current function_ref proposal.
+2. Add a static factory function, named "construct_from_type_erased", that trivially initialize the two aforementioned pointers.
 
 Not making this change in C++23 would constitute a breaking change because it would require implementations that did not use the two pointer solution to have to change.
 
@@ -169,15 +166,15 @@ auto make_function_ref();
 
 The questions are should either free or member function assignment be removed from function_ref or make_function_ref!
 
-Should the make_function_ref proposal or the function_ref proposal drop initialization from a free function?
+#### Should the make_function_ref proposal or the function_ref proposal drop initialization from a free function?
 
 The make_function_ref implementation is not the same as the function_ref implementation. In make_function_ref, a free function is passed as a template parameter making it more compile time. The internal state pointer goes unused and likely initialized to nullptr. The function_ref implementation is more runtime by storing the function pointer in the internal state pointer member of function_ref. In this case, the function_ref proposal is easier in the sense of a constructor over a factory function. It is also more flexible in the sense a user can wait latter in their code to bind the function pointer to the function_ref. make_function_ref is more consistent with the other three use case where it is clearly better. Also just like strongly typed primitive types such as email alias type vs the string it is based upon, code quality improves by using function_ref sooner rather than latter. Despite these differences, the gains of having both out weigh the small overlap in functionality.
 
-Should the make_function_ref proposal drop initialization from a member function?
+#### Should the make_function_ref proposal drop initialization from a member function?
 
 Perish the thought. "make_function_ref" does not dangle, the current function_ref proposal can. "make_function_ref" is consistent with its other three use cases.
 
-Should the function_ref proposal drop initialization from a member function?
+#### Should the function_ref proposal drop initialization from a member function?
 
 That depends. Should the standardization process go with just the minimal interface i.e. without make_function_ref, than it should remain. Having it is just clunky and users can just learn the multiple right ways of doing things and be on guard against the easy wrong way of doing things that lead to dangling. However, if the standardization does go with the make_function_ref factory functions then MAYBE. Removing it would just be a matter of adding something like " requires !std::is_member_function_pointer::value" to the constructor in the current function_ref proposal. However, for consistency sake, since function_ref can take a free function pointer it could be argued to keep it in. In either case, it doesn't negate the need of the make_function_ref factory functions to address the four free and member, stateless and stateful function pointer use cases.
 
@@ -225,9 +222,9 @@ namespace std
 
 ## Motivating examples
 
-In order to be able to identify such areas of improvement, we need to look at the reference implementation for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers. This constructor serves the same purpose as the proposed static factory function named "construct_from_type_erased" in the previous solution. A constructor is instead used here to reduce the additional syntax in order to ensure we are making a fair comparison between the varying construction methods.
+In order to be able to identify such areas of improvement, we need to look at the `reference implementation` [^functionref] for function_ref. This also requires that we, momentarily, add one constructor that provides direct access to its two pointers. This constructor serves the same purpose as the proposed static factory function named "construct_from_type_erased" in the previous solution. A constructor is instead used here to reduce the additional syntax in order to ensure we are making a fair comparison between the varying construction methods.
 
-The given
+### The given
 
 ```cpp
 template <class F> class function_ref;
@@ -250,7 +247,7 @@ private:
 };
 ```
 
-All examples unless stated otherwise were compiled on godbolt.org using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.
+All examples unless stated otherwise were compiled on [godbolt.org](https://www.godbolt.org/) using "x86-64 clang (trunk)" with "-std=c++20 -O2" in order to identify dangling.
 
 In the following examples, function_ref is compared to std::function in order to identify it behaving unexpectedly. "function_ref" is also compared with itself to highlight inconsistencies in its own interface.
 
@@ -327,7 +324,7 @@ int main() {
 
 Some proponents of the current function_ref proposal advocate for not even messing with the WORKAROUND which is sort of how one currently deals with dangling today and that the correct usage is to just initialize the function_ref directly in the function parameter in question. I would argue that we should still be able to initialize first because I may provide the same function_ref instantiation to multiple parameters across multiple function calls. Otherwise, duplicating an exact same lambda, in more complicated scenarios, would increase verbosity and violating in programming the one definition rule or don't repeat yourself. This usage is also plagued with the superfluous workaround line. Why initialize with 2 lines of code when it should just be one! Again, it is not like std::function or how we initialize in C++. Why force end users to work around dangling needlessly when the library implementation is more than capable of handling this? By fixing these trivial dangling noise, we leave the remaining dangling cases to be as clear as the std::string_view example. So, how do we fix some of this dangling in the implementation!
 
-Given the new constructor mentioned in the "Overview" we can construct an example that does not dangle.
+Given the new constructor mentioned in the [Overview](#overview) we can construct an example that does not dangle.
 
 ```cpp
 //#include <https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp>
@@ -404,7 +401,7 @@ int main() {
 
 These make_function_ref examples provides the best of both worlds. No dangling for member and free functions without type erasure and a reasonably concise syntax that explicitly states what the user intends to do.
 
-Adding the new constructor, mentioned in the "Overview", makes the implementation of function_ref capable of so much more functionality then is currently available. The current function_ref implentation only type erases state for callables such as capturing lambdas but what if your functions or member functions could benefit from type erasure. Instead of making these latter two use cases easy, current users have to use a lambda even if there were no changes in their callable parameters. This too can be improved. Using the new constructor, "make_function_ref" factory functions can be created that type safely creates function_ref from member or free functions with type erased state, as is common in both functional and object oriented programming. Since the usage of these factory functions are intended for objects that already exist, than in this scenario too there is significantly less dangling that a user has to deal with.
+Adding the new constructor, mentioned in the [Overview](#overview), makes the implementation of function_ref capable of so much more functionality then is currently available. The current function_ref implentation only type erases state for callables such as capturing lambdas but what if your functions or member functions could benefit from type erasure. Instead of making these latter two use cases easy, current users have to use a lambda even if there were no changes in their callable parameters. This too can be improved. Using the new constructor, "make_function_ref" factory functions can be created that type safely creates function_ref from member or free functions with type erased state, as is common in both functional and object oriented programming. Since the usage of these factory functions are intended for objects that already exist, than in this scenario too there is significantly less dangling that a user has to deal with.
 
 ```cpp
 //#include <https://raw.githubusercontent.com/TartanLlama/function_ref/master/include/tl/function_ref.hpp>
@@ -463,15 +460,18 @@ Here, the type erased free and member function use cases are consistent with the
 We do not need a feature macro, because we intend for this paper to modify std::function_ref before it ships.
 
 ## Other Languages
-C# and the .NET family of languages provide this via delegates.
+C# and the .NET family of languages provide this via `delegates` [^delegates].
 
 ```cpp
 // C#
 delegate void some_name();
 some_name fr = foo;// the stateless free function use case
 some_name fr = b.baz;// the stateful member function use case
-Borland C++ now embarcadero provide this via __closure.
+```
 
+Borland C++ now embarcadero provide this via `__closure` [^closure].
+
+```cpp
 // Borland C++, embarcadero __closure
 void(__closure * fr)();
 fr = foo;// the stateless free function use case
@@ -482,7 +482,7 @@ Since make_function_ref handles all 4 statess/stateful free/member use cases, it
 
 ## Example implementation
 
-The most up-to-date implementation, created by Jarrad Waterloo, is available on Github
+The most up-to-date implementation, created by Jarrad Waterloo, is available on `Github` [^functionrefprime]
 
 ## Acknowledgments
 
@@ -494,13 +494,10 @@ Thanks to Arthur O'Dwyer, Tomasz Kamiński and Corentin Jabot for providing very
 
 While succinct, this does have some undesirable consequences.
 
-It is more complex; at least cognitively speaking. The only pieces the end user really cares about is either "=baz" or "=b.baz". The capture, the parameter propagation even with auto and the occassional return are all superfluous.
-
-If this was a C function pointer would the end user be happy with that versus just assigning with "= some_function". In this case the public wrapper interface is more complicated than the internals. Shouldn't that be reversed i.e. abstraction.
-
-Using a functor or stateful lambda does require creating a object and type even if anonymous that has a lifetime that must be managed making things more complicated.
-
-Construction which should be one step has now been broken into two which is more cumbersome; see the next decision.
+* It is more complex; at least cognitively speaking. The only pieces the end user really cares about is either "=baz" or "=b.baz". The capture, the parameter propagation even with auto and the occassional return are all superfluous.
+* If this was a C function pointer would the end user be happy with that versus just assigning with "= some_function". In this case the public wrapper interface is more complicated than the internals. Shouldn't that be reversed i.e. abstraction.
+* Using a functor or stateful lambda does require creating a object and type even if anonymous that has a lifetime that must be managed making things more complicated.
+* Construction which should be one step has now been broken into two which is more cumbersome; see the next decision.
 
 ### Why not just use bind_front and turn the remaining make_function_ref implementations into a general purpose functors library?
 
@@ -508,16 +505,14 @@ I actually agree that C++ could use a separate function transformation library f
 
 It should also be noted that their are current C++ limitations that restrict our implementation choices.
 
-C++ template constructors do not support explicit template parameters meaning having to resort to tag classes which make things more verbose.
-
-Template functions do not support partial specialization meaning such things that should simply be performed by functions has to be performed by whole partially specialized classes making things more verbose.
-
-Making heavily templatized make_function_ref functions into FRIEND functions of function_ref is borderline impossible, if not so. This is why I still need my public double pointer constructor. I am still for having this constructor anyway for advance end users to prototype other compatible signatures for operators and other function like constructs in C++ that currently don't have a natural binding.
+* C++ template constructors do not support explicit template parameters meaning having to resort to tag classes which make things more verbose.
+* Template functions do not support partial specialization meaning such things that should simply be performed by functions has to be performed by whole partially specialized classes making things more verbose.
+* Making heavily templatized make_function_ref functions into FRIEND functions of function_ref is borderline impossible, if not so. This is why I still need my public double pointer constructor. I am still for having this constructor anyway for advance end users to prototype other compatible signatures for operators and other function like constructs in C++ that currently don't have a natural binding.
 
 At present, my current make_function_ref solution seems to provide a very concise single step construction that enhances function_ref to support better the 4 use cases: [non] type erased [member/free] functions.
 
 ## References
-   
+
 [^p0792r5]: <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0792r5.html>
 [^functionref]: <https://github.com/TartanLlama/function_ref>
 [^functionrefprime]: <https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp>
