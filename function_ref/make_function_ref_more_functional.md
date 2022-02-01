@@ -1,7 +1,7 @@
 |                 |                                                           |
 |-----------------|-----------------------------------------------------------|
-| Document number | P2472R2                                                   |
-| Date            | 2022-01-02                                                |
+| Document number | P2472R1                                                   |
+| Date            | 2022-01-31                                                |
 | Reply-to        | Jarrad J. Waterloo <<descender76@gmail.com>>              |
 | Audience        | Library Evolution Working Group (LEWG)                    |
 | Project         | ISO JTC1/SC22/WG21: Programming Language C++              |
@@ -49,15 +49,15 @@ a code
 
 ## Abstract
 
-I propose adding two/four constructors to `function_ref` [^p0792r6] in order to make it easier to use, more efficient and safer to use with common use cases.
+This document proposes adding additional constructors to `function_ref` [^p0792r6] in order to make it easier to use, more efficient and safer to use with common use cases.
 
-Currently, a `function_ref` [^p0792r6], can be constructed from a lambda/functor, a free function pointer and a member function pointer. While the lambda/functor use case does supports type erasing the `this` pointer, its free/member function pointer constructors does NOT allow type erasing any arguments even though these two use cases are among the most common and valuable in the programming world.
+Currently, a `function_ref`, can be constructed from a lambda/functor, a free function pointer and a member function pointer. While the lambda/functor use case does supports type erasing the `this` pointer, its free/member function pointer constructors does NOT allow type erasing any arguments even though these two use cases are among the most common and valuable in the programming world.
 
 <table>
 <tr>
 <td colspan="3">
 
-`function_ref` [^p0792r6]
+`function_ref`
 
 </td>
 </tr>
@@ -96,6 +96,10 @@ struct bar {
 void foo(bar& b) {
 }
 
+void barbaz(bar& b) {
+    b.baz();
+}
+
 struct callback {
     bar* b;
     void (*f)(bar&);
@@ -104,7 +108,7 @@ struct callback {
 bar b;
 ```
 
-Since typed erased free and member functions are not currently supported, the current `function_ref` [^p0792r6] proposal forces its users to create a unnecessary temporary `stateful` lambda which the developer hopes the optimizer removes.
+Since typed erased free and member functions are not currently supported, the current `function_ref` proposal forces its users to create a unnecessary temporary `stateful` lambda which the developer hopes the optimizer removes.
 
 #### member function with type erasure
 
@@ -117,6 +121,8 @@ C/C++ core language
 
 ```cpp
 callback cb = {&b, [](bar& b){b.baz();}};
+// or
+callback cb = {&b, &barbaz};
 ```
 
 </td>
@@ -163,6 +169,8 @@ C/C++ core language
 
 ```cpp
 callback cb = {&b, [](bar& b){foo(b);}};
+// or
+callback cb = {&b, &foo};
 ```
 
 </td>
@@ -205,14 +213,14 @@ This has numerous disadvantages when compared to what can currently be performed
 ##### Not easy to use
 
 * Unlike the consistent direct initialization of the C/C++ core language example, the initialization of function_ref is `bifurcated` among passing it directly as a function argument or using 2 step initialization by first creating a named temporary. Direct initialization of function_ref leads to immediate dangling.
-* Why should a `stateful` lambda even be needed?
+* Why should a `stateful` lambda even be needed when the signature is compatible?
   * The C/C++ core language example works with a `stateless` lambda. By requiring a `stateful` lambda, a new anonymous type gets created which has state. That state's lifetime also needs to be managed by the user.
   * By requiring lambda, the user must manually forward the function arguments. In the C/C++ core language example, the syntax can get even simpler when the function already exists because in that case the function pointer is passed to the `callback` struct because the function signature is compatible.
 
 ##### Inefficient
 
-* By requiring a `stateful` lambda, a new type is created with a lifetime that must be managed. `function_ref` is a reference to a `stateful` lambda which also is a reference.
-* In the case of member functions, function_ref stores a reference to member function pointer which means calling the member function means going through the fatness of the member function pointer. That could include going through a v-table and multiple inheritance. In the proposed, `nontype` does not take a pointer but rather a [member] function pointer initialization statement thus giving the compiler more information to resolve the function selection at compile time rather than run time.
+* By requiring a `stateful` lambda, a new type is created with a lifetime that must be managed. `function_ref` is a reference to a `stateful` lambda which also is a reference. Even if the optimizer can remove the cost, the user is still left with the burden in the code.
+* In the case of member functions, function_ref stores a reference to a member function pointer which means calling the member function goes through the fatness of the member function pointer. That could include going through a v-table and multiple inheritance. In the proposed, `nontype` does not take a pointer but rather a [member] function pointer initialization statement thus giving the compiler more information to resolve the function selection at compile time rather than run time.
 
 ##### Unsafe
 
@@ -220,7 +228,7 @@ This has numerous disadvantages when compared to what can currently be performed
   ```cpp
   std::string_view sv = "hello world"s;  // immediately dangling
   ```
-  Unfortunate there is a big difference. While with string_view it is apparent that dangling occurs but with `function_ref` of existing instances it is not `expected` to dangle. In this string_view example, it is clear that sv is a reference and ""s is state. It is totally unclear in the case of function_ref initialization. Dangling is not what the end user is intending on doing when a function is assigned whether free or member. Functions are stateless and also global, so they don't go out of scope. So the state that is `expected` to be referenced by `function_ref` should be the type erased argument such as `this` rather than a temporary lambda/functor itself.
+  Unfortunate there is a big difference. With string_view it is apparent that dangling occurs but with `function_ref` of existing instances it is not `expected` to dangle. In this string_view example, it is clear that sv is a reference and ""s is state. It is totally unclear in the case of function_ref initialization. Dangling is not what the end user is intending on doing when a function is assigned, whether free or member. Functions are stateless and also global, so they don't go out of scope. So the state that is `expected` to be referenced by `function_ref` should be the type erased argument such as `this` rather than a reference to a temporary lambda/functor itself.
 
 |                         | easier to use | more efficient | safer to use |
 |-------------------------|---------------|----------------|--------------|
@@ -228,7 +236,7 @@ This has numerous disadvantages when compared to what can currently be performed
 | **function_ref**        | &#10007;      | &#10007;       | &#10007;     |
 | **proposed**            | &#128504;     | &#128504;      | &#128504;    |
 
-What is more member/free function with type erasure are common use cases! `member function with type erasure` is used in delegates in object oriented programming languages and `free function with type erasure` are common with callbacks in procedural/functional programming languages. Why should the call operator be treated more important than any other member function with the same signature?
+What is more, member/free function with type erasure are common use cases! `member function with type erasure` is used by delegates/events in object oriented programming languages and `free function with type erasure` are common with callbacks in procedural/functional programming languages. Why should the call operator be treated more important than any other member function with the same signature?
 
 The fact that users do not expect `stateless` things to dangle becomes even more apparent with the member function without type erasure use case.  
 
@@ -278,8 +286,8 @@ function_ref<void(bar&)> fr = {nontype<&bar::baz>};
 </tr>
 </table>
 
-Current `function_ref` implementations store a reference to the member function pointer as the state inside `function_ref`. A trampoline function is required regardless. However the user `expected` behavior is for `function_ref` referenced state to be unused/`nullptr` as all the arguments has to be forwarded as none are being type erased. As such dangling is `NEVER` expected and yet the current `function_ref` [proposal/implementation] does.
-Similarly this use case similarly suffers as the previous two with respect to ease of of use, efficiency and safety due to the superfluous lambda/functor and two step initialization.
+Current `function_ref` implementations store a reference to the member function pointer as the state inside `function_ref`. A trampoline function is required regardless. However the user `expected` behavior is for `function_ref` referenced state to be unused/`nullptr`, as `ALL` of the arguments has to be forwarded since `NONE` are being type erased. As such dangling is `NEVER` expected and yet the current `function_ref` [proposal/implementation] does.
+Similarly, this use case suffers, just as the previous two did, with respect to ease of of use, efficiency and safety due to the superfluous lambda/functor and two step initialization.
 
 |                         | easier to use | more efficient | safer to use |
 |-------------------------|---------------|----------------|--------------|
@@ -287,7 +295,7 @@ Similarly this use case similarly suffers as the previous two with respect to ea
 | **function_ref**        | &#10007;      | &#10007;       | &#10007;     |
 | **proposed**            | &#128504;     | &#128504;      | &#128504;    |
 
-The C/C++ core language, `function_ref` and the proposed examples are approximately equal with respect to ease of use, efficiency and safety for the free function without type erasure use case. While the proposed `nontype` example is slightly more wordy because of using the template `nontype`, it is more consistent with the other three use cases making it more teachable and usable not having to know when to do one versus the other. Also the expectation of unused state and the function being selected at compile time still applies here as it does for member function without type erasure use case. 
+The C/C++ core language, `function_ref` and the proposed examples are approximately equal with respect to ease of use, efficiency and safety for the free function without type erasure use case. While the proposed `nontype` example is slightly more wordy because of using the template `nontype`, it is more consistent with the other three use cases, making it more teachable and usable since the user does not have to know when to do one versus the other. Also the expectation of unused state and the function being selected at compile time still applies here, as it does for member function without type erasure use case. 
 
 #### free function without type erasure
 
@@ -344,7 +352,7 @@ function_ref<void(bar&)> fr = {nontype<&foo>};
 
 #### Remove existing free function constructor?
 
-With the overlap in functionality with the free function without type erasure use case, should the existing free function constructor be removed? NO. Initializing a `function_ref` from a function pointer instead of function pointer initialization statement is still usable in the most runtime of libraries such as runtime dynamic library linking where a function pointer is looked by a string. It is just not the general case when working with type declarations found in header files and modules.
+With the overlap in functionality with the free function without type erasure use case, should the existing free function constructor be removed? NO. Initializing a `function_ref` from a function pointer instead of function pointer initialization statement is still usable in the most runtime of libraries such as runtime dynamic library linking where a function pointer is looked up by a string or some other identifier. It is just not the general case, where users work with declarations found in header files and modules.
 
 ## Solution
 
@@ -385,7 +393,7 @@ fr = foo;// the stateless free function use case
 fr = b.baz;// the stateful member function use case
 ```
 
-Since make_function_ref handles all 4 statess/stateful free/member use cases, it is more feature rich than either of the above.
+Since `nontype function_ref` handles all 4 statess/stateful free/member use cases, it is more feature rich than either of the above.
 
 ## Example implementation
 
