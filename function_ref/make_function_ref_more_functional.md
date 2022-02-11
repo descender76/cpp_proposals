@@ -404,14 +404,19 @@ With the overlap in functionality with the free function without type erasure us
 ```cpp
 template<class R, class... ArgTypes> class function_ref<R(ArgTypes...) cv noexcept(noex)>
 public:
-  template<class MFP, class I> function_ref(nontype<MFP>, I*) noexcept;
   // MFP is a member function pointer initialization statement
   // I is an instance of the type that house the member function pointed to by MFP
-  template<class MFP> function_ref(nontype<MFP>) noexcept;
-  template<class FP, class FST> function_ref(nontype<FP>, FST*) noexcept;
+  template<auto MFP, class I> function_ref(nontype<MFP>, I*) noexcept;
+
+  // MFP is a member function pointer initialization statement
+  template<auto MFP> function_ref(nontype<MFP>) noexcept;
+
   // FP is a free function pointer initialization statement
   // FST is the type of the first parameter of the free function pointed to by FP
-  template<class FP> function_ref(nontype<FP>) noexcept;
+  template<auto FP, class FST> function_ref(nontype<FP>, FST*) noexcept;
+
+  // FP is a free function pointer initialization statement
+  template<auto FP> function_ref(nontype<FP>) noexcept;
 };
 ```
 
@@ -438,7 +443,7 @@ fr = foo;// the stateless free function use case
 fr = b.baz;// the stateful member function use case
 ```
 
-Since `nontype function_ref` handles all 4 statess/stateful free/member use cases, it is more feature rich than either of the above.
+Since `nontype function_ref` handles all 4 stateless/stateful free/member use cases, it is more feature rich than either of the above.
 
 ## Example implementation
 
