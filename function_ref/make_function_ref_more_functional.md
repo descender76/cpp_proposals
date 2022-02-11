@@ -87,24 +87,24 @@ Currently, a `function_ref`, can be constructed from a lambda/functor, a free fu
 ### Given
 
 ```cpp
-struct bar {
-    void baz() {
+struct cat {
+    void walk() {
     }
 };
 
-void foo(bar& b) {
+void leap(cat& c) {
 }
 
-void barbaz(bar& b) {
-    b.baz();
+void catwalk(cat& c) {
+    c.walk();
 }
 
 struct callback {
-    bar* b;
-    void (*f)(bar&);
+    cat* c;
+    void (*f)(cat&);
 };
 
-bar b;
+cat c;
 ```
 
 #### member/free function with type erasure
@@ -121,9 +121,9 @@ C/C++ core language
 <td>
 
 ```cpp
-callback cb = {&b, [](bar& b){b.baz();}};
+callback cb = {&c, [](cat& c){c.walk();}};
 // or
-callback cb = {&b, &barbaz};
+callback cb = {&c, &catwalk};
 ```
 
 </td>
@@ -137,10 +137,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = [&b](){b.baz();};
+auto temp = [&c](){c.walk();};
 function_ref<void()> fr = temp;
 // or when given directly as a function argument
-some_function([&b](){b.baz();});
+some_function([&c](){c.walk();});
 ```
 
 </td>
@@ -152,7 +152,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void()> fr = {nontype<&bar::baz>, b};
+function_ref<void()> fr = {nontype<&cat::walk>, c};
 ```
 
 </td>
@@ -169,9 +169,9 @@ C/C++ core language
 <td>
 
 ```cpp
-callback cb = {&b, [](bar& b){foo(b);}};
+callback cb = {&c, [](cat& c){leap(c);}};
 // or
-callback cb = {&b, &foo};
+callback cb = {&c, &leap};
 ```
 
 </td>
@@ -185,10 +185,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = [&b](){foo(b);};
+auto temp = [&c](){leap(c);};
 function_ref<void()> fr = temp;
 // or when given directly as a function argument
-some_function([&b](){foo(b);});
+some_function([&c](){leap(c);});
 ```
 
 </td>
@@ -200,9 +200,9 @@ proposed
 <td>
 
 ```cpp
-function_ref<void()> fr = {nontype<foo>, b}
+function_ref<void()> fr = {nontype<leap>, c}
 // or
-function_ref<void()> fr = {nontype<&foo>, b}
+function_ref<void()> fr = {nontype<&leap>, c}
 ```
 
 </td>
@@ -235,8 +235,8 @@ This has numerous disadvantages when compared to what can currently be performed
   
   ```cpp
   std::string_view sv = "hello world"s;// immediately dangling
-  auto b = "hello world"s;
-  std::string_view sv = b;// DOES NOT DANGLE
+  auto c = "hello world"s;
+  std::string_view sv = c;// DOES NOT DANGLE
   ```
   
   </td>
@@ -248,9 +248,9 @@ This has numerous disadvantages when compared to what can currently be performed
   <td>
   
   ```cpp
-  function_ref<void()> fr = [&b](){b.baz();};// immediately dangling
+  function_ref<void()> fr = [&c](){c.walk();};// immediately dangling
   // or
-  function_ref<void()> fr = [&b](){foo(b);};// immediately dangling
+  function_ref<void()> fr = [&c](){leap(c);};// immediately dangling
   ```
   
   </td>
@@ -262,17 +262,17 @@ This has numerous disadvantages when compared to what can currently be performed
   <td>
   
   ```cpp
-  function_ref<void()> fr = {nontype<&bar::baz>, b};// DOES NOT DANGLE
+  function_ref<void()> fr = {nontype<&cat::walk>, c};// DOES NOT DANGLE
   // or
-  function_ref<void()> fr = {nontype<foo>, b}// DOES NOT DANGLE
+  function_ref<void()> fr = {nontype<leap>, c}// DOES NOT DANGLE
   // or
-  function_ref<void()> fr = {nontype<&foo>, b}// DOES NOT DANGLE
+  function_ref<void()> fr = {nontype<&leap>, c}// DOES NOT DANGLE
   ```
   
   </td>
   </tr>
   </table>
-  While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `b` is the state that the user wants to type erase and `function_ref` would not dangle if `b` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `baz` or the free function `foo` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
+  While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `c` is the state that the user wants to type erase and `function_ref` would not dangle if `c` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `walk` or the free function `leap` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
 
 |                         | easier to use | more efficient | safer to use |
 |-------------------------|---------------|----------------|--------------|
@@ -294,7 +294,7 @@ C/C++ core language
 <td>
 
 ```
-void (bar::*mf)() = &bar::baz;
+void (cat::*mf)() = &cat::walk;
 ```
 
 </td>
@@ -308,10 +308,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = &bar::baz;
-function_ref<void(bar&)> fr = temp;
+auto temp = &cat::walk;
+function_ref<void(cat&)> fr = temp;
 // or when given directly as a function argument
-some_function(&bar::baz);
+some_function(&cat::walk);
 ```
 
 </td>
@@ -323,7 +323,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void(bar&)> fr = {nontype<&bar::baz>};
+function_ref<void(cat&)> fr = {nontype<&cat::walk>};
 ```
 
 </td>
@@ -341,7 +341,7 @@ Similarly, this use case suffers, just as the previous two did, with respect to 
 
 #### free function without type erasure
 
-The C/C++ core language, `function_ref` and the proposed examples are approximately equal with respect to ease of use, efficiency and safety for the free function without type erasure use case. While the proposed `nontype` example is slightly more wordy because of using the template `nontype`, it is more consistent with the other three use cases, making it more teachable and usable since the user does not have to know when to do one versus the other. Also the expectation of unused state and the function being selected at compile time still applies here, as it does for member function without type erasure use case. 
+The C/C++ core language, `function_ref` and the proposed examples are approximately equal with respect to ease of use, efficiency and safety for the free function without type erasure use case. While the proposed `nontype` example is slightly more wordy because of using the template `nontype`, it is more consistent with the other three use cases, making it more teachable and usable since the user does not have to know when to do one versus the other i.e. less bifurcation. Also the expectation of unused state and the function being selected at compile time still applies here, as it does for member function without type erasure use case. 
 
 <table>
 <tr>
@@ -351,9 +351,9 @@ C/C++ core language
 <td>
 
 ```cpp
-void (*f)(bar&) = foo;
+void (*f)(cat&) = leap;
 // or
-void (*f)(bar&) = &foo;
+void (*f)(cat&) = &leap;
 ```
 
 </td>
@@ -365,9 +365,9 @@ function_ref
 <td>
 
 ```cpp
-function_ref<void(bar&)> fr = foo;
+function_ref<void(cat&)> fr = leap;
 // or
-function_ref<void(bar&)> fr = &foo;
+function_ref<void(cat&)> fr = &leap;
 ```
 
 </td>
@@ -379,9 +379,9 @@ proposed
 <td>
 
 ```cpp
-function_ref<void(bar&)> fr = {nontype<foo>};
+function_ref<void(cat&)> fr = {nontype<leap>};
 // or
-function_ref<void(bar&)> fr = {nontype<&foo>};
+function_ref<void(cat&)> fr = {nontype<&leap>};
 ```
 
 </td>
@@ -429,8 +429,8 @@ C# and the .NET family of languages provide this via `delegates` [^delegates].
 ```cpp
 // C#
 delegate void some_name();
-some_name fr = foo;// the stateless free function use case
-some_name fr = b.baz;// the stateful member function use case
+some_name fr = leap;// the stateless free function use case
+some_name fr = c.walk;// the stateful member function use case
 ```
 
 Borland C++ now embarcadero provide this via `__closure` [^closure].
@@ -438,8 +438,8 @@ Borland C++ now embarcadero provide this via `__closure` [^closure].
 ```cpp
 // Borland C++, embarcadero __closure
 void(__closure * fr)();
-fr = foo;// the stateless free function use case
-fr = b.baz;// the stateful member function use case
+fr = leap;// the stateless free function use case
+fr = c.walk;// the stateful member function use case
 ```
 
 Since `nontype function_ref` handles all 4 stateless/stateful free/member use cases, it is more feature rich than either of the above.
