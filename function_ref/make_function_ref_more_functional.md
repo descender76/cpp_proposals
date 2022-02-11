@@ -4,7 +4,6 @@
 | Date            | 2022-01-31                                                |
 | Reply-to        | Jarrad J. Waterloo <<descender76@gmail.com>>              |
 | Audience        | Library Evolution Working Group (LEWG)                    |
-| Project         | ISO JTC1/SC22/WG21: Programming Language C++              |
 
 # make `function_ref` more functional
 
