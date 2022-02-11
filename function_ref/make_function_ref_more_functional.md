@@ -108,9 +108,11 @@ struct callback {
 bar b;
 ```
 
+#### member/free function with type erasure
+
 Since typed erased free and member functions are not currently supported, the current `function_ref` proposal forces its users to create a unnecessary temporary `stateful` lambda which the developer hopes the optimizer removes.
 
-#### member function with type erasure
+##### member function with type erasure
 
 <table>
 <tr>
@@ -158,7 +160,7 @@ function_ref<void()> fr = {nontype<&bar::baz>, b};
 </tr>
 </table>
 
-#### free function with type erasure
+##### free function with type erasure
 
 <table>
 <tr>
@@ -224,11 +226,54 @@ This has numerous disadvantages when compared to what can currently be performed
 
 ##### Unsafe
 
-* Direct initialization of function_ref outside of a function argument immediately dangles. Some would say that this is no different than other standardized types such as string_view.
+* Direct initialization of function_ref outside of a function argument immediately dangles. Some would say that this is no different than other standardized types such as string_view. However, this is not true.
+  <table>
+  <tr>
+  <td>
+  C/C++ core language
+  </td>
+  <td>
+  
   ```cpp
-  std::string_view sv = "hello world"s;  // immediately dangling
+  std::string_view sv = "hello world"s;// immediately dangling
+  auto b = "hello world"s;
+  std::string_view sv = b;// DOES NOT DANGLE
   ```
-  Unfortunate there is a big difference. With string_view it is apparent that dangling occurs but with `function_ref` of existing instances it is not `expected` to dangle. In this string_view example, it is clear that sv is a reference and ""s is state. It is totally unclear in the case of function_ref initialization. Dangling is not what the end user is intending on doing when a function is assigned, whether free or member. Functions are stateless and also global, so they don't go out of scope. So the state that is `expected` to be referenced by `function_ref` should be the type erased argument such as `this` rather than a reference to a temporary lambda/functor itself.
+  
+  </td>
+  </tr>
+  <tr>
+  <td>
+  function_ref
+  </td>
+  <td>
+  
+  ```cpp
+  function_ref<void()> fr = [&b](){b.baz();};// immediately dangling
+  // or
+  function_ref<void()> fr = [&b](){foo(b);};// immediately dangling
+  ```
+  
+  </td>
+  </tr>
+  <tr>
+  <td>
+  proposed
+  </td>
+  <td>
+  
+  ```cpp
+  function_ref<void()> fr = {nontype<&bar::baz>, b};// DOES NOT DANGLE
+  // or
+  function_ref<void()> fr = {nontype<foo>, b}// DOES NOT DANGLE
+  // or
+  function_ref<void()> fr = {nontype<&foo>, b}// DOES NOT DANGLE
+  ```
+  
+  </td>
+  </tr>
+  </table>
+  While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `b` is the state that the user wants to type erase and `function_ref` would not dangle if `b` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `baz` or the free function `foo` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
 
 |                         | easier to use | more efficient | safer to use |
 |-------------------------|---------------|----------------|--------------|
@@ -238,9 +283,9 @@ This has numerous disadvantages when compared to what can currently be performed
 
 What is more, member/free function with type erasure are common use cases! `member function with type erasure` is used by delegates/events in object oriented programming languages and `free function with type erasure` are common with callbacks in procedural/functional programming languages. Why should the call operator be treated more important than any other member function with the same signature?
 
-The fact that users do not expect `stateless` things to dangle becomes even more apparent with the member function without type erasure use case.  
-
 #### member function without type erasure
+
+The fact that users do not expect `stateless` things to dangle becomes even more apparent with the member function without type erasure use case.  
 
 <table>
 <tr>
@@ -287,7 +332,7 @@ function_ref<void(bar&)> fr = {nontype<&bar::baz>};
 </table>
 
 Current `function_ref` implementations store a reference to the member function pointer as the state inside `function_ref`. A trampoline function is required regardless. However the user `expected` behavior is for `function_ref` referenced state to be unused/`nullptr`, as `ALL` of the arguments has to be forwarded since `NONE` are being type erased. As such dangling is `NEVER` expected and yet the current `function_ref` [proposal/implementation] does.
-Similarly, this use case suffers, just as the previous two did, with respect to ease of of use, efficiency and safety due to the superfluous lambda/functor and two step initialization.
+Similarly, this use case suffers, just as the previous two did, with respect to ease of of use, efficiency and safety due to the superfluous lambda/functor and two step initialization. Further if the size of `function_ref` is increased beyond 2 pointers to just make the original proposal work for member function pointers, when it is not needed since only a reference to state and a pointer to a trampoline function is needed, then all use cases are pessimistically increased in size.
 
 |                         | easier to use | more efficient | safer to use |
 |-------------------------|---------------|----------------|--------------|
@@ -295,9 +340,9 @@ Similarly, this use case suffers, just as the previous two did, with respect to 
 | **function_ref**        | &#10007;      | &#10007;       | &#10007;     |
 | **proposed**            | &#128504;     | &#128504;      | &#128504;    |
 
-The C/C++ core language, `function_ref` and the proposed examples are approximately equal with respect to ease of use, efficiency and safety for the free function without type erasure use case. While the proposed `nontype` example is slightly more wordy because of using the template `nontype`, it is more consistent with the other three use cases, making it more teachable and usable since the user does not have to know when to do one versus the other. Also the expectation of unused state and the function being selected at compile time still applies here, as it does for member function without type erasure use case. 
-
 #### free function without type erasure
+
+The C/C++ core language, `function_ref` and the proposed examples are approximately equal with respect to ease of use, efficiency and safety for the free function without type erasure use case. While the proposed `nontype` example is slightly more wordy because of using the template `nontype`, it is more consistent with the other three use cases, making it more teachable and usable since the user does not have to know when to do one versus the other. Also the expectation of unused state and the function being selected at compile time still applies here, as it does for member function without type erasure use case. 
 
 <table>
 <tr>
@@ -360,11 +405,11 @@ With the overlap in functionality with the free function without type erasure us
 template<class R, class... ArgTypes> class function_ref<R(ArgTypes...) cv noexcept(noex)>
 public:
   template<class MFP, class I> function_ref(nontype<MFP>, I*) noexcept;
-  // MFP is a member function pointer
+  // MFP is a member function pointer initialization statement
   // I is an instance of the type that house the member function pointed to by MFP
   template<class MFP> function_ref(nontype<MFP>) noexcept;
   template<class FP, class FST> function_ref(nontype<FP>, FST*) noexcept;
-  // FP is a free function pointer
+  // FP is a free function pointer initialization statement
   // FST is the type of the first parameter of the free function pointed to by FP
   template<class FP> function_ref(nontype<FP>) noexcept;
 };
