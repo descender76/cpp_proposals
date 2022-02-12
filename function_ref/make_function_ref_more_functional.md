@@ -50,7 +50,7 @@ a code
 
 This document proposes adding additional constructors to `function_ref` [^p0792r6] in order to make it easier to use, more efficient and safer to use with common use cases.
 
-Currently, a `function_ref`, can be constructed from a lambda/functor, a free function pointer and a member function pointer. While the lambda/functor use case does supports type erasing the `this` pointer, its free/member function pointer constructors does NOT allow type erasing any arguments even though these two use cases are among the most common and valuable in the programming world.
+Currently, a `function_ref`, can be constructed from a lambda/functor, a free function pointer and a member function pointer. While the lambda/functor use case does supports type erasing the `this` pointer, its free/member function pointer constructors does NOT allow type erasing any arguments, even though these two use cases are common.
 
 <table>
 <tr>
@@ -109,7 +109,7 @@ cat c;
 
 #### member/free function with type erasure
 
-Since typed erased free and member functions are not currently supported, the current `function_ref` proposal forces its users to create a unnecessary temporary `stateful` lambda which the developer hopes the optimizer removes.
+Since typed erased free and member functions are not currently supported, the current `function_ref` proposal forces its users to create a unnecessary temporary functor likely with std::bind_front or a `stateful`/capturing lambda which the developer hopes the optimizer elides.
 
 ##### member function with type erasure
 
@@ -171,7 +171,7 @@ C/C++ core language
 ```cpp
 callback cb = {&c, [](cat& c){leap(c);}};
 // or
-callback cb = {&c, &leap};
+callback cb = {&c, leap};
 ```
 
 </td>
@@ -201,8 +201,6 @@ proposed
 
 ```cpp
 function_ref<void()> fr = {nontype<leap>, c}
-// or
-function_ref<void()> fr = {nontype<&leap>, c}
 ```
 
 </td>
@@ -265,8 +263,6 @@ This has numerous disadvantages when compared to what can currently be performed
   function_ref<void()> fr = {nontype<&cat::walk>, c};// DOES NOT DANGLE
   // or
   function_ref<void()> fr = {nontype<leap>, c}// DOES NOT DANGLE
-  // or
-  function_ref<void()> fr = {nontype<&leap>, c}// DOES NOT DANGLE
   ```
   
   </td>
@@ -352,8 +348,6 @@ C/C++ core language
 
 ```cpp
 void (*f)(cat&) = leap;
-// or
-void (*f)(cat&) = &leap;
 ```
 
 </td>
@@ -366,8 +360,6 @@ function_ref
 
 ```cpp
 function_ref<void(cat&)> fr = leap;
-// or
-function_ref<void(cat&)> fr = &leap;
 ```
 
 </td>
@@ -380,8 +372,6 @@ proposed
 
 ```cpp
 function_ref<void(cat&)> fr = {nontype<leap>};
-// or
-function_ref<void(cat&)> fr = {nontype<&leap>};
 ```
 
 </td>
