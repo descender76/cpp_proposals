@@ -211,7 +211,7 @@ This has numerous disadvantages when compared to what can currently be performed
 
 ##### Not easy to use
 
-* Unlike the consistent direct initialization of the C/C++ core language example, the initialization of function_ref is `bifurcated` among passing it directly as a function argument or using 2 step initialization by first creating a named temporary. Direct initialization of function_ref leads to immediate dangling.
+* Unlike the consistent direct initialization of the C/C++ core language example, the initialization of `function_ref` is `bifurcated` among passing it directly as a function argument or using 2 step initialization by first creating a named temporary. Direct initialization of function_ref to a variable would be welcomed if the same function_ref is passed to multiple arguments on either the same but more likely different functions. This leads to immediate dangling which must be resolved with an additional line of code. Getting in the habit of only passing `function_ref` as a argument to a function results in users duplicating lambdas when needed to be used more than once, again needless increasing the volume of code. In both the C/C++ core language and the proposed revision, initialization is consistantly the same and safe regardless of whether `function_ref` is first assigned to a variable.
 * Why should a `stateful` lambda even be needed when the signature is compatible?
   * The C/C++ core language example works with a `stateless` lambda. By requiring a `stateful` lambda, a new anonymous type gets created which has state. That state's lifetime also needs to be managed by the user.
   * By requiring lambda, the user must manually forward the function arguments. In the C/C++ core language example, the syntax can get even simpler when the function already exists because in that case the function pointer is passed to the `callback` struct because the function signature is compatible.
@@ -219,7 +219,7 @@ This has numerous disadvantages when compared to what can currently be performed
 ##### Inefficient
 
 * By requiring a `stateful` lambda, a new type is created with a lifetime that must be managed. `function_ref` is a reference to a `stateful` lambda which also is a reference. Even if the optimizer can remove the cost, the user is still left with the burden in the code.
-* In the case of member functions, function_ref stores a reference to a member function pointer which means calling the member function goes through the fatness of the member function pointer. That could include going through a v-table and multiple inheritance. In the proposed, `nontype` does not take a pointer but rather a [member] function pointer initialization statement thus giving the compiler more information to resolve the function selection at compile time rather than run time.
+* In the proposed, `nontype` does not take a pointer but rather a [member] function pointer initialization statement thus giving the compiler more information to resolve the function selection at compile time rather than run time, granted it is more likely with free functions instead of member functions.
 
 ##### Unsafe
 
@@ -276,7 +276,7 @@ This has numerous disadvantages when compared to what can currently be performed
 | **function_ref**        | &#10007;      | &#10007;       | &#10007;     |
 | **proposed**            | &#128504;     | &#128504;      | &#128504;    |
 
-What is more, member/free function with type erasure are common use cases! `member function with type erasure` is used by delegates/events in object oriented programming languages and `free function with type erasure` are common with callbacks in procedural/functional programming languages. Why should the call operator be treated more important than any other member function with the same signature?
+What is more, member/free function with type erasure are common use cases! `member function with type erasure` is used by delegates/events in object oriented programming languages and `free function with type erasure` are common with callbacks in procedural/functional programming languages.
 
 #### member function without type erasure
 
