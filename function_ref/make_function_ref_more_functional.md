@@ -447,7 +447,7 @@ Thanks to Arthur O'Dwyer, Tomasz Kamiński, Corentin Jabot and Zhihao Yuan for p
 [^p0792r6]: <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r6.html>
 [^functionref]: <https://github.com/TartanLlama/function_ref>
 [^functionrefprime]: <https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp>
-[^nontype]: <https://github.com/zhihaoy/function_ref_nontype/blob/main/include/function_ref.h>
+[^nontype]: <https://github.com/zhihaoy/nontype_functional/blob/main/include/std23/function_ref.h>
 [^delegates]: <https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates>
 [^closure]: <http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure>
 [^fastest]: <https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible>
