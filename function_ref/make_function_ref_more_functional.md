@@ -123,7 +123,7 @@ C/C++ core language
 ```cpp
 callback cb = {&c, [](cat& c){c.walk();}};
 // or
-callback cb = {&c, &catwalk};
+callback cb = {&c, catwalk};
 ```
 
 </td>
@@ -214,7 +214,7 @@ This has numerous disadvantages when compared to what can currently be performed
 * Unlike the consistent direct initialization of the C/C++ core language example, the initialization of `function_ref` is `bifurcated` among passing it directly as a function argument or using 2 step initialization by first creating a named temporary. Direct initialization of function_ref to a variable would be welcomed if the same function_ref is passed to multiple arguments on either the same but more likely different functions. This leads to immediate dangling which must be resolved with an additional line of code. Getting in the habit of only passing `function_ref` as a argument to a function results in users duplicating lambdas when needed to be used more than once, again needless increasing the volume of code. In both the C/C++ core language and the proposed revision, initialization is consistantly the same and safe regardless of whether `function_ref` is first assigned to a variable.
 * Why should a `stateful` lambda even be needed when the signature is compatible?
   * The C/C++ core language example works with a `stateless` lambda. By requiring a `stateful` lambda, a new anonymous type gets created which has state. That state's lifetime also needs to be managed by the user.
-  * By requiring lambda, the user must manually forward the function arguments. In the C/C++ core language example, the syntax can get even simpler when the function already exists because in that case the function pointer is passed to the `callback` struct because the function signature is compatible.
+  * When using a lambda, the user must manually forward the function arguments. In the C/C++ core language example, the syntax can get even simpler when the function already exists because in that case the function pointer is passed to the `callback` struct because the function signature is compatible.
 
 ##### Inefficient
 
