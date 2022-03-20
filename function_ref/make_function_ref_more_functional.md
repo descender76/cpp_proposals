@@ -1,3 +1,9 @@
+<style type="text/css">
+ins { background-color: #CCFFCC }
+s { background-color: #FFCACA }
+blockquote { color: inherit !important }
+</style>
+
 <table>
 <tr>
 <td>Document number</td>
@@ -423,20 +429,13 @@ With the overlap in functionality with the free function without type erasure us
 
 ## Wording
 
-The wording is relative to N4901.
+The wording is relative to P0792R8.
 
-Add new templates to 20.2.1 [utility.syn], header `<utility>` synopsis:
+Add new templates to 20.2.1 [utility.syn], header `<utility>` synopsis after `in_place_index_t` and `in_place_index`:
 
 ```cpp
 namespace std {
   [...]
-
-  template<size_t I>
-    struct in_place_index_t {
-      explicit in_place_index_t() = default;
-    };
-
-  template<size_t I> inline constexpr in_place_index_t<I> in_place_index{};
 
   // nontype argument tag
   template<auto V>
@@ -450,212 +449,50 @@ namespace std {
 
 Add a definition to 20.14.3 [func.def]:
 
-> […]
-> 
-> A target object is the callable object held by a call wrapper.
-> 
-> A constant target object is a target object of a structural type [temp.param].
-> 
-> A call wrapper type may additionally hold […]
-
-Modify 20.14.17.4.3 [func.wrap.ref.ctor] as indicated:
-
-```cpp
-template<class... T>
-  static constexpr bool is-invocable-using = see below;
-```
-
-> If noex is true, `is-invocable-using<T...>` is equal to:
-> 
->   `is_nothrow_invocable_r_v<R, T..., ArgTypes...>`
-> 
-> Otherwise, `is-invocable-using<T...>` is equal to:
-> 
->   `is_invocable_r_v<R, T..., ArgTypes...>`
-
-```cpp
-template<class VT>
-  static constexpr bool is-callable-from = see below;
-```
-
-> If noex is true, `is-callable-from<VT>` is equal to:
-> 
->   `is_nothrow_invocable_r_v<R, VT cv ref, ArgTypes…> &&
->   is_nothrow_invocable_r_v<R, VT inv-quals, ArgTypes…>`
-> 
-> Otherwise,  `is-callable-from<VT>` is equal to:
-> 
->   `is-invocable-using<VT cv ref> &&
->   is-invocable-using<VT inv-quals>
->   is_invocable_r_v<R, VT cv ref, ArgTypes…> &&
->   is_invocable_r_v<R, VT inv-quals, ArgTypes…>`
-
-```cpp
-template<auto f, class T>
-  static constexpr bool is-callable-as-if-from = see below;
-```
-
-> `is-callable-as-if-from<f, VT>` is equal to:
-> 
->   `is-invocable-using<decltype(f), VT cv ref> &&
-  is-invocable-using<decltype(f), VT inv-quals>`
-
-```cpp
-function_ref(function_ref& f) noexcept;
-```
-
-> Postconditions: The target objectstate entities of *this isare the target objectstate entities f had before construction, and f is in a valid state with an unspecified value.
-
-```cpp
-template<class F> function_ref(F& f);
-```
-
-> Let VT be `decay_t<F>`.
-> 
-> Constraints:
-> 
-> - `remove_cvref_t<F>` is not the same type as function_ref, and
-> - `remove_cvref_t<F>` is not a specialization of in_place_type_t, and
-> - `is-callable-from<F>` is true.
-> Mandates: `is_constructible_v<VT, F>` is true.
-> 
-> Preconditions: VT meets the Cpp17Destructible requirements, and if `is_move_constructible_v<VT>` is true, VT meets the Cpp17MoveConstructible requirements.
-> 
-> Postconditions: `*this` has no target objectstate entity if any of the following hold:
-> 
-> - f is a null function pointer value, or
-> - f is a null member pointer value, or
-> - `remove_cvref_t<F>` is a specialization of the function_ref class template, and f has no target objectstate entity.
-> 
-> Otherwise, *this has a target object of type VT direct-non-list-initialized with `std::forward<F>(f)`.
-> 
-> Throws: Any exception thrown by the initialization of the target object. May throw bad_alloc unless VT is a function pointer or a specialization of reference_wrapper.
-
-:::success
 ```cpp
 template<auto f> function_ref(nontype_t<f>) noexcept;
 ```
-:::
 
-:::success
-> Constraints: `is-invocable-using<decltype(f)>` is true.
+> *Constraints:* `is-invocable-using<decltype(f)>` is `true`.
 > 
-> Postconditions: *this has no state entity if f is a null function pointer value or a null member pointer value. Otherwise, *this has a constant target object. Such an object and f are template-argument-equivalent [temp.type].
-:::
-
-
-:::success
-```cpp
-template<auto f, class T> function_ref(nontype_t<f>, T&& x);
-```
-:::
-
-> :::success
-> 
-> Let VT be `decay_t<T>`.
-> 
-> Constraints: `is-callable-as-if-from<f, VT>` is true.
-> 
-> Mandates: `is_constructible_v<VT, T>` is true.
-> 
-> Preconditions: VT meets the Cpp17Destructible requirements, and if `is_move_constructible_v<VT>` is true, VT meets the Cpp17MoveConstructible requirements.
-> 
-> Postconditions: `*this` has no state entity if f is a null function pointer value or a null member pointer value. Otherwise, `*this` has the following properties:
-> 
-> - Its constant target object and f are template-argument-equivalent [temp.type].
-> - It has one bound argument entity, an object of type VT direct-non-list-initialized with `std::forward<T>(x)`.
-> 
-> Throws: Any exception thrown by the initialization of the bound argument. May throw bad_alloc unless
-> 
-> - VT is a specialization of reference_wrapper, or
-> - VT is an object pointer and f is of a pointer to member.
-> :::
+> *Postconditions:* Initializes `bound-entity` with `nullptr`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, nullptr, call-args...)`.
 
 ```cpp
-~function_ref();
+template<auto f, class T> function_ref(nontype_t<f>, cv T& x) noexcept;
 ```
 
-> Effects: Destroys the target objectstate entities of `*this`, if any.
-
-Modify 20.14.17.4.4 [func.wrap.ref.inv] as indicated:
+> 
+> *Constraints:* `is-invocable-using<decltype(f), cv T&>` is true.
+> 
+> *Postconditions:* Initializes `bound-entity` with `addressof(x)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<T cv&>(bound-entity), call-args...)`.
 
 ```cpp
-R operator()(ArgTypes... args) cv ref noexcept(noex);
+template<auto f, class T> function_ref(nontype_t<f>, cv T* x) noexcept;
 ```
 
-> *Preconditions*: `*this` has a target object.
 > 
-> *Effects*: Equivalent to:Let f be an lvalue designating the target object of `*this` and F be the type of f.
+> *Constraints:* `is-invocable-using<decltype(f), cv T*>` is true.
 > 
-> If `*this` has a bound argument, equivalent to
-> 
->   `return INVOKE<R>(f, static_cast<T inv-quals>(x), std::forward<ArgTypes>(args)...);`
-> 
-> where x is an lvalue designating the bound argument of type T.
-> 
-> Otherwise, if `*this` has a constant target object, equivalent to
-> 
->   `return INVOKE<R>(f, std::forward<ArgTypes>(args)...);`
-> 
-> Otherwise, equivalent to
-> 
->   `return INVOKE<R>(static_cast<F inv-quals>(f), std::forward<ArgTypes>(args)...);`
-> 
-> where f is an lvalue designating the target object of `*this` and F is the type of f.
-
-Modify 20.14.17.4.5 [func.wrap.ref.util] as indicated:
-
-```cpp
-void swap(function_ref& other) noexcept;
-```
-
-> *Effects*: Exchanges the target objectsstate entities of `*this` and other.
-
-```cpp
-friend void swap(function_ref& f1, function_ref& f2) noexcept;
-```
-
-> *Effects*: Equivalent to f1.swap(f2).
-
-Add new signatures to [func.wrap.ref.class] synopsis:
-
-> […]
+> *Postconditions:* Initializes `bound-entity` with `addressof(*x)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<cv T*>(bound-entity), call-args...)`.
 
 ```cpp
   template<class R, class... ArgTypes>
   class function_ref<R(ArgTypes...) cv ref noexcept(noex)> {
   public:
-    using result_type = R;
-
-    // [func.wrap.ref.ctor], constructors, assignment, and destructor
-    function_ref(function_ref&) noexcept;
-    template<class F> function_ref(F&);
+    // [func.wrap.ref.ctor], constructors ...
+    ...
     template<auto f> function_ref(nontype_t<f>) noexcept;
-    template<auto f, class T> function_ref(nontype_t<f>, T&);
+    template<auto f, class T> function_ref(nontype_t<f>, cv T&) noexcept;
+    template<auto f, class T> function_ref(nontype_t<f>, cv T*) noexcept;
 
-    ~function_ref();
-
-    // [func.wrap.ref.inv], invocation
-    R operator()(ArgTypes...) cv ref noexcept(noex);
-
-    // [func.wrap.ref.util], utility
-    void swap(function_ref&) noexcept;
-    friend void swap(function_ref&, function_ref&) noexcept;
-
-  private:
-    template<class... T>
-      static constexpr bool is-invocable-using = see below;     // exposition only
-    template<class VT>
-      static constexpr bool is-callable-from = see below;       // exposition only
-    template<auto f, class T>
-      static constexpr bool is-callable-as-if-from = see below; // exposition only
+    ...
   };
 }
 ```
 
 ## Feature test macro
 
-We do not need a feature macro, because we intend for this paper to modify std::function_ref before it ships.
+We do not need a feature macro, because we intend for this paper to modify `std::function_ref` before it ships.
 
 ## Other Languages
 C# and the .NET family of languages provide this via `delegates` [^delegates].
@@ -676,11 +513,11 @@ fr = leap;// the stateless free function use case
 fr = c.walk;// the stateful member function use case
 ```
 
-Since `nontype function_ref` handles all 4 stateless/stateful free/member use cases, it is more feature rich than either of the above.
+Since `nontype` `function_ref` handles all 4 stateless/stateful free/member use cases, it is more feature rich than either of the above. Further, these other language implementations require strict matching of the signatures.
 
 ## Example implementation
 
-The most up-to-date implementation, created by Zhihao Yuan, is available on `Github` [^nontype]
+The most up-to-date implementation, created by Zhihao Yuan, is available on GitHub.[^nontype]
 
 ## Acknowledgments
 
