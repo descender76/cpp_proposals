@@ -86,6 +86,7 @@ a code
 - Transformed solution into the wording
 - Added a third constructor which takes a pointer instead of a reference for convenience
 - Revised example from cat to rule/test
+- Added deduction guide
 
 ## Abstract
 
@@ -474,7 +475,7 @@ template<auto f, class T> function_ref(nontype_t<f>, cv T* state) noexcept;
 ```
 
 > 
-> *Constraints:* `is-invocable-using<decltype(f), cv T*>` is true.
+> *Constraints:* `is-invocable-using<decltype(f), cv T*>` is `true`.
 > 
 > *Effects:* Initializes `bound-entity` with `state`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<cv T*>(bound-entity), call-args...)`.
 
@@ -490,8 +491,30 @@ template<auto f, class T> function_ref(nontype_t<f>, cv T* state) noexcept;
 
     ...
   };
+
+  // [func.wrap.ref.deduct], deduction guides
+  template<auto f>
+    function_ref(nontype_t<f>) -> function_ref<f>;
+  template<auto f, class T>
+    function_ref(nontype_t<f>, T&) -> function_ref<f>;
+  template<auto f, class T>
+    function_ref(nontype_t<f>, cv T*) -> function_ref<f>;
 }
 ```
+
+> **Deduction guides**
+>
+> [func.wrap.ref.deduct]
+
+```cpp
+template<auto f>
+  function_ref(nontype_t<f>) -> function_ref<f>;
+template<auto f, class T>
+  function_ref(nontype_t<f>, T&) -> function_ref<f>;
+template<auto f, class T>
+  function_ref(nontype_t<f>, cv T*) -> function_ref<f>;
+```
+> *Constraints:* `is_function_v<f>` is `true`.
 
 ## Feature test macro
 
