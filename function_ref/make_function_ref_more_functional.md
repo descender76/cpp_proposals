@@ -134,19 +134,19 @@ struct rule {
 };
 // rule could just as easily be test which also have when and then functions
 
-void then(rule& c) {
+void then(rule& r) {
 }
 
-void rulewhen(rule& c) {
-    c.when();
+void rule_when(rule& r) {
+    r.when();
 }
 
 struct callback {
-    rule* c;
+    rule* r;
     void (*f)(rule&);
 };
 
-rule c;
+rule localTaxRule;
 ```
 
 #### member/free function with type erasure
@@ -163,9 +163,9 @@ C/C++ core language
 <td>
 
 ```cpp
-callback cb = {&c, [](rule& c){c.when();}};
+callback cb = {&localTaxRule, [](rule& r){r.when();}};
 // or
-callback cb = {&c, rulewhen};
+callback cb = {&localTaxRule, rule_when};
 ```
 
 </td>
@@ -179,10 +179,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = [&c](){c.when();};
+auto temp = [&localTaxRule](){localTaxRule.when();};
 function_ref<void()> fr = temp;
 // or when given directly as a function argument
-some_function([&c](){c.when();});
+some_function([&localTaxRule](){localTaxRule.when();});
 ```
 
 </td>
@@ -194,7 +194,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void()> fr = {nontype<&rule::when>, c};
+function_ref<void()> fr = {nontype<&rule::when>, localTaxRule};
 ```
 
 </td>
@@ -211,9 +211,9 @@ C/C++ core language
 <td>
 
 ```cpp
-callback cb = {&c, [](rule& c){then(c);}};
+callback cb = {&localTaxRule, [](rule& r){then(r);}};
 // or
-callback cb = {&c, then};
+callback cb = {&localTaxRule, then};
 ```
 
 </td>
@@ -227,10 +227,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = [&c](){then(c);};
+auto temp = [&localTaxRule](){then(localTaxRule);};
 function_ref<void()> fr = temp;
 // or when given directly as a function argument
-some_function([&c](){then(c);});
+some_function([&localTaxRule](){then(localTaxRule);});
 ```
 
 </td>
@@ -242,7 +242,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void()> fr = {nontype<then>, c}
+function_ref<void()> fr = {nontype<then>, localTaxRule}
 ```
 
 </td>
@@ -288,9 +288,9 @@ This has numerous disadvantages when compared to what can currently be performed
   <td>
   
   ```cpp
-  function_ref<void()> fr = [&c](){c.when();};// immediately dangling
+  function_ref<void()> fr = [&localTaxRule](){localTaxRule.when();};// immediately dangling
   // or
-  function_ref<void()> fr = [&c](){then(c);};// immediately dangling
+  function_ref<void()> fr = [&localTaxRule](){then(localTaxRule);};// immediately dangling
   ```
   
   </td>
@@ -302,15 +302,15 @@ This has numerous disadvantages when compared to what can currently be performed
   <td>
   
   ```cpp
-  function_ref<void()> fr = {nontype<&rule::when>, c};// DOES NOT DANGLE
+  function_ref<void()> fr = {nontype<&rule::when>, localTaxRule};// DOES NOT DANGLE
   // or
-  function_ref<void()> fr = {nontype<then>, c}// DOES NOT DANGLE
+  function_ref<void()> fr = {nontype<then>, localTaxRule}// DOES NOT DANGLE
   ```
   
   </td>
   </tr>
   </table>
-  While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `c` is the state that the user wants to type erase and `function_ref` would not dangle if `c` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `when` or the free function `then` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
+  While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `localTaxRule` is the state that the user wants to type erase and `function_ref` would not dangle if `localTaxRule` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `when` or the free function `then` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
 
 |                         | easier to use | more efficient | safer to use |
 |-------------------------|---------------|----------------|--------------|
@@ -461,22 +461,22 @@ template<auto f> constexpr function_ref(nontype_t<f>) noexcept;
 > *Effects:* Initializes `bound-entity` with `nullptr`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, nullptr, call-args...)`.
 
 ```cpp
-template<auto f, class T> function_ref(nontype_t<f>, T& x) noexcept;
+template<auto f, class T> function_ref(nontype_t<f>, T& state) noexcept;
 ```
 
 > 
 > *Constraints:* `is-invocable-using<decltype(f), cv T&>` is true.
 > 
-> *Effects:* Initializes `bound-entity` with `addressof(x)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<T cv&>(bound-entity), call-args...)`.
+> *Effects:* Initializes `bound-entity` with `addressof(state)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<T cv&>(bound-entity), call-args...)`.
 
 ```cpp
-template<auto f, class T> function_ref(nontype_t<f>, cv T* x) noexcept;
+template<auto f, class T> function_ref(nontype_t<f>, cv T* state) noexcept;
 ```
 
 > 
 > *Constraints:* `is-invocable-using<decltype(f), cv T*>` is true.
 > 
-> *Effects:* Initializes `bound-entity` with `x`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<cv T*>(bound-entity), call-args...)`.
+> *Effects:* Initializes `bound-entity` with `state`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<cv T*>(bound-entity), call-args...)`.
 
 ```cpp
   template<class R, class... ArgTypes>
@@ -504,7 +504,7 @@ C# and the .NET family of languages provide this via `delegates` [^delegates].
 // C#
 delegate void some_name();
 some_name fr = then;// the stateless free function use case
-some_name fr = c.when;// the stateful member function use case
+some_name fr = localTaxRule.when;// the stateful member function use case
 ```
 
 Borland C++ now embarcadero provide this via `__closure` [^closure].
@@ -513,7 +513,7 @@ Borland C++ now embarcadero provide this via `__closure` [^closure].
 // Borland C++, embarcadero __closure
 void(__closure * fr)();
 fr = then;// the stateless free function use case
-fr = c.when;// the stateful member function use case
+fr = localTaxRule.when;// the stateful member function use case
 ```
 
 Since `nontype` `function_ref` handles all 4 stateless/stateful free/member use cases, it is more feature rich than either of the above. Further, these other language implementations require strict matching of the signatures.
