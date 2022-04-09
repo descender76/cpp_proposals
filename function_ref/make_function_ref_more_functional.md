@@ -84,6 +84,8 @@ a code
 
 - Added this changelog
 - Transformed solution into the wording
+- Added a third constructor which takes a pointer instead of a reference for convenience
+- Revised example from cat to rule/test
 
 ## Abstract
 
@@ -126,24 +128,25 @@ Currently, a `function_ref`, can be constructed from a lambda/functor, a free fu
 ### Given
 
 ```cpp
-struct cat {
-    void walk() {
+struct rule {
+    void when() {
     }
 };
+// rule could just as easily be test which also have when and then functions
 
-void leap(cat& c) {
+void then(rule& c) {
 }
 
-void catwalk(cat& c) {
-    c.walk();
+void rulewhen(rule& c) {
+    c.when();
 }
 
 struct callback {
-    cat* c;
-    void (*f)(cat&);
+    rule* c;
+    void (*f)(rule&);
 };
 
-cat c;
+rule c;
 ```
 
 #### member/free function with type erasure
@@ -160,9 +163,9 @@ C/C++ core language
 <td>
 
 ```cpp
-callback cb = {&c, [](cat& c){c.walk();}};
+callback cb = {&c, [](rule& c){c.when();}};
 // or
-callback cb = {&c, catwalk};
+callback cb = {&c, rulewhen};
 ```
 
 </td>
@@ -176,10 +179,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = [&c](){c.walk();};
+auto temp = [&c](){c.when();};
 function_ref<void()> fr = temp;
 // or when given directly as a function argument
-some_function([&c](){c.walk();});
+some_function([&c](){c.when();});
 ```
 
 </td>
@@ -191,7 +194,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void()> fr = {nontype<&cat::walk>, c};
+function_ref<void()> fr = {nontype<&rule::when>, c};
 ```
 
 </td>
@@ -208,9 +211,9 @@ C/C++ core language
 <td>
 
 ```cpp
-callback cb = {&c, [](cat& c){leap(c);}};
+callback cb = {&c, [](rule& c){then(c);}};
 // or
-callback cb = {&c, leap};
+callback cb = {&c, then};
 ```
 
 </td>
@@ -224,10 +227,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = [&c](){leap(c);};
+auto temp = [&c](){then(c);};
 function_ref<void()> fr = temp;
 // or when given directly as a function argument
-some_function([&c](){leap(c);});
+some_function([&c](){then(c);});
 ```
 
 </td>
@@ -239,7 +242,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void()> fr = {nontype<leap>, c}
+function_ref<void()> fr = {nontype<then>, c}
 ```
 
 </td>
@@ -285,9 +288,9 @@ This has numerous disadvantages when compared to what can currently be performed
   <td>
   
   ```cpp
-  function_ref<void()> fr = [&c](){c.walk();};// immediately dangling
+  function_ref<void()> fr = [&c](){c.when();};// immediately dangling
   // or
-  function_ref<void()> fr = [&c](){leap(c);};// immediately dangling
+  function_ref<void()> fr = [&c](){then(c);};// immediately dangling
   ```
   
   </td>
@@ -299,15 +302,15 @@ This has numerous disadvantages when compared to what can currently be performed
   <td>
   
   ```cpp
-  function_ref<void()> fr = {nontype<&cat::walk>, c};// DOES NOT DANGLE
+  function_ref<void()> fr = {nontype<&rule::when>, c};// DOES NOT DANGLE
   // or
-  function_ref<void()> fr = {nontype<leap>, c}// DOES NOT DANGLE
+  function_ref<void()> fr = {nontype<then>, c}// DOES NOT DANGLE
   ```
   
   </td>
   </tr>
   </table>
-  While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `c` is the state that the user wants to type erase and `function_ref` would not dangle if `c` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `walk` or the free function `leap` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
+  While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `c` is the state that the user wants to type erase and `function_ref` would not dangle if `c` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `when` or the free function `then` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
 
 |                         | easier to use | more efficient | safer to use |
 |-------------------------|---------------|----------------|--------------|
@@ -329,7 +332,7 @@ C/C++ core language
 <td>
 
 ```
-void (cat::*mf)() = &cat::walk;
+void (rule::*mf)() = &rule::when;
 ```
 
 </td>
@@ -343,10 +346,10 @@ function_ref
 ```cpp
 // separate temp needed to prevent dangling
 // when temp is passed to multiple arguments
-auto temp = &cat::walk;
-function_ref<void(cat&)> fr = temp;
+auto temp = &rule::when;
+function_ref<void(rule&)> fr = temp;
 // or when given directly as a function argument
-some_function(&cat::walk);
+some_function(&rule::when);
 ```
 
 </td>
@@ -358,7 +361,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void(cat&)> fr = {nontype<&cat::walk>};
+function_ref<void(rule&)> fr = {nontype<&rule::when>};
 ```
 
 </td>
@@ -386,7 +389,7 @@ C/C++ core language
 <td>
 
 ```cpp
-void (*f)(cat&) = leap;
+void (*f)(rule&) = then;
 ```
 
 </td>
@@ -398,7 +401,7 @@ function_ref
 <td>
 
 ```cpp
-function_ref<void(cat&)> fr = leap;
+function_ref<void(rule&)> fr = then;
 ```
 
 </td>
@@ -410,7 +413,7 @@ proposed
 <td>
 
 ```cpp
-function_ref<void(cat&)> fr = {nontype<leap>};
+function_ref<void(rule&)> fr = {nontype<then>};
 ```
 
 </td>
@@ -450,21 +453,21 @@ namespace std {
 Add a definition to 20.14.3 [func.def]:
 
 ```cpp
-template<auto f> function_ref(nontype_t<f>) noexcept;
+template<auto f> constexpr function_ref(nontype_t<f>) noexcept;
 ```
 
 > *Constraints:* `is-invocable-using<decltype(f)>` is `true`.
 > 
-> *Postconditions:* Initializes `bound-entity` with `nullptr`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, nullptr, call-args...)`.
+> *Effects:* Initializes `bound-entity` with `nullptr`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, nullptr, call-args...)`.
 
 ```cpp
-template<auto f, class T> function_ref(nontype_t<f>, cv T& x) noexcept;
+template<auto f, class T> function_ref(nontype_t<f>, T& x) noexcept;
 ```
 
 > 
 > *Constraints:* `is-invocable-using<decltype(f), cv T&>` is true.
 > 
-> *Postconditions:* Initializes `bound-entity` with `addressof(x)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<T cv&>(bound-entity), call-args...)`.
+> *Effects:* Initializes `bound-entity` with `addressof(x)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<T cv&>(bound-entity), call-args...)`.
 
 ```cpp
 template<auto f, class T> function_ref(nontype_t<f>, cv T* x) noexcept;
@@ -473,7 +476,7 @@ template<auto f, class T> function_ref(nontype_t<f>, cv T* x) noexcept;
 > 
 > *Constraints:* `is-invocable-using<decltype(f), cv T*>` is true.
 > 
-> *Postconditions:* Initializes `bound-entity` with `addressof(*x)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<cv T*>(bound-entity), call-args...)`.
+> *Effects:* Initializes `bound-entity` with `x`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<cv T*>(bound-entity), call-args...)`.
 
 ```cpp
   template<class R, class... ArgTypes>
@@ -481,8 +484,8 @@ template<auto f, class T> function_ref(nontype_t<f>, cv T* x) noexcept;
   public:
     // [func.wrap.ref.ctor], constructors ...
     ...
-    template<auto f> function_ref(nontype_t<f>) noexcept;
-    template<auto f, class T> function_ref(nontype_t<f>, cv T&) noexcept;
+    template<auto f> constexpr function_ref(nontype_t<f>) noexcept;
+    template<auto f, class T> function_ref(nontype_t<f>, T&) noexcept;
     template<auto f, class T> function_ref(nontype_t<f>, cv T*) noexcept;
 
     ...
@@ -500,8 +503,8 @@ C# and the .NET family of languages provide this via `delegates` [^delegates].
 ```cpp
 // C#
 delegate void some_name();
-some_name fr = leap;// the stateless free function use case
-some_name fr = c.walk;// the stateful member function use case
+some_name fr = then;// the stateless free function use case
+some_name fr = c.when;// the stateful member function use case
 ```
 
 Borland C++ now embarcadero provide this via `__closure` [^closure].
@@ -509,8 +512,8 @@ Borland C++ now embarcadero provide this via `__closure` [^closure].
 ```cpp
 // Borland C++, embarcadero __closure
 void(__closure * fr)();
-fr = leap;// the stateless free function use case
-fr = c.walk;// the stateful member function use case
+fr = then;// the stateless free function use case
+fr = c.when;// the stateful member function use case
 ```
 
 Since `nontype` `function_ref` handles all 4 stateless/stateful free/member use cases, it is more feature rich than either of the above. Further, these other language implementations require strict matching of the signatures.
