@@ -7,19 +7,19 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2472R2</td>
+<td>D2472R3</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-03-08</td>
+<td>2022-04-23</td>
 </tr>
 <tr>
 <td>Reply-to</td>
 <td>
 
-Jarrad J. Waterloo <<descender76 at gmail dot com>>
+Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;
 
-Zhihao Yuan <<zy at miator dot net>>
+Zhihao Yuan &lt;zy at miator dot net&gt;
 
 </td>
 </tr>
@@ -87,6 +87,10 @@ a code
 - Added a third constructor which takes a pointer instead of a reference for convenience
 - Revised example from cat to rule/test
 - Added deduction guide
+
+### R3
+
+- `constexpr` added to constuctors
 
 ## Abstract
 
@@ -435,7 +439,7 @@ Should the existing free function constructor be removed with the overlap in fun
 
 ## Wording
 
-The wording is relative to P0792R8.
+The wording is relative to P0792R9.
 
 Add new templates to 20.2.1 [utility.syn], header `<utility>` synopsis after `in_place_index_t` and `in_place_index`:
 
@@ -461,10 +465,10 @@ template<auto f> constexpr function_ref(nontype_t<f>) noexcept;
 
 > *Constraints:* `is-invocable-using<decltype(f)>` is `true`.
 > 
-> *Effects:* Initializes `bound-entity` with `nullptr`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, nullptr, call-args...)`.
+> *Effects:* Initializes `bound-entity` with an unused value, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, call-args...)`.
 
 ```cpp
-template<auto f, class T> function_ref(nontype_t<f>, T& state) noexcept;
+template<auto f, class T> constexpr function_ref(nontype_t<f>, T& state) noexcept;
 ```
 
 > 
@@ -473,13 +477,15 @@ template<auto f, class T> function_ref(nontype_t<f>, T& state) noexcept;
 > *Effects:* Initializes `bound-entity` with `addressof(state)`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<T cv&>(bound-entity), call-args...)`.
 
 ```cpp
-template<auto f, class T> function_ref(nontype_t<f>, cv T* state) noexcept;
+template<auto f, class T> constexpr function_ref(nontype_t<f>, cv T* state) noexcept;
 ```
 
 > 
 > *Constraints:* `is-invocable-using<decltype(f), cv T*>` is `true`.
 > 
 > *Effects:* Initializes `bound-entity` with `state`, and `thunk-ptr` to address of a function such that `thunk-ptr(bound-entity, call-args...)` is expression equivalent to `invoke_r<R>(f, static_cast<cv T*>(bound-entity), call-args...)`.
+
+Add the following signatures to [func.wrap.ref.class] synopsis:
 
 ```cpp
   template<class R, class... ArgTypes>
@@ -488,8 +494,8 @@ template<auto f, class T> function_ref(nontype_t<f>, cv T* state) noexcept;
     // [func.wrap.ref.ctor], constructors ...
     ...
     template<auto f> constexpr function_ref(nontype_t<f>) noexcept;
-    template<auto f, class T> function_ref(nontype_t<f>, T&) noexcept;
-    template<auto f, class T> function_ref(nontype_t<f>, cv T*) noexcept;
+    template<auto f, class T> constexpr function_ref(nontype_t<f>, T&) noexcept;
+    template<auto f, class T> constexpr function_ref(nontype_t<f>, cv T*) noexcept;
 
     ...
   };
@@ -502,9 +508,11 @@ template<auto f, class T> function_ref(nontype_t<f>, cv T* state) noexcept;
 }
 ```
 
-> **Deduction guides**
->
-> [func.wrap.ref.deduct]
+Modify [func.wrap.ref.class] as indicated:
+
+> [...] `BoundEntityType` is capable of storing a pointer to object value, a pointer to function value, ++an unused value,++ or a null pointer value. [...]
+
+Add the following to [func.wrap.ref.deduct]:
 
 ```cpp
 template<auto f>
