@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-04-23</td>
+<td>2022-05-12</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -94,7 +94,7 @@ a code
 
 ## Abstract
 
-This document proposes adding additional constructors to `function_ref` [^p0792r6] in order to make it easier to use, more efficient, and safer to use with common use cases.
+This document proposes adding additional constructors to `function_ref` [^p0792r9] in order to make it easier to use, more efficient, and safer to use with common use cases.
 
 Currently, a `function_ref`, can be constructed from a lambda/functor, a free function pointer, and a member function pointer. While the lambda/functor use case does support type erasing `this` pointer, its free/member function pointer constructors do **not** allow type erasing any arguments, even though these two use cases are common.
 
@@ -565,7 +565,7 @@ Thanks to Arthur O'Dwyer, Tomasz Kamiński, Corentin Jabot and Zhihao Yuan for p
 
 ## References
 
-[^p0792r6]: <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r6.html>
+[^p0792r9]: <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html>
 [^functionref]: <https://github.com/TartanLlama/function_ref>
 [^functionrefprime]: <https://raw.githubusercontent.com/descender76/cpp_proposals/main/function_ref/function_ref_prime.hpp>
 [^nontype]: <https://github.com/zhihaoy/nontype_functional/blob/main/include/std23/function_ref.h>
