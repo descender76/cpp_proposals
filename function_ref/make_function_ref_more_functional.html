@@ -1,260 +1,64 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<html lang="en">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>make_function_ref_more_functional</title>
-  <style>
-    html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 1em;
-      }
-    }
-    @media print {
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
-      font-size: 85%;
-      margin: 0;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      background-color: #1a1a1a;
-      border: none;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      {   }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-    code span.at { color: #7d9029; } /* Attribute */
-    code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { } /* BuiltIn */
-    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #4070a0; } /* Char */
-    code span.cn { color: #880000; } /* Constant */
-    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-    code span.dt { color: #902000; } /* DataType */
-    code span.dv { color: #40a070; } /* DecVal */
-    code span.er { color: #ff0000; font-weight: bold; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #40a070; } /* Float */
-    code span.fu { color: #06287e; } /* Function */
-    code span.im { } /* Import */
-    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-    code span.op { color: #666666; } /* Operator */
-    code span.ot { color: #007020; } /* Other */
-    code span.pp { color: #bc7a00; } /* Preprocessor */
-    code span.sc { color: #4070a0; } /* SpecialChar */
-    code span.ss { color: #bb6688; } /* SpecialString */
-    code span.st { color: #4070a0; } /* String */
-    code span.va { color: #19177c; } /* Variable */
-    code span.vs { color: #4070a0; } /* VerbatimString */
-    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>
+        make function_ref more functional - HackMD
+    </title>
+    <link rel="icon" type="image/png" href="https://hackmd.io/favicon.png">
+    <link rel="apple-touch-icon" href="https://hackmd.io/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" integrity="sha256-3iu9jgsy9TpTwXKb7bNQzqWekRX7pPK+2OLj3R922fo=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css" integrity="sha256-QiWfLIsCT02Sdwkogf6YMiQlj4NE84MKkzEMkZnMGdg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css" integrity="sha256-vtR0hSWRc3Tb26iuN2oZHt3KRUomwTufNIf5/4oeCyg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@hackmd/emojify.js@2.1.0/dist/css/basic/emojify.min.css" integrity="sha256-UOrvMOsSDSrW6szVLe8ZDZezBxh5IoIfgTwdNDgTjiU=" crossorigin="anonymous" />
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i|Source+Code+Pro:300,400,500|Source+Sans+Pro:300,300i,400,400i,600,600i|Source+Serif+Pro&subset=latin-ext);.hljs{display:block;background:#fff;padding:.5em;color:#333;overflow-x:auto}.hljs-comment,.hljs-meta{color:#969896}.hljs-emphasis,.hljs-quote,.hljs-string,.hljs-strong,.hljs-template-variable,.hljs-variable{color:#df5000}.hljs-keyword,.hljs-selector-tag,.hljs-type{color:#a71d5d}.hljs-attribute,.hljs-bullet,.hljs-literal,.hljs-number,.hljs-symbol{color:#0086b3}.hljs-built_in,.hljs-builtin-name{color:#005cc5}.hljs-name,.hljs-section{color:#63a35c}.hljs-tag{color:#333}.hljs-attr,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-selector-pseudo,.hljs-title{color:#795da3}.hljs-addition{color:#55a532;background-color:#eaffea}.hljs-deletion{color:#bd2c00;background-color:#ffecec}.hljs-link{text-decoration:underline}.markdown-body{font-size:16px;line-height:1.5;word-wrap:break-word}.markdown-body:after,.markdown-body:before{display:table;content:""}.markdown-body:after{clear:both}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body .absent{color:#c00}.markdown-body .anchor{float:left;padding-right:4px;margin-left:-20px;line-height:1}.markdown-body .anchor:focus{outline:none}.markdown-body blockquote,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-top:0;margin-bottom:16px}.markdown-body hr{height:.25em;padding:0;margin:24px 0;background-color:#e7e7e7;border:0}.markdown-body blockquote{font-size:16px;padding:0 1em;color:#777;border-left:.25em solid #ddd}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body kbd,.popover kbd{display:inline-block;padding:3px 5px;font-size:11px;line-height:10px;color:#555;vertical-align:middle;background-color:#fcfcfc;border:1px solid #ccc;border-bottom-color:#bbb;border-radius:3px;box-shadow:inset 0 -1px 0 #bbb}.markdown-body .loweralpha{list-style-type:lower-alpha}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{margin-top:24px;margin-bottom:16px;font-weight:600;line-height:1.25}.markdown-body h1 .octicon-link,.markdown-body h2 .octicon-link,.markdown-body h3 .octicon-link,.markdown-body h4 .octicon-link,.markdown-body h5 .octicon-link,.markdown-body h6 .octicon-link{color:#000;vertical-align:middle;visibility:hidden}.markdown-body h1:hover .anchor,.markdown-body h2:hover .anchor,.markdown-body h3:hover .anchor,.markdown-body h4:hover .anchor,.markdown-body h5:hover .anchor,.markdown-body h6:hover .anchor{text-decoration:none}.markdown-body h1:hover .anchor .octicon-link,.markdown-body h2:hover .anchor .octicon-link,.markdown-body h3:hover .anchor .octicon-link,.markdown-body h4:hover .anchor .octicon-link,.markdown-body h5:hover .anchor .octicon-link,.markdown-body h6:hover .anchor .octicon-link{visibility:visible}.markdown-body h1 code,.markdown-body h1 tt,.markdown-body h2 code,.markdown-body h2 tt,.markdown-body h3 code,.markdown-body h3 tt,.markdown-body h4 code,.markdown-body h4 tt,.markdown-body h5 code,.markdown-body h5 tt,.markdown-body h6 code,.markdown-body h6 tt{font-size:inherit}.markdown-body h1{font-size:2em}.markdown-body h1,.markdown-body h2{padding-bottom:.3em;border-bottom:1px solid #eee}.markdown-body h2{font-size:1.5em}.markdown-body h3{font-size:1.25em}.markdown-body h4{font-size:1em}.markdown-body h5{font-size:.875em}.markdown-body h6{font-size:.85em;color:#777}.markdown-body ol,.markdown-body ul{padding-left:2em}.markdown-body ol.no-list,.markdown-body ul.no-list{padding:0;list-style-type:none}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:0;margin-bottom:0}.markdown-body li>p{margin-top:16px}.markdown-body li+li{padding-top:.25em}.markdown-body dl{padding:0}.markdown-body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}.markdown-body dl dd{padding:0 16px;margin-bottom:16px}.markdown-body table{display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}.markdown-body table th{font-weight:700}.markdown-body table td,.markdown-body table th{padding:6px 13px;border:1px solid #ddd}.markdown-body table tr{background-color:#fff;border-top:1px solid #ccc}.markdown-body table tr:nth-child(2n){background-color:#f8f8f8}.markdown-body img{max-width:100%;box-sizing:content-box;background-color:#fff}.markdown-body img[align=right]{padding-left:20px}.markdown-body img[align=left]{padding-right:20px}.markdown-body .emoji{max-width:none;vertical-align:text-top;background-color:transparent}.markdown-body span.frame{display:block;overflow:hidden}.markdown-body span.frame>span{display:block;float:left;width:auto;padding:7px;margin:13px 0 0;overflow:hidden;border:1px solid #ddd}.markdown-body span.frame span img{display:block;float:left}.markdown-body span.frame span span{display:block;padding:5px 0 0;clear:both;color:#333}.markdown-body span.align-center{display:block;overflow:hidden;clear:both}.markdown-body span.align-center>span{display:block;margin:13px auto 0;overflow:hidden;text-align:center}.markdown-body span.align-center span img{margin:0 auto;text-align:center}.markdown-body span.align-right{display:block;overflow:hidden;clear:both}.markdown-body span.align-right>span{display:block;margin:13px 0 0;overflow:hidden;text-align:right}.markdown-body span.align-right span img{margin:0;text-align:right}.markdown-body span.float-left{display:block;float:left;margin-right:13px;overflow:hidden}.markdown-body span.float-left span{margin:13px 0 0}.markdown-body span.float-right{display:block;float:right;margin-left:13px;overflow:hidden}.markdown-body span.float-right>span{display:block;margin:13px auto 0;overflow:hidden;text-align:right}.markdown-body code,.markdown-body tt{padding:0;padding-top:.2em;padding-bottom:.2em;margin:0;font-size:85%;background-color:rgba(0,0,0,.04);border-radius:3px}.markdown-body code:after,.markdown-body code:before,.markdown-body tt:after,.markdown-body tt:before{letter-spacing:-.2em;content:"\00a0"}.markdown-body code br,.markdown-body tt br{display:none}.markdown-body del code{text-decoration:inherit}.markdown-body pre{word-wrap:normal}.markdown-body pre>code{padding:0;margin:0;font-size:100%;word-break:normal;white-space:pre;background:transparent;border:0}.markdown-body .highlight{margin-bottom:16px}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{padding:16px;overflow:auto;font-size:85%;line-height:1.45;background-color:#f7f7f7;border-radius:3px}.markdown-body pre code,.markdown-body pre tt{display:inline;max-width:auto;padding:0;margin:0;overflow:visible;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}.markdown-body pre code:after,.markdown-body pre code:before,.markdown-body pre tt:after,.markdown-body pre tt:before{content:normal}.markdown-body .csv-data td,.markdown-body .csv-data th{padding:5px;overflow:hidden;font-size:12px;line-height:1;text-align:left;white-space:nowrap}.markdown-body .csv-data .blob-line-num{padding:10px 8px 9px;text-align:right;background:#fff;border:0}.markdown-body .csv-data tr{border-top:0}.markdown-body .csv-data th{font-weight:700;background:#f8f8f8;border-top:0}.news .alert .markdown-body blockquote{padding:0 0 0 40px;border:0 none}.activity-tab .news .alert .commits,.activity-tab .news .markdown-body blockquote{padding-left:0}.task-list-item{list-style-type:none}.task-list-item label{font-weight:400}.task-list-item.enabled label{cursor:pointer}.task-list-item+.task-list-item{margin-top:3px}.task-list-item-checkbox{float:left;margin:.31em 0 .2em -1.3em!important;vertical-align:middle;cursor:default!important}.markdown-body{padding-top:40px;padding-bottom:40px;max-width:758px;overflow:visible!important;position:relative}.markdown-body .emoji{vertical-align:top}.markdown-body pre{border:inherit!important}.markdown-body code{color:inherit!important}.markdown-body pre code .wrapper{display:-moz-inline-flex;display:-ms-inline-flex;display:-o-inline-flex;display:inline-flex}.markdown-body pre code .gutter{float:left;overflow:hidden;-webkit-user-select:none;user-select:none}.markdown-body pre code .gutter.linenumber{text-align:right;position:relative;display:inline-block;cursor:default;z-index:4;padding:0 8px 0 0;min-width:20px;box-sizing:content-box;color:#afafaf!important;border-right:3px solid #6ce26c!important}.markdown-body pre code .gutter.linenumber>span:before{content:attr(data-linenumber)}.markdown-body pre code .code{float:left;margin:0 0 0 16px}.markdown-body .gist .line-numbers{border-left:none;border-top:none;border-bottom:none}.markdown-body .gist .line-data{border:none}.markdown-body .gist table{border-spacing:0;border-collapse:inherit!important}.markdown-body code[data-gist-id]{background:none;padding:0}.markdown-body code[data-gist-id]:after,.markdown-body code[data-gist-id]:before{content:""}.markdown-body code[data-gist-id] .blob-num{border:unset}.markdown-body code[data-gist-id] table{overflow:unset;margin-bottom:unset}.markdown-body code[data-gist-id] table tr{background:unset}.markdown-body[dir=rtl] pre{direction:ltr}.markdown-body[dir=rtl] code{direction:ltr;unicode-bidi:embed}.markdown-body .alert>p:last-child{margin-bottom:0}.markdown-body pre.abc,.markdown-body pre.flow-chart,.markdown-body pre.graphviz,.markdown-body pre.mermaid,.markdown-body pre.sequence-diagram,.markdown-body pre.vega{text-align:center;background-color:inherit;border-radius:0;white-space:inherit;overflow:visible}.markdown-body pre.abc>code,.markdown-body pre.flow-chart>code,.markdown-body pre.graphviz>code,.markdown-body pre.mermaid>code,.markdown-body pre.sequence-diagram>code,.markdown-body pre.vega>code{text-align:left}.markdown-body pre.abc>svg,.markdown-body pre.flow-chart>svg,.markdown-body pre.graphviz>svg,.markdown-body pre.mermaid>svg,.markdown-body pre.sequence-diagram>svg,.markdown-body pre.vega>svg{max-width:100%;height:100%}.markdown-body pre>code.wrap{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word}.markdown-body .alert>p:last-child,.markdown-body .alert>ul:last-child{margin-bottom:0}.markdown-body summary{display:list-item}.markdown-body summary:focus{outline:none}.markdown-body details summary{cursor:pointer}.markdown-body details:not([open])>:not(summary){display:none}.markdown-body figure{margin:1em 40px}.markdown-body .mark,.markdown-body mark{background-color:#fff1a7}.vimeo,.youtube{cursor:pointer;display:table;text-align:center;background-position:50%;background-repeat:no-repeat;background-size:contain;background-color:#000;overflow:hidden}.vimeo,.youtube{position:relative;width:100%}.youtube{padding-bottom:56.25%}.vimeo img{width:100%;object-fit:contain;z-index:0}.youtube img{object-fit:cover;z-index:0}.vimeo iframe,.youtube iframe,.youtube img{width:100%;height:100%;position:absolute;top:0;left:0}.vimeo iframe,.youtube iframe{vertical-align:middle;z-index:1}.vimeo .icon,.youtube .icon{position:absolute;height:auto;width:auto;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;opacity:.3;transition:opacity .2s;z-index:0}.vimeo:hover .icon,.youtube:hover .icon{opacity:.6;transition:opacity .2s}.slideshare .inner,.speakerdeck .inner{position:relative;width:100%}.slideshare .inner iframe,.speakerdeck .inner iframe{position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%}.figma{display:table;position:relative;width:100%;padding-bottom:56.25%}.figma iframe{position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%;border:1px solid #eee}.markmap-container{height:300px}.markmap-container>svg{width:100%;height:100%}.MJX_Assistive_MathML{display:none}#MathJax_Message{z-index:1000!important}.ui-infobar{position:relative;z-index:2;max-width:760px;margin:25px auto -25px;color:#777}.toc .invisable-node{list-style-type:none}.ui-toc{position:fixed;bottom:20px;z-index:998}.ui-toc.both-mode{margin-left:8px}.ui-toc.both-mode .ui-toc-label{height:40px;padding:10px 4px;border-top-left-radius:0;border-bottom-left-radius:0}.ui-toc-label{background-color:#e6e6e6;border:none;color:#868686;transition:opacity .2s}.ui-toc .open .ui-toc-label{opacity:1;color:#fff;transition:opacity .2s}.ui-toc-label:focus{opacity:.3;background-color:#ccc;color:#000}.ui-toc-label:hover{opacity:1;background-color:#ccc;transition:opacity .2s}.ui-toc-dropdown{margin-top:20px;margin-bottom:20px;padding-left:10px;padding-right:10px;max-width:45vw;width:25vw;max-height:70vh;overflow:auto;text-align:inherit}.ui-toc-dropdown>.toc{max-height:calc(70vh - 100px);overflow:auto}.ui-toc-dropdown[dir=rtl] .nav{padding-right:0;letter-spacing:.0029em}.ui-toc-dropdown a{overflow:hidden;text-overflow:ellipsis;white-space:pre}.ui-toc-dropdown .nav>li>a{display:block;padding:4px 20px;font-size:13px;font-weight:500;color:#767676}.ui-toc-dropdown .nav>li:first-child:last-child>ul,.ui-toc-dropdown .toc.expand ul{display:block}.ui-toc-dropdown .nav>li>a:focus,.ui-toc-dropdown .nav>li>a:hover{padding-left:19px;color:#000;text-decoration:none;background-color:transparent;border-left:1px solid #000}.ui-toc-dropdown[dir=rtl] .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav>li>a:hover{padding-right:19px;border-left:none;border-right:1px solid #000}.ui-toc-dropdown .nav>.active:focus>a,.ui-toc-dropdown .nav>.active:hover>a,.ui-toc-dropdown .nav>.active>a{padding-left:18px;font-weight:700;color:#000;background-color:transparent;border-left:2px solid #000}.ui-toc-dropdown[dir=rtl] .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav>.active>a{padding-right:18px;border-left:none;border-right:2px solid #000}.ui-toc-dropdown .nav .nav{display:none;padding-bottom:10px}.ui-toc-dropdown .nav>.active>ul{display:block}.ui-toc-dropdown .nav .nav>li>a{padding-top:1px;padding-bottom:1px;padding-left:30px;font-size:12px;font-weight:400}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a{padding-right:30px}.ui-toc-dropdown .nav .nav>li>ul>li>a{padding-top:1px;padding-bottom:1px;padding-left:40px;font-size:12px;font-weight:400}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a{padding-right:40px}.ui-toc-dropdown .nav .nav>li>a:focus,.ui-toc-dropdown .nav .nav>li>a:hover{padding-left:29px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:hover{padding-right:29px}.ui-toc-dropdown .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown .nav .nav>li>ul>li>a:hover{padding-left:39px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:hover{padding-right:39px}.ui-toc-dropdown .nav .nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>a{padding-left:28px;font-weight:500}.ui-toc-dropdown[dir=rtl] .nav .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>a{padding-right:28px}.ui-toc-dropdown .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active>a{padding-left:38px;font-weight:500}.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active>a{padding-right:38px}.markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif}html[lang^=ja] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}html .markdown-body[lang^=ja]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html .markdown-body[lang=zh-tw]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html .markdown-body[lang=zh-cn]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}html[lang^=ja] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ\ Ｐゴシック,sans-serif}html[lang=zh-tw] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html[lang=zh-cn] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}html .ui-toc-dropdown[lang^=ja]{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ\ Ｐゴシック,sans-serif}html .ui-toc-dropdown[lang=zh-tw]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html .ui-toc-dropdown[lang=zh-cn]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}.ui-affix-toc{position:fixed;top:0;max-width:15vw;max-height:70vh;overflow:auto}.back-to-top,.expand-toggle,.go-to-bottom{display:block;padding:4px 10px;margin-top:10px;margin-left:10px;font-size:12px;font-weight:500;color:#999}.back-to-top:focus,.back-to-top:hover,.expand-toggle:focus,.expand-toggle:hover,.go-to-bottom:focus,.go-to-bottom:hover{color:#563d7c;text-decoration:none}.back-to-top,.go-to-bottom{margin-top:0}.ui-user-icon{width:20px;height:20px;display:block;border-radius:50%;margin-top:2px;margin-bottom:2px;margin-right:5px;background-position:50%;background-repeat:no-repeat;background-size:cover}.ui-user-icon.small{width:18px;height:18px;display:inline-block;vertical-align:middle;margin:0 0 .2em}.ui-infobar>small>span{line-height:22px}.ui-infobar>small .dropdown{display:inline-block}.ui-infobar>small .dropdown a:focus,.ui-infobar>small .dropdown a:hover{text-decoration:none}.ui-more-info{color:#888;cursor:pointer;vertical-align:middle}.ui-more-info .fa{font-size:16px}.ui-connectedGithub,.ui-published-note{color:#888}.ui-connectedGithub{line-height:23px;white-space:nowrap}.ui-connectedGithub a.file-path{color:#888;text-decoration:none;padding-left:22px}.ui-connectedGithub a.file-path:active,.ui-connectedGithub a.file-path:hover{color:#888;text-decoration:underline}.ui-connectedGithub .fa{font-size:20px}.ui-published-note .fa{font-size:20px;vertical-align:top}.unselectable{-webkit-user-select:none;-o-user-select:none;user-select:none}.selectable{-webkit-user-select:text;-o-user-select:text;user-select:text}@media print{blockquote,div,img,pre,table{page-break-inside:avoid!important}a[href]:after{font-size:12px!important}}.markdown-body.slides{position:relative;z-index:1;color:#222}.markdown-body.slides:before{content:"";display:block;position:absolute;top:0;left:0;right:0;bottom:0;z-index:-1;background-color:currentColor;box-shadow:0 0 0 50vw}.markdown-body.slides section[data-markdown]{position:relative;margin-bottom:1.5em;background-color:#fff;text-align:center}.markdown-body.slides section[data-markdown] code{text-align:left}.markdown-body.slides section[data-markdown]:before{content:"";display:block;padding-bottom:56.23%}.markdown-body.slides section[data-markdown]>div:first-child{position:absolute;top:50%;left:1em;right:1em;transform:translateY(-50%);max-height:100%;overflow:hidden}.markdown-body.slides section[data-markdown]>ul{display:inline-block}.markdown-body.slides>section>section+section:after{content:"";position:absolute;top:-1.5em;right:1em;height:1.5em;border:3px solid #777}.site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}body{font-smoothing:subpixel-antialiased!important;-webkit-font-smoothing:subpixel-antialiased!important;-moz-osx-font-smoothing:auto!important;text-shadow:0 0 1em transparent,1px 1px 1.2px rgba(0,0,0,.004);-webkit-overflow-scrolling:touch;letter-spacing:.025em;font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] body{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}abbr[title]{border-bottom:none;text-decoration:underline;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}abbr[data-original-title],abbr[title]{cursor:help}body.modal-open{overflow-y:auto;padding-right:0!important}
+    </style>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha256-3Jy/GbSLrg0o9y5Z5n1uw0qxZECH7C6OQpVBgNFYa0g=" crossorigin="anonymous"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js" integrity="sha256-g6iAfvZp+nDQ2TdTR/VVKJf3bGro4ub5fvWSWVRi2NE=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js" integrity="sha256-8E4Is26QH0bD52WoQpcB+R/tcWQtpzlCojrybUd7Mxo=" crossorigin="anonymous"></script>
+    <![endif]-->
 </head>
+
 <body>
-<style type="text/css">
+    <div id="doc" class="markdown-body container-fluid comment-enabled" data-hard-breaks="false"><style>
 ins { background-color: #CCFFCC }
 s { background-color: #FFCACA }
 blockquote { color: inherit !important }
-</style>
-<table>
+</style><table>
+<tbody><tr>
+<td>Document number</td>
+<td>D2472R3</td>
+</tr>
 <tr>
+<td>Date</td>
+<td>2022-05-12</td>
+</tr>
+<tr>
+<td>Reply-to</td>
 <td>
-Document number
-</td>
-<td>
-D2472R3
+<p><span>Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;</span></p>
+<p><span>Zhihao Yuan &lt;zy at miator dot net&gt;</span></p>
 </td>
 </tr>
 <tr>
-<td>
-Date
-</td>
-<td>
-2022-04-23
-</td>
+<td>Audience</td>
+<td>Library Evolution Working Group (LEWG)</td>
 </tr>
-<tr>
-<td>
-Reply-to
-</td>
-<td>
-<p>Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;</p>
-<p>Zhihao Yuan &lt;zy at miator dot net&gt;</p>
-</td>
-</tr>
-<tr>
-<td>
-Audience
-</td>
-<td>
-Library Evolution Working Group (LEWG)
-</td>
-</tr>
-</table>
-<h1 id="make-function_ref-more-functional">make <code>function_ref</code> more functional</h1>
-<style>
+</tbody></table><h1 id="make-function_ref-more-functional" data-id="make-function_ref-more-functional"><a class="anchor hidden-xs" href="#make-function_ref-more-functional" title="make-function_ref-more-functional"><span class="octicon octicon-link"></span></a><span>make </span><code>function_ref</code><span> more functional</span></h1><style>
 .inline-link
 {
     font-size: small;
@@ -279,130 +83,91 @@ a code
 {
     color: #0645ad;
 }
-</style>
-<h2 id="table-of-contents">Table of contents</h2>
+</style><h2 id="Table-of-contents" data-id="Table-of-contents"><a class="anchor hidden-xs" href="#Table-of-contents" title="Table-of-contents"><span class="octicon octicon-link"></span></a><span>Table of contents</span></h2><ul>
+<li><a href="#make-functionref-more-functional"><span>make </span><code>function_ref</code><span> more functional</span></a>
 <ul>
-<li><a href="#make-functionref-more-functional">make <code>function_ref</code> more functional</a>
-<ul>
-<li><a href="#changelog">Changelog</a></li>
-<li><a href="#abstract">Abstract</a></li>
-<li><a href="#motivating-examples">Motivating examples</a></li>
-<li><a href="#wording">Wording</a></li>
-<li><a href="#feature-test-macro">Feature test macro</a></li>
-<li><a href="#other-languages">Other languages</a></li>
-<li><a href="#example-implementation">Example implementation</a></li>
-<li><a href="#acknowledgments">Acknowledgments</a></li>
-<li><a href="#references">References</a></li>
-</ul></li>
+<li><a href="#changelog"><span>Changelog</span></a></li>
+<li><a href="#abstract"><span>Abstract</span></a></li>
+<li><a href="#motivating-examples"><span>Motivating examples</span></a></li>
+<li><a href="#wording"><span>Wording</span></a></li>
+<li><a href="#feature-test-macro"><span>Feature test macro</span></a></li>
+<li><a href="#other-languages"><span>Other languages</span></a></li>
+<li><a href="#example-implementation"><span>Example implementation</span></a></li>
+<li><a href="#acknowledgments"><span>Acknowledgments</span></a></li>
+<li><a href="#references"><span>References</span></a></li>
 </ul>
-<h2 id="changelog">Changelog</h2>
-<h3 id="r1">R1</h3>
+</li>
+</ul><h2 id="Changelog" data-id="Changelog"><a class="anchor hidden-xs" href="#Changelog" title="Changelog"><span class="octicon octicon-link"></span></a><span>Changelog</span></h2><h3 id="R1" data-id="R1"><a class="anchor hidden-xs" href="#R1" title="R1"><span class="octicon octicon-link"></span></a><span>R1</span></h3><ul>
+<li><span>Moved from my make_function_ref implementation to Zhihao Yuan’s nontype implementation</span>
 <ul>
-<li>Moved from my make_function_ref implementation to Zhihao Yuan’s nontype implementation
-<ul>
-<li>Constructors were always my ideal over factory function but I was unable to make it work.</li>
-<li>nontype has better type deduction</li>
-<li>Most of the changes were syntactical and reasoning based on feedback as well as making examples even more concise</li>
-</ul></li>
+<li><span>Constructors were always my ideal over factory function but I was unable to make it work.</span></li>
+<li><span>nontype has better type deduction</span></li>
+<li><span>Most of the changes were syntactical and reasoning based on feedback as well as making examples even more concise</span></li>
 </ul>
-<h3 id="r2">R2</h3>
-<ul>
-<li>Added this changelog</li>
-<li>Transformed solution into the wording</li>
-<li>Added a third constructor which takes a pointer instead of a reference for convenience</li>
-<li>Revised example from cat to rule/test</li>
-<li>Added deduction guide</li>
-</ul>
-<h3 id="r3">R3</h3>
-<ul>
-<li><code>constexpr</code> added to constuctors</li>
-</ul>
-<h2 id="abstract">Abstract</h2>
-<p>This document proposes adding additional constructors to <code>function_ref</code> <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> in order to make it easier to use, more efficient, and safer to use with common use cases.</p>
-<p>Currently, a <code>function_ref</code>, can be constructed from a lambda/functor, a free function pointer, and a member function pointer. While the lambda/functor use case does support type erasing <code>this</code> pointer, its free/member function pointer constructors do <strong>not</strong> allow type erasing any arguments, even though these two use cases are common.</p>
-<table>
-<tr>
+</li>
+</ul><h3 id="R2" data-id="R2"><a class="anchor hidden-xs" href="#R2" title="R2"><span class="octicon octicon-link"></span></a><span>R2</span></h3><ul>
+<li><span>Added this changelog</span></li>
+<li><span>Transformed solution into the wording</span></li>
+<li><span>Added a third constructor which takes a pointer instead of a reference for convenience</span></li>
+<li><span>Revised example from cat to rule/test</span></li>
+<li><span>Added deduction guide</span></li>
+</ul><h3 id="R3" data-id="R3"><a class="anchor hidden-xs" href="#R3" title="R3"><span class="octicon octicon-link"></span></a><span>R3</span></h3><ul>
+<li><code>constexpr</code><span> added to constuctors</span></li>
+</ul><h2 id="Abstract" data-id="Abstract"><a class="anchor hidden-xs" href="#Abstract" title="Abstract"><span class="octicon octicon-link"></span></a><span>Abstract</span></h2><p><span>This document proposes adding additional constructors to </span><code>function_ref</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><span> in order to make it easier to use, more efficient, and safer to use with common use cases.</span></p><p><span>Currently, a </span><code>function_ref</code><span>, can be constructed from a lambda/functor, a free function pointer, and a member function pointer. While the lambda/functor use case does support type erasing </span><code>this</code><span> pointer, its free/member function pointer constructors do </span><strong><span>not</span></strong><span> allow type erasing any arguments, even though these two use cases are common.</span></p><table>
+<tbody><tr>
 <td colspan="3">
 <p><code>function_ref</code></p>
 </td>
 </tr>
 <tr>
-<td>
-</td>
-<td>
-Stateless
-</td>
-<td>
-Stateful
-</td>
+<td></td>
+<td>Stateless</td>
+<td>Stateful</td>
 </tr>
 <tr>
-<td>
-Lambda/Functor
-</td>
-<td>
-🗸
-</td>
-<td>
-🗸
-</td>
+<td>Lambda/Functor</td>
+<td>🗸</td>
+<td>🗸</td>
 </tr>
 <tr>
-<td>
-Free Function
-</td>
-<td>
-🗸
-</td>
-<td>
-✗
-</td>
+<td>Free Function</td>
+<td>🗸</td>
+<td>✗</td>
 </tr>
 <tr>
-<td>
-Member Function
-</td>
-<td>
-🗸
-</td>
-<td>
-✗
-</td>
+<td>Member Function</td>
+<td>🗸</td>
+<td>✗</td>
 </tr>
-</table>
-<h2 id="motivating-examples">Motivating Examples</h2>
-<h3 id="given">Given</h3>
-<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> rule <span class="op">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> when<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">// rule could just as easily be test which also have when and then functions</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> then<span class="op">(</span>rule<span class="op">&amp;</span> r<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> rule_when<span class="op">(</span>rule<span class="op">&amp;</span> r<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>when<span class="op">();</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> callback <span class="op">{</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    rule<span class="op">*</span> r<span class="op">;</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> <span class="op">(*</span>f<span class="op">)(</span>rule<span class="op">&amp;);</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>rule localTaxRule<span class="op">;</span></span></code></pre></div>
-<h4 id="memberfree-function-with-type-erasure">member/free function with type erasure</h4>
-<p>Since typed erased free and member functions are not currently supported, the current <code>function_ref</code> proposal forces users to create an unnecessary temporary functor, likely with <code>std::bind_front</code> or a stateful/capturing lambda that the developer hopes the optimizer to elide.</p>
-<h5 id="member-function-with-type-erasure">member function with type erasure</h5>
-<table>
-<tr>
+</tbody></table><h2 id="Motivating-Examples" data-id="Motivating-Examples"><a class="anchor hidden-xs" href="#Motivating-Examples" title="Motivating-Examples"><span class="octicon octicon-link"></span></a><span>Motivating Examples</span></h2><h3 id="Given" data-id="Given"><a class="anchor hidden-xs" href="#Given" title="Given"><span class="octicon octicon-link"></span></a><span>Given</span></h3><pre><code class="cpp hljs"><span class="token keyword">struct</span> <span class="token class-name">rule</span> <span class="token punctuation">{</span>
+    <span class="token keyword">void</span> <span class="token function">when</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token comment">// rule could just as easily be test which also have when and then functions</span>
+
+<span class="token keyword">void</span> <span class="token function">then</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">rule_when</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    r<span class="token punctuation">.</span><span class="token function">when</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">callback</span> <span class="token punctuation">{</span>
+    rule<span class="token operator">*</span> r<span class="token punctuation">;</span>
+    <span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>f<span class="token punctuation">)</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+rule localTaxRule<span class="token punctuation">;</span>
+</code></pre><h4 id="memberfree-function-with-type-erasure" data-id="memberfree-function-with-type-erasure"><a class="anchor hidden-xs" href="#memberfree-function-with-type-erasure" title="memberfree-function-with-type-erasure"><span class="octicon octicon-link"></span></a><span>member/free function with type erasure</span></h4><p><span>Since typed erased free and member functions are not currently supported, the current </span><code>function_ref</code><span> proposal forces users to create an unnecessary temporary functor, likely with </span><code>std::bind_front</code><span> or a stateful/capturing lambda that the developer hopes the optimizer to elide.</span></p><h5 id="member-function-with-type-erasure" data-id="member-function-with-type-erasure"><a class="anchor hidden-xs" href="#member-function-with-type-erasure" title="member-function-with-type-erasure"><span class="octicon octicon-link"></span></a><span>member function with type erasure</span></h5><table>
+<tbody><tr>
 <td>
 C/C++ core language
 </td>
 <td>
-<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>callback cb <span class="op">=</span> <span class="op">{&amp;</span>localTaxRule<span class="op">,</span> <span class="op">[](</span>rule<span class="op">&amp;</span> r<span class="op">){</span>r<span class="op">.</span>when<span class="op">();}};</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// or</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>callback cb <span class="op">=</span> <span class="op">{&amp;</span>localTaxRule<span class="op">,</span> rule_when<span class="op">};</span></span></code></pre></div>
+<pre><code class="cpp hljs">callback cb <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span> r<span class="token punctuation">)</span><span class="token punctuation">{</span>r<span class="token punctuation">.</span><span class="token function">when</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token comment">// or</span>
+callback cb <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">,</span> rule_when<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -410,12 +175,13 @@ C/C++ core language
 function_ref
 </td>
 <td>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// separate temp to prevent dangling</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// when temp is passed to multiple arguments</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> temp <span class="op">=</span> <span class="op">[&amp;</span>localTaxRule<span class="op">](){</span>localTaxRule<span class="op">.</span>when<span class="op">();};</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> temp<span class="op">;</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">// or when given directly as a function argument</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>some_function<span class="op">([&amp;</span>localTaxRule<span class="op">](){</span>localTaxRule<span class="op">.</span>when<span class="op">();});</span></span></code></pre></div>
+<pre><code class="cpp hljs"><span class="token comment">// separate temp to prevent dangling</span>
+<span class="token comment">// when temp is passed to multiple arguments</span>
+<span class="token keyword">auto</span> temp <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>localTaxRule<span class="token punctuation">.</span><span class="token function">when</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> temp<span class="token punctuation">;</span>
+<span class="token comment">// or when given directly as a function argument</span>
+<span class="token function">some_function</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>localTaxRule<span class="token punctuation">.</span><span class="token function">when</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -423,20 +189,20 @@ function_ref
 proposed
 </td>
 <td>
-<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> <span class="op">{</span>nontype<span class="op">&lt;&amp;</span>rule<span class="op">::</span>when<span class="op">&gt;,</span> localTaxRule<span class="op">};</span></span></code></pre></div>
+<pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span><span class="token operator">&amp;</span>rule<span class="token double-colon punctuation">::</span>when<span class="token operator">&gt;</span><span class="token punctuation">,</span> localTaxRule<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
-</table>
-<h5 id="free-function-with-type-erasure">free function with type erasure</h5>
-<table>
-<tr>
+</tbody></table><h5 id="free-function-with-type-erasure" data-id="free-function-with-type-erasure"><a class="anchor hidden-xs" href="#free-function-with-type-erasure" title="free-function-with-type-erasure"><span class="octicon octicon-link"></span></a><span>free function with type erasure</span></h5><table>
+<tbody><tr>
 <td>
 C/C++ core language
 </td>
 <td>
-<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>callback cb <span class="op">=</span> <span class="op">{&amp;</span>localTaxRule<span class="op">,</span> <span class="op">[](</span>rule<span class="op">&amp;</span> r<span class="op">){</span>then<span class="op">(</span>r<span class="op">);}};</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">// or</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>callback cb <span class="op">=</span> <span class="op">{&amp;</span>localTaxRule<span class="op">,</span> then<span class="op">};</span></span></code></pre></div>
+<pre><code class="cpp hljs">callback cb <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span> r<span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token function">then</span><span class="token punctuation">(</span>r<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token comment">// or</span>
+callback cb <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">,</span> then<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -444,12 +210,13 @@ C/C++ core language
 function_ref
 </td>
 <td>
-<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// separate temp to prevent dangling</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// when temp is passed to multiple arguments</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> temp <span class="op">=</span> <span class="op">[&amp;</span>localTaxRule<span class="op">](){</span>then<span class="op">(</span>localTaxRule<span class="op">);};</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> temp<span class="op">;</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">// or when given directly as a function argument</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>some_function<span class="op">([&amp;</span>localTaxRule<span class="op">](){</span>then<span class="op">(</span>localTaxRule<span class="op">);});</span></span></code></pre></div>
+<pre><code class="cpp hljs"><span class="token comment">// separate temp to prevent dangling</span>
+<span class="token comment">// when temp is passed to multiple arguments</span>
+<span class="token keyword">auto</span> temp <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token function">then</span><span class="token punctuation">(</span>localTaxRule<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> temp<span class="token punctuation">;</span>
+<span class="token comment">// or when given directly as a function argument</span>
+<span class="token function">some_function</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token function">then</span><span class="token punctuation">(</span>localTaxRule<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -457,37 +224,31 @@ function_ref
 proposed
 </td>
 <td>
-<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> <span class="op">{</span>nontype<span class="op">&lt;</span>then<span class="op">&gt;,</span> localTaxRule<span class="op">}</span></span></code></pre></div>
+<pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span>then<span class="token operator">&gt;</span><span class="token punctuation">,</span> localTaxRule<span class="token punctuation">}</span>
+</code></pre>
 </td>
 </tr>
-</table>
-<p>This has numerous disadvantages compared to what the C++ core language can do. It is inefficient, hard to use, and unsafe to use.</p>
-<h5 id="not-easy-to-use">Not easy to use</h5>
-<ul>
-<li>Unlike the direct initialization of the C/C++ core language example, the initialization of <code>function_ref</code> is bifurcated by passing it directly as a function argument or using 2-step initialization by first creating a named temporary. Direct initializing a variable of <code>function_ref</code> is needed if the same object serves as multiple arguments on either the same but more likely different functions. However, this leads to immediate dangling, which must introduce an extra line of code. Furthermore, getting in the habit of only passing <code>function_ref</code> as an argument to a function results in users duplicating lambdas when needed to be used more than once, again needless increasing the code volume. Initialization is consistently safe in both the C/C++ core language and the proposed revision, regardless of whether <code>function_ref</code> appears as a variable.</li>
-</ul>
-<h5 id="why-should-a-stateful-lambda-even-be-needed-when-the-signature-is-compatible">Why should a stateful lambda even be needed when the signature is compatible?</h5>
-<ul>
-<li>The C/C++ core language example works with a “stateless” lambda. A new anonymous type is created with states when requiring a “stateful” lambda. That state’s lifetime also needs to be managed by the user.</li>
-<li>When using a lambda, the user must manually forward the function arguments. However, in the C/C++ core language example, the syntax is straightforward when the function exists. We simply pass a function pointer to the callback struct.</li>
-</ul>
-<h5 id="inefficient">Inefficient</h5>
-<ul>
-<li>By requiring a “stateful” lambda, a new type is created with a lifetime that must be managed. <code>function_ref</code> is a reference to a “stateful” lambda which also is a reference. Even if the optimizer can remove the cost, the user is still left with the burden in the code.</li>
-<li>In the proposed, <code>nontype</code> does not take a pointer but rather a member function pointer initialization statement thus giving the compiler more information to resolve the function selection at compile time rather than runtime, granted it is more likely with free functions instead of member functions.</li>
-</ul>
-<h5 id="unsafe">Unsafe</h5>
-<ul>
-<li>Direct initialization of <code>function_ref</code> outside of a function argument immediately dangles. Some would say that this is no different than other standardized types such as <code>string_view</code>. However, this is not true.
+</tbody></table><p><span>This has numerous disadvantages compared to what the C++ core language can do. It is inefficient, hard to use, and unsafe to use.</span></p><h5 id="Not-easy-to-use" data-id="Not-easy-to-use"><a class="anchor hidden-xs" href="#Not-easy-to-use" title="Not-easy-to-use"><span class="octicon octicon-link"></span></a><span>Not easy to use</span></h5><ul>
+<li><span>Unlike the direct initialization of the C/C++ core language example, the initialization of </span><code>function_ref</code><span> is bifurcated by passing it directly as a function argument or using 2-step initialization by first creating a named temporary. Direct initializing a variable of </span><code>function_ref</code><span> is needed if the same object serves as multiple arguments on either the same but more likely different functions. However, this leads to immediate dangling, which must introduce an extra line of code. Furthermore, getting in the habit of only passing </span><code>function_ref</code><span> as an argument to a function results in users duplicating lambdas when needed to be used more than once, again needless increasing the code volume. Initialization is consistently safe in both the C/C++ core language and the proposed revision, regardless of whether </span><code>function_ref</code><span> appears as a variable.</span></li>
+</ul><h5 id="Why-should-a-stateful-lambda-even-be-needed-when-the-signature-is-compatible" data-id="Why-should-a-stateful-lambda-even-be-needed-when-the-signature-is-compatible"><a class="anchor hidden-xs" href="#Why-should-a-stateful-lambda-even-be-needed-when-the-signature-is-compatible" title="Why-should-a-stateful-lambda-even-be-needed-when-the-signature-is-compatible"><span class="octicon octicon-link"></span></a><span>Why should a stateful lambda even be needed when the signature is compatible?</span></h5><ul>
+<li><span>The C/C++ core language example works with a “stateless” lambda. A new anonymous type is created with states when requiring a “stateful” lambda. That state’s lifetime also needs to be managed by the user.</span></li>
+<li><span>When using a lambda, the user must manually forward the function arguments. However, in the C/C++ core language example, the syntax is straightforward when the function exists. We simply pass a function pointer to the callback struct.</span></li>
+</ul><h5 id="Inefficient" data-id="Inefficient"><a class="anchor hidden-xs" href="#Inefficient" title="Inefficient"><span class="octicon octicon-link"></span></a><span>Inefficient</span></h5><ul>
+<li><span class="ui-comment-inline-span">By requiring a “stateful” lambda, a new type is created with a lifetime that must be managed.</span><span> </span><code>function_ref</code><span> is a reference to a “stateful” lambda which also is a reference. Even if the optimizer can remove the cost, the user is still left with the burden in the code.</span></li>
+<li><span>In the proposed, </span><code>nontype</code><span> does not take a pointer but rather a member function pointer initialization statement thus giving the compiler more information to resolve the function selection at compile time rather than runtime, granted it is more likely with free functions instead of member functions.</span></li>
+</ul><h5 id="Unsafe" data-id="Unsafe"><a class="anchor hidden-xs" href="#Unsafe" title="Unsafe"><span class="octicon octicon-link"></span></a><span>Unsafe</span></h5><ul>
+<li>
+<p><span>Direct initialization of </span><code>function_ref</code><span> outside of a function argument immediately dangles. Some would say that this is no different than other standardized types such as </span><code>string_view</code><span>. However, this is not true.</span></p>
 <table>
-<tr>
+<tbody><tr>
 <td>
 C/C++ core language
 </td>
 <td>
-<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>string_view<span class="op"> </span>sv <span class="op">=</span> <span class="st">&quot;hello world&quot;</span><span class="bu">s</span><span class="op">;</span><span class="co">// immediately dangling</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> c <span class="op">=</span> <span class="st">&quot;hello world&quot;</span><span class="bu">s</span><span class="op">;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>string_view<span class="op"> </span>sv <span class="op">=</span> c<span class="op">;</span><span class="co">// DOES NOT DANGLE</span></span></code></pre></div>
+<pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span><span class="token comment">// immediately dangling</span>
+<span class="token keyword">auto</span> c <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span>
+std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> c<span class="token punctuation">;</span><span class="token comment">// DOES NOT DANGLE</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -495,9 +256,10 @@ C/C++ core language
 function_ref
 </td>
 <td>
-<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> <span class="op">[&amp;</span>localTaxRule<span class="op">](){</span>localTaxRule<span class="op">.</span>when<span class="op">();};</span><span class="co">// immediately dangling</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">// or</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> <span class="op">[&amp;</span>localTaxRule<span class="op">](){</span>then<span class="op">(</span>localTaxRule<span class="op">);};</span><span class="co">// immediately dangling</span></span></code></pre></div>
+<pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>localTaxRule<span class="token punctuation">.</span><span class="token function">when</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">;</span><span class="token comment">// immediately dangling</span>
+<span class="token comment">// or</span>
+function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>localTaxRule<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token function">then</span><span class="token punctuation">(</span>localTaxRule<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">;</span><span class="token comment">// immediately dangling</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -505,54 +267,52 @@ function_ref
 proposed
 </td>
 <td>
-<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> <span class="op">{</span>nontype<span class="op">&lt;&amp;</span>rule<span class="op">::</span>when<span class="op">&gt;,</span> localTaxRule<span class="op">};</span><span class="co">// DOES NOT DANGLE</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">// or</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">()&gt;</span> fr <span class="op">=</span> <span class="op">{</span>nontype<span class="op">&lt;</span>then<span class="op">&gt;,</span> localTaxRule<span class="op">}</span><span class="co">// DOES NOT DANGLE</span></span></code></pre></div>
+<pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span><span class="token operator">&amp;</span>rule<span class="token double-colon punctuation">::</span>when<span class="token operator">&gt;</span><span class="token punctuation">,</span> localTaxRule<span class="token punctuation">}</span><span class="token punctuation">;</span><span class="token comment">// DOES NOT DANGLE</span>
+<span class="token comment">// or</span>
+function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span>then<span class="token operator">&gt;</span><span class="token punctuation">,</span> localTaxRule<span class="token punctuation">}</span><span class="token comment">// DOES NOT DANGLE</span>
+</code></pre>
 </td>
 </tr>
-</table>
-While both the original <code>function_ref</code> proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn’t. It is clear from the immediately dangling <code>string_view</code> example that it dangles because <code>sv</code> is a reference and <code>""s</code> is a temporary. However, it is less clear in the original <code>function_ref</code> example. While it is true and clear that <code>fr</code> is a reference and the stateful lambda is a temporary. It is not what the user of <code>function_ref</code> is intending or wanting to express. <code>localTaxRule</code> is the state that the user wants to type erase and <code>function_ref</code> would not dangle if <code>localTaxRule</code> was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function <code>when</code> or the free function <code>then</code> should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like <code>string_view</code> when the referenced object is safely constructed.</li>
-</ul>
-<table>
+</tbody></table>
+While both the original `function_ref` proposal and the proposed addendum perform the same desired task, the former dangles and the later doesn't. It is clear from the immediately dangling `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary. However, it is less clear in the original `function_ref` example. While it is true and clear that `fr` is a reference and the stateful lambda is a temporary. It is not what the user of `function_ref` is intending or wanting to express. `localTaxRule` is the state that the user wants to type erase and `function_ref` would not dangle if `localTaxRule` was the state since it is not a temporary and has already been constructed higher up in the call stack. Further, the member function `when` or the free function `then` should not dangle since functions are stateless and also global. So member/free function with type erasure use cases are more like `string_view` when the referenced object is safely constructed. 
+</li>
+</ul><table>
 <thead>
-<tr class="header">
+<tr>
 <th></th>
-<th>easier to use</th>
-<th>more efficient</th>
-<th>safer to use</th>
+<th><span>easier to use</span></th>
+<th><span>more efficient</span></th>
+<th><span>safer to use</span></th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td><strong>C/C++ core language</strong></td>
-<td>🗸</td>
-<td>🗸</td>
-<td>🗸</td>
+<tr>
+<td><strong><span>C/C++ core language</span></strong></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
 </tr>
-<tr class="even">
-<td><strong>function_ref</strong></td>
-<td>✗</td>
-<td>✗</td>
-<td>✗</td>
+<tr>
+<td><strong><span>function_ref</span></strong></td>
+<td><span>✗</span></td>
+<td><span>✗</span></td>
+<td><span>✗</span></td>
 </tr>
-<tr class="odd">
-<td><strong>proposed</strong></td>
-<td>🗸</td>
-<td>🗸</td>
-<td>🗸</td>
+<tr>
+<td><strong><span>proposed</span></strong></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
 </tr>
 </tbody>
-</table>
-<p>What is more, member/free functions with type erasure are common use cases! “Member functions with type erasure” is used by delegates/events in object oriented programming and “free functions with type erasure” are common with callbacks in procedural/functional programming.</p>
-<h4 id="member-function-without-type-erasure">member function without type erasure</h4>
-<p>The fact that users do not expect “stateless” things to dangle becomes even more apparent with the member function without type erasure use case.</p>
-<table>
-<tr>
+</table><p><span>What is more, member/free functions with type erasure are common use cases! “Member functions with type erasure” is used by delegates/events in object oriented programming and “free functions with type erasure” are common with callbacks in procedural/functional programming.</span></p><h4 id="member-function-without-type-erasure" data-id="member-function-without-type-erasure"><a class="anchor hidden-xs" href="#member-function-without-type-erasure" title="member-function-without-type-erasure"><span class="octicon octicon-link"></span></a><span>member function without type erasure</span></h4><p><span>The fact that users do not expect “stateless” things to dangle becomes even more apparent with the member function without type erasure use case.</span></p><table>
+<tbody><tr>
 <td>
 C/C++ core language
 </td>
 <td>
-<pre><code>void (rule::*mf)() = &amp;rule::when;</code></pre>
+<pre><code>void (rule::*mf)() = &amp;rule::when;
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -560,12 +320,13 @@ C/C++ core language
 function_ref
 </td>
 <td>
-<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// separate temp needed to prevent dangling</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">// when temp is passed to multiple arguments</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> temp <span class="op">=</span> <span class="op">&amp;</span>rule<span class="op">::</span>when<span class="op">;</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>rule<span class="op">&amp;)&gt;</span> fr <span class="op">=</span> temp<span class="op">;</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">// or when given directly as a function argument</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>some_function<span class="op">(&amp;</span>rule<span class="op">::</span>when<span class="op">);</span></span></code></pre></div>
+<pre><code class="cpp hljs"><span class="token comment">// separate temp needed to prevent dangling</span>
+<span class="token comment">// when temp is passed to multiple arguments</span>
+<span class="token keyword">auto</span> temp <span class="token operator">=</span> <span class="token operator">&amp;</span>rule<span class="token double-colon punctuation">::</span>when<span class="token punctuation">;</span>
+function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> temp<span class="token punctuation">;</span>
+<span class="token comment">// or when given directly as a function argument</span>
+<span class="token function">some_function</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>rule<span class="token double-colon punctuation">::</span>when<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -573,50 +334,48 @@ function_ref
 proposed
 </td>
 <td>
-<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>rule<span class="op">&amp;)&gt;</span> fr <span class="op">=</span> <span class="op">{</span>nontype<span class="op">&lt;&amp;</span>rule<span class="op">::</span>when<span class="op">&gt;};</span></span></code></pre></div>
+<pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span><span class="token operator">&amp;</span>rule<span class="token double-colon punctuation">::</span>when<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
-</table>
-<p>Current <code>function_ref</code> implementations store a reference to the member function pointer as the state inside <code>function_ref</code>. A trampoline function is required regardless. However, the user <strong>expected</strong> behavior is for <code>function_ref</code> referenced state to be unused/<code>nullptr</code>, as <strong>all</strong> of the arguments must be forwarded since <strong>none</strong> are being type erased. Such dangling is <strong>never</strong> expected, yet the current <code>function_ref</code> proposal/implementation does. Similarly, this use case suffers, just as the previous two did, with respect to ease of use, efficiency, and safety due to the superfluous lambda/functor and two-step initialization.</p>
-<table>
+</tbody></table><p><span>Current </span><code>function_ref</code><span> implementations store a reference to the member function pointer as the state inside </span><code>function_ref</code><span>. A trampoline function is required regardless. However, the user </span><strong><span>expected</span></strong><span> behavior is for </span><code>function_ref</code><span> referenced state to be unused/</span><code>nullptr</code><span>, as </span><strong><span>all</span></strong><span> of the arguments must be forwarded since </span><strong><span>none</span></strong><span> are being type erased. Such dangling is </span><strong><span>never</span></strong><span> expected, yet the current </span><code>function_ref</code><span> proposal/implementation does.</span>
+<span>Similarly, this use case suffers, just as the previous two did, with respect to ease of use, efficiency, and safety due to the superfluous lambda/functor and two-step initialization.</span></p><table>
 <thead>
-<tr class="header">
+<tr>
 <th></th>
-<th>easier to use</th>
-<th>more efficient</th>
-<th>safer to use</th>
+<th><span>easier to use</span></th>
+<th><span>more efficient</span></th>
+<th><span>safer to use</span></th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td><strong>C/C++ core language</strong></td>
-<td>🗸</td>
-<td>🗸</td>
-<td>🗸</td>
+<tr>
+<td><strong><span>C/C++ core language</span></strong></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
 </tr>
-<tr class="even">
-<td><strong>function_ref</strong></td>
-<td>✗</td>
-<td>✗</td>
-<td>✗</td>
+<tr>
+<td><strong><span>function_ref</span></strong></td>
+<td><span>✗</span></td>
+<td><span>✗</span></td>
+<td><span>✗</span></td>
 </tr>
-<tr class="odd">
-<td><strong>proposed</strong></td>
-<td>🗸</td>
-<td>🗸</td>
-<td>🗸</td>
+<tr>
+<td><strong><span>proposed</span></strong></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
 </tr>
 </tbody>
-</table>
-<h4 id="free-function-without-type-erasure">free function without type erasure</h4>
-<p>The C/C++ core language, <code>function_ref</code>, and the proposed examples are approximately equal concerning ease of use, efficiency, and safety for the free function without type erasure use case. While the proposed <code>nontype</code> example is slightly wordier because of the template <code>nontype</code>, it is more consistent with the other three use cases, making it more teachable and usable since the user does not need to choose between bifurcation practices. Also, the expectation of unused state and the function being selected at compile time still applies here, as it does for member function without type erasure use case.</p>
-<table>
-<tr>
+</table><h4 id="free-function-without-type-erasure" data-id="free-function-without-type-erasure"><a class="anchor hidden-xs" href="#free-function-without-type-erasure" title="free-function-without-type-erasure"><span class="octicon octicon-link"></span></a><span>free function without type erasure</span></h4><p><span>The C/C++ core language, </span><code>function_ref</code><span>, and the proposed examples are approximately equal concerning ease of use, efficiency, and safety for the free function without type erasure use case. While the proposed </span><code>nontype</code><span> example is slightly wordier because of the template </span><code>nontype</code><span>, it is more consistent with the other three use cases, making it more teachable and usable since the user does not need to choose between bifurcation practices. Also, the expectation of unused state and the function being selected at compile time still applies here, as it does for member function without type erasure use case.</span></p><table>
+<tbody><tr>
 <td>
 C/C++ core language
 </td>
 <td>
-<div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="op">(*</span>f<span class="op">)(</span>rule<span class="op">&amp;)</span> <span class="op">=</span> then<span class="op">;</span></span></code></pre></div>
+<pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>f<span class="token punctuation">)</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> then<span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -624,7 +383,8 @@ C/C++ core language
 function_ref
 </td>
 <td>
-<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>rule<span class="op">&amp;)&gt;</span> fr <span class="op">=</span> then<span class="op">;</span></span></code></pre></div>
+<pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> then<span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
 <tr>
@@ -632,133 +392,320 @@ function_ref
 proposed
 </td>
 <td>
-<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>function_ref<span class="op">&lt;</span><span class="dt">void</span><span class="op">(</span>rule<span class="op">&amp;)&gt;</span> fr <span class="op">=</span> <span class="op">{</span>nontype<span class="op">&lt;</span>then<span class="op">&gt;};</span></span></code></pre></div>
+<pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span>rule<span class="token operator">&amp;</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span>then<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
 </td>
 </tr>
-</table>
-<table>
+</tbody></table><table>
 <thead>
-<tr class="header">
+<tr>
 <th></th>
-<th>easier to use</th>
-<th>more efficient</th>
-<th>safer to use</th>
+<th><span>easier to use</span></th>
+<th><span>more efficient</span></th>
+<th><span>safer to use</span></th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td><strong>C/C++ core language</strong></td>
-<td>🗸</td>
-<td>🗸</td>
-<td>🗸</td>
+<tr>
+<td><strong><span>C/C++ core language</span></strong></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
 </tr>
-<tr class="even">
-<td><strong>function_ref</strong></td>
-<td>🗸</td>
-<td>🗸</td>
-<td>🗸</td>
+<tr>
+<td><strong><span>function_ref</span></strong></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
 </tr>
-<tr class="odd">
-<td><strong>proposed</strong></td>
-<td>🗸</td>
-<td>🗸</td>
-<td>🗸</td>
+<tr>
+<td><strong><span>proposed</span></strong></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
+<td><span>🗸</span></td>
 </tr>
 </tbody>
-</table>
-<h4 id="remove-existing-free-function-constructor">Remove existing free function constructor?</h4>
-<p>Should the existing free function constructor be removed with the overlap in functionality with the free function without type erasure use case? NO. Initializing a <code>function_ref</code> from a function pointer instead of a non-type function pointer template argument is still usable in the most runtime of libraries, such as dynamically loaded libraries where function pointers are looked up. However, it is not necessarily the general case where users work with declarations found in header files and modules.</p>
-<h2 id="wording">Wording</h2>
-<p>The wording is relative to P0792R9.</p>
-<p>Add new templates to 20.2.1 [utility.syn], header <code>&lt;utility&gt;</code> synopsis after <code>in_place_index_t</code> and <code>in_place_index</code>:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> std <span class="op">{</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">[...]</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// nontype argument tag</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> V<span class="op">&gt;</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">struct</span> <span class="dt">nontype_t</span> <span class="op">{</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">explicit</span> <span class="dt">nontype_t</span><span class="op">()</span> <span class="op">=</span> <span class="cf">default</span><span class="op">;</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> V<span class="op">&gt;</span> <span class="kw">inline</span> <span class="kw">constexpr</span> <span class="dt">nontype_t</span><span class="op">&lt;</span>V<span class="op">&gt;</span> nontype<span class="op">{};</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>Add a definition to 20.14.3 [func.def]:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">&gt;</span> <span class="kw">constexpr</span> function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;)</span> <span class="kw">noexcept</span><span class="op">;</span></span></code></pre></div>
-<blockquote>
-<p><em>Constraints:</em> <code>is-invocable-using&lt;decltype(f)&gt;</code> is <code>true</code>.</p>
-<p><em>Effects:</em> Initializes <code>bound-entity</code> with an unused value, and <code>thunk-ptr</code> to address of a function such that <code>thunk-ptr(bound-entity, call-args...)</code> is expression equivalent to <code>invoke_r&lt;R&gt;(f, call-args...)</code>.</p>
-</blockquote>
-<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">,</span> <span class="kw">class</span> T<span class="op">&gt;</span> <span class="kw">constexpr</span> function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;,</span> T<span class="op">&amp;</span> state<span class="op">)</span> <span class="kw">noexcept</span><span class="op">;</span></span></code></pre></div>
-<blockquote>
-<p><em>Constraints:</em> <code>is-invocable-using&lt;decltype(f), cv T&amp;&gt;</code> is true.</p>
-<p><em>Effects:</em> Initializes <code>bound-entity</code> with <code>addressof(state)</code>, and <code>thunk-ptr</code> to address of a function such that <code>thunk-ptr(bound-entity, call-args...)</code> is expression equivalent to <code>invoke_r&lt;R&gt;(f, static_cast&lt;T cv&amp;&gt;(bound-entity), call-args...)</code>.</p>
-</blockquote>
-<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">,</span> <span class="kw">class</span> T<span class="op">&gt;</span> <span class="kw">constexpr</span> function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;,</span> cv T<span class="op">*</span> state<span class="op">)</span> <span class="kw">noexcept</span><span class="op">;</span></span></code></pre></div>
-<blockquote>
-<p><em>Constraints:</em> <code>is-invocable-using&lt;decltype(f), cv T*&gt;</code> is <code>true</code>.</p>
-<p><em>Effects:</em> Initializes <code>bound-entity</code> with <code>state</code>, and <code>thunk-ptr</code> to address of a function such that <code>thunk-ptr(bound-entity, call-args...)</code> is expression equivalent to <code>invoke_r&lt;R&gt;(f, static_cast&lt;cv T*&gt;(bound-entity), call-args...)</code>.</p>
-</blockquote>
-<p>Add the following signatures to [func.wrap.ref.class] synopsis:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">,</span> <span class="kw">class</span><span class="op">...</span> ArgTypes<span class="op">&gt;</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">class</span> function_ref<span class="op">&lt;</span>R<span class="op">(</span>ArgTypes<span class="op">...)</span> cv ref <span class="kw">noexcept</span><span class="op">(</span>noex<span class="op">)&gt;</span> <span class="op">{</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span><span class="op">:</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// [func.wrap.ref.ctor], constructors ...</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">&gt;</span> <span class="kw">constexpr</span> function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;)</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">,</span> <span class="kw">class</span> T<span class="op">&gt;</span> <span class="kw">constexpr</span> function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;,</span> T<span class="op">&amp;)</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">,</span> <span class="kw">class</span> T<span class="op">&gt;</span> <span class="kw">constexpr</span> function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;,</span> cv T<span class="op">*)</span> <span class="kw">noexcept</span><span class="op">;</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">};</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// [func.wrap.ref.deduct], deduction guides</span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">&gt;</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;)</span> <span class="op">-&gt;</span> function_ref<span class="op">&lt;</span><span class="bu">std::</span>remove_pointer_t<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f<span class="op">)&gt;;</span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">&gt;</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;,</span> <span class="kw">auto</span><span class="op">)</span> <span class="op">-&gt;</span> function_ref<span class="op">&lt;</span>see below<span class="op">&gt;;</span></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>Modify [func.wrap.ref.class] as indicated:</p>
-<blockquote>
-<p>[…] <code>BoundEntityType</code> is capable of storing a pointer to object value, a pointer to function value, ++an unused value,++ or a null pointer value. […]</p>
-</blockquote>
-<p>Add the following to [func.wrap.ref.deduct]:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">&gt;</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;)</span> <span class="op">-&gt;</span> function_ref<span class="op">&lt;</span><span class="bu">std::</span>remove_pointer_t<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span>f<span class="op">)&gt;;</span></span></code></pre></div>
-<blockquote>
-<p><em>Constraints:</em> <code>is_function_v&lt;f&gt;</code> is <code>true</code>.</p>
-</blockquote>
-<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">auto</span> f<span class="op">&gt;</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  function_ref<span class="op">(</span><span class="dt">nontype_t</span><span class="op">&lt;</span>f<span class="op">&gt;,</span> <span class="kw">auto</span><span class="op">)</span> <span class="op">-&gt;</span> function_ref<span class="op">&lt;</span>see below<span class="op">&gt;;</span></span></code></pre></div>
-<blockquote>
-<p><em>Constraints:</em> - <code>decltype(f)</code> is of the form <code>R(G::<em>)(A...) <i>cv</i> &amp;<sub><i>opt</i></sub> noexcept(<i>E</i>)</code> for a class type <code>G</code>, or - <code>decltype(f)</code> is of the form <code>R G::</em></code> for a class type <code>G</code>, in which case let <code>A...</code> be an empty pack, or - <code>decltype(f)</code> is of the form <code>R(U, A...) noexcept(<i>E</i>)</code>.</p>
-<p><em>Remarks:</em> The deduced type is <code>function_ref&lt;R(A...) noexcept(<i>E</i>)&gt;</code>.</p>
-</blockquote>
-<h2 id="feature-test-macro">Feature test macro</h2>
-<p>We do not need a feature macro, because we intend for this paper to modify <code>std::function_ref</code> before it ships.</p>
-<h2 id="other-languages">Other languages</h2>
-<p>C# and the .NET family of languages provide this via <code>delegates</code> <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">// C#</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>delegate <span class="dt">void</span> some_name<span class="op">();</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>some_name fr <span class="op">=</span> then<span class="op">;</span><span class="co">// the stateless free function use case</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>some_name fr <span class="op">=</span> localTaxRule<span class="op">.</span>when<span class="op">;</span><span class="co">// the stateful member function use case</span></span></code></pre></div>
-<p>Borland C++ now embarcadero provides this via <code>__closure</code> <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Borland C++, embarcadero __closure</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">(</span>__closure <span class="op">*</span> fr<span class="op">)();</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>fr <span class="op">=</span> localTaxRule<span class="op">.</span>when<span class="op">;</span><span class="co">// the stateful member function use case</span></span></code></pre></div>
-<p><code>function_ref</code> with <code>nontype</code> constructors handles all four stateless/stateful free/member use cases. It is more feature-rich than those prior arts.</p>
-<h2 id="example-implementation">Example implementation</h2>
-<p>The most up-to-date implementation, created by Zhihao Yuan, is available on GitHub.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
-<h2 id="acknowledgments">Acknowledgments</h2>
-<p>Thanks to Arthur O’Dwyer, Tomasz Kamiński, Corentin Jabot and Zhihao Yuan for providing very valuable feedback on this proposal.</p>
-<h2 id="references">References</h2>
-<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
-<hr />
-<ol>
-<li id="fn1" role="doc-endnote"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r6.html" class="uri">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r6.html</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2" role="doc-endnote"><p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" class="uri">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3" role="doc-endnote"><p><a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" class="uri">http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</a><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4" role="doc-endnote"><p><a href="https://github.com/zhihaoy/nontype_functional/blob/main/include/std23/function_ref.h" class="uri">https://github.com/zhihaoy/nontype_functional/blob/main/include/std23/function_ref.h</a><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</table><h4 id="Remove-existing-free-function-constructor" data-id="Remove-existing-free-function-constructor"><a class="anchor hidden-xs" href="#Remove-existing-free-function-constructor" title="Remove-existing-free-function-constructor"><span class="octicon octicon-link"></span></a><span>Remove existing free function constructor?</span></h4><p><span>Should the existing free function constructor be removed with the overlap in functionality with the free function without type erasure use case? NO. Initializing a </span><code>function_ref</code><span> from a function pointer instead of a non-type function pointer template argument is still usable in the most runtime of libraries, such as dynamically loaded libraries where function pointers are looked up. However, it is not necessarily the general case where users work with declarations found in header files and modules.</span></p><h2 id="Wording" data-id="Wording"><a class="anchor hidden-xs" href="#Wording" title="Wording"><span class="octicon octicon-link"></span></a><span>Wording</span></h2><p><span>The wording is relative to P0792R9.</span></p><p><span>Add new templates to 20.2.1 [utility.syn], header </span><code>&lt;utility&gt;</code><span> synopsis after </span><code>in_place_index_t</code><span> and </span><code>in_place_index</code><span>:</span></p><pre><code class="cpp hljs"><span class="token keyword">namespace</span> std <span class="token punctuation">{</span>
+  <span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span>
+
+  <span class="token comment">// nontype argument tag</span>
+  <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> V<span class="token operator">&gt;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">nontype_t</span> <span class="token punctuation">{</span>
+      <span class="token keyword">explicit</span> <span class="token function">nontype_t</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token keyword">default</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> V<span class="token operator">&gt;</span> <span class="token keyword">inline</span> <span class="token keyword">constexpr</span> nontype_t<span class="token operator">&lt;</span>V<span class="token operator">&gt;</span> nontype<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>Add a definition to 20.14.3 [func.def]:</span></p><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token operator">&gt;</span> <span class="token keyword">constexpr</span> <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+</code></pre><blockquote>
+<p><em><span>Constraints:</span></em><span> </span><code>is-invocable-using&lt;decltype(f)&gt;</code><span> is </span><code>true</code><span>.</span></p>
+<p><em><span>Effects:</span></em><span> Initializes </span><code>bound-entity</code><span> with an unused value, and </span><code>thunk-ptr</code><span> to address of a function such that </span><code>thunk-ptr(bound-entity, call-args...)</code><span> is expression equivalent to </span><code>invoke_r&lt;R&gt;(f, call-args...)</code><span>.</span></p>
+</blockquote><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token keyword">constexpr</span> <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">,</span> T<span class="token operator">&amp;</span> state<span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+</code></pre><blockquote>
+<p><em><span>Constraints:</span></em><span> </span><code>is-invocable-using&lt;decltype(f), cv T&amp;&gt;</code><span> is true.</span></p>
+<p><em><span>Effects:</span></em><span> Initializes </span><code>bound-entity</code><span> with </span><code>addressof(state)</code><span>, and </span><code>thunk-ptr</code><span> to address of a function such that </span><code>thunk-ptr(bound-entity, call-args...)</code><span> is expression equivalent to </span><code>invoke_r&lt;R&gt;(f, static_cast&lt;T cv&amp;&gt;(bound-entity), call-args...)</code><span>.</span></p>
+</blockquote><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token keyword">constexpr</span> <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">,</span> cv T<span class="token operator">*</span> state<span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+</code></pre><blockquote>
+<p><em><span>Constraints:</span></em><span> </span><code>is-invocable-using&lt;decltype(f), cv T*&gt;</code><span> is </span><code>true</code><span>.</span></p>
+<p><em><span>Effects:</span></em><span> Initializes </span><code>bound-entity</code><span> with </span><code>state</code><span>, and </span><code>thunk-ptr</code><span> to address of a function such that </span><code>thunk-ptr(bound-entity, call-args...)</code><span> is expression equivalent to </span><code>invoke_r&lt;R&gt;(f, static_cast&lt;cv T*&gt;(bound-entity), call-args...)</code><span>.</span></p>
+</blockquote><p><span>Add the following signatures to [func.wrap.ref.class] synopsis:</span></p><pre><code class="cpp hljs">  <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">R</span><span class="token punctuation">,</span> <span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> ArgTypes<span class="token operator">&gt;</span>
+  <span class="token keyword">class</span> <span class="token class-name">function_ref</span><span class="token operator">&lt;</span><span class="token function">R</span><span class="token punctuation">(</span>ArgTypes<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> cv ref <span class="token keyword">noexcept</span><span class="token punctuation">(</span>noex<span class="token punctuation">)</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token comment">// [func.wrap.ref.ctor], constructors ...</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token operator">&gt;</span> <span class="token keyword">constexpr</span> <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+    <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token keyword">constexpr</span> <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">,</span> T<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+    <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token punctuation">,</span> <span class="token keyword">class</span> <span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token keyword">constexpr</span> <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">,</span> cv T<span class="token operator">*</span><span class="token punctuation">)</span> <span class="token keyword">noexcept</span><span class="token punctuation">;</span>
+
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// [func.wrap.ref.deduct], deduction guides</span>
+  <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token operator">&gt;</span>
+    <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> function_ref<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>remove_pointer_t<span class="token operator">&lt;</span><span class="token keyword">decltype</span><span class="token punctuation">(</span>f<span class="token punctuation">)</span><span class="token operator">&gt;</span><span class="token punctuation">;</span>
+  <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token operator">&gt;</span>
+    <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">,</span> <span class="token keyword">auto</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> function_ref<span class="token operator">&lt;</span>see below<span class="token operator">&gt;</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>Modify [func.wrap.ref.class] as indicated:</span></p><blockquote>
+<p><span>[…] </span><code>BoundEntityType</code><span> is capable of storing a pointer to object value, a pointer to function value, </span><ins><span>an unused value,</span></ins><span> or a null pointer value. […]</span></p>
+</blockquote><p><span>Add the following to [func.wrap.ref.deduct]:</span></p><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token operator">&gt;</span>
+  <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> function_ref<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>remove_pointer_t<span class="token operator">&lt;</span><span class="token keyword">decltype</span><span class="token punctuation">(</span>f<span class="token punctuation">)</span><span class="token operator">&gt;</span><span class="token punctuation">;</span>
+</code></pre><blockquote>
+<p><em><span>Constraints:</span></em><span> </span><code>is_function_v&lt;f&gt;</code><span> is </span><code>true</code><span>.</span></p>
+</blockquote><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">auto</span> f<span class="token operator">&gt;</span>
+  <span class="token function">function_ref</span><span class="token punctuation">(</span>nontype_t<span class="token operator">&lt;</span>f<span class="token operator">&gt;</span><span class="token punctuation">,</span> <span class="token keyword">auto</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> function_ref<span class="token operator">&lt;</span>see below<span class="token operator">&gt;</span><span class="token punctuation">;</span>
+</code></pre><blockquote>
+<p><em><span>Constraints:</span></em></p>
+<ul>
+<li><code>decltype(f)</code><span> is of the form </span><code><span>R(G::*)(A...) </span><i><span>cv</span></i><span> &amp;</span><sub><i><span>opt</span></i></sub><span> noexcept(</span><i><span>E</span></i><span>)</span></code><span> for a class type </span><code>G</code><span>, or</span></li>
+<li><code>decltype(f)</code><span> is of the form </span><code><span>R G::*</span></code><span> for a class type </span><code>G</code><span>, in which case let </span><code>A...</code><span> be an empty pack, or</span></li>
+<li><code>decltype(f)</code><span> is of the form </span><code><span>R(U, A...) noexcept(</span><i><span>E</span></i><span>)</span></code><span>.</span></li>
+</ul>
+<p><em><span>Remarks:</span></em><span> The deduced type is </span><code><span>function_ref&lt;R(A...) noexcept(</span><i><span>E</span></i><span>)&gt;</span></code><span>.</span></p>
+</blockquote><h2 id="Feature-test-macro" data-id="Feature-test-macro"><a class="anchor hidden-xs" href="#Feature-test-macro" title="Feature-test-macro"><span class="octicon octicon-link"></span></a><span>Feature test macro</span></h2><p><span>We do not need a feature macro, because we intend for this paper to modify </span><code>std::function_ref</code><span> before it ships.</span></p><h2 id="Other-languages" data-id="Other-languages"><a class="anchor hidden-xs" href="#Other-languages" title="Other-languages"><span class="octicon octicon-link"></span></a><span>Other languages</span></h2><p><span>C# and the .NET family of languages provide this via </span><code>delegates</code><span> </span><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup><span>.</span></p><pre><code class="cpp hljs"><span class="token comment">// C#</span>
+delegate <span class="token keyword">void</span> <span class="token function">some_name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+some_name fr <span class="token operator">=</span> then<span class="token punctuation">;</span><span class="token comment">// the stateless free function use case</span>
+some_name fr <span class="token operator">=</span> localTaxRule<span class="token punctuation">.</span>when<span class="token punctuation">;</span><span class="token comment">// the stateful member function use case</span>
+</code></pre><p><span>Borland C++ now embarcadero provides this via </span><code>__closure</code><span> </span><sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup><span>.</span></p><pre><code class="cpp hljs"><span class="token comment">// Borland C++, embarcadero __closure</span>
+<span class="token keyword">void</span><span class="token punctuation">(</span>__closure <span class="token operator">*</span> fr<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+fr <span class="token operator">=</span> localTaxRule<span class="token punctuation">.</span>when<span class="token punctuation">;</span><span class="token comment">// the stateful member function use case</span>
+</code></pre><p><code>function_ref</code><span> with </span><code>nontype</code><span> constructors handles all four stateless/stateful free/member use cases. It is more feature-rich than those </span><span class="ui-comment-inline-span">prior arts</span><span>.</span></p><h2 id="Example-implementation" data-id="Example-implementation"><a class="anchor hidden-xs" href="#Example-implementation" title="Example-implementation"><span class="octicon octicon-link"></span></a><span>Example implementation</span></h2><p><span>The most up-to-date implementation, created by Zhihao Yuan, is available on GitHub.</span><sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup></p><h2 id="Acknowledgments" data-id="Acknowledgments"><a class="anchor hidden-xs" href="#Acknowledgments" title="Acknowledgments"><span class="octicon octicon-link"></span></a><span>Acknowledgments</span></h2><p><span>Thanks to Arthur O’Dwyer, Tomasz Kamiński, Corentin Jabot and Zhihao Yuan for providing very valuable feedback on this proposal.</span></p><h2 id="References" data-id="References"><a class="anchor hidden-xs" href="#References" title="References"><span class="octicon octicon-link"></span></a><span>References</span></h2><hr class="footnotes-sep"><section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html" target="_blank" rel="noopener"><span>http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html</span></a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates" target="_blank" rel="noopener"><span>https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/using-delegates</span></a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure" target="_blank" rel="noopener"><span>http://docwiki.embarcadero.com/RADStudio/Sydney/en/Closure</span></a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="https://github.com/zhihaoy/nontype_functional/blob/main/include/std23/function_ref.h" target="_blank" rel="noopener"><span>https://github.com/zhihaoy/nontype_functional/blob/main/include/std23/function_ref.h</span></a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
 </ol>
-</section>
+</section></div>
+    <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
+        <div class="pull-right dropdown">
+            <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
+                <i class="fa fa-bars"></i>
+            </a>
+            <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
+                <div class="toc"><ul class="nav">
+<li><a href="#make-function_ref-more-functional" title="make function_ref more functional">make function_ref more functional</a><ul class="nav">
+<li><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Changelog" title="Changelog">Changelog</a><ul class="nav">
+<li><a href="#R1" title="R1">R1</a></li>
+<li><a href="#R2" title="R2">R2</a></li>
+<li><a href="#R3" title="R3">R3</a></li>
+</ul>
+</li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Examples" title="Motivating Examples">Motivating Examples</a><ul class="nav">
+<li><a href="#Given" title="Given">Given</a></li>
+</ul>
+</li>
+<li><a href="#Wording" title="Wording">Wording</a></li>
+<li><a href="#Feature-test-macro" title="Feature test macro">Feature test macro</a></li>
+<li><a href="#Other-languages" title="Other languages">Other languages</a></li>
+<li><a href="#Example-implementation" title="Example implementation">Example implementation</a></li>
+<li><a href="#Acknowledgments" title="Acknowledgments">Acknowledgments</a></li>
+<li><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+            </ul>
+        </div>
+    </div>
+    <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;" null null>
+        <div class="toc"><ul class="nav">
+<li><a href="#make-function_ref-more-functional" title="make function_ref more functional">make function_ref more functional</a><ul class="nav">
+<li><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Changelog" title="Changelog">Changelog</a><ul class="nav">
+<li><a href="#R1" title="R1">R1</a></li>
+<li><a href="#R2" title="R2">R2</a></li>
+<li><a href="#R3" title="R3">R3</a></li>
+</ul>
+</li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Examples" title="Motivating Examples">Motivating Examples</a><ul class="nav">
+<li><a href="#Given" title="Given">Given</a></li>
+</ul>
+</li>
+<li><a href="#Wording" title="Wording">Wording</a></li>
+<li><a href="#Feature-test-macro" title="Feature test macro">Feature test macro</a></li>
+<li><a href="#Other-languages" title="Other languages">Other languages</a></li>
+<li><a href="#Example-implementation" title="Example implementation">Example implementation</a></li>
+<li><a href="#Acknowledgments" title="Acknowledgments">Acknowledgments</a></li>
+<li><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gist-embed/2.6.0/gist-embed.min.js" integrity="sha256-KyF2D6xPIJUW5sUDSs93vWyZm+1RzIpKCexxElmxl8g=" crossorigin="anonymous" defer></script>
+    <script>
+        var markdown = $(".markdown-body");
+        //smooth all hash trigger scrolling
+        function smoothHashScroll() {
+            var hashElements = $("a[href^='#']").toArray();
+            for (var i = 0; i < hashElements.length; i++) {
+                var element = hashElements[i];
+                var $element = $(element);
+                var hash = element.hash;
+                if (hash) {
+                    $element.on('click', function (e) {
+                        // store hash
+                        var hash = this.hash;
+                        if ($(hash).length <= 0) return;
+                        // prevent default anchor click behavior
+                        e.preventDefault();
+                        // animate
+                        $('body, html').stop(true, true).animate({
+                            scrollTop: $(hash).offset().top
+                        }, 100, "linear", function () {
+                            // when done, add hash to url
+                            // (default click behaviour)
+                            window.location.hash = hash;
+                        });
+                    });
+                }
+            }
+        }
+
+        smoothHashScroll();
+        var toc = $('.ui-toc');
+        var tocAffix = $('.ui-affix-toc');
+        var tocDropdown = $('.ui-toc-dropdown');
+        //toc
+        tocDropdown.click(function (e) {
+            e.stopPropagation();
+        });
+
+        var enoughForAffixToc = true;
+
+        function generateScrollspy() {
+            $(document.body).scrollspy({
+                target: ''
+            });
+            $(document.body).scrollspy('refresh');
+            if (enoughForAffixToc) {
+                toc.hide();
+                tocAffix.show();
+            } else {
+                tocAffix.hide();
+                toc.show();
+            }
+            $(document.body).scroll();
+        }
+
+        function windowResize() {
+            //toc right
+            var paddingRight = parseFloat(markdown.css('padding-right'));
+            var right = ($(window).width() - (markdown.offset().left + markdown.outerWidth() - paddingRight));
+            toc.css('right', right + 'px');
+            //affix toc left
+            var newbool;
+            var rightMargin = (markdown.parent().outerWidth() - markdown.outerWidth()) / 2;
+            //for ipad or wider device
+            if (rightMargin >= 133) {
+                newbool = true;
+                var affixLeftMargin = (tocAffix.outerWidth() - tocAffix.width()) / 2;
+                var left = markdown.offset().left + markdown.outerWidth() - affixLeftMargin;
+                tocAffix.css('left', left + 'px');
+            } else {
+                newbool = false;
+            }
+            if (newbool != enoughForAffixToc) {
+                enoughForAffixToc = newbool;
+                generateScrollspy();
+            }
+        }
+        $(window).resize(function () {
+            windowResize();
+        });
+        $(document).ready(function () {
+            windowResize();
+            generateScrollspy();
+        });
+
+        //remove hash
+        function removeHash() {
+            window.location.hash = '';
+        }
+
+        var backtotop = $('.back-to-top');
+        var gotobottom = $('.go-to-bottom');
+
+        backtotop.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToTop)
+                scrollToTop();
+            removeHash();
+        });
+        gotobottom.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToBottom)
+                scrollToBottom();
+            removeHash();
+        });
+
+        var toggle = $('.expand-toggle');
+        var tocExpand = false;
+
+        checkExpandToggle();
+        toggle.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tocExpand = !tocExpand;
+            checkExpandToggle();
+        })
+
+        function checkExpandToggle () {
+            var toc = $('.ui-toc-dropdown .toc');
+            var toggle = $('.expand-toggle');
+            if (!tocExpand) {
+                toc.removeClass('expand');
+                toggle.text('Expand all');
+            } else {
+                toc.addClass('expand');
+                toggle.text('Collapse all');
+            }
+        }
+
+        function scrollToTop() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: 0
+            }, 100, "linear");
+        }
+
+        function scrollToBottom() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: $(document.body)[0].scrollHeight
+            }, 100, "linear");
+        }
+    </script>
 </body>
+
 </html>
