@@ -27,7 +27,7 @@ Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;
 </tr>
 </table>
 
-# automatic lifetime extension - guaranteed interning
+# dangling reduction - constexpr
 
 <style>
 .inline-link
@@ -58,7 +58,7 @@ a code
 
 ## Table of contents
 
-- [automatic lifetime extension - guaranteed interning](#automatic-lifetime-extension-guaranteed-interning)
+- [dangling reduction - constexpr](#dangling-reduction-constexpr)
   - [Abstract](#abstract)
   - [Motivating examples](#motivating-examples)
   - [The conditions](#the-conditions)
@@ -98,8 +98,8 @@ That given simple reasonable conditions, the lifetime of the temporary gets auto
 
 ## The conditions
 
-1. argument would, prior to this proposal, be a temporary
-1. parameter is a constant reference or constant character pointer
+1. the argument would, prior to this proposal, be a temporary
+1. the type of the parameter is a constant reference or constant pointer
 1. type of the temporary argument has constexpr constructor
 1. type of the temporary argument has compile time comparison; constexpr <=>
 
@@ -114,7 +114,7 @@ There is interest in eliminating, if not reducing dangling references. Consider 
 
 ## Why not before
 
-Only recently have we had all the pieces to make this happen.
+Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally be dynamically allocated such as string and vector has opened up the door wide for many more types being constructed at compile time. 
 
 ### C++11
 
@@ -170,7 +170,7 @@ some_fuction("hello world");
 ---
 
 ```cpp
-void some_function(std::string&);
+void some_function(const std::string&);
 
 // As of C++20, std::string can be constructed constexpr
 some_fuction("hello world"s);
@@ -179,7 +179,7 @@ some_fuction("hello world"s);
 ---
 
 ```cpp
-void some_function(std::vector<std::string>&);
+void some_function(const std::vector<std::string>&);
 
 // As of C++20, std::vector and std::string can be constructed constexpr
 some_fuction({"hello", "world"});
@@ -188,7 +188,7 @@ some_fuction({"hello", "world"});
 ---
 
 ```cpp
-void some_function(std::optional<std::string>&);
+void some_function(const std::optional<std::string>&);
 
 // As of C++23, std::optional and std::string can be constructed constexpr
 some_fuction("hello world"s);
@@ -197,7 +197,7 @@ some_fuction("hello world"s);
 ---
 
 ```cpp
-void some_function(std::variant<std::string>&);
+void some_function(const std::variant<std::string>&);
 
 // As of C++23, std::variant and std::string can be constructed constexpr
 some_fuction("hello world"s);
@@ -206,7 +206,7 @@ some_fuction("hello world"s);
 ---
 
 ```cpp
-void some_function(std::unique_ptr<std::string>&);
+void some_function(const std::unique_ptr<std::string>&);
 
 // As of C++23, std::unique_ptr can be constructed constexpr
 some_fuction(std::make_unique<std::string>("hello world"));
