@@ -70,7 +70,11 @@ a code
   - [Rationale](#rationale)
     - [Expectations](#expectations)
     - [Past](#past)
+      - [n1511](#n1511)
+      - [n2235](#n2235)
     - [Present](#present)
+      - [C Standard Compound Literals](#c-standard-compund-literals)
+      - [C++ Standard](#c-standard)
     - [Future](#future)
       - [Proposal #1: `C++` with `static storage duration`](#proposal-1-c-with-static-storage-duration)
       - [Proposal #2: `C` `compound literals` with `static storage duration`](#proposal-2-c-compound-literals-with-static-storage-duration)
@@ -359,11 +363,176 @@ were ROMable. What is more interesting is that it doesn't matter if it is in the
 
 ### Past
 
-TODO
+A brief consideration of the proposals that led to `constexpr` landing as a feature bears weight.
+
+#### n1511
+***`Literals for user-defined types`*** [^n1511]
+
+**2003**
+
+*"Bjarne Stroustrup"*
+
+*"This note proposes a notion of user-defined literals based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the C99 notion of compound literals."*
+
+*"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be confident that a value will be constructed at compile time and potentially stored in ROM. For example:"*
+
+```cpp
+complex z(1,2); // the variable z can be constructed at compile time
+const complex cz(1,2); // the const cz can potentially be put in ROM
+```
+
+*"Personally, I prefer (1): basically, a value is a literal if it is composed out of literals and implemented by a literal constructor. The problem with that is that some people will not trust compilers to do proper resolution, placement in ROM, placement in text segment, etc. Choosing that solution would require text in the standard to constrain and/or guide implementations."*
+
+*"C99 compound literals"*
+
+*"In C99, it is explicitly allowed to take the address of a compound literal. For example:"*
+
+```cpp
+f(&(struct foo) { 1,2 });
+```
+
+*"This makes sense only if we assume that the {1,2} is stored in a data segment (like a string literal, but different from a int literal). I see no problem allowing that, as long as it is understood that unless & is explicitly used or the literal, a user-defined literal is an rvalue with which the optimizer has a free hand."*
+
+*"It would be tempting to expand this rule to user-defined literals bound to references. For example:"*
+
+```cpp
+ void f(complex&);
+ // …
+ f(complex(1,2)); // ok?
+```
+
+*"However, this would touch upon some rather brittle parts of the overload resolution rules to do with rvalue vs. lvalue. For example:"*
+
+```cpp
+ vector<int> v;
+ // ...
+ vector<int>().swap(v); // ok
+ swap(vector<int>(), v); // would become ok
+```
+
+*"I suggest we don’t touch this unless we are looking at the rvalue/lvalue rules for other reasons."*
+
+#### n2235
+***`Generalized Constant Expressions—Revision 5`*** [^n2235]
+
+**2007**
+
+*"Gabriel Dos Reis	Bjarne Stroustrup	Jens Maurer"*
+
+*"This paper generalizes the notion of constant expressions to include constant-expression functions and user-defined literals"*
+
+*"The goal is ... to increase C99 compatibility."*
+
+*"This paper generalizes the notion of constant expressions to include calls to “sufficiently simple” functions (constexpr functions) and objects of user-defined types constructed from “sufficiently simple” constructors (constexpr constructors.)"*
+
+*"simplify the language definition in the area of constant expression to match existing practice"*
+
+*"Any enhancement of the notion of constant expressions has to carefully consider the entanglement of many different notions, but strongly related. Indeed, the notion of constant expression appears in different contexts:"*
+
+*"3. Static initialization of objects with static storage."*
+
+*"Similarly, we do not propose to change the already complex and subtle distinction between “static initialization” and “dynamic initialization”. However we strieve for more uniform and consistency among related C++ language features and compatibility"*
+
+*"3 Problems"*
+
+*"Most of the problems addressed by this proposal have been discussed in previous papers, especially the initial proposal for Generalized Constant Expressions [DR03], the proposal for Literals for user-defined types [Str03], Generalized initializer lists [DRS03], Initializer lists [SDR05]. What follows is a brief summary."*
+
+*"3.4 Unexpected dynamic initialization"*
+
+*"However, it is possible to be surprised by expressions that (to someone) “look const” but are not."*
+
+*"3.5 Complex rules for simple things"*
+
+*"The focus of this proposal is to address the issues mentioned in preceding sections. However, discussions in the Core Working Group at the Berlin meeting (April 2006) concluded that the current rules for integral constant expressions are too complicated, and source of several Defect Reports. Consequently, a “cleanup”, i.e. adoption of simpler, more general rules is suggested."*
+
+*"4 Suggestions for C++0x"*
+
+*"Second, we introduce “literals for user-defined type” based on the notion of constant expression constructors."*
+
+*"4.2 Constant-expression data"*
+
+*"A constant-expression value is a variable or data member declared with the constexpr specifier."*
+
+*"As for other const variables, storage need not be allocated for a constant expression datum, unless its address is taken."*
+
+```cpp
+// the &x forces x into memory
+```
+
+*"When the initializer for an ordinary variable (i.e. not a constexpr) happens to be a constant, the compiler can choose to do dynamic or static initialization (as ever)."*
+
+*"Declaring a constructor constexpr will help compilers to identify static initialization and perform appropriate optimizations (like putting literals in read-only memory.) Note that since “ROM” isn’t a concept of the C++ Standard and what to put into ROM is often a quite subtle design decision, this proposal simply allows the programmer to indicate what might be put into ROM (constant-expression data) rather than trying to specify what actually goes into ROM in a particular implementation."*
+
+*"We do not propose to make constexpr a storage-class-specifier because it can be combined with either static or extern or register, much like const."*
 
 ### Present
 
-TODO
+#### C Standard Compound Literals
+
+`2021/10/18 Meneide, C Working Draft` [^n2731]
+
+*"6.5.2.5 Compound literals"*
+
+**paragraph 5**
+
+*"The value of the compound literal is that of an unnamed object initialized by the initializer list. If the compound literal occurs outside the body of a function, the object has static storage duration; otherwise, it has automatic storage duration associated with the enclosing block."*
+
+#### C++ Standard
+
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+*"5.13.5 String literals [lex.string]"*
+
+*"9 Evaluating a string-literal results in a string literal object with static storage duration (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed."*
+
+*"[Note 4: The eﬀect of attempting to modify a string literal object is undefned. — end note]"*
+
+*"6.7.7 Temporary objects [class.temporary]"*
+
+*"(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer."*
+
+*"[Note 7: This might introduce a dangling reference. — end note]"*
+
+*"[Example 5:"*
+
+```cpp
+struct S { int mi; const std::pair<int,int>& mp; };
+S a { 1, {2,3} };
+S* p = new S{ 1, {2,3} }; // creates dangling reference
+```
+
+*"— end example]"*
+
+*"9.4 Initializers [dcl.init]"*
+
+*"9.4.1 General [dcl.init.general]"*
+
+```cpp
+A a1{1, f()}; // OK, lifetime is extended
+A a2(1, f()); // well-formed, but dangling reference
+A a3{1.0, 1}; // error: narrowing conversion
+A a4(1.0, 1); // well-formed, but dangling reference
+A a5(1.0, std::move(n)); // OK
+```
+
+*"9.4.5 List-initialization [dcl.init.list]"*
+
+```cpp
+struct A {
+std::initializer_list<int> i4;
+A() : i4{ 1, 2, 3 } {} // ill-formed, would create a dangling reference
+};
+```
+
+*"11.9.6 Copy/move elision [class.copy.elision]"*
+
+```cpp
+constexpr A a; // well-formed, a.p points to a
+constexpr A b = g(); // error: b.p would be dangling (7.7)
+void h() {
+A c = g(); // well-formed, c.p can point to c or be dangling
+}
+```
 
 ### Future
 
@@ -383,7 +552,28 @@ TODO
 
 ## Frequently Asked Questions
 
-TODO
+### Why not just extend the lifetime as descibed in p0936r0?
+
+`Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp]
+
+In that proposal, a question was raised.
+
+*"Lifetime Extension or Just a Warning?"*
+*"We could use the marker in two ways:"*
+
+1. *"Warn only about some possible buggy behavior."*
+1. *"Fix possible buggy behavior by extending the lifetime of temporaries"*
+
+In reality, there are three scenarios; warning, **error** or just fix it by extending the lifetime.
+
+However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen, so shouldn't we fix what we can, when we can; low hanging fruit. Also, fixing everything the same way may not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
+
+1. Change automatic storage duration such that a instances' lifetime is just moved higher up the stack as prescribed in p0936r0.
+1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
+
+If only #1 was applied holistically via p0936r0, -Wlifetime or some such then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to.
+
+Any reduction in undefined behavior or dangling references should be welcomed, at least as long it can be explained simply and rationally.
 
 ## References
 
@@ -421,12 +611,18 @@ TODO
 [^guidelines]: <https://www.modernescpp.com/index.php/c-core-guidelines-programming-at-compile-time-with-constexpr>
 <!--How can I get GCC to place a C++ constexpr in ROM?-->
 [^gccconstexprrom]: <https://stackoverflow.com/questions/10982249/how-can-i-get-gcc-to-place-a-c-constexpr-in-rom>
-
+<!--Literals for user-defined types-->
+[^n1511]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1511.pdf>
+<!--Generalized Constant Expressions—Revision 5-->
+[^n2235]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf>
+<!--2021/10/18 Meneide, C Working Draft-->
+[^n2731]: <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf>
+<!--Working Draft, Standard for Programming Language C++-->
+[^n4910]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf>
 <!---->
 <!--
 [^]: <>
 -->
-
 <!--
 recipients
 To: C++ Library Evolution Working Group <lib-ext@lists.isocpp.org>
