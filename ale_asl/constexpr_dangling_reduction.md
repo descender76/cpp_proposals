@@ -111,7 +111,8 @@ int main() {
     return 42;
 }
 -->
-It is clear from the `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary.
+
+It is clear from this `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary.
 ***What is being proposed is that same example doesn't dangle!***
 That given simple reasonable conditions, the lifetime of the temporary gets automatically extended.
 
@@ -129,27 +130,33 @@ This is reasonable because a constant reference/pointer parameter doesn't care h
 
 This feature is also similar to existing features/concepts that programmers are familiar with. This feature is an implicit anonymous constant. It is more like an implicit anonymous static local.
 
-There is interest in eliminating, if not reducing dangling references. Consider `Why lifetime of temporary doesn't extend till lifetime of enclosing object?` [^soauto]. Also `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] and `Lifetime safety: Preventing common dangling` [^lifetimesafety] talks about identify such issues but this proposal would address a small portion of them especially ones that would be considered surprising to programmers.
+There is interest in eliminating, if not reducing dangling references. Consider:
+
+1. `Why lifetime of temporary doesn't extend till lifetime of enclosing object?` [^soauto]
+1. `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp]
+1. `Lifetime safety: Preventing common dangling` [^lifetimesafety]
+
+These talks about identify such issues but this proposal would address a small portion of them especially ones that would be considered surprising to programmers.
 
 ## Why not before
 
 Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally be dynamically allocated such as string and vector has opened up the door wide for many more types being constructed at compile time. 
 
-### C++11
+**C++11**
 
 * constexpr
 
-### C++14
+**C++14**
 
 * relaxed constexpr restrictions
 
-### C++20
+**C++20**
 
 * The spaceship operator
 * `Making std::string constexpr` [^string]
 * `Making std::vector constexpr` [^vector]
 
-### C++23??
+**C++23**
 
 * `P2255R2 (A type trait to detect reference binding to temporary)` [^p2255r2]
 * `Missing constexpr in std::optional and std::variant` [^optionalvariant]
@@ -175,7 +182,7 @@ The .NET languages also performs interning on its `String class` [^csharp]
 
 According to Wikipedia's article, `String interning` [^stringinterning], Python, PHP, Lua, Ruby, Julia, Lisp, Scheme, Smalltalk and Objective-C's each has this capability in one fashion or another.
 
-What is proposed here is increasing the interning that C++ already does, but is not limited to just strings, in order to reduce dangling references. That fact is literals in `C++` is needless complicated with clearly unnecessary memory safety issues that impedes programmers coming to `C++` from other languages, even `C`.
+What is proposed here is increasing the interning that C++ already does, but is not limited to just strings, in order to reduce dangling references. The fact is, literals in `C++` is needless complicated with clearly unnecessary memory safety issues that impedes programmers coming to `C++` from other languages, even `C`.
 
 <!--
 
@@ -240,45 +247,110 @@ some_fuction(std::make_unique<std::string>("hello world"));
 ### p2255r2
 ***`A type trait to detect reference binding to temporary`*** [^p2255r2]
 
-Following is a slightly modified example taken from the `p2255r2` [^p2255r2] proposal. Only the suffix `s` has been added. Currently, such an example is immediately dangling.
+Following is a slightly modified `constexpr` example taken from the `p2255r2` [^p2255r2] proposal. Only the suffix `s` has been added. It is followed by a non `constexpr` example. Currently, such an example is immediately dangling. Via `p2255r2` [^p2255r2], both examples become ill formed. However, with this proposal the `constexpr` example becomes valid.
 
-#### Before
+<table>
+<tr>
+<td>
+</td>
+<td>
 
-```cpp
-std::tuple<const std::string&> x("hello"s); // dangling
-```
+**constexpr**
 
-After `p2255r2` [^p2255r2] this becomes ill-formed, which is a vast improvement since the compiler is informing us of an error.
+</td>
+<td>
 
-#### After p2255r2
+**runtime**
 
-```cpp
-std::tuple<const std::string&> x("hello"s); // ill-formed
-```
+</td>
+</tr>
+<tr>
+<td>
 
-After this proposal, such an example becomes correct because `"hello"s` will be globally allocated and as such can't dangle since `std::string` has a `constexpr` constructor.
+**Examples**
 
-#### After this proposal
-
-```cpp
-std::tuple<const std::string&> x("hello"s); // correct
-```
-
-With this proposal `reference_constructs_from_temporary` and `reference_converts_from_temporary` would always return false for constant expressions. Does this mean `p2255r2` [^p2255r2] is useless? NO, while instances created at compile time would no longer dangle, mutable objects still could dangle. This is illustrated in the following examples.
-
-#### Before
+</td>
+<td>
 
 ```cpp
-std::tuple<const std::string&> x(factory_of_string_at_runtime()); // dangling
+std::tuple<const std::string&> x("hello"s);
 ```
 
-After `p2255r2` [^p2255r2] this becomes ill-formed, which again is a vast improvement since the compiler is informing us of an error.
-
-#### After p2255r2
+</td>
+<td>
 
 ```cpp
-std::tuple<const std::string&> x(factory_of_string_at_runtime()); // ill-formed
+std::tuple<const std::string&> x(factory_of_string_at_runtime());
 ```
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Before**
+
+</td>
+<td>
+
+```cpp
+// dangling
+```
+
+</td>
+<td>
+
+```cpp
+// dangling
+```
+
+</td>
+</tr>
+<tr>
+<td>
+
+`p2255r2` [^p2255r2]
+
+</td>
+<td>
+
+```cpp
+// ill-formed
+```
+
+</td>
+<td>
+
+```cpp
+// ill-formed
+```
+
+</td>
+</tr>
+<tr>
+<td>
+
+`p2255r2` [^p2255r2] and this proposal
+
+</td>
+<td>
+
+```cpp
+// correct
+```
+
+</td>
+<td>
+
+```cpp
+// ill-formed
+```
+
+</td>
+</tr>
+</table>
+
+The proposed valid example is reasonable from many programmers perspective because `"hello"s` is a literal just like `"hello"` is a safe literal in C++ and C99 compound literals are safer literals because the lifetime is the life of the block instead of the expression. More on that latter.
 
 ### p2576r0
 ***`The constexpr specifier for object definitions`*** [^p2576r0]
@@ -370,20 +442,18 @@ A brief consideration of the proposals that led to `constexpr` landing as a feat
 
 **2003**
 
-*"Bjarne Stroustrup"*
+*"This note proposes a notion of **user-defined literals** based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the C99 notion of compound literals."*
 
-*"This note proposes a notion of user-defined literals based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the C99 notion of compound literals."*
-
-*"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be confident that a value will be constructed at compile time and potentially stored in ROM. For example:"*
+*"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be **confident that a value will be constructed at compile time** and potentially stored in ROM. For example:"*
 
 ```cpp
 complex z(1,2); // the variable z can be constructed at compile time
 const complex cz(1,2); // the const cz can potentially be put in ROM
 ```
 
-*"Personally, I prefer (1): basically, a value is a literal if it is composed out of literals and implemented by a literal constructor. The problem with that is that some people will not trust compilers to do proper resolution, placement in ROM, placement in text segment, etc. Choosing that solution would require text in the standard to constrain and/or guide implementations."*
+*"Personally, I prefer (1): basically, a value is a literal if it is composed out of literals and implemented by a literal constructor. **The problem with that is that some people will not trust compilers to do proper resolution, placement in ROM, placement in text segment**, etc. Choosing that solution would require text in the standard to constrain and/or guide implementations."*
 
-*"C99 compound literals"*
+*"**C99 compound literals**"*
 
 *"In C99, it is explicitly allowed to take the address of a compound literal. For example:"*
 
@@ -391,9 +461,9 @@ const complex cz(1,2); // the const cz can potentially be put in ROM
 f(&(struct foo) { 1,2 });
 ```
 
-*"This makes sense only if we assume that the {1,2} is stored in a data segment (like a string literal, but different from a int literal). I see no problem allowing that, as long as it is understood that unless & is explicitly used or the literal, a user-defined literal is an rvalue with which the optimizer has a free hand."*
+*"**This makes sense only if we assume that the {1,2} is stored in a data segment (like a string literal**, but different from a int literal). **I see no problem allowing that, as long as it is understood that unless & is explicitly used or the literal, a user-defined literal is an rvalue** with which the optimizer has a free hand."*
 
-*"It would be tempting to expand this rule to user-defined literals bound to references. For example:"*
+*"**It would be tempting to expand this rule to user-defined literals bound to references.** For example:"*
 
 ```cpp
  void f(complex&);
@@ -410,22 +480,26 @@ f(&(struct foo) { 1,2 });
  swap(vector<int>(), v); // would become ok
 ```
 
-*"I suggest we don’t touch this unless we are looking at the rvalue/lvalue rules for other reasons."*
+*"I suggest we don’t touch this **unless we are looking at the rvalue/lvalue rules for other reasons.**"*
+
+The other reason why we should re-evaluate user-defined literals bound to references is to reduce dangling pointers and dangling references. It is also surprising that user defined literals do not work simply without memory issues and that they currently work better in C and practically in every other language than it does in C++. It wouldn't hurt to fix any brittle rules and in the 10++ years since we got `constexpr` some of these may have already been fixed and it could be time to review these finer points.
+
+Even if these brittle concerns haven't already been addressed, two things could be performed to mitigate these concerns. For instance a automatic conversion from lvalue reference to pointer would allow passing implicit and explicit, via `&`, references to pointer arguments. Along with static duration, `C++` would then support the address of `C99` compound literal syntax.
+
+A more complicated solution for references would require compilers not just to look at 2 types but instead 3: the type of the resolved `constexpr`, the type of the argument and the explicit '&' in front of the `constexpr` when the argument is a pointer.
 
 #### n2235
 ***`Generalized Constant Expressions—Revision 5`*** [^n2235]
 
 **2007**
 
-*"Gabriel Dos Reis	Bjarne Stroustrup	Jens Maurer"*
-
 *"This paper generalizes the notion of constant expressions to include constant-expression functions and user-defined literals"*
 
-*"The goal is ... to increase C99 compatibility."*
+*"The goal is ... to **increase C99 compatibility.**"*
 
 *"This paper generalizes the notion of constant expressions to include calls to “sufficiently simple” functions (constexpr functions) and objects of user-defined types constructed from “sufficiently simple” constructors (constexpr constructors.)"*
 
-*"simplify the language definition in the area of constant expression to match existing practice"*
+*"**simplify the language** definition in the area of constant expression **to match existing practice**"*
 
 *"Any enhancement of the notion of constant expressions has to carefully consider the entanglement of many different notions, but strongly related. Indeed, the notion of constant expression appears in different contexts:"*
 
@@ -439,11 +513,11 @@ f(&(struct foo) { 1,2 });
 
 *"3.4 Unexpected dynamic initialization"*
 
-*"However, it is possible to be surprised by expressions that (to someone) “look const” but are not."*
+*"**However, it is possible to be surprised by expressions that (to someone) “look const” but are not.**"*
 
 *"3.5 Complex rules for simple things"*
 
-*"The focus of this proposal is to address the issues mentioned in preceding sections. However, discussions in the Core Working Group at the Berlin meeting (April 2006) concluded that the current rules for integral constant expressions are too complicated, and source of several Defect Reports. Consequently, a “cleanup”, i.e. adoption of simpler, more general rules is suggested."*
+*"The focus of this proposal is to address the issues mentioned in preceding sections. However, discussions in the Core Working Group at the Berlin meeting (April 2006) concluded that the current rules for integral constant expressions are too complicated, and source of several Defect Reports. **Consequently, a “cleanup”, i.e. adoption of simpler, more general rules is suggested.**"*
 
 *"4 Suggestions for C++0x"*
 
@@ -464,6 +538,13 @@ f(&(struct foo) { 1,2 });
 *"Declaring a constructor constexpr will help compilers to identify static initialization and perform appropriate optimizations (like putting literals in read-only memory.) Note that since “ROM” isn’t a concept of the C++ Standard and what to put into ROM is often a quite subtle design decision, this proposal simply allows the programmer to indicate what might be put into ROM (constant-expression data) rather than trying to specify what actually goes into ROM in a particular implementation."*
 
 *"We do not propose to make constexpr a storage-class-specifier because it can be combined with either static or extern or register, much like const."*
+
+Most of these references is too give us a better idea of the current behavior of constexpr. However, it should be noted that the motivations of this proposal is much the same as the motivations for `constexpr` itself. Mainly ...
+
+- Increase C99 compatibility
+- Simplify the language to match existing practice
+- Lessen to surprise of unreasonable lifetimes by expressions that look and are const
+- Consequently, a “cleanup”, i.e. adoption of simpler, more general rules
 
 ### Present
 
