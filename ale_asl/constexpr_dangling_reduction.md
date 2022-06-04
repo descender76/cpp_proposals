@@ -124,7 +124,7 @@ That given simple reasonable conditions, the lifetime of the temporary gets auto
 1. **[Optional]** type of the temporary argument has compile time comparison; constexpr <=>
 
 What is being proposed is that the storage duration of the argument, under these specific conditions, be changed from automatic to static!
-In other words, the temporary argument would be constructed with the constexpr constructor, stored statically in read only memory and automatically deduplicated if this unnamed constant expression was used more than once provided the type has an option `constexpr` spaceship operator.
+In other words, the temporary argument would be constructed with the constexpr constructor, stored statically in read only memory and automatically deduplicated if this unnamed constant expression was used more than once provided the type has an optional `constexpr` spaceship operator.
 
 This is reasonable because a constant reference/pointer parameter doesn't care how the object was constructed and if the compiler has the choice to constexpr construct the object once than why wouldn't one want that.
 
@@ -418,7 +418,7 @@ This proposal just requests that at least in specific scenarios that instead of 
 
 Let's also consider the view of compiler writers briefly.
 
-**Asked 9 years, 10 months ago**
+**Asked 9 years, 10++ months ago**
 
 `How can I get GCC to place a C++ constexpr in ROM?` [^gccconstexprrom]
 
@@ -442,7 +442,7 @@ A brief consideration of the proposals that led to `constexpr` landing as a feat
 
 **2003**
 
-*"This note proposes a notion of **user-defined literals** based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the C99 notion of compound literals."*
+*"This note proposes a notion of **user-defined literals** based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the **C99 notion of compound literals**."*
 
 *"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be **confident that a value will be constructed at compile time** and potentially stored in ROM. For example:"*
 
@@ -505,7 +505,7 @@ A more complicated solution for references would require compilers not just to l
 
 *"3. Static initialization of objects with static storage."*
 
-*"Similarly, we do not propose to change the already complex and subtle distinction between “static initialization” and “dynamic initialization”. However we strieve for more uniform and consistency among related C++ language features and compatibility"*
+*"Similarly, we do not propose to change the already complex and subtle distinction between “static initialization” and “dynamic initialization”. However **we strive for more uniform and consistency among related C++ language features and compatibility**"*
 
 *"3 Problems"*
 
@@ -539,16 +539,20 @@ A more complicated solution for references would require compilers not just to l
 
 *"We do not propose to make constexpr a storage-class-specifier because it can be combined with either static or extern or register, much like const."*
 
-Most of these references is too give us a better idea of the current behavior of constexpr. However, it should be noted that the motivations of this proposal is much the same as the motivations for `constexpr` itself. Mainly ...
+Most of these references are given to give us a better idea of the current behavior of constexpr. However, it should be noted that the motivations of this proposal is similar to the motivations for `constexpr` itself. Mainly ...
 
 - Increase C99 compatibility
 - Simplify the language to match existing practice
-- Lessen to surprise of unreasonable lifetimes by expressions that look and are const
+- Lessen the surprise of unreasonable lifetimes by expressions that look and are const
 - Consequently, a “cleanup”, i.e. adoption of simpler, more general rules
 
 ### Present
 
+This proposal should also be considered in the light of the current standards. A better idea of our current rules is necessary to understanding how they may be simplied for the betterment of `C++`.
+
 #### C Standard Compound Literals
+
+Let's first look at how literals specifically compound literals behave in `C`. There is still a gap between `C99` and `C++` and closing or reducing that gap would not only increase our compatibility but also reduce dangling.
 
 `2021/10/18 Meneide, C Working Draft` [^n2731]
 
@@ -556,17 +560,61 @@ Most of these references is too give us a better idea of the current behavior of
 
 **paragraph 5**
 
-*"The value of the compound literal is that of an unnamed object initialized by the initializer list. If the compound literal occurs outside the body of a function, the object has static storage duration; otherwise, it has automatic storage duration associated with the enclosing block."*
+*"The value of the compound literal is that of an unnamed object initialized by the initializer list. If the compound literal occurs outside the body of a function, the object has static storage duration; otherwise, it has **automatic storage duration associated with the enclosing block**."*
+
+The lifetime of this "enclosing block" is longer than that of `C++`. In `C++` under `6.7.7 Temporary objects [class.temporary]` specifically `6.12` states a *temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer*.
+
+`GCC` [^gcccompoundliterals] describes the result of this gap.
+
+*"**In C, a compound literal designates an unnamed object with static or automatic storage duration. In C++, a compound literal designates a temporary object that only lives until the end of its full-expression. As a result, well-defined C code that takes the address of a subobject of a compound literal can be undefined in C++**, so G++ rejects the conversion of a temporary array to a pointer."*
+
+Simply put `C` has fewer dangling than `C++`. Consequently, the remaining dangling should be easier to spot for developers not having to look at superfluous dangling. What is more is that `C`'s  solution covers both const and non const temporaries! Even though it is `C`, it is more like `C++` than what people give this feature credit for because it is tied to blocks/braces, just like RAII. This adds more weight that the `C` way is more intuitive.
+
+GCC even takes this a step forward which is closer to what this proposal is advocating. The last reference also says the following.
+
+
+*"**As a GNU extension, GCC allows initialization of objects with static storage duration by compound literals (which is not possible in ISO C99 because the initializer is not a constant).** It is handled as if the object were initialized only with the brace-enclosed list if the types of the compound literal and the object match. **The elements of the compound literal must be constant.** If the object being initialized has array type of unknown size, the size is determined by the size of the compound literal."*
+
+While adopting more of `C99` compound lierals would reduce dangling just like this proposal, there is still the expectation that constant expressions are of by default of static storage duration. As such this proposal and `C99` compound literals are complimentary. Regardless, dangling would still be possible, especially for non constant expressions. Those could be fixed by some future non constant expression proposal.
+
+For instance, stackoverflow has a good example of dangling with `Compund literals storage duration in C` [^sogcccompoundliterals].
+
+```cpp
+/* Example 2 - if statements with braces */
+
+double *coefficients, value;
+
+if(x){
+    coefficients = (double[3]) {1.5, -3.0, 6.0};
+}else{
+    coefficients = (double[3]) {4.5, 1.0, -3.5};
+}
+value = evaluate_polynomial(coefficients);
+```
+
+While this is an example of dangling, it is also an example of uninitialized. Interestingly, in the future, the block in question would be the block where `coefficients` is defined instead of the block where the uninitialized `coefficients` is initiated.
 
 #### C++ Standard
 
+It is also good to consider how the `C++` standard impacts this proposal and how the standard may be impacted by such a proposal.
+
 `Working Draft, Standard for Programming Language C++` [^n4910]
+
+String literals are traditionally one of the most common literals and in `C++` they have static storage duration. This leads developers to believe that all literals have static storage duration and that is the case in many programming languages.
 
 *"5.13.5 String literals [lex.string]"*
 
-*"9 Evaluating a string-literal results in a string literal object with static storage duration (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed."*
+*"9 Evaluating a string-literal results in a string literal object with **static storage duration** (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed."*
 
-*"[Note 4: The eﬀect of attempting to modify a string literal object is undefned. — end note]"*
+*"[Note 4: **The eﬀect of attempting to modify a string literal object is undefined.** — end note]"*
+
+This proposal aligns or adjusts literals not only with `C` compound literals but also with `C++` string literals. It too should be noted that `C++` may be silent on whether other literals are like string. Are array literals of `static storage duration`? What about if the array was of characters? If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
+
+`C++` also says the *"eﬀect of attempting to modify a string literal object is undefined."* With us having constant and for so long, there is no reason for this to be undefined. A string literal could be stored in global memory twice once for constant and non constant use cases. Developers should favor constant because it ensures it is only there once. So there is no need for undefined behavior when the behavior can be clearly defined. If a compiler stored a string literal once in ROM and allowed it go to a non constant character pointer than that should be a language mandated warning. 
+
+---
+
+The section of the `C++` standard on temporary objects has an example of dangling.
 
 *"6.7.7 Temporary objects [class.temporary]"*
 
@@ -584,7 +632,13 @@ S* p = new S{ 1, {2,3} }; // creates dangling reference
 
 *"— end example]"*
 
+It should be noted that this example is not an example of dangling in `C99` or with my proposal.
+
+---
+
 *"9.4 Initializers [dcl.init]"*
+
+Similarly, the section of the `C++` standard on initializer has multiple examples of dangling.
 
 *"9.4.1 General [dcl.init.general]"*
 
@@ -596,7 +650,13 @@ A a4(1.0, 1); // well-formed, but dangling reference
 A a5(1.0, std::move(n)); // OK
 ```
 
+Provided that A has a constexpr constuctor, with this proposal, `a2` would not be dangling if f() too was a constant expression. Also `a4` would also not be dangling. The `a4` example does not need jumping to the signature of a function to figure out if it is a constant expression as is the case of the `a2` example. Really the `a4` example is surprising to current developers that it would be dangling since the native literals 1.0 and 1 can be constant expressions.
+
+It should also be noted that the `C++11` brace constructor does not or should not create another block scope.
+
 *"9.4.5 List-initialization [dcl.init.list]"*
+
+Similarly, the section of the `C++` standard on list-initialization has an example of dangling.
 
 ```cpp
 struct A {
@@ -605,7 +665,13 @@ A() : i4{ 1, 2, 3 } {} // ill-formed, would create a dangling reference
 };
 ```
 
+According to this proposal, just like native arrays list initializers should not dangle either by being implicitly constexpr or explicitly created so.
+
+---
+
 *"11.9.6 Copy/move elision [class.copy.elision]"*
+
+Similarly, the section of the `C++` standard on copy and move elision has examples of dangling.
 
 ```cpp
 constexpr A a; // well-formed, a.p points to a
@@ -615,21 +681,52 @@ A c = g(); // well-formed, c.p can point to c or be dangling
 }
 ```
 
+Not only would `b` no longer dangle but the anbiguity of `c.p` could "point to c or be dangling" would be gone.
+
 ### Future
 
-TODO
+There are many paths to reducing dangling via using `static storage duration`. The question that need answering is too what degree do we do it and whether or not we also reduce the gap between `C` and `C++`.
 
 #### Proposal #1: `C++` with `static storage duration`
 
-TODO
+##### Wording
 
-#### Proposal #2: `C` `compound literals` with `static storage duration`
+6.7.7 Temporary objects [class.temporary]
 
-TODO
+(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer ++unless the expected type is constant and the temporary posesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
 
-#### Proposal #3: `constexpr` is `static storage duration`
+NOTE: All examples of dangling need to be revised for not involving constant expressions.
 
-TODO
+#### Proposal #2: `C compound literals` with `static storage duration`
+
+##### Wording
+
+6.7.7 Temporary objects [class.temporary]
+
+(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the ++enclosing block of the++ full-expression containing the new-initializer ++unless the expected type is constant and the temporary posesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
+
+NOTE: All examples of dangling need to be revised for not involving constant expressions.
+
+#### Optional Addendum #1
+
+Literals that have constexpr constructors and constexpr spaceship operators should be de-duplicated at least throughout the translation unit.
+
+#### Optional Addendum #2
+
+Assigning a constant expression to a uninitialiated variable results in the lifetime of the literal being the block that contains the declaration of said variable. This one is for that earlier example found on stack overflow.
+
+```cpp
+/* Example 2 - if statements with braces */
+
+double *coefficients, value;
+
+if(x){
+    coefficients = (double[3]) {1.5, -3.0, 6.0};
+}else{
+    coefficients = (double[3]) {4.5, 1.0, -3.5};
+}
+value = evaluate_polynomial(coefficients);
+```
 
 ## Frequently Asked Questions
 
@@ -647,7 +744,7 @@ In that proposal, a question was raised.
 
 In reality, there are three scenarios; warning, **error** or just fix it by extending the lifetime.
 
-However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen, so shouldn't we fix what we can, when we can; low hanging fruit. Also, fixing everything the same way may not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
+However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen, so shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way may not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
 
 1. Change automatic storage duration such that a instances' lifetime is just moved higher up the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
@@ -655,6 +752,10 @@ However, things in the real world tend to be more complicated. Depending upon th
 If only #1 was applied holistically via p0936r0, -Wlifetime or some such then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to.
 
 Any reduction in undefined behavior or dangling references should be welcomed, at least as long it can be explained simply and rationally.
+
+### Why not just make the evaluation of all constant expressions by default of `static storage duration`?
+
+This too would reduce dangling in the same way as this proposal and has the added benefit of being even simpler rules. [To be decided]
 
 ## References
 
@@ -700,6 +801,10 @@ Any reduction in undefined behavior or dangling references should be welcomed, a
 [^n2731]: <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf>
 <!--Working Draft, Standard for Programming Language C++-->
 [^n4910]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf>
+<!--6.28 Compound Literals-->
+[^gcccompoundliterals]: <https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html>
+<!--Compund literals storage duration in C-->
+[^sogcccompoundliterals]: <https://stackoverflow.com/questions/62776214/compund-literals-storage-duration-in-c>
 <!---->
 <!--
 [^]: <>
@@ -715,7 +820,8 @@ Tim Song
 Alex Gilding (Perforce UK)
 Jens Gustedt (INRIA France)
 Martin Uecker and Joseph Myers
-Gabriel Dos Reis Bjarne Stroustrup Jens Maurer
+Bjarne Stroustrup Jens Maurer
+bs@ms.com
 Gabriel Dos Reis
-gdr@cs.tamu.edu
+gdr@microsoft.com
 -->
