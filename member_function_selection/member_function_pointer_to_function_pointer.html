@@ -1,0 +1,103 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Markdown Plus exported HTML</title><link rel="stylesheet" href="https://cdn.rawgit.com/tylingsoft/markdown-core/0.7.0/dist/markdown-core.min.css"></head><body><article class="markdown-body"><style type="text/css">
+ins { background-color: #CCFFCC }
+s { background-color: #FFCACA }
+blockquote { color: inherit !important }
+</style>
+<table>
+<tbody><tr>
+<td>Document number</td>
+<td>D****R0</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2022-06-05</td>
+</tr>
+<tr>
+<td>Reply-to</td>
+<td>
+<p>Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;</p>
+</td>
+</tr>
+<tr>
+<td>Audience</td>
+<td>Evolution Working Group (EWG)</td>
+</tr>
+</tbody></table>
+<h1 id="member-function-pointer-to-function-pointer"><a class="anchor" href="#member-function-pointer-to-function-pointer"><span class="octicon octicon-link"></span></a>member function pointer to function pointer</h1>
+<style>
+.inline-link
+{
+    font-size: small;
+    margin-top: -2.8em;
+    margin-right: 4px;
+    text-align: right;
+    font-weight: bold;
+}
+
+code
+{
+    font-family: "Fira Code", monospace !important;
+    font-size: 0.87em;
+}
+
+.sourceCode
+{
+    font-size: 0.95em;
+}
+
+a code
+{
+    color: #0645ad;
+}
+</style>
+<h2 id="table-of-contents"><a class="anchor" href="#table-of-contents"><span class="octicon octicon-link"></span></a>Table of contents</h2>
+<ul>
+<li><a href="#member-function-pointer-to-function-pointer">member function pointer to function pointer</a>
+<ul>
+<li><a href="#abstract">Abstract</a></li>
+<li><a href="#motivating-examples">Motivating examples</a></li>
+<li><a href="#implementation-experience">Implementation Experience</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="abstract"><a class="anchor" href="#abstract"><span class="octicon octicon-link"></span></a>Abstract</h2>
+<p>There is more to member function pointers than calling a member function virtually.</p>
+<h2 id="motivating-examples"><a class="anchor" href="#motivating-examples"><span class="octicon octicon-link"></span></a>Motivating Examples</h2>
+<p><code>"Direct" vs "virtual" call to a virtual function</code> <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+<pre><code class="hljs">SomeObject obj;
+SomeObject *pobj = &amp;obj;
+SomeObject &amp;robj = obj;
+
+obj.some_virtual_function(); <span class="hljs-comment">// Direct call</span>
+pobj-&gt;some_virtual_function(); <span class="hljs-comment">// Virtual call in general case</span>
+robj.some_virtual_function(); <span class="hljs-comment">// Virtual call in general case</span>
+
+obj.SomeObject::some_virtual_function(); <span class="hljs-comment">// Direct call</span>
+pobj-&gt;SomeObject::some_virtual_function(); <span class="hljs-comment">// Direct call</span>
+robj.SomeObject::some_virtual_function(); <span class="hljs-comment">// Direct call</span></code></pre><p><code>Working Draft, Standard for Programming Language C++</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup></p>
+<p>"<em>11.7.3 Virtual functions [class.virtual]"</em></p>
+<p>"<em>16 Explicit qualifcation with the scope operator (7.5.4.3) suppresses the virtual call mechanism."</em></p>
+<p>"<em>[Example 10:"</em></p>
+<pre><code class="hljs"><span class="hljs-keyword">class</span> B { <span class="hljs-keyword">public</span>: <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>; };
+<span class="hljs-keyword">class</span> D : <span class="hljs-keyword">public</span> B { <span class="hljs-keyword">public</span>: <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>; };
+
+<span class="hljs-keyword">void</span> D::f() { <span class="hljs-comment">/* ... */</span> B::f(); }</code></pre><p><em>"Here, the function call in D::f really does call B::f and not D::f. — end example]"</em></p>
+<h2 id="implementation-experience"><a class="anchor" href="#implementation-experience"><span class="octicon octicon-link"></span></a>Implementation Experience</h2>
+<p>GCC has support acquiring the function pointer from a member function pointer via its <code>bound member function</code> <sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup> feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support <code>auto</code> for deduction.</p>
+<h2 id="references"><a class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
+<!--"Direct" vs "virtual" call to a virtual function-->
+<!--Working Draft, Standard for Programming Language C++-->
+<!--Extracting the Function Pointer from a Bound Pointer to Member Function-->
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://stackoverflow.com/questions/36584670/direct-vs-virtual-call-to-a-virtual-function">https://stackoverflow.com/questions/36584670/direct-vs-virtual-call-to-a-virtual-function</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html">https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+</article><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.slim.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js"></script><script>$(function() { $('canvas.chartjs').each(function() { new Chart($(this), JSON.parse($(this).text())); }); });</script></body></html>
