@@ -78,7 +78,11 @@ a code
     - [Future](#future)
       - [Proposal #1: `C++` with `static storage duration`](#proposal-1-c-with-static-storage-duration)
       - [Proposal #2: `C` `compound literals` with `static storage duration`](#proposal-2-c-compound-literals-with-static-storage-duration)
-      - [Proposal #3: `constexpr` is `static storage duration`](#proposal-3-constexpr-is-static-storage-duration)
+      - [Optional Addendum #1 - Deduplication](#optional-addendum-1-deduplication)
+      - [Optional Addendum #2 - Undefined Strings](#optional-addendum-2-undefined-strings)
+      - [Optional Addendum #3 - Arrays](#optional-addendum-3-arrays)
+      - [Optional Addendum #4 - Address of literal](#optional-addendum-4-address-of-literal)
+      - [Optional Addendum #5 - Delayed Initialization](#optional-addendum-5-delayed-initialization)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
 
@@ -126,9 +130,9 @@ That given simple reasonable conditions, the lifetime of the temporary gets auto
 What is being proposed is that the storage duration of the argument, under these specific conditions, be changed from automatic to static!
 In other words, the temporary argument would be constructed with the constexpr constructor, stored statically in read only memory and automatically deduplicated if this unnamed constant expression was used more than once provided the type has an optional `constexpr` spaceship operator.
 
-This is reasonable because a constant reference/pointer parameter doesn't care how the object was constructed and if the compiler has the choice to constexpr construct the object once than why wouldn't one want that.
+This is reasonable because a constant reference/pointer parameter doesn't care how the object was constructed. Further, if the compiler has the choice to constexpr construct the object once rather than repeatedly throughout the execution of the program, than why wouldn't a developer want that.
 
-This feature is also similar to existing features/concepts that programmers are familiar with. This feature is an implicit anonymous constant. It is more like an implicit anonymous static local.
+This feature is also similar to existing features/concepts that programmers are familiar with. This feature is an implicit anonymous `constant`. It is more like an implicit anonymous `static local`.
 
 There is interest in eliminating, if not reducing dangling references. Consider:
 
@@ -350,7 +354,7 @@ std::tuple<const std::string&> x(factory_of_string_at_runtime());
 </tr>
 </table>
 
-The proposed valid example is reasonable from many programmers perspective because `"hello"s` is a literal just like `"hello"` is a safe literal in C++ and C99 compound literals are safer literals because the lifetime is the life of the block instead of the expression. More on that latter.
+The proposed valid example is reasonable from many programmers perspective because `"hello"s` is a literal just like `"hello"` is a safe literal in C++ and C99 compound literals are **safer** literals because the lifetime is the life of the block instead of the expression. More on that latter.
 
 ### p2576r0
 ***`The constexpr specifier for object definitions`*** [^p2576r0]
@@ -379,27 +383,27 @@ My proposal would constitute a delay in the `p2576r0` [^p2576r0] proposal as I a
 
 ### Expectations
 
-There is a general expectation that constant expressions are already of static storage duration. While that is wrong, that expectation is still there. Consider the following examples. Everywhere you see ROMable, you might as well say global or static.
+There is a general expectation that constant expressions are already of static storage duration. While that is partially wrong, that expectation is still there. Consider the following examples. Everywhere you see ROMable, you might as well say constant and global/static.
 
 **December 19, 2012**
 
 `Using constexpr to Improve Security, Performance and Encapsulation in C++` [^smartbear]
 
-*"One of the advantages of user-defined literals with a small memory footprint is that an implementation can store them in the system’s ROM. Without a constexpr constructor, the object would require dynamic initialization and therefore wouldn’t be ROM-able."*
+*"One of the advantages of **user-defined literals** with a small memory footprint is that an implementation can store them in the system’s **ROM**. Without a **constexpr constructor**, the object would require dynamic initialization and therefore wouldn’t be **ROM-able**."*
 
 ...
 
-*"Compile-time evaluation of expressions often leads to more efficient code and enables the compiler to store the result in the system’s ROM."*
+*"**Compile-time evaluation of expressions** often leads to more efficient code and enables the compiler to store the result in the system’s **ROM**."*
 
 **May 21, 2015**
 
 `Bitesize Modern C++ : constexpr` [^bitesize]
 
-*"ROM-able types"*
+*"**ROM-able** types"*
 
 ...
 
-*"Since everything required to construct the Rommable object is known at compile-time it can be constructed in read-only memory."*
+*"<u>Since everything required to construct the **Rommable** object is known at **compile-time** it can be constructed in **read-only memory**.</u>"*
 
 **4 February 2019**
 
@@ -407,14 +411,14 @@ There is a general expectation that constant expressions are already of static s
 
 *"A constant expression"*
 
--  *"can be evaluated at compile time."*
+-  *"**can** be evaluated at **compile time**."*
 -  *"give the compiler deep insight into the code."*
 -  *"are implicitly thread-safe."*
--  *"can be constructed in the read-only memory (ROM-able)."*
+-  *"**can** be constructed in the **read-only memory (ROM-able)**."*
 
-It isn't just that resolved constant expressions can be placed in ROM which makes programmers believe these should be stored globally but also the fact that fundamentally these expressions are executed at compile time. Constant expressions are the closest thing `C++` has to pure functions. That means the results are the same given the parameters, since these expressions run at compile time than the resultant values are the same no matter where or when in the `C++` program. This is essentially global to the program; technically across programs too.
+It isn't just that resolved constant expressions **can** be placed in ROM which makes programmers believe these **should** be stored globally but also the fact that fundamentally **these expressions are executed at compile time**. Along with templates, constant expressions are the closest thing `C++` has to **pure** functions. That means the results are the same given the parameters, and since these expressions run at compile time, than the resultant values are the same, no matter where or when in the `C++` program. This is essentially global to the program; technically across programs too.
 
-This proposal just requests that at least in specific scenarios that instead of resolved constant expressions CAN be ROMable but rather that they HAVE to be or at least the next closest thing; constant and `static storage duration`.
+This proposal just requests that at least in specific scenarios that instead of resolved constant expressions **CAN** be ROMable but rather that they **HAVE** to be or at least the next closest thing; constant and `static storage duration`.
 
 Let's also consider the view of compiler writers briefly.
 
@@ -424,7 +428,7 @@ Let's also consider the view of compiler writers briefly.
 
 ...
 
-*"As far as I understand the ffx object in the code below should end up in ROM (code), but instead it is placed in DATA."*
+*"As far as I understand the ffx object in the code below should end up in **ROM (code)**, but instead it is placed in **DATA**."*
 
 ...
 
@@ -444,14 +448,14 @@ A brief consideration of the proposals that led to `constexpr` landing as a feat
 
 *"This note proposes a notion of **user-defined literals** based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the **C99 notion of compound literals**."*
 
-*"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be **confident that a value will be constructed at compile time** and potentially stored in ROM. For example:"*
+*"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be **confident that a value <u>will be</u> constructed at compile time** and **potentially stored in ROM**. For example:"*
 
 ```cpp
 complex z(1,2); // the variable z can be constructed at compile time
 const complex cz(1,2); // the const cz can potentially be put in ROM
 ```
 
-*"Personally, I prefer (1): basically, a value is a literal if it is composed out of literals and implemented by a literal constructor. **The problem with that is that some people will not trust compilers to do proper resolution, placement in ROM, placement in text segment**, etc. Choosing that solution would require text in the standard to constrain and/or guide implementations."*
+*"**Personally, I prefer (1): basically, a value is a literal if it is composed out of literals and implemented by a literal constructor. The problem with that is that some people will not trust compilers to do proper resolution, placement in ROM, placement in text segment**, etc. Choosing that solution would require text in the standard to constrain and/or guide implementations."*
 
 *"**C99 compound literals**"*
 
@@ -592,7 +596,7 @@ if(x){
 value = evaluate_polynomial(coefficients);
 ```
 
-While this is an example of dangling, it is also an example of uninitialized. Interestingly, in the future, the block in question would be the block where `coefficients` is defined instead of the block where the uninitialized `coefficients` is initiated.
+While this is an example of dangling, it is also an example of uninitialized or more specifically delayed initialization. Interestingly, in the future, the block in question could be the block where `coefficients` is defined instead of the block where the uninitialized `coefficients` is initiated.
 
 #### C++ Standard
 
@@ -652,7 +656,7 @@ A a5(1.0, std::move(n)); // OK
 
 Provided that A has a constexpr constuctor, with this proposal, `a2` would not be dangling if f() too was a constant expression. Also `a4` would also not be dangling. The `a4` example does not need jumping to the signature of a function to figure out if it is a constant expression as is the case of the `a2` example. Really the `a4` example is surprising to current developers that it would be dangling since the native literals 1.0 and 1 can be constant expressions.
 
-It should also be noted that the `C++11` brace constructor does not or should not create another block scope.
+It should also be noted that the `C++11` brace initialization does not or should not create another block scope.
 
 *"9.4.5 List-initialization [dcl.init.list]"*
 
@@ -693,7 +697,7 @@ There are many paths to reducing dangling via using `static storage duration`. T
 
 6.7.7 Temporary objects [class.temporary]
 
-(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer ++unless the expected type is constant and the temporary posesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
+(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer ++unless the expected type is constant and the temporary possesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
 
 NOTE: All examples of dangling need to be revised for not involving constant expressions.
 
@@ -703,17 +707,53 @@ NOTE: All examples of dangling need to be revised for not involving constant exp
 
 6.7.7 Temporary objects [class.temporary]
 
-(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the ++enclosing block of the++ full-expression containing the new-initializer ++unless the expected type is constant and the temporary posesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
+(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the ++enclosing block of the++ full-expression containing the new-initializer ++unless the expected type is constant and the temporary possesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
 
 NOTE: All examples of dangling need to be revised for not involving constant expressions.
 
-#### Optional Addendum #1
+#### Optional Addendum #1 - Deduplication
 
-Literals that have constexpr constructors and constexpr spaceship operators should be de-duplicated at least throughout the translation unit.
+##### Wording
 
-#### Optional Addendum #2
+5.13.5 String literals [lex.string]
 
-Assigning a constant expression to a uninitialiated variable results in the lifetime of the literal being the block that contains the declaration of said variable. This one is for that earlier example found on stack overflow.
+9 Evaluating a string-literal results in a string literal object with static storage duration (6.7.5). Whether ~~all~~ string-literals ++bound to a character pointer++ are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed. ++All successive evaluations of a string-literals bound to a const pointer should yield the same object. Similarly too, all successive evaluations of a custom string-like-literals bound to a const pointer should yield the same object. Further, std::basic_string_view should be stored in overlapping objects.++
+
+[Note 4: The eﬀect of attempting to modify a string literal object is undefned. — end note]
+
+#### Optional Addendum #2 - Undefined Strings
+
+##### Wording
+
+5.13.5 String literals [lex.string]
+
+9 ++Evaluating a string-literal bound to a character pointer results in a string literal object with automatic storage duration (6.7.5).++ Evaluating a string-literal ++bound to a const character pointer++ results in a string literal object with static storage duration (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed.
+
+~~[Note 4: The eﬀect of attempting to modify a string literal object is undefined. — end note]~~
+
+#### Optional Addendum #3 - Arrays
+
+Similar wording as for string-literals is needed for native arrays, const std::array, const std::span and initializer lists.
+
+#### Optional Addendum #4 - Address of literal
+
+In order to allow taking the address of a literal, either a new conversion needs adding or the lvalue reference composition rules need revising.
+
+```cpp
+f(&(struct foo) { 1,2 });
+```
+
+++7.3.16 Lvalue-to-pointer conversion [conv.lval.pointer]++
+
+++1 An lvalue of type T can be converted to a type “pointer to T”.++
+
+++or++
+
+++Taking the explicit address, `&`, of a lvalue reference yields the lvalue reference unless a pointer of compatible type is expected.++
+
+#### Optional Addendum #5 - Delayed Initialization
+
+Assigning a literal to a non const uninitialiated variable results in the lifetime of the literal being the block that contains the declaration of said variable. This one is for that earlier example found on stack overflow.
 
 ```cpp
 /* Example 2 - if statements with braces */
