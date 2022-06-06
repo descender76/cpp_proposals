@@ -55,48 +55,213 @@ a code
 <li><a href="#member-function-pointer-to-function-pointer">member function pointer to function pointer</a>
 <ul>
 <li><a href="#abstract">Abstract</a></li>
-<li><a href="#motivating-examples">Motivating examples</a></li>
+<li><a href="#motivating-example">Motivating example</a></li>
+<li><a href="#solution">Solution</a></li>
 <li><a href="#implementation-experience">Implementation Experience</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </li>
 </ul>
 <h2 id="abstract"><a class="anchor" href="#abstract"><span class="octicon octicon-link"></span></a>Abstract</h2>
-<p>There is more to member function pointers than calling a member function virtually.</p>
-<h2 id="motivating-examples"><a class="anchor" href="#motivating-examples"><span class="octicon octicon-link"></span></a>Motivating Examples</h2>
-<p><code>"Direct" vs "virtual" call to a virtual function</code> <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
-<pre><code class="hljs">SomeObject obj;
-SomeObject *pobj = &amp;obj;
-SomeObject &amp;robj = obj;
-
-obj.some_virtual_function(); <span class="hljs-comment">// Direct call</span>
-pobj-&gt;some_virtual_function(); <span class="hljs-comment">// Virtual call in general case</span>
-robj.some_virtual_function(); <span class="hljs-comment">// Virtual call in general case</span>
-
-obj.SomeObject::some_virtual_function(); <span class="hljs-comment">// Direct call</span>
-pobj-&gt;SomeObject::some_virtual_function(); <span class="hljs-comment">// Direct call</span>
-robj.SomeObject::some_virtual_function(); <span class="hljs-comment">// Direct call</span></code></pre><p><code>Working Draft, Standard for Programming Language C++</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup></p>
+<p><code>C++</code> allows one to call a base member function from a derived instance at compile time.</p>
+<p><code>Working Draft, Standard for Programming Language C++</code> <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
 <p>"<em>11.7.3 Virtual functions [class.virtual]"</em></p>
-<p>"<em>16 Explicit qualifcation with the scope operator (7.5.4.3) suppresses the virtual call mechanism."</em></p>
+<p>"<em>16 Explicit qualification with the scope operator (7.5.4.3) suppresses the virtual call mechanism."</em></p>
 <p>"<em>[Example 10:"</em></p>
 <pre><code class="hljs"><span class="hljs-keyword">class</span> B { <span class="hljs-keyword">public</span>: <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>; };
 <span class="hljs-keyword">class</span> D : <span class="hljs-keyword">public</span> B { <span class="hljs-keyword">public</span>: <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>; };
 
 <span class="hljs-keyword">void</span> D::f() { <span class="hljs-comment">/* ... */</span> B::f(); }</code></pre><p><em>"Here, the function call in D::f really does call B::f and not D::f. — end example]"</em></p>
+<p>Currently <code>C++</code> <strong>does not</strong> allow calling a base member function from a derived instance at runtime time. The member function pointer always resolves to the member function of the derived instance. While this does make sense for traditional runtime polymorphism, this behavior is less desired when selecting member functions for other types of runtime polymorphism as it occurs a superfluous dual dispatch.</p>
+<p>Just as the programmer decides whether to call the virtual function virtually or not at compile time, the programmer should be able to do the same at runtime.</p>
+<h2 id="motivating-example"><a class="anchor" href="#motivating-example"><span class="octicon octicon-link"></span></a>Motivating Example</h2>
+<!--
+`"Direct" vs "virtual" call to a virtual function` [^directvsvirtual]
+-->
+<!--
+```cpp
+//import std;
+//import <iostream>;
+#include <iostream>;
+
+class Base
+{ 
+public:
+    virtual void some_pure_virtual_function() = 0;
+    virtual void some_virtual_function()
+    {
+        std::cout << "Base::some_virtual_function\n";
+    }
+    virtual void some_virtual_function() const
+    {
+        std::cout << "Base::some_virtual_function const\n";
+    }
+};
+
+class Derived : public Base
+{
+public:
+    void some_pure_virtual_function() override
+    {
+        std::cout << "Derived::some_pure_virtual_function\n";
+    }
+    void some_virtual_function() override
+    {
+        //Base::some_virtual_function();
+        std::cout << "Derived::some_virtual_function\n";
+    }
+    void some_virtual_function() const override
+    {
+        //Base::some_virtual_function();
+        std::cout << "Derived::some_virtual_function const\n";
+    }
+};
+
+int main()
+{
+    Derived derived;
+    Derived* pderived = &derived;
+    Derived& rderived = derived;
+
+    derived.some_virtual_function(); // Direct call to Derived::some_virtual_function
+    pderived->some_virtual_function(); // Virtual call in general case to Derived::some_virtual_function
+    rderived.some_virtual_function(); // Virtual call in general case to Derived::some_virtual_function
+
+    derived.Base::some_virtual_function(); // Direct call to Base::some_virtual_function
+    pderived->Base::some_virtual_function(); // Direct call to Base::some_virtual_function
+    rderived.Base::some_virtual_function(); // Direct call to Base::some_virtual_function
+
+    void (Base::*bmfp)() = &Base::some_virtual_function;
+    void (Derived::*dmfp)() = &Derived::some_virtual_function;
+    void (Derived::*dmfpc)() const = static_cast<void (Derived::*)() const>(&Derived::some_virtual_function);
+
+    (derived.*bmfp)();// Derived::some_virtual_function
+    (derived.*dmfp)();// Derived::some_virtual_function
+    (derived.*dmfpc)();// Derived::some_virtual_function const
+
+    return 0;
+}
+```
+-->
+<pre><code class="hljs"><span class="hljs-keyword">class</span> Base
+{ 
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">some_pure_virtual_function</span><span class="hljs-params">()</span> </span>= <span class="hljs-number">0</span>;
+    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> </span>{ }
+    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ }
+};
+
+<span class="hljs-keyword">class</span> Derived : <span class="hljs-keyword">public</span> Base
+{
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_pure_virtual_function</span><span class="hljs-params">()</span> override </span>{ }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> override </span>{ }
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> override </span>{ }
+};
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+    Derived derived;
+    Derived* pderived = &amp;derived;
+    Derived&amp; rderived = derived;
+
+    derived.some_virtual_function(); <span class="hljs-comment">// Direct call to Derived::some_virtual_function</span>
+    pderived-&gt;some_virtual_function(); <span class="hljs-comment">// Virtual call in general case to Derived::some_virtual_function</span>
+    rderived.some_virtual_function(); <span class="hljs-comment">// Virtual call in general case to Derived::some_virtual_function</span>
+
+    derived.Base::some_virtual_function(); <span class="hljs-comment">// Direct call to Base::some_virtual_function</span>
+    pderived-&gt;Base::some_virtual_function(); <span class="hljs-comment">// Direct call to Base::some_virtual_function</span>
+    rderived.Base::some_virtual_function(); <span class="hljs-comment">// Direct call to Base::some_virtual_function</span>
+
+    <span class="hljs-keyword">void</span> (Base::*bmfp)() = &amp;Base::some_virtual_function;
+    <span class="hljs-keyword">void</span> (Derived::*dmfp)() = &amp;Derived::some_virtual_function;
+    <span class="hljs-keyword">void</span> (Derived::*dmfpc)() <span class="hljs-keyword">const</span> = <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">void</span> (Derived::*)() <span class="hljs-keyword">const</span>&gt;(&amp;Derived::some_virtual_function);
+
+    (derived.*bmfp)();<span class="hljs-comment">// Derived::some_virtual_function</span>
+    (derived.*dmfp)();<span class="hljs-comment">// Derived::some_virtual_function</span>
+    (derived.*dmfpc)();<span class="hljs-comment">// Derived::some_virtual_function const</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre><p>The most relevant lines in question are the following:</p>
+<pre><code class="hljs">Derived derived;
+
+<span class="hljs-keyword">void</span> (Base::*bmfp)() = &amp;Base::some_virtual_function;
+
+(derived.*bmfp)();<span class="hljs-comment">// Derived::some_virtual_function</span></code></pre><p>Even though the programmer explicitly stated that they want to call <code>Base</code>'s <code>some_virtual_function</code>, <code>Derived</code>'s <code>some_virtual_function</code> is always called. The programmer was never given the same choice that they have at compile time. Again this is correct for traditional runtime polymorphism. However, for a callback using raw pointers, <code>function_ref</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>, or <code>nontype function_ref</code> <sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>, the end programmer wants the choice and really should choose based on the scenario.</p>
+<p>For instance, if the programmer received some pointer or reference to an instance and as such doesn't know how the instance was created than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario occurs frequently when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late.</p>
+<pre><code class="hljs">function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Base::some_virtual_function, some_virtual_tag_class&gt;, some_Base_referance};</code></pre><p>However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario occurs even more frequently when the programmer is calling his own and his team member's code and as such the callback type is instantiated early.</p>
+<pre><code class="hljs">Derived derived;
+function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Derived::some_virtual_function, some_direct_tag_class&gt;, derived};</code></pre><p>It should ne noted, that besides callbacks of single functions this functionality could be of benefit to callbacks of n-ary functions such as found in <code>proxy</code> <sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>, <code>dyno</code> <sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup> and <code>boost ext te</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>.</p>
+<h2 id="solution"><a class="anchor" href="#solution"><span class="octicon octicon-link"></span></a>Solution</h2>
+<p>Unlike calling base class member functions with derived instances at compile time, it is <strong>undesirable</strong> to add keywords/vernacular at the point of function call, that is to choose direct or virtual at call time. This incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don't need the choice as in traditional runtime polymorphism.</p>
+<pre><code class="hljs">Derived derived;
+
+<span class="hljs-keyword">void</span> (Base::*bmfp)() = &amp;Base::some_virtual_function;
+
+<span class="hljs-comment">// This is NOT desired</span>
+(derived.*bmfp)() direct;<span class="hljs-comment">// Base::some_virtual_function</span>
+(derived.*bmfp)() <span class="hljs-keyword">virtual</span>;<span class="hljs-comment">// Derived::some_virtual_function</span></code></pre><p>It is also <strong>undesirable</strong> to add keywords/vernacular at the point of member function ponter initialization. This also incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don't need the choice as in traditional runtime polymorphism.</p>
+<pre><code class="hljs">Derived derived;
+
+<span class="hljs-keyword">void</span> (Base::*bmfp1)() = &amp;Base::some_virtual_function direct;
+<span class="hljs-keyword">void</span> (Base::*bmfp2)() = &amp;Base::some_virtual_function <span class="hljs-keyword">virtual</span>;</code></pre><p>What is desired is no change to member function pointer at all! Rather, a new intrinsic constexpr function would be created called <code>member_function_pointer_to_free_function_pointer</code>. This function would not take member function pointer at runtime but only a member function pointer initialization statement, <code>&amp;class_name::member_function_name</code>, at compile time. Technically, it could also take a static_cast of a member function pointer initialization to a specific member function pointer type to allow explicit choosing of overloaded methods. What gets returned is just a free function pointer that points to the actual member function or a thunk where the <code>this</code> reference is the first parameter. For <code>Deducing this</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup> member functions, the <code>this</code> type could be a value instead of a reference and as such this new function would just be a passthrough.</p>
+<pre><code class="hljs">Derived derived;
+
+<span class="hljs-keyword">void</span> (*bfp)(Base&amp;) = member_function_pointer_to_free_function_pointer(&amp;Base::some_virtual_function);
+<span class="hljs-keyword">void</span> (*dfp)(Derived&amp;) = member_function_pointer_to_free_function_pointer(&amp;Derived::some_virtual_function);
+<span class="hljs-keyword">void</span> (*dfpc)(<span class="hljs-keyword">const</span> Derived&amp;) = member_function_pointer_to_free_function_pointer(<span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">void</span> (Derived::*)() <span class="hljs-keyword">const</span>&gt;(&amp;Derived::some_virtual_function));</code></pre><p>With this, <code>Base::some_virtual_function</code> can be called at runtime, simply initialized, like [member] function pointers, without having to use a lambda. The end result is member function pointers' initialization syntax can be used to select member functions with the knowledge that the selected is the one that actually will be called.</p>
+<p>NOTE: The following is invalid code because there is no function when the member function declaration is pure.</p>
+<pre><code class="hljs"><span class="hljs-keyword">void</span> (*bfp)(Base&amp;) = member_function_pointer_to_free_function_pointer(&amp;Base::some_pure_virtual_function);</code></pre><p>The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly. Though, I wouldn't want to rule anything out.</p>
 <h2 id="implementation-experience"><a class="anchor" href="#implementation-experience"><span class="octicon octicon-link"></span></a>Implementation Experience</h2>
-<p>GCC has support acquiring the function pointer from a member function pointer via its <code>bound member function</code> <sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup> feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support <code>auto</code> for deduction.</p>
+<p>GCC has support acquiring the function pointer from a member function pointer via its <code>bound member function</code> <sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup> feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support <code>auto</code> for deduction.</p>
 <h2 id="references"><a class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
 <!--"Direct" vs "virtual" call to a virtual function-->
 <!--Working Draft, Standard for Programming Language C++-->
 <!--Extracting the Function Pointer from a Bound Pointer to Member Function-->
-<hr class="footnotes-sep">
+<!--function_ref: a non-owning reference to a Callable-->
+<!--make function_ref more functional-->
+<!--Proxy: A Polymorphic Programming Library-->
+<!--Deducing this-->
+<!--Dyno: Runtime polymorphism done right-->
+<!--boost-ext/te: TE: C++17 Run-time polymorphism-->
+<!--Language support for customisable functions-->
+<!---->
+<!--
+[^]: <>
+-->
+<!--
+recipients
+C++ Library Evolution Working Group <lib-ext@lists.isocpp.org>
+Vittorio Romeo <vittorio.romeo@outlook.com>
+Zhihao Yuan <zy@miator.net>
+Jarrad Waterloo <descender76@gmail.com>
+Gašper Ažman
+<gasper.azman@gmail.com>
+Sy Brand
+<sibrand@microsoft.com>
+Ben Deane, ben at elbeno dot com
+<ben@elbeno.com>
+Barry Revzin
+<barry.revzin@gmail.com>
+Mingxin Wang <mingxwa@microsoft.com>
+--><hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">
-<li id="fn1" class="footnote-item"><p><a href="https://stackoverflow.com/questions/36584670/direct-vs-virtual-call-to-a-virtual-function">https://stackoverflow.com/questions/36584670/direct-vs-virtual-call-to-a-virtual-function</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+<li id="fn1" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn2" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+<li id="fn2" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn3" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html">https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+<li id="fn3" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0957r7.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0957r7.pdf</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p><a href="https://github.com/ldionne/dyno">https://github.com/ldionne/dyno</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p><a href="https://github.com/boost-ext/te">https://github.com/boost-ext/te</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html">https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
 </li>
 </ol>
 </section>
