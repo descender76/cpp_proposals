@@ -83,6 +83,7 @@ a code
       - [Optional Addendum #3 - Arrays](#optional-addendum-3-arrays)
       - [Optional Addendum #4 - Address of literal](#optional-addendum-4-address-of-literal)
       - [Optional Addendum #5 - Delayed Initialization](#optional-addendum-5-delayed-initialization)
+  - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
 
@@ -132,7 +133,7 @@ In other words, the temporary argument would be constructed with the constexpr c
 
 This is reasonable because a constant reference/pointer parameter doesn't care how the object was constructed. Further, if the compiler has the choice to constexpr construct the object once rather than repeatedly throughout the execution of the program, than why wouldn't a developer want that.
 
-This feature is also similar to existing features/concepts that programmers are familiar with. This feature is an implicit anonymous `constant`. It is more like an implicit anonymous `static local`.
+This feature is also similar to existing features/concepts that programmers are familiar with. This feature is an implicit anonymous `constant`. It is more like an implicit anonymous `static local`. Really, at the end of the day, it is just another literal. For new `C++` programmers, old programmers from other programming languages and even old `C++` programmers it can be surprising when something as simple and trivial as a literal fails. No less, why one has to be overly attentive to it in the first place.
 
 There is interest in eliminating, if not reducing dangling references. Consider:
 
@@ -144,7 +145,7 @@ These talks about identify such issues but this proposal would address a small p
 
 ## Why not before
 
-Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally be dynamically allocated such as string and vector has opened up the door wide for many more types being constructed at compile time. 
+Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20` can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time. 
 
 **C++11**
 
@@ -596,7 +597,7 @@ if(x){
 value = evaluate_polynomial(coefficients);
 ```
 
-While this is an example of dangling, it is also an example of uninitialized or more specifically delayed initialization. Interestingly, in the future, the block in question could be the block where `coefficients` is defined instead of the block where the uninitialized `coefficients` is initiated.
+If `coefficients` was const, as it should be since all control paths lead to constant expressions, than even this example would not dangle with this proposal. While this example is an example of dangling, it is also an example of uninitialized or more specifically delayed initialization. Interestingly, in the future, the block in question could be the block where `coefficients` is defined instead of the block where the uninitialized `coefficients` is initiated. This refinement to the `C` rules would fix even more non constexpr dangling.
 
 #### C++ Standard
 
@@ -604,7 +605,7 @@ It is also good to consider how the `C++` standard impacts this proposal and how
 
 `Working Draft, Standard for Programming Language C++` [^n4910]
 
-String literals are traditionally one of the most common literals and in `C++` they have static storage duration. This leads developers to believe that all literals have static storage duration and that is the case in many programming languages.
+String literals are traditionally one of the most common literals and in `C++` they have static storage duration. This also leads developers to believe that all literals have static storage duration and that is the case in many programming languages.
 
 *"5.13.5 String literals [lex.string]"*
 
@@ -614,7 +615,7 @@ String literals are traditionally one of the most common literals and in `C++` t
 
 This proposal aligns or adjusts literals not only with `C` compound literals but also with `C++` string literals. It too should be noted that `C++` may be silent on whether other literals are like string. Are array literals of `static storage duration`? What about if the array was of characters? If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
 
-`C++` also says the *"eﬀect of attempting to modify a string literal object is undefined."* With us having constant and for so long, there is no reason for this to be undefined. A string literal could be stored in global memory twice once for constant and non constant use cases. Developers should favor constant because it ensures it is only there once. So there is no need for undefined behavior when the behavior can be clearly defined. If a compiler stored a string literal once in ROM and allowed it go to a non constant character pointer than that should be a language mandated warning. 
+`C++` also says the *"eﬀect of attempting to modify a string literal object is undefined."* With us having constant for so long, there is no reason for this to go undefined. A string literal could have **static storage duration** for constant expressions and **automatic storage duration** for **non** constant expressions. The lifetime of the `automatic storage duration` could be the `C` rule of the enclosing block since it is safer than `C++`. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have `static storage duration` and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp].
 
 ---
 
@@ -669,7 +670,7 @@ A() : i4{ 1, 2, 3 } {} // ill-formed, would create a dangling reference
 };
 ```
 
-According to this proposal, just like native arrays list initializers should not dangle either by being implicitly constexpr or explicitly created so.
+According to this proposal, just like native arrays, list initializers should not dangle either by being implicitly constexpr or explicitly created so.
 
 ---
 
@@ -768,6 +769,19 @@ if(x){
 value = evaluate_polynomial(coefficients);
 ```
 
+## Summary
+
+The advantages to `C++` with this proposal is manifold.
+
+- Reduce dangling
+- Make constexpr literals less surprising for new and old developers alike
+- Reduce the gap between `C++` and `C99` compound literals
+- Improve the potential contribution of `C++`'s `constexpr` back to `C`
+- Make string literals and `C++` literals more consistent with one another
+- Reduce undefined behavior
+- Reduce unitialized errors
+- Increase and improve upon the utilization of ROM and the benefits that entails
+
 ## Frequently Asked Questions
 
 ### Why not just extend the lifetime as descibed in p0936r0?
@@ -789,9 +803,9 @@ However, things in the real world tend to be more complicated. Depending upon th
 1. Change automatic storage duration such that a instances' lifetime is just moved higher up the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
 
-If only #1 was applied holistically via p0936r0, -Wlifetime or some such then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to.
+If only #1 was applied holistically via p0936r0, -Wlifetime or some such then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
-Any reduction in undefined behavior or dangling references should be welcomed, at least as long it can be explained simply and rationally.
+Personally, `p0936r0` [^bindp] should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
 
 ### Why not just make the evaluation of all constant expressions by default of `static storage duration`?
 
