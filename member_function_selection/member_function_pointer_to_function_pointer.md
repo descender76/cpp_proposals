@@ -62,7 +62,8 @@ a code
   - [Abstract](#abstract)
   - [Motivating example](#motivating-example)
   - [Solution](#solution)
-  - [Implementation Experience](#implementation-experience)
+  - [Summary](#summary)
+  - [Prior work](#prior-work)
   - [References](#references)
 
 ## Abstract
@@ -86,7 +87,7 @@ void D::f() { /* ... */ B::f(); }
 
 *"Here, the function call in D::f really does call B::f and not D::f. — end example]"*
 
-Currently `C++` **does not** allow calling a base member function from a derived instance at runtime time. The member function pointer always resolves to the member function of the derived instance. While this does make sense for traditional runtime polymorphism, this behavior is less desired when selecting member functions for other types of runtime polymorphism as it occurs a superfluous dual dispatch.
+Currently `C++` **does not** allow calling a base member function from a derived instance at runtime. The member function pointer always resolves to the member function of the derived instance. While this does make sense for traditional runtime polymorphism, this behavior is less desired when selecting member functions for other types of runtime polymorphism as it occurs a superfluous dual dispatch.
 
 Just as the programmer decides whether to call the virtual function virtually or not at compile time, the programmer should be able to do the same at runtime.
 
@@ -217,13 +218,13 @@ void (Base::*bmfp)() = &Base::some_virtual_function;
 
 Even though the programmer explicitly stated that they want to call `Base`'s `some_virtual_function`, `Derived`'s `some_virtual_function` is always called. The programmer was never given the same choice that they have at compile time. Again this is correct for traditional runtime polymorphism. However, for a callback using raw pointers, `function_ref` [^p0792r9], or `nontype function_ref` [^p2472r3], the end programmer wants the choice and really should choose based on the scenario.
 
-For instance, if the programmer received some pointer or reference to an instance and as such doesn't know how the instance was created than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario occurs frequently when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late. 
+For instance, if the programmer received some pointer or reference to an instance and as such doesn't know how the instance was created than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario **occurs frequently** when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late. 
 
 ```cpp
 function_ref<void()> fr = {nontype<&Base::some_virtual_function, some_virtual_tag_class>, some_Base_referance};
 ```
 
-However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario occurs even more frequently when the programmer is calling his own and his team member's code and as such the callback type is instantiated early. 
+However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario **occurs even more frequently** when the programmer is calling his own and his team member's code and as such the callback type is instantiated early. 
 
 ```cpp
 Derived derived;
@@ -275,7 +276,15 @@ void (*bfp)(Base&) = member_function_pointer_to_free_function_pointer(&Base::som
 
 The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly. Though, I wouldn't want to rule anything out. 
 
-## Implementation Experience
+## Summary
+
+The advantages to `C++` with this proposal is manifold.
+
+- An oversight in `C++` gets fixed by allowing calling a base member function from a derived instance at runtime
+- Mitigates a bifurcation by allowing one to interact with member functions regardless of whether they are a `Deducing this` [^p0847r7] member function or a legacy member function
+- Matches existing practice by allowing users to use member function pointer initialization to select member functions with the confidence that it is the function that will be called
+
+## Prior work
 
 GCC has support acquiring the function pointer from a member function pointer via its `bound member function` [^boundmemberfunctions] feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support `auto` for deduction.
 

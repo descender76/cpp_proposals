@@ -57,7 +57,8 @@ a code
 <li><a href="#abstract">Abstract</a></li>
 <li><a href="#motivating-example">Motivating example</a></li>
 <li><a href="#solution">Solution</a></li>
-<li><a href="#implementation-experience">Implementation Experience</a></li>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#prior-work">Prior work</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </li>
@@ -72,7 +73,7 @@ a code
 <span class="hljs-keyword">class</span> D : <span class="hljs-keyword">public</span> B { <span class="hljs-keyword">public</span>: <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>; };
 
 <span class="hljs-keyword">void</span> D::f() { <span class="hljs-comment">/* ... */</span> B::f(); }</code></pre><p><em>"Here, the function call in D::f really does call B::f and not D::f. — end example]"</em></p>
-<p>Currently <code>C++</code> <strong>does not</strong> allow calling a base member function from a derived instance at runtime time. The member function pointer always resolves to the member function of the derived instance. While this does make sense for traditional runtime polymorphism, this behavior is less desired when selecting member functions for other types of runtime polymorphism as it occurs a superfluous dual dispatch.</p>
+<p>Currently <code>C++</code> <strong>does not</strong> allow calling a base member function from a derived instance at runtime. The member function pointer always resolves to the member function of the derived instance. While this does make sense for traditional runtime polymorphism, this behavior is less desired when selecting member functions for other types of runtime polymorphism as it occurs a superfluous dual dispatch.</p>
 <p>Just as the programmer decides whether to call the virtual function virtually or not at compile time, the programmer should be able to do the same at runtime.</p>
 <h2 id="motivating-example"><a class="anchor" href="#motivating-example"><span class="octicon octicon-link"></span></a>Motivating Example</h2>
 <!--
@@ -188,8 +189,8 @@ int main()
 <span class="hljs-keyword">void</span> (Base::*bmfp)() = &amp;Base::some_virtual_function;
 
 (derived.*bmfp)();<span class="hljs-comment">// Derived::some_virtual_function</span></code></pre><p>Even though the programmer explicitly stated that they want to call <code>Base</code>'s <code>some_virtual_function</code>, <code>Derived</code>'s <code>some_virtual_function</code> is always called. The programmer was never given the same choice that they have at compile time. Again this is correct for traditional runtime polymorphism. However, for a callback using raw pointers, <code>function_ref</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>, or <code>nontype function_ref</code> <sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>, the end programmer wants the choice and really should choose based on the scenario.</p>
-<p>For instance, if the programmer received some pointer or reference to an instance and as such doesn't know how the instance was created than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario occurs frequently when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late.</p>
-<pre><code class="hljs">function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Base::some_virtual_function, some_virtual_tag_class&gt;, some_Base_referance};</code></pre><p>However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario occurs even more frequently when the programmer is calling his own and his team member's code and as such the callback type is instantiated early.</p>
+<p>For instance, if the programmer received some pointer or reference to an instance and as such doesn't know how the instance was created than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario <strong>occurs frequently</strong> when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late.</p>
+<pre><code class="hljs">function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Base::some_virtual_function, some_virtual_tag_class&gt;, some_Base_referance};</code></pre><p>However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario <strong>occurs even more frequently</strong> when the programmer is calling his own and his team member's code and as such the callback type is instantiated early.</p>
 <pre><code class="hljs">Derived derived;
 function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Derived::some_virtual_function, some_direct_tag_class&gt;, derived};</code></pre><p>It should ne noted, that besides callbacks of single functions this functionality could be of benefit to callbacks of n-ary functions such as found in <code>proxy</code> <sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>, <code>dyno</code> <sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup> and <code>boost ext te</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>.</p>
 <h2 id="solution"><a class="anchor" href="#solution"><span class="octicon octicon-link"></span></a>Solution</h2>
@@ -212,7 +213,14 @@ function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&a
 <span class="hljs-keyword">void</span> (*dfpc)(<span class="hljs-keyword">const</span> Derived&amp;) = member_function_pointer_to_free_function_pointer(<span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">void</span> (Derived::*)() <span class="hljs-keyword">const</span>&gt;(&amp;Derived::some_virtual_function));</code></pre><p>With this, <code>Base::some_virtual_function</code> can be called at runtime, simply initialized, like [member] function pointers, without having to use a lambda. The end result is member function pointers' initialization syntax can be used to select member functions with the knowledge that the selected is the one that actually will be called.</p>
 <p>NOTE: The following is invalid code because there is no function when the member function declaration is pure.</p>
 <pre><code class="hljs"><span class="hljs-keyword">void</span> (*bfp)(Base&amp;) = member_function_pointer_to_free_function_pointer(&amp;Base::some_pure_virtual_function);</code></pre><p>The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly. Though, I wouldn't want to rule anything out.</p>
-<h2 id="implementation-experience"><a class="anchor" href="#implementation-experience"><span class="octicon octicon-link"></span></a>Implementation Experience</h2>
+<h2 id="summary"><a class="anchor" href="#summary"><span class="octicon octicon-link"></span></a>Summary</h2>
+<p>The advantages to <code>C++</code> with this proposal is manifold.</p>
+<ul>
+<li>An oversight in <code>C++</code> gets fixed by allowing calling a base member function from a derived instance at runtime</li>
+<li>Mitigates a bifurcation by allowing one to interact with member functions regardless of whether they are a <code>Deducing this</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7:1">[7:1]</a></sup> member function or a legacy member function</li>
+<li>Matches existing practice by allowing users to use member function pointer initialization to select member functions with the confidence that it is the function that will be called</li>
+</ul>
+<h2 id="prior-work"><a class="anchor" href="#prior-work"><span class="octicon octicon-link"></span></a>Prior work</h2>
 <p>GCC has support acquiring the function pointer from a member function pointer via its <code>bound member function</code> <sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup> feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support <code>auto</code> for deduction.</p>
 <h2 id="references"><a class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
 <!--"Direct" vs "virtual" call to a virtual function-->
@@ -259,7 +267,7 @@ Mingxin Wang <mingxwa@microsoft.com>
 </li>
 <li id="fn6" class="footnote-item"><p><a href="https://github.com/boost-ext/te">https://github.com/boost-ext/te</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn7" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+<li id="fn7" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a> <a href="#fnref7:1" class="footnote-backref">↩︎</a></p>
 </li>
 <li id="fn8" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html">https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
 </li>
