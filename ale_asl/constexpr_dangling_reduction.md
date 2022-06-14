@@ -865,6 +865,7 @@ This too would reduce dangling in the same way as this proposal and has the adde
 -->
 <!--
 recipients
+std-proposals@lists.isocpp.org
 To: C++ Library Evolution Working Group <lib-ext@lists.isocpp.org>
 Cc: Tomasz Kamiński <tomaszkam@gmail.com>
 Gašper Ažman

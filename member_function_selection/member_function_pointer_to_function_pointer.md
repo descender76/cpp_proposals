@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>D****R0</td>
+<td>P****R0</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-06-05</td>
+<td>2022-06-14</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -61,6 +61,10 @@ a code
 - [member function pointer to function pointer](#member-function-pointer-to-function-pointer)
   - [Abstract](#abstract)
   - [Motivating example](#motivating-example)
+    - [Scenario #1 - Unknown State](#scenario-1-unknown-state)
+    - [Scenario #2 - Known State](#scenario-2-known-state)
+      - [Scenario #2a - Known State - Exact](#scenario-2a-known-state-exact)
+      - [Scenario #2b - Known State - Derived](#scenario-2b-known-state-derived)
   - [Solution](#solution)
   - [Summary](#summary)
   - [Prior work](#prior-work)
@@ -164,20 +168,26 @@ int main()
 -->
 
 ```cpp
-class Base
+class Abstract
 { 
 public:
-    virtual void some_pure_virtual_function() = 0;
-    virtual void some_virtual_function() { }
-    virtual void some_virtual_function() const { }
+    virtual void some_virtual_function() = 0;
+    virtual void some_virtual_function() const = 0;
+};
+
+class Base : public Abstract
+{ 
+public:
+    void some_virtual_function() override { }
+    void some_virtual_function() const override { }
 };
 
 class Derived : public Base
 {
 public:
-    void some_pure_virtual_function() override { }
     void some_virtual_function() override { }
     void some_virtual_function() const override { }
+    void some_deducing_this_member_function(this Derived) { }
 };
 
 int main()
@@ -190,6 +200,8 @@ int main()
     pderived->some_virtual_function(); // Virtual call in general case to Derived::some_virtual_function
     rderived.some_virtual_function(); // Virtual call in general case to Derived::some_virtual_function
 
+    // NOTE: A derived class can call its base class member function directly
+    // at compile time using a qualifier in these cases Base:: 
     derived.Base::some_virtual_function(); // Direct call to Base::some_virtual_function
     pderived->Base::some_virtual_function(); // Direct call to Base::some_virtual_function
     rderived.Base::some_virtual_function(); // Direct call to Base::some_virtual_function
@@ -198,6 +210,7 @@ int main()
     void (Derived::*dmfp)() = &Derived::some_virtual_function;
     void (Derived::*dmfpc)() const = static_cast<void (Derived::*)() const>(&Derived::some_virtual_function);
 
+    // NOTE: A derived class can NOT call its base class member function at runtime
     (derived.*bmfp)();// Derived::some_virtual_function
     (derived.*dmfp)();// Derived::some_virtual_function
     (derived.*dmfpc)();// Derived::some_virtual_function const
@@ -218,31 +231,58 @@ void (Base::*bmfp)() = &Base::some_virtual_function;
 
 Even though the programmer explicitly stated that they want to call `Base`'s `some_virtual_function`, `Derived`'s `some_virtual_function` is always called. The programmer was never given the same choice that they have at compile time. Again this is correct for traditional runtime polymorphism. However, for a callback using raw pointers, `function_ref` [^p0792r9], or `nontype function_ref` [^p2472r3], the end programmer wants the choice and really should choose based on the scenario.
 
-For instance, if the programmer received some pointer or reference to an instance and as such doesn't know how the instance was created than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario **occurs frequently** when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late. 
+### Scenario #1 - Unknown State
+
+For instance, if the programmer received some pointer or reference to some instance and as such doesn't know the exact type of the instance  than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario **occurs frequently** when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late. 
 
 ```cpp
-function_ref<void()> fr = {nontype<&Base::some_virtual_function, some_virtual_tag_class>, some_Base_referance};
+function_ref<void()> factory(Base& base)
+{
+  // base could be of type Base, Derived or some other class not known at this function's creation
+  // in which case dual dispatch is still a good idea
+  function_ref<void()> fr = {nontype<&Base::some_virtual_function, some_virtual_tag_class>, base};
+  return fr;
+}
 ```
 
-However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario **occurs even more frequently** when the programmer is calling his own and his team member's code and as such the callback type is instantiated early. 
+A library could provide an overload via a tag class, in this example `some_virtual_tag_class`, in order to allow the programmer to choose whether the function will be called virtually or directly, in this case the former.
+
+### Scenario #2 - Known State
+
+However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario **occurs even more frequently** when the programmer is calling his own code, his team member's code or the 3rd party library is aware of the callback type and provide callback instances. As such the callback type is instantiated early. 
+
+#### Scenario #2a - Known State - Exact
+
+In this scenario, the state is known and is the same type of the class that houses the member function. As such there is no need resolve the member function at runtime since the type is known.
+
+```cpp
+Base base;
+function_ref<void()> fr = {nontype<&Base::some_virtual_function, some_direct_tag_class>, base};
+```
+
+Again a library could provide an overload via a tag class, in this example `some_direct_tag_class`, in order to allow the programmer to choose whether the function will be called virtually or directly, in this case the later.
+
+#### Scenario #2b - Known State - Derived
+
+This would would also work safely for derived state calling their base class member functions at runtime without the additional member function pointer costs. After all, `Derived` is still a `Base`.
 
 ```cpp
 Derived derived;
-function_ref<void()> fr = {nontype<&Derived::some_virtual_function, some_direct_tag_class>, derived};
+function_ref<void()> fr = {nontype<&Base::some_virtual_function, some_direct_tag_class>, derived};
 ```
 
 It should ne noted, that besides callbacks of single functions this functionality could be of benefit to callbacks of n-ary functions such as found in `proxy` [^p0957r7], `dyno` [^dyno] and `boost ext te` [^boostte].
 
 ## Solution
 
-Unlike calling base class member functions with derived instances at compile time, it is **undesirable** to add keywords/vernacular at the point of function call, that is to choose direct or virtual at call time. This incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don't need the choice as in traditional runtime polymorphism.
+**Unlike** calling base class member functions with derived instances at compile time via a qualifier, it is **undesirable** to add keywords/vernacular/qualifiers at the point of function call, that is to choose direct or virtual at call time. This incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don't need the choice as in traditional runtime polymorphism.
 
 ```cpp
 Derived derived;
 
 void (Base::*bmfp)() = &Base::some_virtual_function;
 
-// This is NOT desired
+// NOTE: This is NOT desired
 (derived.*bmfp)() direct;// Base::some_virtual_function
 (derived.*bmfp)() virtual;// Derived::some_virtual_function
 ```
@@ -264,6 +304,7 @@ Derived derived;
 void (*bfp)(Base&) = member_function_pointer_to_free_function_pointer(&Base::some_virtual_function);
 void (*dfp)(Derived&) = member_function_pointer_to_free_function_pointer(&Derived::some_virtual_function);
 void (*dfpc)(const Derived&) = member_function_pointer_to_free_function_pointer(static_cast<void (Derived::*)() const>(&Derived::some_virtual_function));
+void (*ddtfp)(Derived) = member_function_pointer_to_free_function_pointer(&Derived::some_deducing_this_member_function);
 ```
 
 With this, `Base::some_virtual_function` can be called at runtime, simply initialized, like [member] function pointers, without having to use a lambda. The end result is member function pointers' initialization syntax can be used to select member functions with the knowledge that the selected is the one that actually will be called.
@@ -271,7 +312,7 @@ With this, `Base::some_virtual_function` can be called at runtime, simply initia
 NOTE: The following is invalid code because there is no function when the member function declaration is pure.
 
 ```cpp
-void (*bfp)(Base&) = member_function_pointer_to_free_function_pointer(&Base::some_pure_virtual_function);
+void (*bfp)(Abstract&) = member_function_pointer_to_free_function_pointer(&Abstract::some_virtual_function);
 ```
 
 The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly. Though, I wouldn't want to rule anything out. 
@@ -280,13 +321,13 @@ The brevity of the name of the intrinsic function is less relevant as it will in
 
 The advantages to `C++` with this proposal is manifold.
 
-- An oversight in `C++` gets fixed by allowing calling a base member function from a derived instance at runtime
+- A seemingly oversight in `C++` gets fixed by allowing calling a base member function from a derived instance at runtime
 - Mitigates a bifurcation by allowing one to interact with member functions regardless of whether they are a `Deducing this` [^p0847r7] member function or a legacy member function
 - Matches existing practice by allowing users to use member function pointer initialization to select member functions with the confidence that it is the function that will be called
 
 ## Prior work
 
-GCC has support acquiring the function pointer from a member function pointer via its `bound member function` [^boundmemberfunctions] feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support `auto` for deduction.
+GCC has support acquiring the function pointer from a member function pointer via its `bound member function` [^boundmemberfunctions] feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support automatic type deduction.
 
 ## References
 
@@ -316,6 +357,7 @@ GCC has support acquiring the function pointer from a member function pointer vi
 -->
 <!--
 recipients
+std-proposals@lists.isocpp.org
 C++ Library Evolution Working Group <lib-ext@lists.isocpp.org>
 Vittorio Romeo <vittorio.romeo@outlook.com>
 Zhihao Yuan <zy@miator.net>
