@@ -1,9 +1,44 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>Markdown Plus exported HTML</title><link rel="stylesheet" href="https://cdn.rawgit.com/tylingsoft/markdown-core/0.7.0/dist/markdown-core.min.css"></head><body><article class="markdown-body"><style type="text/css">
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>
+        member function pointer to function pointer - HackMD
+    </title>
+    <link rel="icon" type="image/png" href="https://hackmd.io/favicon.png">
+    <link rel="apple-touch-icon" href="https://hackmd.io/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" integrity="sha256-3iu9jgsy9TpTwXKb7bNQzqWekRX7pPK+2OLj3R922fo=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css" integrity="sha256-QiWfLIsCT02Sdwkogf6YMiQlj4NE84MKkzEMkZnMGdg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css" integrity="sha256-vtR0hSWRc3Tb26iuN2oZHt3KRUomwTufNIf5/4oeCyg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@hackmd/emojify.js@2.1.0/dist/css/basic/emojify.min.css" integrity="sha256-UOrvMOsSDSrW6szVLe8ZDZezBxh5IoIfgTwdNDgTjiU=" crossorigin="anonymous" />
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i|Source+Code+Pro:300,400,500|Source+Sans+Pro:300,300i,400,400i,600,600i|Source+Serif+Pro&subset=latin-ext);.hljs{display:block;background:#fff;padding:.5em;color:#333;overflow-x:auto}.hljs-comment,.hljs-meta{color:#969896}.hljs-emphasis,.hljs-quote,.hljs-string,.hljs-strong,.hljs-template-variable,.hljs-variable{color:#df5000}.hljs-keyword,.hljs-selector-tag,.hljs-type{color:#a71d5d}.hljs-attribute,.hljs-bullet,.hljs-literal,.hljs-number,.hljs-symbol{color:#0086b3}.hljs-built_in,.hljs-builtin-name{color:#005cc5}.hljs-name,.hljs-section{color:#63a35c}.hljs-tag{color:#333}.hljs-attr,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-selector-pseudo,.hljs-title{color:#795da3}.hljs-addition{color:#55a532;background-color:#eaffea}.hljs-deletion{color:#bd2c00;background-color:#ffecec}.hljs-link{text-decoration:underline}.markdown-body{font-size:16px;line-height:1.5;word-wrap:break-word}.markdown-body:after,.markdown-body:before{display:table;content:""}.markdown-body:after{clear:both}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body .absent{color:#c00}.markdown-body .anchor{float:left;padding-right:4px;margin-left:-20px;line-height:1}.markdown-body .anchor:focus{outline:none}.markdown-body blockquote,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-top:0;margin-bottom:16px}.markdown-body hr{height:.25em;padding:0;margin:24px 0;background-color:#e7e7e7;border:0}.markdown-body blockquote{font-size:16px;padding:0 1em;color:#777;border-left:.25em solid #ddd}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body kbd,.popover kbd{display:inline-block;padding:3px 5px;font-size:11px;line-height:10px;color:#555;vertical-align:middle;background-color:#fcfcfc;border:1px solid #ccc;border-bottom-color:#bbb;border-radius:3px;box-shadow:inset 0 -1px 0 #bbb}.markdown-body .loweralpha{list-style-type:lower-alpha}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{margin-top:24px;margin-bottom:16px;font-weight:600;line-height:1.25}.markdown-body h1 .octicon-link,.markdown-body h2 .octicon-link,.markdown-body h3 .octicon-link,.markdown-body h4 .octicon-link,.markdown-body h5 .octicon-link,.markdown-body h6 .octicon-link{color:#000;vertical-align:middle;visibility:hidden}.markdown-body h1:hover .anchor,.markdown-body h2:hover .anchor,.markdown-body h3:hover .anchor,.markdown-body h4:hover .anchor,.markdown-body h5:hover .anchor,.markdown-body h6:hover .anchor{text-decoration:none}.markdown-body h1:hover .anchor .octicon-link,.markdown-body h2:hover .anchor .octicon-link,.markdown-body h3:hover .anchor .octicon-link,.markdown-body h4:hover .anchor .octicon-link,.markdown-body h5:hover .anchor .octicon-link,.markdown-body h6:hover .anchor .octicon-link{visibility:visible}.markdown-body h1 code,.markdown-body h1 tt,.markdown-body h2 code,.markdown-body h2 tt,.markdown-body h3 code,.markdown-body h3 tt,.markdown-body h4 code,.markdown-body h4 tt,.markdown-body h5 code,.markdown-body h5 tt,.markdown-body h6 code,.markdown-body h6 tt{font-size:inherit}.markdown-body h1{font-size:2em}.markdown-body h1,.markdown-body h2{padding-bottom:.3em;border-bottom:1px solid #eee}.markdown-body h2{font-size:1.5em}.markdown-body h3{font-size:1.25em}.markdown-body h4{font-size:1em}.markdown-body h5{font-size:.875em}.markdown-body h6{font-size:.85em;color:#777}.markdown-body ol,.markdown-body ul{padding-left:2em}.markdown-body ol.no-list,.markdown-body ul.no-list{padding:0;list-style-type:none}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:0;margin-bottom:0}.markdown-body li>p{margin-top:16px}.markdown-body li+li{padding-top:.25em}.markdown-body dl{padding:0}.markdown-body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}.markdown-body dl dd{padding:0 16px;margin-bottom:16px}.markdown-body table{display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}.markdown-body table th{font-weight:700}.markdown-body table td,.markdown-body table th{padding:6px 13px;border:1px solid #ddd}.markdown-body table tr{background-color:#fff;border-top:1px solid #ccc}.markdown-body table tr:nth-child(2n){background-color:#f8f8f8}.markdown-body img{max-width:100%;box-sizing:content-box;background-color:#fff}.markdown-body img[align=right]{padding-left:20px}.markdown-body img[align=left]{padding-right:20px}.markdown-body .emoji{max-width:none;vertical-align:text-top;background-color:transparent}.markdown-body span.frame{display:block;overflow:hidden}.markdown-body span.frame>span{display:block;float:left;width:auto;padding:7px;margin:13px 0 0;overflow:hidden;border:1px solid #ddd}.markdown-body span.frame span img{display:block;float:left}.markdown-body span.frame span span{display:block;padding:5px 0 0;clear:both;color:#333}.markdown-body span.align-center{display:block;overflow:hidden;clear:both}.markdown-body span.align-center>span{display:block;margin:13px auto 0;overflow:hidden;text-align:center}.markdown-body span.align-center span img{margin:0 auto;text-align:center}.markdown-body span.align-right{display:block;overflow:hidden;clear:both}.markdown-body span.align-right>span{display:block;margin:13px 0 0;overflow:hidden;text-align:right}.markdown-body span.align-right span img{margin:0;text-align:right}.markdown-body span.float-left{display:block;float:left;margin-right:13px;overflow:hidden}.markdown-body span.float-left span{margin:13px 0 0}.markdown-body span.float-right{display:block;float:right;margin-left:13px;overflow:hidden}.markdown-body span.float-right>span{display:block;margin:13px auto 0;overflow:hidden;text-align:right}.markdown-body code,.markdown-body tt{padding:0;padding-top:.2em;padding-bottom:.2em;margin:0;font-size:85%;background-color:rgba(0,0,0,.04);border-radius:3px}.markdown-body code:after,.markdown-body code:before,.markdown-body tt:after,.markdown-body tt:before{letter-spacing:-.2em;content:"\00a0"}.markdown-body code br,.markdown-body tt br{display:none}.markdown-body del code{text-decoration:inherit}.markdown-body pre{word-wrap:normal}.markdown-body pre>code{padding:0;margin:0;font-size:100%;word-break:normal;white-space:pre;background:transparent;border:0}.markdown-body .highlight{margin-bottom:16px}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{padding:16px;overflow:auto;font-size:85%;line-height:1.45;background-color:#f7f7f7;border-radius:3px}.markdown-body pre code,.markdown-body pre tt{display:inline;max-width:auto;padding:0;margin:0;overflow:visible;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}.markdown-body pre code:after,.markdown-body pre code:before,.markdown-body pre tt:after,.markdown-body pre tt:before{content:normal}.markdown-body .csv-data td,.markdown-body .csv-data th{padding:5px;overflow:hidden;font-size:12px;line-height:1;text-align:left;white-space:nowrap}.markdown-body .csv-data .blob-line-num{padding:10px 8px 9px;text-align:right;background:#fff;border:0}.markdown-body .csv-data tr{border-top:0}.markdown-body .csv-data th{font-weight:700;background:#f8f8f8;border-top:0}.news .alert .markdown-body blockquote{padding:0 0 0 40px;border:0 none}.activity-tab .news .alert .commits,.activity-tab .news .markdown-body blockquote{padding-left:0}.task-list-item{list-style-type:none}.task-list-item label{font-weight:400}.task-list-item.enabled label{cursor:pointer}.task-list-item+.task-list-item{margin-top:3px}.task-list-item-checkbox{float:left;margin:.31em 0 .2em -1.3em!important;vertical-align:middle;cursor:default!important}.markdown-body{padding-top:40px;padding-bottom:40px;max-width:758px;overflow:visible!important;position:relative}.markdown-body .emoji{vertical-align:top}.markdown-body pre{border:inherit!important}.markdown-body code{color:inherit!important}.markdown-body pre code .wrapper{display:-moz-inline-flex;display:-ms-inline-flex;display:-o-inline-flex;display:inline-flex}.markdown-body pre code .gutter{float:left;overflow:hidden;-webkit-user-select:none;user-select:none}.markdown-body pre code .gutter.linenumber{text-align:right;position:relative;display:inline-block;cursor:default;z-index:4;padding:0 8px 0 0;min-width:20px;box-sizing:content-box;color:#afafaf!important;border-right:3px solid #6ce26c!important}.markdown-body pre code .gutter.linenumber>span:before{content:attr(data-linenumber)}.markdown-body pre code .code{float:left;margin:0 0 0 16px}.markdown-body .gist .line-numbers{border-left:none;border-top:none;border-bottom:none}.markdown-body .gist .line-data{border:none}.markdown-body .gist table{border-spacing:0;border-collapse:inherit!important}.markdown-body code[data-gist-id]{background:none;padding:0}.markdown-body code[data-gist-id]:after,.markdown-body code[data-gist-id]:before{content:""}.markdown-body code[data-gist-id] .blob-num{border:unset}.markdown-body code[data-gist-id] table{overflow:unset;margin-bottom:unset}.markdown-body code[data-gist-id] table tr{background:unset}.markdown-body[dir=rtl] pre{direction:ltr}.markdown-body[dir=rtl] code{direction:ltr;unicode-bidi:embed}.markdown-body .alert>p:last-child{margin-bottom:0}.markdown-body pre.abc,.markdown-body pre.flow-chart,.markdown-body pre.graphviz,.markdown-body pre.mermaid,.markdown-body pre.sequence-diagram,.markdown-body pre.vega{text-align:center;background-color:inherit;border-radius:0;white-space:inherit;overflow:visible}.markdown-body pre.abc>code,.markdown-body pre.flow-chart>code,.markdown-body pre.graphviz>code,.markdown-body pre.mermaid>code,.markdown-body pre.sequence-diagram>code,.markdown-body pre.vega>code{text-align:left}.markdown-body pre.abc>svg,.markdown-body pre.flow-chart>svg,.markdown-body pre.graphviz>svg,.markdown-body pre.mermaid>svg,.markdown-body pre.sequence-diagram>svg,.markdown-body pre.vega>svg{max-width:100%;height:100%}.markdown-body pre>code.wrap{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word}.markdown-body .alert>p:last-child,.markdown-body .alert>ul:last-child{margin-bottom:0}.markdown-body summary{display:list-item}.markdown-body summary:focus{outline:none}.markdown-body details summary{cursor:pointer}.markdown-body details:not([open])>:not(summary){display:none}.markdown-body figure{margin:1em 40px}.markdown-body .mark,.markdown-body mark{background-color:#fff1a7}.vimeo,.youtube{cursor:pointer;display:table;text-align:center;background-position:50%;background-repeat:no-repeat;background-size:contain;background-color:#000;overflow:hidden}.vimeo,.youtube{position:relative;width:100%}.youtube{padding-bottom:56.25%}.vimeo img{width:100%;object-fit:contain;z-index:0}.youtube img{object-fit:cover;z-index:0}.vimeo iframe,.youtube iframe,.youtube img{width:100%;height:100%;position:absolute;top:0;left:0}.vimeo iframe,.youtube iframe{vertical-align:middle;z-index:1}.vimeo .icon,.youtube .icon{position:absolute;height:auto;width:auto;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;opacity:.3;transition:opacity .2s;z-index:0}.vimeo:hover .icon,.youtube:hover .icon{opacity:.6;transition:opacity .2s}.slideshare .inner,.speakerdeck .inner{position:relative;width:100%}.slideshare .inner iframe,.speakerdeck .inner iframe{position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%}.figma{display:table;position:relative;width:100%;padding-bottom:56.25%}.figma iframe{position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%;border:1px solid #eee}.markmap-container{height:300px}.markmap-container>svg{width:100%;height:100%}.MJX_Assistive_MathML{display:none}#MathJax_Message{z-index:1000!important}.ui-infobar{position:relative;z-index:2;max-width:760px;margin:25px auto -25px;color:#777}.toc .invisable-node{list-style-type:none}.ui-toc{position:fixed;bottom:20px;z-index:998}.ui-toc.both-mode{margin-left:8px}.ui-toc.both-mode .ui-toc-label{height:40px;padding:10px 4px;border-top-left-radius:0;border-bottom-left-radius:0}.ui-toc-label{background-color:#e6e6e6;border:none;color:#868686;transition:opacity .2s}.ui-toc .open .ui-toc-label{opacity:1;color:#fff;transition:opacity .2s}.ui-toc-label:focus{opacity:.3;background-color:#ccc;color:#000}.ui-toc-label:hover{opacity:1;background-color:#ccc;transition:opacity .2s}.ui-toc-dropdown{margin-top:20px;margin-bottom:20px;padding-left:10px;padding-right:10px;max-width:45vw;width:25vw;max-height:70vh;overflow:auto;text-align:inherit}.ui-toc-dropdown>.toc{max-height:calc(70vh - 100px);overflow:auto}.ui-toc-dropdown[dir=rtl] .nav{padding-right:0;letter-spacing:.0029em}.ui-toc-dropdown a{overflow:hidden;text-overflow:ellipsis;white-space:pre}.ui-toc-dropdown .nav>li>a{display:block;padding:4px 20px;font-size:13px;font-weight:500;color:#767676}.ui-toc-dropdown .nav>li:first-child:last-child>ul,.ui-toc-dropdown .toc.expand ul{display:block}.ui-toc-dropdown .nav>li>a:focus,.ui-toc-dropdown .nav>li>a:hover{padding-left:19px;color:#000;text-decoration:none;background-color:transparent;border-left:1px solid #000}.ui-toc-dropdown[dir=rtl] .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav>li>a:hover{padding-right:19px;border-left:none;border-right:1px solid #000}.ui-toc-dropdown .nav>.active:focus>a,.ui-toc-dropdown .nav>.active:hover>a,.ui-toc-dropdown .nav>.active>a{padding-left:18px;font-weight:700;color:#000;background-color:transparent;border-left:2px solid #000}.ui-toc-dropdown[dir=rtl] .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav>.active>a{padding-right:18px;border-left:none;border-right:2px solid #000}.ui-toc-dropdown .nav .nav{display:none;padding-bottom:10px}.ui-toc-dropdown .nav>.active>ul{display:block}.ui-toc-dropdown .nav .nav>li>a{padding-top:1px;padding-bottom:1px;padding-left:30px;font-size:12px;font-weight:400}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a{padding-right:30px}.ui-toc-dropdown .nav .nav>li>ul>li>a{padding-top:1px;padding-bottom:1px;padding-left:40px;font-size:12px;font-weight:400}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a{padding-right:40px}.ui-toc-dropdown .nav .nav>li>a:focus,.ui-toc-dropdown .nav .nav>li>a:hover{padding-left:29px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:hover{padding-right:29px}.ui-toc-dropdown .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown .nav .nav>li>ul>li>a:hover{padding-left:39px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:hover{padding-right:39px}.ui-toc-dropdown .nav .nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>a{padding-left:28px;font-weight:500}.ui-toc-dropdown[dir=rtl] .nav .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>a{padding-right:28px}.ui-toc-dropdown .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active>a{padding-left:38px;font-weight:500}.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active>a{padding-right:38px}.markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif}html[lang^=ja] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}html .markdown-body[lang^=ja]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html .markdown-body[lang=zh-tw]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html .markdown-body[lang=zh-cn]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}html[lang^=ja] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ\ Ｐゴシック,sans-serif}html[lang=zh-tw] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html[lang=zh-cn] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}html .ui-toc-dropdown[lang^=ja]{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ\ Ｐゴシック,sans-serif}html .ui-toc-dropdown[lang=zh-tw]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html .ui-toc-dropdown[lang=zh-cn]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}.ui-affix-toc{position:fixed;top:0;max-width:15vw;max-height:70vh;overflow:auto}.back-to-top,.expand-toggle,.go-to-bottom{display:block;padding:4px 10px;margin-top:10px;margin-left:10px;font-size:12px;font-weight:500;color:#999}.back-to-top:focus,.back-to-top:hover,.expand-toggle:focus,.expand-toggle:hover,.go-to-bottom:focus,.go-to-bottom:hover{color:#563d7c;text-decoration:none}.back-to-top,.go-to-bottom{margin-top:0}.ui-user-icon{width:20px;height:20px;display:block;border-radius:50%;margin-top:2px;margin-bottom:2px;margin-right:5px;background-position:50%;background-repeat:no-repeat;background-size:cover}.ui-user-icon.small{width:18px;height:18px;display:inline-block;vertical-align:middle;margin:0 0 .2em}.ui-infobar>small>span{line-height:22px}.ui-infobar>small .dropdown{display:inline-block}.ui-infobar>small .dropdown a:focus,.ui-infobar>small .dropdown a:hover{text-decoration:none}.ui-more-info{color:#888;cursor:pointer;vertical-align:middle}.ui-more-info .fa{font-size:16px}.ui-connectedGithub,.ui-published-note{color:#888}.ui-connectedGithub{line-height:23px;white-space:nowrap}.ui-connectedGithub a.file-path{color:#888;text-decoration:none;padding-left:22px}.ui-connectedGithub a.file-path:active,.ui-connectedGithub a.file-path:hover{color:#888;text-decoration:underline}.ui-connectedGithub .fa{font-size:20px}.ui-published-note .fa{font-size:20px;vertical-align:top}.unselectable{-webkit-user-select:none;-o-user-select:none;user-select:none}.selectable{-webkit-user-select:text;-o-user-select:text;user-select:text}@media print{blockquote,div,img,pre,table{page-break-inside:avoid!important}a[href]:after{font-size:12px!important}}.markdown-body.slides{position:relative;z-index:1;color:#222}.markdown-body.slides:before{content:"";display:block;position:absolute;top:0;left:0;right:0;bottom:0;z-index:-1;background-color:currentColor;box-shadow:0 0 0 50vw}.markdown-body.slides section[data-markdown]{position:relative;margin-bottom:1.5em;background-color:#fff;text-align:center}.markdown-body.slides section[data-markdown] code{text-align:left}.markdown-body.slides section[data-markdown]:before{content:"";display:block;padding-bottom:56.23%}.markdown-body.slides section[data-markdown]>div:first-child{position:absolute;top:50%;left:1em;right:1em;transform:translateY(-50%);max-height:100%;overflow:hidden}.markdown-body.slides section[data-markdown]>ul{display:inline-block}.markdown-body.slides>section>section+section:after{content:"";position:absolute;top:-1.5em;right:1em;height:1.5em;border:3px solid #777}.site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}body{font-smoothing:subpixel-antialiased!important;-webkit-font-smoothing:subpixel-antialiased!important;-moz-osx-font-smoothing:auto!important;text-shadow:0 0 1em transparent,1px 1px 1.2px rgba(0,0,0,.004);-webkit-overflow-scrolling:touch;letter-spacing:.025em;font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] body{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}abbr[title]{border-bottom:none;text-decoration:underline;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}abbr[data-original-title],abbr[title]{cursor:help}body.modal-open{overflow-y:auto;padding-right:0!important}
+    </style>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha256-3Jy/GbSLrg0o9y5Z5n1uw0qxZECH7C6OQpVBgNFYa0g=" crossorigin="anonymous"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js" integrity="sha256-g6iAfvZp+nDQ2TdTR/VVKJf3bGro4ub5fvWSWVRi2NE=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js" integrity="sha256-8E4Is26QH0bD52WoQpcB+R/tcWQtpzlCojrybUd7Mxo=" crossorigin="anonymous"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div id="doc" class="markdown-body container-fluid comment-enabled" data-hard-breaks="true"><style>
 ins { background-color: #CCFFCC }
 s { background-color: #FFCACA }
 blockquote { color: inherit !important }
-</style>
-<table>
+</style><table>
 <tbody><tr>
 <td>Document number</td>
 <td>P2603R0</td>
@@ -15,16 +50,14 @@ blockquote { color: inherit !important }
 <tr>
 <td>Reply-to</td>
 <td>
-<p>Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;</p>
+<p><span>Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;</span></p>
 </td>
 </tr>
 <tr>
 <td>Audience</td>
 <td>Evolution Working Group (EWG)</td>
 </tr>
-</tbody></table>
-<h1 id="member-function-pointer-to-function-pointer"><a class="anchor" href="#member-function-pointer-to-function-pointer"><span class="octicon octicon-link"></span></a>member function pointer to function pointer</h1>
-<style>
+</tbody></table><h1 id="member-function-pointer-to-function-pointer" data-id="member-function-pointer-to-function-pointer"><a class="anchor hidden-xs" href="#member-function-pointer-to-function-pointer" title="member-function-pointer-to-function-pointer"><span class="octicon octicon-link"></span></a><span>member function pointer to function pointer</span></h1><style>
 .inline-link
 {
     font-size: small;
@@ -49,264 +82,329 @@ a code
 {
     color: #0645ad;
 }
-</style>
-<h2 id="table-of-contents"><a class="anchor" href="#table-of-contents"><span class="octicon octicon-link"></span></a>Table of contents</h2>
+</style><h2 id="Table-of-contents" data-id="Table-of-contents"><a class="anchor hidden-xs" href="#Table-of-contents" title="Table-of-contents"><span class="octicon octicon-link"></span></a><span>Table of contents</span></h2><ul>
+<li><a href="#member-function-pointer-to-function-pointer"><span>member function pointer to function pointer</span></a>
 <ul>
-<li><a href="#member-function-pointer-to-function-pointer">member function pointer to function pointer</a>
+<li><a href="#abstract"><span>Abstract</span></a></li>
+<li><a href="#motivating-example"><span>Motivating example</span></a>
 <ul>
-<li><a href="#abstract">Abstract</a></li>
-<li><a href="#motivating-example">Motivating example</a>
+<li><a href="#scenario-1-unknown-state"><span>Scenario #1 - Unknown State</span></a></li>
+<li><a href="#scenario-2-known-state"><span>Scenario #2 - Known State</span></a>
 <ul>
-<li><a href="#scenario-1-unknown-state">Scenario #1 - Unknown State</a></li>
-<li><a href="#scenario-2-known-state">Scenario #2 - Known State</a>
-<ul>
-<li><a href="#scenario-2a-known-state-exact">Scenario #2a - Known State - Exact</a></li>
-<li><a href="#scenario-2b-known-state-derived">Scenario #2b - Known State - Derived</a></li>
+<li><a href="#scenario-2a-known-state-exact"><span>Scenario #2a - Known State - Exact</span></a></li>
+<li><a href="#scenario-2b-known-state-derived"><span>Scenario #2b - Known State - Derived</span></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#solution">Solution</a></li>
-<li><a href="#summary">Summary</a></li>
-<li><a href="#prior-work">Prior work</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#solution"><span>Solution</span></a></li>
+<li><a href="#summary"><span>Summary</span></a></li>
+<li><a href="#prior-work"><span>Prior work</span></a></li>
+<li><a href="#references"><span>References</span></a></li>
 </ul>
 </li>
-</ul>
-<h2 id="abstract"><a class="anchor" href="#abstract"><span class="octicon octicon-link"></span></a>Abstract</h2>
-<p><code>C++</code> allows one to call a base member function from a derived instance at compile time.</p>
-<p><code>Working Draft, Standard for Programming Language C++</code> <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
-<p>"<em>11.7.3 Virtual functions [class.virtual]"</em></p>
-<p>"<em>16 Explicit qualification with the scope operator (7.5.4.3) suppresses the virtual call mechanism."</em></p>
-<p>"<em>[Example 10:"</em></p>
-<pre><code class="hljs"><span class="hljs-keyword">class</span> B { <span class="hljs-keyword">public</span>: <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>; };
-<span class="hljs-keyword">class</span> D : <span class="hljs-keyword">public</span> B { <span class="hljs-keyword">public</span>: <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>; };
+</ul><h2 id="Abstract" data-id="Abstract"><a class="anchor hidden-xs" href="#Abstract" title="Abstract"><span class="octicon octicon-link"></span></a><span>Abstract</span></h2><p><code>C++</code><span> allows one to call a base member function from a derived instance at compile time.</span></p><p><code>Working Draft, Standard for Programming Language C++</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p><p><span>"</span><em><span>11.7.3 Virtual functions [class.virtual]"</span></em></p><p><span>"</span><em><span>16 Explicit qualification with the scope operator (7.5.4.3) suppresses the virtual call mechanism."</span></em></p><p><span>"</span><em><span>[Example 10:"</span></em></p><pre><code class="cpp hljs"><span class="token keyword">class</span> <span class="token class-name">B</span> <span class="token punctuation">{</span> <span class="token keyword">public</span><span class="token operator">:</span> <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">D</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">B</span></span> <span class="token punctuation">{</span> <span class="token keyword">public</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-<span class="hljs-keyword">void</span> D::f() { <span class="hljs-comment">/* ... */</span> B::f(); }</code></pre><p><em>"Here, the function call in D::f really does call B::f and not D::f. — end example]"</em></p>
-<p>Currently <code>C++</code> <strong>does not</strong> allow calling a base member function from a derived instance at runtime. The member function pointer always resolves to the member function of the derived instance. While this does make sense for traditional runtime polymorphism, this behavior is less desired when selecting member functions for other types of runtime polymorphism as it occurs a superfluous dual dispatch.</p>
-<p>Just as the programmer decides whether to call the virtual function virtually or not at compile time, the programmer should be able to do the same at runtime.</p>
-<h2 id="motivating-example"><a class="anchor" href="#motivating-example"><span class="octicon octicon-link"></span></a>Motivating Example</h2>
-<!--
-`"Direct" vs "virtual" call to a virtual function` [^directvsvirtual]
--->
-<!--
-```cpp
-//import std;
-//import <iostream>;
-#include <iostream>;
+<span class="token keyword">void</span> <span class="token class-name">D</span><span class="token double-colon punctuation">::</span><span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token class-name">B</span><span class="token double-colon punctuation">::</span><span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre><p><em><span>“Here, the function call in D::f really does call B::f and not D::f. — end example]”</span></em></p><p><span>Currently </span><code>C++</code><span> </span><strong><span>does not</span></strong><span> allow calling a base member function from a derived instance at runtime. The member function pointer always resolves to the member function of the derived instance. While this does make sense for traditional runtime polymorphism, this behavior is less desired when selecting member functions for other types of runtime polymorphism as it occurs a superfluous dual dispatch.</span></p><p><span>Just as the programmer decides whether to call the virtual function virtually or not at compile time, the programmer should be able to do the same at runtime.</span></p><h2 id="Motivating-Example" data-id="Motivating-Example"><a class="anchor hidden-xs" href="#Motivating-Example" title="Motivating-Example"><span class="octicon octicon-link"></span></a><span>Motivating Example</span></h2><pre><code class="cpp hljs"><span class="token keyword">class</span> <span class="token class-name">Abstract</span>
+<span class="token punctuation">{</span> 
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-class Base
-{ 
-public:
-    virtual void some_pure_virtual_function() = 0;
-    virtual void some_virtual_function()
-    {
-        std::cout << "Base::some_virtual_function\n";
-    }
-    virtual void some_virtual_function() const
-    {
-        std::cout << "Base::some_virtual_function const\n";
-    }
-};
+<span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">Abstract</span></span>
+<span class="token punctuation">{</span> 
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">void</span> <span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">override</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+    <span class="token keyword">void</span> <span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">override</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-class Derived : public Base
-{
-public:
-    void some_pure_virtual_function() override
-    {
-        std::cout << "Derived::some_pure_virtual_function\n";
-    }
-    void some_virtual_function() override
-    {
-        //Base::some_virtual_function();
-        std::cout << "Derived::some_virtual_function\n";
-    }
-    void some_virtual_function() const override
-    {
-        //Base::some_virtual_function();
-        std::cout << "Derived::some_virtual_function const\n";
-    }
-};
+<span class="token keyword">class</span> <span class="token class-name">Derived</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">Base</span></span>
+<span class="token punctuation">{</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">void</span> <span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">override</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+    <span class="token keyword">void</span> <span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">override</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+    <span class="token keyword">void</span> <span class="token function">some_deducing_this_member_function</span><span class="token punctuation">(</span><span class="token keyword">this</span> Derived<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
 
-int main()
-{
-    Derived derived;
-    Derived* pderived = &derived;
-    Derived& rderived = derived;
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    Derived derived<span class="token punctuation">;</span>
+    Derived<span class="token operator">*</span> pderived <span class="token operator">=</span> <span class="token operator">&amp;</span>derived<span class="token punctuation">;</span>
+    Derived<span class="token operator">&amp;</span> rderived <span class="token operator">=</span> derived<span class="token punctuation">;</span>
 
-    derived.some_virtual_function(); // Direct call to Derived::some_virtual_function
-    pderived->some_virtual_function(); // Virtual call in general case to Derived::some_virtual_function
-    rderived.some_virtual_function(); // Virtual call in general case to Derived::some_virtual_function
+    derived<span class="token punctuation">.</span><span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Direct call to Derived::some_virtual_function</span>
+    pderived<span class="token operator">-&gt;</span><span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Virtual call in general case to Derived::some_virtual_function</span>
+    rderived<span class="token punctuation">.</span><span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Virtual call in general case to Derived::some_virtual_function</span>
 
-    derived.Base::some_virtual_function(); // Direct call to Base::some_virtual_function
-    pderived->Base::some_virtual_function(); // Direct call to Base::some_virtual_function
-    rderived.Base::some_virtual_function(); // Direct call to Base::some_virtual_function
+    <span class="token comment">// NOTE: A derived class can call its base class member function directly</span>
+    <span class="token comment">// at compile time using a qualifier in these cases Base:: </span>
+    derived<span class="token punctuation">.</span><span class="token class-name">Base</span><span class="token double-colon punctuation">::</span><span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Direct call to Base::some_virtual_function</span>
+    pderived<span class="token operator">-&gt;</span><span class="token class-name">Base</span><span class="token double-colon punctuation">::</span><span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Direct call to Base::some_virtual_function</span>
+    rderived<span class="token punctuation">.</span><span class="token class-name">Base</span><span class="token double-colon punctuation">::</span><span class="token function">some_virtual_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Direct call to Base::some_virtual_function</span>
 
-    void (Base::*bmfp)() = &Base::some_virtual_function;
-    void (Derived::*dmfp)() = &Derived::some_virtual_function;
-    void (Derived::*dmfpc)() const = static_cast<void (Derived::*)() const>(&Derived::some_virtual_function);
+    <span class="token keyword">void</span> <span class="token punctuation">(</span>Base<span class="token double-colon punctuation">::</span><span class="token operator">*</span>bmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">;</span>
+    <span class="token keyword">void</span> <span class="token punctuation">(</span>Derived<span class="token double-colon punctuation">::</span><span class="token operator">*</span>dmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Derived<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">;</span>
+    <span class="token keyword">void</span> <span class="token punctuation">(</span>Derived<span class="token double-colon punctuation">::</span><span class="token operator">*</span>dmfpc<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">void</span> <span class="token punctuation">(</span>Derived<span class="token double-colon punctuation">::</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Derived<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    (derived.*bmfp)();// Derived::some_virtual_function
-    (derived.*dmfp)();// Derived::some_virtual_function
-    (derived.*dmfpc)();// Derived::some_virtual_function const
+    <span class="token comment">// NOTE: A derived class can NOT call its base class member function at runtime</span>
+    <span class="token punctuation">(</span>derived<span class="token punctuation">.</span><span class="token operator">*</span>bmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// Derived::some_virtual_function</span>
+    <span class="token punctuation">(</span>derived<span class="token punctuation">.</span><span class="token operator">*</span>dmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// Derived::some_virtual_function</span>
+    <span class="token punctuation">(</span>derived<span class="token punctuation">.</span><span class="token operator">*</span>dmfpc<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// Derived::some_virtual_function const</span>
 
-    return 0;
-}
-```
--->
-<pre><code class="hljs"><span class="hljs-keyword">class</span> Abstract
-{ 
-<span class="hljs-keyword">public</span>:
-    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> </span>= <span class="hljs-number">0</span>;
-    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>= <span class="hljs-number">0</span>;
-};
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>The most relevant lines in question are the following:</span></p><pre><code class="cpp hljs">Derived derived<span class="token punctuation">;</span>
 
-<span class="hljs-keyword">class</span> Base : <span class="hljs-keyword">public</span> Abstract
-{ 
-<span class="hljs-keyword">public</span>:
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> override </span>{ }
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> override </span>{ }
-};
+<span class="token keyword">void</span> <span class="token punctuation">(</span>Base<span class="token double-colon punctuation">::</span><span class="token operator">*</span>bmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">;</span>
 
-<span class="hljs-keyword">class</span> Derived : <span class="hljs-keyword">public</span> Base
-{
-<span class="hljs-keyword">public</span>:
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> override </span>{ }
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_virtual_function</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> override </span>{ }
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">some_deducing_this_member_function</span><span class="hljs-params">(<span class="hljs-keyword">this</span> Derived)</span> </span>{ }
-};
+<span class="token punctuation">(</span>derived<span class="token punctuation">.</span><span class="token operator">*</span>bmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// Derived::some_virtual_function</span>
+</code></pre><p><span>Even though the programmer explicitly stated that they want to call </span><code>Base</code><span>’s </span><code>some_virtual_function</code><span>, </span><code>Derived</code><span>’s </span><code>some_virtual_function</code><span> is always called. The programmer was never given the same choice that they have at compile time. Again this is correct for traditional runtime polymorphism. However, for a callback using raw pointers, </span><code>function_ref</code><span> </span><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup><span>, or </span><code>nontype function_ref</code><span> </span><sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup><span>, the end programmer wants the choice and really should choose based on the scenario.</span></p><h3 id="Scenario-1---Unknown-State" data-id="Scenario-1---Unknown-State"><a class="anchor hidden-xs" href="#Scenario-1---Unknown-State" title="Scenario-1---Unknown-State"><span class="octicon octicon-link"></span></a><span>Scenario #1 - Unknown State</span></h3><p><span>For instance, if the programmer received some pointer or reference to some instance and as such doesn’t know the exact type of the instance  than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario </span><strong><span>occurs frequently</span></strong><span> when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated </span><strong><span>late</span></strong><span>.</span></p><pre><code class="cpp hljs">function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> <span class="token function">factory</span><span class="token punctuation">(</span>Base<span class="token operator">&amp;</span> base<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token comment">// base could be of type Base, Derived or some other class not known at this function's creation</span>
+  <span class="token comment">// in which case dual dispatch is still a good idea</span>
+  function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span><span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">,</span> some_virtual_tag_class<span class="token operator">&gt;</span><span class="token punctuation">,</span> base<span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> fr<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>A library could provide an overload via a tag class, in this example </span><code>some_virtual_tag_class</code><span>, in order to allow the programmer to choose whether the function will be called virtually or directly, in this case the former.</span></p><h3 id="Scenario-2---Known-State" data-id="Scenario-2---Known-State"><a class="anchor hidden-xs" href="#Scenario-2---Known-State" title="Scenario-2---Known-State"><span class="octicon octicon-link"></span></a><span>Scenario #2 - Known State</span></h3><p><span>However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario </span><strong><span>occurs even more frequently</span></strong><span> when the programmer is calling his own code, his team member’s code or a 3rd party library that is aware of the callback type and provide callback instances. As such the callback type is instantiated </span><strong><span>early</span></strong><span>.</span></p><h4 id="Scenario-2a---Known-State---Exact" data-id="Scenario-2a---Known-State---Exact"><a class="anchor hidden-xs" href="#Scenario-2a---Known-State---Exact" title="Scenario-2a---Known-State---Exact"><span class="octicon octicon-link"></span></a><span>Scenario #2a - Known State - Exact</span></h4><p><span>In this scenario, the state is known and is the same type of the class that houses the member function. As such there is no need resolve the member function at runtime since the type is known.</span></p><pre><code class="cpp hljs">Base base<span class="token punctuation">;</span>
+function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span><span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">,</span> some_direct_tag_class<span class="token operator">&gt;</span><span class="token punctuation">,</span> base<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre><p><span>Again a library could provide an overload via a tag class, in this example </span><code>some_direct_tag_class</code><span>, in order to allow the programmer to choose whether the function will be called virtually or directly, in this case the later.</span></p><h4 id="Scenario-2b---Known-State---Derived" data-id="Scenario-2b---Known-State---Derived"><a class="anchor hidden-xs" href="#Scenario-2b---Known-State---Derived" title="Scenario-2b---Known-State---Derived"><span class="octicon octicon-link"></span></a><span>Scenario #2b - Known State - Derived</span></h4><p><span>This would also work safely for derived state calling their base class member functions at runtime without the additional member function pointer costs. After all, </span><code>Derived</code><span> is still a </span><code>Base</code><span>.</span></p><pre><code class="cpp hljs">Derived derived<span class="token punctuation">;</span>
+function_ref<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&gt;</span> fr <span class="token operator">=</span> <span class="token punctuation">{</span>nontype<span class="token operator">&lt;</span><span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">,</span> some_direct_tag_class<span class="token operator">&gt;</span><span class="token punctuation">,</span> derived<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre><p><span>It should ne noted, that besides callbacks of single functions this functionality could be of benefit to callbacks of n-ary functions such as found in </span><code>proxy</code><span> </span><sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup><span>, </span><code>dyno</code><span> </span><sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup><span> and </span><code>boost ext te</code><span> </span><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup><span>.</span></p><h2 id="Solution" data-id="Solution"><a class="anchor hidden-xs" href="#Solution" title="Solution"><span class="octicon octicon-link"></span></a><span>Solution</span></h2><p><strong><span>Unlike</span></strong><span> calling base class member functions with derived instances at compile time via a qualifier, it is </span><strong><span>undesirable</span></strong><span> to add keywords/vernacular/qualifiers at the point of function call, that is to choose direct or virtual at call time. This incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don’t need the choice as in traditional runtime polymorphism.</span></p><pre><code class="cpp hljs">Derived derived<span class="token punctuation">;</span>
 
-<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
-</span>{
-    Derived derived;
-    Derived* pderived = &amp;derived;
-    Derived&amp; rderived = derived;
+<span class="token keyword">void</span> <span class="token punctuation">(</span>Base<span class="token double-colon punctuation">::</span><span class="token operator">*</span>bmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">;</span>
 
-    derived.some_virtual_function(); <span class="hljs-comment">// Direct call to Derived::some_virtual_function</span>
-    pderived-&gt;some_virtual_function(); <span class="hljs-comment">// Virtual call in general case to Derived::some_virtual_function</span>
-    rderived.some_virtual_function(); <span class="hljs-comment">// Virtual call in general case to Derived::some_virtual_function</span>
+<span class="token comment">// NOTE: This is NOT desired</span>
+<span class="token punctuation">(</span>derived<span class="token punctuation">.</span><span class="token operator">*</span>bmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> direct<span class="token punctuation">;</span><span class="token comment">// Base::some_virtual_function</span>
+<span class="token punctuation">(</span>derived<span class="token punctuation">.</span><span class="token operator">*</span>bmfp<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">virtual</span><span class="token punctuation">;</span><span class="token comment">// Derived::some_virtual_function</span>
+</code></pre><p><span>It is also </span><strong><span>undesirable</span></strong><span> to add keywords/vernacular at the point of member function ponter initialization. This also incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don’t need the choice as in traditional runtime polymorphism.</span></p><pre><code class="cpp hljs">Derived derived<span class="token punctuation">;</span>
 
-    <span class="hljs-comment">// <span class="hljs-doctag">NOTE:</span> A derived class can call its base class member function directly</span>
-    <span class="hljs-comment">// at compile time using a qualifier in these cases Base:: </span>
-    derived.Base::some_virtual_function(); <span class="hljs-comment">// Direct call to Base::some_virtual_function</span>
-    pderived-&gt;Base::some_virtual_function(); <span class="hljs-comment">// Direct call to Base::some_virtual_function</span>
-    rderived.Base::some_virtual_function(); <span class="hljs-comment">// Direct call to Base::some_virtual_function</span>
+<span class="token keyword">void</span> <span class="token punctuation">(</span>Base<span class="token double-colon punctuation">::</span><span class="token operator">*</span>bmfp1<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function direct<span class="token punctuation">;</span>
+<span class="token keyword">void</span> <span class="token punctuation">(</span>Base<span class="token double-colon punctuation">::</span><span class="token operator">*</span>bmfp2<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function <span class="token keyword">virtual</span><span class="token punctuation">;</span>
+</code></pre><p><span>What is desired is no change to member function pointer, at all! Rather, a new intrinsic constexpr function would be created called </span><code>member_function_pointer_to_free_function_pointer</code><span>. This function would not take member function pointer at runtime but only a member function pointer initialization statement, </span><code>&amp;class_name::member_function_name</code><span>, at compile time. Technically, it could also take a static_cast of a member function pointer initialization to a specific member function pointer type to allow explicit choosing of overloaded methods. What gets returned is just a free function pointer that points to the actual member function or a thunk where the </span><code>this</code><span> reference is the first parameter. For </span><code>Deducing this</code><span> </span><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup><span> member functions, the </span><code>this</code><span> type could be a value instead of a reference and as such this new function would just be a passthrough.</span></p><pre><code class="cpp hljs">Derived derived<span class="token punctuation">;</span>
 
-    <span class="hljs-keyword">void</span> (Base::*bmfp)() = &amp;Base::some_virtual_function;
-    <span class="hljs-keyword">void</span> (Derived::*dmfp)() = &amp;Derived::some_virtual_function;
-    <span class="hljs-keyword">void</span> (Derived::*dmfpc)() <span class="hljs-keyword">const</span> = <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">void</span> (Derived::*)() <span class="hljs-keyword">const</span>&gt;(&amp;Derived::some_virtual_function);
-
-    <span class="hljs-comment">// <span class="hljs-doctag">NOTE:</span> A derived class can NOT call its base class member function at runtime</span>
-    (derived.*bmfp)();<span class="hljs-comment">// Derived::some_virtual_function</span>
-    (derived.*dmfp)();<span class="hljs-comment">// Derived::some_virtual_function</span>
-    (derived.*dmfpc)();<span class="hljs-comment">// Derived::some_virtual_function const</span>
-
-    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
-}</code></pre><p>The most relevant lines in question are the following:</p>
-<pre><code class="hljs">Derived derived;
-
-<span class="hljs-keyword">void</span> (Base::*bmfp)() = &amp;Base::some_virtual_function;
-
-(derived.*bmfp)();<span class="hljs-comment">// Derived::some_virtual_function</span></code></pre><p>Even though the programmer explicitly stated that they want to call <code>Base</code>'s <code>some_virtual_function</code>, <code>Derived</code>'s <code>some_virtual_function</code> is always called. The programmer was never given the same choice that they have at compile time. Again this is correct for traditional runtime polymorphism. However, for a callback using raw pointers, <code>function_ref</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>, or <code>nontype function_ref</code> <sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>, the end programmer wants the choice and really should choose based on the scenario.</p>
-<h3 id="scenario-1-unknown-state"><a class="anchor" href="#scenario-1-unknown-state"><span class="octicon octicon-link"></span></a>Scenario #1 - Unknown State</h3>
-<p>For instance, if the programmer received some pointer or reference to some instance and as such doesn't know the exact type of the instance  than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario <strong>occurs frequently</strong> when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated <strong>late</strong>.</p>
-<pre><code class="hljs">function_ref&lt;<span class="hljs-keyword">void</span>()&gt; factory(Base&amp; base)
-{
-  <span class="hljs-comment">// base could be of type Base, Derived or some other class not known at this function's creation</span>
-  <span class="hljs-comment">// in which case dual dispatch is still a good idea</span>
-  function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Base::some_virtual_function, some_virtual_tag_class&gt;, base};
-  <span class="hljs-keyword">return</span> fr;
-}</code></pre><p>A library could provide an overload via a tag class, in this example <code>some_virtual_tag_class</code>, in order to allow the programmer to choose whether the function will be called virtually or directly, in this case the former.</p>
-<h3 id="scenario-2-known-state"><a class="anchor" href="#scenario-2-known-state"><span class="octicon octicon-link"></span></a>Scenario #2 - Known State</h3>
-<p>However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario <strong>occurs even more frequently</strong> when the programmer is calling his own code, his team member's code or a 3rd party library that is aware of the callback type and provide callback instances. As such the callback type is instantiated <strong>early</strong>.</p>
-<h4 id="scenario-2a-known-state-exact"><a class="anchor" href="#scenario-2a-known-state-exact"><span class="octicon octicon-link"></span></a>Scenario #2a - Known State - Exact</h4>
-<p>In this scenario, the state is known and is the same type of the class that houses the member function. As such there is no need resolve the member function at runtime since the type is known.</p>
-<pre><code class="hljs">Base base;
-function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Base::some_virtual_function, some_direct_tag_class&gt;, base};</code></pre><p>Again a library could provide an overload via a tag class, in this example <code>some_direct_tag_class</code>, in order to allow the programmer to choose whether the function will be called virtually or directly, in this case the later.</p>
-<h4 id="scenario-2b-known-state-derived"><a class="anchor" href="#scenario-2b-known-state-derived"><span class="octicon octicon-link"></span></a>Scenario #2b - Known State - Derived</h4>
-<p>This would also work safely for derived state calling their base class member functions at runtime without the additional member function pointer costs. After all, <code>Derived</code> is still a <code>Base</code>.</p>
-<pre><code class="hljs">Derived derived;
-function_ref&lt;<span class="hljs-keyword">void</span>()&gt; fr = {nontype&lt;&amp;Base::some_virtual_function, some_direct_tag_class&gt;, derived};</code></pre><p>It should ne noted, that besides callbacks of single functions this functionality could be of benefit to callbacks of n-ary functions such as found in <code>proxy</code> <sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>, <code>dyno</code> <sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup> and <code>boost ext te</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>.</p>
-<h2 id="solution"><a class="anchor" href="#solution"><span class="octicon octicon-link"></span></a>Solution</h2>
-<p><strong>Unlike</strong> calling base class member functions with derived instances at compile time via a qualifier, it is <strong>undesirable</strong> to add keywords/vernacular/qualifiers at the point of function call, that is to choose direct or virtual at call time. This incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don't need the choice as in traditional runtime polymorphism.</p>
-<pre><code class="hljs">Derived derived;
-
-<span class="hljs-keyword">void</span> (Base::*bmfp)() = &amp;Base::some_virtual_function;
-
-<span class="hljs-comment">// <span class="hljs-doctag">NOTE:</span> This is NOT desired</span>
-(derived.*bmfp)() direct;<span class="hljs-comment">// Base::some_virtual_function</span>
-(derived.*bmfp)() <span class="hljs-keyword">virtual</span>;<span class="hljs-comment">// Derived::some_virtual_function</span></code></pre><p>It is also <strong>undesirable</strong> to add keywords/vernacular at the point of member function ponter initialization. This also incurs additional runtime costs of potentially increased member function pointer size and execution time, even for those that don't need the choice as in traditional runtime polymorphism.</p>
-<pre><code class="hljs">Derived derived;
-
-<span class="hljs-keyword">void</span> (Base::*bmfp1)() = &amp;Base::some_virtual_function direct;
-<span class="hljs-keyword">void</span> (Base::*bmfp2)() = &amp;Base::some_virtual_function <span class="hljs-keyword">virtual</span>;</code></pre><p>What is desired is no change to member function pointer, at all! Rather, a new intrinsic constexpr function would be created called <code>member_function_pointer_to_free_function_pointer</code>. This function would not take member function pointer at runtime but only a member function pointer initialization statement, <code>&amp;class_name::member_function_name</code>, at compile time. Technically, it could also take a static_cast of a member function pointer initialization to a specific member function pointer type to allow explicit choosing of overloaded methods. What gets returned is just a free function pointer that points to the actual member function or a thunk where the <code>this</code> reference is the first parameter. For <code>Deducing this</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup> member functions, the <code>this</code> type could be a value instead of a reference and as such this new function would just be a passthrough.</p>
-<pre><code class="hljs">Derived derived;
-
-<span class="hljs-keyword">void</span> (*bfp)(Base&amp;) = member_function_pointer_to_free_function_pointer(&amp;Base::some_virtual_function);
-<span class="hljs-keyword">void</span> (*dfp)(Derived&amp;) = member_function_pointer_to_free_function_pointer(&amp;Derived::some_virtual_function);
-<span class="hljs-keyword">void</span> (*dfpc)(<span class="hljs-keyword">const</span> Derived&amp;) = member_function_pointer_to_free_function_pointer(<span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">void</span> (Derived::*)() <span class="hljs-keyword">const</span>&gt;(&amp;Derived::some_virtual_function));
-<span class="hljs-keyword">void</span> (*ddtfp)(Derived) = member_function_pointer_to_free_function_pointer(&amp;Derived::some_deducing_this_member_function);</code></pre><p>With this, <code>Base::some_virtual_function</code> can be called at runtime, simply initialized, like [member] function pointers, without having to use a lambda. The end result is member function pointers' initialization syntax can be used to select member functions with the knowledge that the selected is the one that actually will be called.</p>
-<p>NOTE: The following is invalid code because there is no function when the member function declaration is pure.</p>
-<pre><code class="hljs"><span class="hljs-keyword">void</span> (*bfp)(Abstract&amp;) = member_function_pointer_to_free_function_pointer(&amp;Abstract::some_virtual_function);</code></pre><p>The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly. Though, I wouldn't want to rule anything out.</p>
-<h2 id="summary"><a class="anchor" href="#summary"><span class="octicon octicon-link"></span></a>Summary</h2>
-<p>The advantages to <code>C++</code> with this proposal is manifold.</p>
-<ul>
-<li>A seemingly oversight in <code>C++</code> gets fixed by allowing calling a base member function from a derived instance at runtime</li>
-<li>Mitigates a bifurcation by allowing one to interact with member functions regardless of whether they are a <code>Deducing this</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7:1">[7:1]</a></sup> member function or a legacy member function</li>
-<li>Matches existing practice by allowing users to use member function pointer initialization to select member functions with the confidence that it is the function that will be called</li>
-</ul>
-<h2 id="prior-work"><a class="anchor" href="#prior-work"><span class="octicon octicon-link"></span></a>Prior work</h2>
-<p>GCC has support acquiring the function pointer from a member function pointer via its <code>bound member function</code> <sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup> feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support automatic type deduction.</p>
-<h2 id="references"><a class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
-<!--"Direct" vs "virtual" call to a virtual function-->
-<!--Working Draft, Standard for Programming Language C++-->
-<!--Extracting the Function Pointer from a Bound Pointer to Member Function-->
-<!--function_ref: a non-owning reference to a Callable-->
-<!--make function_ref more functional-->
-<!--Proxy: A Polymorphic Programming Library-->
-<!--Deducing this-->
-<!--Dyno: Runtime polymorphism done right-->
-<!--boost-ext/te: TE: C++17 Run-time polymorphism-->
-<!--Language support for customisable functions-->
-<!---->
-<!--
-[^]: <>
--->
-<!--
-recipients
-std-proposals@lists.isocpp.org
-C++ Library Evolution Working Group <lib-ext@lists.isocpp.org>
-Vittorio Romeo <vittorio.romeo@outlook.com>
-Zhihao Yuan <zy@miator.net>
-Jarrad Waterloo <descender76@gmail.com>
-Gašper Ažman
-<gasper.azman@gmail.com>
-Sy Brand
-<sibrand@microsoft.com>
-Ben Deane, ben at elbeno dot com
-<ben@elbeno.com>
-Barry Revzin
-<barry.revzin@gmail.com>
-Mingxin Wang <mingxwa@microsoft.com>
---><hr class="footnotes-sep">
-<section class="footnotes">
+<span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>bfp<span class="token punctuation">)</span><span class="token punctuation">(</span>Base<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token function">member_function_pointer_to_free_function_pointer</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Base<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>dfp<span class="token punctuation">)</span><span class="token punctuation">(</span>Derived<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token function">member_function_pointer_to_free_function_pointer</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Derived<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>dfpc<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">const</span> Derived<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token function">member_function_pointer_to_free_function_pointer</span><span class="token punctuation">(</span><span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">void</span> <span class="token punctuation">(</span>Derived<span class="token double-colon punctuation">::</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Derived<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>ddtfp<span class="token punctuation">)</span><span class="token punctuation">(</span>Derived<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token function">member_function_pointer_to_free_function_pointer</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Derived<span class="token double-colon punctuation">::</span>some_deducing_this_member_function<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>With this, </span><code>Base::some_virtual_function</code><span> can be called at runtime, simply initialized, like [member] function pointers, without having to use a lambda. The end result is member function pointers’ initialization syntax can be used to select member functions with the knowledge that the selected is the one that actually will be called.</span></p><p><span>NOTE: The following is invalid code because there is no function when the member function declaration is pure.</span></p><pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>bfp<span class="token punctuation">)</span><span class="token punctuation">(</span>Abstract<span class="token operator">&amp;</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token function">member_function_pointer_to_free_function_pointer</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Abstract<span class="token double-colon punctuation">::</span>some_virtual_function<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly. Though, I wouldn’t want to rule anything out.</span></p><h2 id="Summary" data-id="Summary"><a class="anchor hidden-xs" href="#Summary" title="Summary"><span class="octicon octicon-link"></span></a><span>Summary</span></h2><p><span>The advantages to </span><code>C++</code><span> with this proposal is manifold.</span></p><ul>
+<li><span>A seemingly oversight in </span><code>C++</code><span> gets fixed by allowing calling a base member function from a derived instance at runtime</span></li>
+<li><span>Mitigates a bifurcation by allowing one to interact with member functions regardless of whether they are a </span><code>Deducing this</code><span> </span><sup class="footnote-ref"><a href="#fn7" id="fnref7:1">[7:1]</a></sup><span> member function or a legacy member function</span></li>
+<li><span>Matches existing practice by allowing users to use member function pointer initialization to select member functions with the confidence that it is the function that will be called</span></li>
+</ul><h2 id="Prior-work" data-id="Prior-work"><a class="anchor hidden-xs" href="#Prior-work" title="Prior-work"><span class="octicon octicon-link"></span></a><span>Prior work</span></h2><p><span>GCC has support acquiring the function pointer from a member function pointer via its </span><code>bound member function</code><span> </span><sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup><span> feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support automatic type deduction.</span></p><h2 id="References" data-id="References"><a class="anchor hidden-xs" href="#References" title="References"><span class="octicon octicon-link"></span></a><span>References</span></h2><hr class="footnotes-sep"><section class="footnotes">
 <ol class="footnotes-list">
-<li id="fn1" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+<li id="fn1" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf</span></a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn2" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+<li id="fn2" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r9.html</span></a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn3" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+<li id="fn3" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html</span></a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn4" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0957r7.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0957r7.pdf</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+<li id="fn4" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0957r7.pdf" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0957r7.pdf</span></a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn5" class="footnote-item"><p><a href="https://github.com/ldionne/dyno">https://github.com/ldionne/dyno</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+<li id="fn5" class="footnote-item"><p><a href="https://github.com/ldionne/dyno" target="_blank" rel="noopener"><span>https://github.com/ldionne/dyno</span></a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn6" class="footnote-item"><p><a href="https://github.com/boost-ext/te">https://github.com/boost-ext/te</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+<li id="fn6" class="footnote-item"><p><a href="https://github.com/boost-ext/te" target="_blank" rel="noopener"><span>https://github.com/boost-ext/te</span></a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn7" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a> <a href="#fnref7:1" class="footnote-backref">↩︎</a></p>
+<li id="fn7" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html</span></a> <a href="#fnref7" class="footnote-backref">↩︎</a> <a href="#fnref7:1" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn8" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html">https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+<li id="fn8" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html" target="_blank" rel="noopener"><span>https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html</span></a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
 </li>
 </ol>
-</section>
-</article><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.slim.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js"></script><script>$(function() { $('canvas.chartjs').each(function() { new Chart($(this), JSON.parse($(this).text())); }); });</script></body></html>
+</section></div>
+    <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
+        <div class="pull-right dropdown">
+            <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
+                <i class="fa fa-bars"></i>
+            </a>
+            <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
+                <div class="toc"><ul class="nav">
+<li class=""><a href="#member-function-pointer-to-function-pointer" title="member function pointer to function pointer">member function pointer to function pointer</a><ul class="nav">
+<li><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Example" title="Motivating Example">Motivating Example</a><ul class="nav">
+<li><a href="#Scenario-1---Unknown-State" title="Scenario #1 - Unknown State">Scenario #1 - Unknown State</a></li>
+<li><a href="#Scenario-2---Known-State" title="Scenario #2 - Known State">Scenario #2 - Known State</a></li>
+</ul>
+</li>
+<li><a href="#Solution" title="Solution">Solution</a></li>
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#Prior-work" title="Prior work">Prior work</a></li>
+<li class=""><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+            </ul>
+        </div>
+    </div>
+    <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;" null null>
+        <div class="toc"><ul class="nav">
+<li class=""><a href="#member-function-pointer-to-function-pointer" title="member function pointer to function pointer">member function pointer to function pointer</a><ul class="nav">
+<li><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Example" title="Motivating Example">Motivating Example</a><ul class="nav">
+<li><a href="#Scenario-1---Unknown-State" title="Scenario #1 - Unknown State">Scenario #1 - Unknown State</a></li>
+<li><a href="#Scenario-2---Known-State" title="Scenario #2 - Known State">Scenario #2 - Known State</a></li>
+</ul>
+</li>
+<li><a href="#Solution" title="Solution">Solution</a></li>
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#Prior-work" title="Prior work">Prior work</a></li>
+<li class=""><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gist-embed/2.6.0/gist-embed.min.js" integrity="sha256-KyF2D6xPIJUW5sUDSs93vWyZm+1RzIpKCexxElmxl8g=" crossorigin="anonymous" defer></script>
+    <script>
+        var markdown = $(".markdown-body");
+        //smooth all hash trigger scrolling
+        function smoothHashScroll() {
+            var hashElements = $("a[href^='#']").toArray();
+            for (var i = 0; i < hashElements.length; i++) {
+                var element = hashElements[i];
+                var $element = $(element);
+                var hash = element.hash;
+                if (hash) {
+                    $element.on('click', function (e) {
+                        // store hash
+                        var hash = this.hash;
+                        if ($(hash).length <= 0) return;
+                        // prevent default anchor click behavior
+                        e.preventDefault();
+                        // animate
+                        $('body, html').stop(true, true).animate({
+                            scrollTop: $(hash).offset().top
+                        }, 100, "linear", function () {
+                            // when done, add hash to url
+                            // (default click behaviour)
+                            window.location.hash = hash;
+                        });
+                    });
+                }
+            }
+        }
+
+        smoothHashScroll();
+        var toc = $('.ui-toc');
+        var tocAffix = $('.ui-affix-toc');
+        var tocDropdown = $('.ui-toc-dropdown');
+        //toc
+        tocDropdown.click(function (e) {
+            e.stopPropagation();
+        });
+
+        var enoughForAffixToc = true;
+
+        function generateScrollspy() {
+            $(document.body).scrollspy({
+                target: ''
+            });
+            $(document.body).scrollspy('refresh');
+            if (enoughForAffixToc) {
+                toc.hide();
+                tocAffix.show();
+            } else {
+                tocAffix.hide();
+                toc.show();
+            }
+            $(document.body).scroll();
+        }
+
+        function windowResize() {
+            //toc right
+            var paddingRight = parseFloat(markdown.css('padding-right'));
+            var right = ($(window).width() - (markdown.offset().left + markdown.outerWidth() - paddingRight));
+            toc.css('right', right + 'px');
+            //affix toc left
+            var newbool;
+            var rightMargin = (markdown.parent().outerWidth() - markdown.outerWidth()) / 2;
+            //for ipad or wider device
+            if (rightMargin >= 133) {
+                newbool = true;
+                var affixLeftMargin = (tocAffix.outerWidth() - tocAffix.width()) / 2;
+                var left = markdown.offset().left + markdown.outerWidth() - affixLeftMargin;
+                tocAffix.css('left', left + 'px');
+            } else {
+                newbool = false;
+            }
+            if (newbool != enoughForAffixToc) {
+                enoughForAffixToc = newbool;
+                generateScrollspy();
+            }
+        }
+        $(window).resize(function () {
+            windowResize();
+        });
+        $(document).ready(function () {
+            windowResize();
+            generateScrollspy();
+        });
+
+        //remove hash
+        function removeHash() {
+            window.location.hash = '';
+        }
+
+        var backtotop = $('.back-to-top');
+        var gotobottom = $('.go-to-bottom');
+
+        backtotop.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToTop)
+                scrollToTop();
+            removeHash();
+        });
+        gotobottom.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToBottom)
+                scrollToBottom();
+            removeHash();
+        });
+
+        var toggle = $('.expand-toggle');
+        var tocExpand = false;
+
+        checkExpandToggle();
+        toggle.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tocExpand = !tocExpand;
+            checkExpandToggle();
+        })
+
+        function checkExpandToggle () {
+            var toc = $('.ui-toc-dropdown .toc');
+            var toggle = $('.expand-toggle');
+            if (!tocExpand) {
+                toc.removeClass('expand');
+                toggle.text('Expand all');
+            } else {
+                toc.addClass('expand');
+                toggle.text('Collapse all');
+            }
+        }
+
+        function scrollToTop() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: 0
+            }, 100, "linear");
+        }
+
+        function scrollToBottom() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: $(document.body)[0].scrollHeight
+            }, 100, "linear");
+        }
+    </script>
+</body>
+
+</html>
