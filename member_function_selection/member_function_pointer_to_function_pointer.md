@@ -7,7 +7,7 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P****R0</td>
+<td>P2603R0</td>
 </tr>
 <tr>
 <td>Date</td>
@@ -233,7 +233,7 @@ Even though the programmer explicitly stated that they want to call `Base`'s `so
 
 ### Scenario #1 - Unknown State
 
-For instance, if the programmer received some pointer or reference to some instance and as such doesn't know the exact type of the instance  than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario **occurs frequently** when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated late. 
+For instance, if the programmer received some pointer or reference to some instance and as such doesn't know the exact type of the instance  than the logical and safe choice is to call the method virtually even though it incurs dual dispatch costs. This scenario **occurs frequently** when integrating with 3rd party libraries that are unaware of the callback type and as such the callback type is instantiated **late**. 
 
 ```cpp
 function_ref<void()> factory(Base& base)
@@ -249,7 +249,7 @@ A library could provide an overload via a tag class, in this example `some_virtu
 
 ### Scenario #2 - Known State
 
-However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario **occurs even more frequently** when the programmer is calling his own code, his team member's code or the 3rd party library is aware of the callback type and provide callback instances. As such the callback type is instantiated early. 
+However, if the programmer knows the instantiated type, likely because the programmer was the creator, then the programmer wants to avoid the superfluous cost of calling the member function through the member function pointer. This scenario **occurs even more frequently** when the programmer is calling his own code, his team member's code or a 3rd party library that is aware of the callback type and provide callback instances. As such the callback type is instantiated **early**. 
 
 #### Scenario #2a - Known State - Exact
 
@@ -264,7 +264,7 @@ Again a library could provide an overload via a tag class, in this example `some
 
 #### Scenario #2b - Known State - Derived
 
-This would would also work safely for derived state calling their base class member functions at runtime without the additional member function pointer costs. After all, `Derived` is still a `Base`.
+This would also work safely for derived state calling their base class member functions at runtime without the additional member function pointer costs. After all, `Derived` is still a `Base`.
 
 ```cpp
 Derived derived;
@@ -296,7 +296,7 @@ void (Base::*bmfp1)() = &Base::some_virtual_function direct;
 void (Base::*bmfp2)() = &Base::some_virtual_function virtual;
 ```
 
-What is desired is no change to member function pointer at all! Rather, a new intrinsic constexpr function would be created called `member_function_pointer_to_free_function_pointer`. This function would not take member function pointer at runtime but only a member function pointer initialization statement, `&class_name::member_function_name`, at compile time. Technically, it could also take a static_cast of a member function pointer initialization to a specific member function pointer type to allow explicit choosing of overloaded methods. What gets returned is just a free function pointer that points to the actual member function or a thunk where the `this` reference is the first parameter. For `Deducing this` [^p0847r7] member functions, the `this` type could be a value instead of a reference and as such this new function would just be a passthrough. 
+What is desired is no change to member function pointer, at all! Rather, a new intrinsic constexpr function would be created called `member_function_pointer_to_free_function_pointer`. This function would not take member function pointer at runtime but only a member function pointer initialization statement, `&class_name::member_function_name`, at compile time. Technically, it could also take a static_cast of a member function pointer initialization to a specific member function pointer type to allow explicit choosing of overloaded methods. What gets returned is just a free function pointer that points to the actual member function or a thunk where the `this` reference is the first parameter. For `Deducing this` [^p0847r7] member functions, the `this` type could be a value instead of a reference and as such this new function would just be a passthrough. 
 
 ```cpp
 Derived derived;
