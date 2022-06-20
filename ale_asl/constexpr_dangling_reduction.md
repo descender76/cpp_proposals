@@ -27,7 +27,7 @@ Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;
 </tr>
 </table>
 
-# dangling reduction - constexpr
+# implicit constant initialization
 
 <style>
 .inline-link
@@ -58,9 +58,13 @@ a code
 
 ## Table of contents
 
-- [dangling reduction - constexpr](#dangling-reduction-constexpr)
+- [implicit constant initialization](#implicit-constant-initialization)
   - [Abstract](#abstract)
   - [Motivating examples](#motivating-examples)
+    - [Value Categories](#value-categories)
+    - [Storage Duration](#storage-duration)
+    - [Constant Expressions](#constant-expressions)
+    - [Constant Initialization](#constant-initialization)
   - [The conditions](#the-conditions)
   - [Why not before](#why-not-before)
   - [Other languages](#other-languages)
@@ -93,9 +97,199 @@ a code
 
 ## Abstract
 
-This document proposes changes to the C++ language to allow writing code that results in fewer dangling references.
+This document proposes enhancements to `constant initialization` [^constinit] to decrease the shock of working with constants, literals and constant like expressions in C++ with the ultimate goal of reducing the frequency of encountering dangling references.
 
 ## Motivating Examples
+
+There is a general expectation across programming languages that constants or more specifically constant literals are "immutable values which are known at compile time and do not change for the life of the program".  [^csharpconstants] In most programming languages or rather the most widely used programming languages, constants do not dangle. Constants are so simple, so trivial (English wise), that it is shocking to even have to be conscience of dangling. This is shocking to `C++` beginners, expert programmers from other programming languages who come over to `C++` and at times even shocking to experienced `C++` programmers. The shock is not limited to dangling though that is the greater one, when it does happen. There are also seemingly inconsistencies with respect to `storage durations` and `value categories`.
+
+### Value Categories
+
+According to `cppreference.com` [^valuecategory], all literals are prvalue expressions except for string literals which are lvalue expressions.
+
+***lvalue***
+
+*The following expressions are lvalue expressions:*
+
+- *a string literal, such as "Hello, world!";*
+
+***prvalue***
+
+*The following expressions are prvalue expressions:*
+
+- *a literal (except for string literal), such as 42, true or nullptr;*
+
+**Should a beginner `C++` programmer need to know `value categories` in order to create and use constants safely!** Besides the seeming inconsistency, I mention value categories because what is being proposed may require fine tuning the value catgories of literals. Accepting this proposal might mean that non string literals will be lvalue when they are constant expressions and prvalue when they are not constant expressions. If this proposal is ever combined with `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] then string literals might also be lvalue when they are constant expressions and prvalue, with automatic storage duration, when they are not constant expressions. Combined, this could unify the behavior of literals, moving the seeming inconsistency from the type of the literal to the constness of the literal were it makes more sense and more valuable from a dangling stand point.
+
+### Storage Duration
+
+According to `cppreference.com` [^stringliteral], *"string literals have static storage duration, and thus exist in memory for the life of the program."* All the other types of literals have automatic storage duration by default. While that makes perfect sense for literals that are not constant, constants on other hand are generally believed to be the same value for the life of the program and are ideal candidates to have have static storage duration so they can exist in memory for the life of the program. Since literals currently don't behave this way, constant [like] literals are not as simple as they could be, leading to superfluous dangling.
+
+<table>
+<tr>
+<td>
+
+**non dangling**
+
+</td>
+<td>
+
+**dangling**
+
+</td>
+</tr>
+<tr>
+<td>
+
+```cpp
+const char* non_dangling_42()
+{
+    const char* constant = "42";
+    return constant;
+}
+```
+
+</td>
+<td>
+
+```cpp
+const int& dangling_42()
+{
+    const int constant = 42;
+    //static const int constant = 42;// FIX
+    return constant;
+}
+```
+
+</td>
+</tr>
+<tr>
+<td>
+
+```cpp
+const char* maybe_dangling_42(const char* maybe_constant)
+{
+    return maybe_constant;
+}
+
+maybe_dangling_42("42");// NOT dangling
+```
+
+</td>
+<td>
+
+```cpp
+const int& maybe_dangling_42(const int& maybe_constant)
+{
+    return maybe_constant;
+}
+
+// dangling because 
+// 42 is auto not static storage duration unlike string literal
+// 42's lifetime is statement not enclosing block unlike C literal
+maybe_dangling_42(42);
+```
+
+</td>
+</tr>
+</table>
+
+### Constant Expressions
+
+`C++ Core Guidelines: Programming at Compile Time with constexpr` [^guidelines]
+
+*"A constant expression"*
+
+-  *"**can** be evaluated at **compile time**."*
+-  *"give the compiler deep insight into the code."*
+-  *"are implicitly thread-safe."*
+-  *"**can** be constructed in the **read-only memory (ROM-able)**."*
+
+It isn't just that resolved constant expressions **can** be placed in ROM which makes programmers believe these **should** be stored globally but also the fact that fundamentally **these expressions are executed at compile time**. Along with templates, constant expressions are the closest thing `C++` has to **pure** functions. That means the results are the same given the parameters, and since these expressions run at compile time, than the resultant values are the same, no matter where or when in the `C++` program. This is essentially global to the program; technically across programs too.
+
+This proposal just requests that at least in specific scenarios that instead of resolved constant expressions **CAN** be ROMable but rather that they **HAVE** to be or at least the next closest thing; constant and `static storage duration`.
+
+### Constant Initialization
+
+According to `cppreference.com` [^constinit], the syntax for `constant initialization` [^constinit] is as follows:
+
+```cpp
+static T & ref = constexpr;
+
+static T object = constexpr;
+```
+
+For the sake of this proposal, I am only talking about a subset of `constant initialization` where T is const since the primary focus is on constants.
+
+```cpp
+static const T & ref = constexpr;
+
+static const T object = constexpr;
+```
+
+Ironically, at namespace scope, variables are already implicitly static and as such the previous example could simply be written as the following:
+
+```cpp
+const T & ref = constexpr;
+
+const T object = constexpr;
+```
+
+<!--
+6.7.5.2 Static storage duration
+namespace sope is already implicitly static
+technically I am only talking about static const
+and still temporary
+-->
+
+Unfortunately, the static storage duration doesn't come from the fact that it is a constant expression and that a constant was expected/requested. Consider for a moment, if it did, that is implicit static storage duration by looking at this from a constant definition in a class, a function body and parameters/arguments.
+
+#### constant definition in class definitions
+
+```cpp
+struct S
+{
+  const T & ref = constexpr;
+  const T object = constexpr;
+};
+```
+
+Should the object be size 0 or sizeof(ref) + sizeof(object)? Also it is very easy to change the constant expression to a non constant expression with a unintented size change. Potential breaking change for existing code. Also OK to leave same as this is type definition and not code.
+
+#### constant definition in function body
+
+```cpp
+const int& dangling_42()
+{
+    const int& constant = 42;
+    return constant;
+}
+
+const int& dangling_42()
+{
+    const int constant = 42;
+    return constant;
+}
+
+const int& dangling_42()
+{
+    return 42;
+}
+```
+
+These examples makes sense with implicit automatic storage duration. This feature isn't expected to break existing code because either the code is already dangling/broken or the `constant` variable was local instead of global so they still have what they need. Further since this only for const variable than the instance is the same regardless.
+
+#### constant definition in function parameter and arguments
+
+```cpp
+const int& maybe_dangling_42(const int& maybe_constant);
+
+maybe_dangling_42(42);
+```
+
+This is expected to be a non breaking change because a parameter that takes a const& argument doesn't know whether the instance was created locally, statically or even dynamically. The advantage of adding this would those const scenarios that would dangling, no longer dangles. Static storage duration for arguments is actually the primary goal of this paper. 
+
+---
 
 ```cpp
 std::string_view sv = "hello world"s;// immediate dangling reference
@@ -813,8 +1007,16 @@ This too would reduce dangling in the same way as this proposal and has the adde
 
 ## References
 
+<!-- Constant initialization -->
+[^constinit]: <https://en.cppreference.com/w/cpp/language/constant_initialization>
+<!-- Constants (C# Programming Guide) -->
+[^csharpconstants]: <https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants>
+<!-- Value categories -->
+[^valuecategory]: <https://en.cppreference.com/w/cpp/language/value_category>
 <!--Bind Returned/Initialized Objects to the Lifetime of Parameters-->
 [^bindp]: <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf>
+<!-- String literal -->
+[^stringliteral]: <https://en.cppreference.com/w/cpp/language/string_literal>
 <!--Lifetime safety: Preventing common dangling-->
 [^lifetimesafety]: <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1179r1.pdf>
 <!--Why lifetime of temporary doesn't extend till lifetime of enclosing object?-->
