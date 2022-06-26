@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-06-05</td>
+<td>2022-06-26</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -61,6 +61,14 @@ a code
   - [The conditions](#the-conditions)
     - [Expectations](#expectations)
 
+    - [Future](#future)
+      - [Proposal #1: `C++` with `static storage duration`](#proposal-1-c-with-static-storage-duration)
+      - [Proposal #2: `C` `compound literals` with `static storage duration`](#proposal-2-c-compound-literals-with-static-storage-duration)
+      - [Optional Addendum #1 - Deduplication](#optional-addendum-1-deduplication)
+      - [Optional Addendum #2 - Undefined Strings](#optional-addendum-2-undefined-strings)
+      - [Optional Addendum #3 - Arrays](#optional-addendum-3-arrays)
+      - [Optional Addendum #4 - Address of literal](#optional-addendum-4-address-of-literal)
+      - [Optional Addendum #5 - Delayed Initialization](#optional-addendum-5-delayed-initialization)
 -->
 
 ## Table of contents
@@ -86,14 +94,7 @@ a code
     - [Present](#present)
       - [C Standard Compound Literals](#c-standard-compund-literals)
       - [C++ Standard](#c-standard)
-    - [Future](#future)
-      - [Proposal #1: `C++` with `static storage duration`](#proposal-1-c-with-static-storage-duration)
-      - [Proposal #2: `C` `compound literals` with `static storage duration`](#proposal-2-c-compound-literals-with-static-storage-duration)
-      - [Optional Addendum #1 - Deduplication](#optional-addendum-1-deduplication)
-      - [Optional Addendum #2 - Undefined Strings](#optional-addendum-2-undefined-strings)
-      - [Optional Addendum #3 - Arrays](#optional-addendum-3-arrays)
-      - [Optional Addendum #4 - Address of literal](#optional-addendum-4-address-of-literal)
-      - [Optional Addendum #5 - Delayed Initialization](#optional-addendum-5-delayed-initialization)
+      - [Outstanding Issues](#outstanding-issues)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
@@ -286,7 +287,7 @@ const int& dangling_42()
 }
 ```
 
-These examples would not dangle and makes more sense with implicit static storage duration. The local variable `constant` and even unnamed variable, temporary, `42`, still is `const` and have their respective types, so their should be no change in the logic of the code that directly depends upon them. As such, this feature isn't expected to break existing code.
+With implicit static storage duration, these examples would not dangle and would make more sense. The local variable `constant` and even unnamed variable, temporary, `42`, still is `const` and have their respective types, so their should be no change in the logic of the code that directly depends upon them. As such, this feature isn't expected to break existing code.
 
 #### constant definition in function parameter and arguments
 
@@ -321,7 +322,7 @@ some_function(constant<constant_expression>());
 
 ### A common example
 
-After applying this proposal and ensuring `std::string_view` and other reference types have `constexpr` constructor that can take `const` parameters. Does the following example still dangle?
+After applying this proposal and ensuring `std::string_view` and other reference types have a `constexpr` constructor that can take `const` parameters. Does the following example still dangle?
 
 ```cpp
 std::string_view sv = "hello world"s;// immediate dangling reference
@@ -913,7 +914,7 @@ void main()
 </tr>
 </table>
 
-This is contrary to general programmer expectations and how it behaves in `C99`. Besides the fact that a large portion of the `C++` community has their start in `C` and besides the fact that no one, in their right mind, would ever write/expand the second example, for every function call that have arguments, their is a more fundamental reason why it is contrary general programmer expectations. It can actually be impossible to write it that way. Consider another example, now with a return value.
+This is contrary to general programmer expectations and how it behaves in `C99`. Besides the fact that a large portion of the `C++` community has their start in `C` and besides the fact that no one, in their right mind, would ever write/expand the second example, for every function call that have arguments, their is a more fundamental reason why it is contrary to general programmer expectations. It can actually be impossible to write it that way. Consider another example, now with a return value.
 
 **Given**
 
@@ -944,7 +945,7 @@ void main()
 <tr>
 <td>
 
-**What is `C++` is doing?**
+**What is `C++` doing?**
 
 </td>
 <td>
@@ -966,7 +967,7 @@ void main()
 <tr>
 <td>
 
-**What is `C++` is doing?**
+**What is `C++` doing?**
 
 </td>
 <td>
@@ -988,9 +989,9 @@ void main()
 </tr>
 </table>
 
-It should be noted that neither of the "`What is C++ is doing?`" examples even compile. The first because the variable `ndc` is not accessible to the functional call `some_code_after`. The second because the class `no_default_constructor` doesn't have a default constructor and as such does not have a uninitialized state. In short, the current `C++` behavior of statement scoping of temporaries instead of containing block scoping is more difficult to reason about because the equivalent code cannot be written by the programmer. As such the `C99` way is simpler, safer and more reasonable.
+It should be noted that neither of the "`What is C++ doing?`" examples even compile. The first because the variable `ndc` is not accessible to the functional call `some_code_after`. The second because the class `no_default_constructor` doesn't have a default constructor and as such does not have a uninitialized state. In short, the current `C++` behavior of statement scoping of temporaries instead of containing block scoping is more difficult to reason about because the equivalent code cannot be written by the programmer. As such the `C99` way is simpler, safer and more reasonable.
 
-Regardless, dangling would still be possible, especially for non constant expressions. Those could be fixed by some future non constant expression proposals.
+Regardless, dangling would still be possible, especially for non constant expressions. Those could be fixed by some future, non constant expression proposals.
 
 For instance, stackoverflow has a good example of dangling with `Compund literals storage duration in C` [^sogcccompoundliterals].
 
@@ -1007,9 +1008,9 @@ if(x){
 value = evaluate_polynomial(coefficients);
 ```
 
-If `coefficients` was const, as it should be since all control paths lead to constant expressions, than even this example would not dangle with this proposal. While this example is an example of dangling, it is also an example of uninitialized or more specifically delayed initialization. Interestingly, in the future, the binding block in question could be the block where `coefficients` is defined, that is the block containing the unitialized variable that is assigned to a constant expression, instead of the block where the uninitialized `coefficients` is initiated. This refinement to the `C` and `C++` rules would fix even more non constexpr dangling in a simple reasonable way.
+If `coefficients` was const, as it should be since all control paths lead to constant expressions, than even this example would not dangle with this proposal. While this example is an example of dangling, it is also an example of uninitialized or more specifically delayed initialization. Interestingly, perhaps in the future, the binding block in question could be the block where `coefficients` is defined, that is the block containing the unitialized variable that is assigned to a constant expression, instead of the block where the uninitialized `coefficients` is initiated. This refinement to the `C` and `C++` rules would fix even more non constexpr dangling in a simple reasonable way.
 
-Once these trivial dangling is removed from the language, the remaining non const dangling could be handled by `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] or by some similar proposal preferably by fixing it if it makes sense or by a hard error if it really is a decision the programmer must make.
+Once these trivial dangling is removed from the language, the remaining non const dangling could be handled by `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] or by some similar proposal preferably by fixing it if it makes sense or by a hard error if it really is a decision that the programmer must make.
 
 #### C++ Standard
 
@@ -1017,7 +1018,7 @@ It is also good to consider how the `C++` standard impacts this proposal and how
 
 `Working Draft, Standard for Programming Language C++` [^n4910]
 
-String literals are traditionally one of the most common literals and in `C++` they have static storage duration. This also leads developers to believe that all literals have static storage duration and that is the case in many programming languages.
+String literals are traditionally one of the most common literals and in `C++` they have static storage duration. This is also the case in many programming languages. As such, these facts leads developers to incorrectly believe that all literals or at least all constant literals have static storage duration.
 
 *"5.13.5 String literals [lex.string]"*
 
@@ -1104,6 +1105,151 @@ A c = g(); // well-formed, c.p can point to c or be dangling
 
 Not only would `b` no longer dangle but the anbiguity of `c.p` could "point to c or be dangling" would be gone.
 
+#### Outstanding Issues
+
+##### P1018R16
+
+The `C++ Language Evolution status pandemic edition` [^p1018r16] list some issues that could be effected positively by this proposal. Many of these have the `NAD`, Not A Defect, designation. While these may not presently have been a defect, they were surprising enough to have been brought forth in the first place.
+
+##### LWG2432 initializer_list assignability
+
+```cpp
+auto il1 = {1,2,3};
+
+il1 = {7,8,9}; // currently well-formed but dangles immediately; should be ill-formed
+```
+
+With `implicit constant initialization` and if `il1` was `const auto` instead of `auto`, this example would not dangle and as such should not be ill-formed. With `C99` literal enclosing block lifetime, this example, AS IS, would not dangle.
+
+##### CWG900 Lifetime of temporaries in range-based for
+
+```cpp
+// some function
+
+std::vector<int> foo();
+
+// correct usage
+
+auto v = foo();
+
+for( auto i : reverse(v) ) { std::cout << i << std::endl; }
+
+// problematic usage
+
+for( auto i : reverse(foo()) ) { std::cout << i << std::endl; }
+```
+
+I am not sure what is more shocking. That this is even an issue or that the current resolution is `NAD`.
+
+With `implicit constant initialization`, if `i` was `const auto` instead of `auto`, if `foo` was a `constexpr` and if `reverse` was a `constexpr`, this example would not dangle and as such should not be ill-formed.
+
+With `C99` literal enclosing block lifetime, this example, AS IS, would not dangle.
+
+In the identifying paper for this issue, `Fix the range‐based for loop, Rev1` [^p2012r1], says the following:
+
+"***The Root Cause for the problem***"
+
+"*The reason for the undefined behavior above is that according to the current specification, the range-base
+for loop internally is **expanded to multiple statements**:*"
+
+-  "*First, we have some initializations using the for-range-initializer after the colon and*"
+-  "*Then, we are calling a low-level for loop*"
+
+While certainly a factor, the problem is **NOT** that internally, the range-base for loop is expanded to multiple statements. It is rather that one of those statements has a scope of the statement instead of the scope of the containing block. The scoping difference between `C99` and `C++` rears it head again. From the programmers perspective, the issue in both cases is that `C++` doesn't treat temporaries, unnamed variable as if they were named by the programmer just anonymously. The supposed `correct usage` highlights this fact.
+
+```cpp
+auto v = foo();
+
+for( auto i : reverse(v) ) { std::cout << i << std::endl; }
+```
+
+If you just name it, it works! Had `reverse(foo())` been scoped to the block that contains the range based for loop than this too would have worked.
+
+<table>
+<tr>
+<td>
+
+**Should have worked**
+
+</td>
+<td>
+
+**`C99` would have worked**
+
+</td>
+<td>
+
+**Programmer made it work**
+
+</td>
+</tr>
+<tr>
+<td>
+
+```cpp
+{// containing block
+  for( auto i : reverse(foo()) )
+  {
+    std::cout << i << std::endl;
+  }
+}
+```
+
+</td>
+<td>
+
+```cpp
+{// containing block
+  auto&& rg = reverse(foo());
+  auto pos = rg.begin();
+  auto end = rg.end();
+  for ( ; pos != end; ++pos ) {
+    int i = *pos;
+    ...
+  }
+}
+```
+
+</td>
+<td>
+
+```cpp
+{// containing block
+  auto anonymous1 = foo();
+  auto anonymous2 = reverse(anonymous1);
+  for( auto i : anonymous2 )
+  {
+    std::cout << i << std::endl;
+  }
+}
+```
+
+</td>
+</tr>
+</table>
+
+It should be no different had the programmer broken a compound statement into it's components and named them individually.
+
+##### CWG1864 List-initialization of array objects
+
+```cpp
+auto x[] = {1, 2, 3};
+```
+
+I am not exactly sure what is the problem here. With `implicit constant initialization` and if `x` was `const auto` instead of `auto`, this example would not dangle. With `C99` literal enclosing block lifetime, this example, AS IS, would not dangle.
+
+##### CWG2111 Array temporaries in reference binding
+
+"*Somewhat related to P2174 compound literals.*"
+
+That statement and the fact that all of the examples were `const` constant expressions means that issue is related to this proposal and the `NAD` may need to be revisited if this proposal ever gets accepted. 
+
+##### CWG914 Value-initialization of array types
+
+I don't believe this issue is related to or would be benefited from this proposal.
+
+<!--
+
 ### Future
 
 There are many paths to reducing dangling via using `static storage duration`. The question that need answering is too what degree do we do it and whether or not we also reduce the gap between `C` and `C++`.
@@ -1185,6 +1331,8 @@ if(x){
 value = evaluate_polynomial(coefficients);
 ```
 
+-->
+
 ## Summary
 
 The advantages to `C++` with this proposal is manifold.
@@ -1200,7 +1348,7 @@ The advantages to `C++` with this proposal is manifold.
 
 ## Frequently Asked Questions
 
-### Why not just extend the lifetime as descibed in p0936r0?
+### Why not just extend the lifetime as prescribed in p0936r0?
 
 `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp]
 
@@ -1231,15 +1379,22 @@ This too would reduce dangling in the same way as this proposal and has the adde
 
 ### What about locality of reference?
 
-TODO
+It is true that globals can be slower than locals because they are farther in memory from the code that uses them. So let me clarify, when I say `static storage duration`, I really mean **logically** `static storage duration`. If a type has a `constexpr` copy constructor or is a `POD` than there is nothing preventing the compiler from copying the global to a local that is closer to the executing code. Rather, the compiler **must** ensure that the code is always available; **effectively** `static storage duration`.
 
-logical static storage duration
+Consider this from an processor and assembly/machine language standpoint. A processor usually has instructions that works with memory. Whether that memory is ROM or is logically so because it is never written to by a program, then we have constants.
 
-constexpr copy
+```cpp
+mov <register>,<memory>
+```
 
-x86 assembly
+A processor may also have specialized versions of common instructions where a constant value is taken as part of the instruction itself. This too is a constant. However, this constant is guaranteed closer to the code because it is physically a part of it.
 
-TODO
+```cpp
+mov <register>,<constant>
+mov <memory>,<constant>
+```
+
+What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unamed/unaddressable version physically can't dangle.
 
 ## References
 
@@ -1297,6 +1452,10 @@ TODO
 [^gcccompoundliterals]: <https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html>
 <!--Compund literals storage duration in C-->
 [^sogcccompoundliterals]: <https://stackoverflow.com/questions/62776214/compund-literals-storage-duration-in-c>
+<!--C++ Language Evolution status pandemic edition-->
+[^p1018r16]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html>
+<!--Fix the range‐based for loop, Rev1-->
+[^p2012r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf>
 <!---->
 <!--
 [^]: <>
@@ -1304,17 +1463,32 @@ TODO
 <!--
 recipients
 std-proposals@lists.isocpp.org
-To: C++ Library Evolution Working Group <lib-ext@lists.isocpp.org>
-Cc: Tomasz Kamiński <tomaszkam@gmail.com>
+C++ Library Evolution Working Group
+lib-ext@lists.isocpp.org
+Tomasz Kamiński
+tomaszkam@gmail.com
 Gašper Ažman
 gasper.azman@gmail.com
 Tim Song
-<t.canens.cpp@gmail.com>
+t.canens.cpp@gmail.com
 Alex Gilding (Perforce UK)
 Jens Gustedt (INRIA France)
-Martin Uecker and Joseph Myers
-Bjarne Stroustrup Jens Maurer
-bs@ms.com
+Martin Uecker
+Joseph Myers
+Bjarne Stroustrup
+bjarne@stroustrup.com
+Jens Maurer
+Jens.Maurer@gmx.net
 Gabriel Dos Reis
 gdr@microsoft.com
+Nicolai Josuttis
+nico@josuttis.de
+Victor Zverovich
+victor.zverovich@gmail.com
+Filipe Mulonde
+filipemulonde@gmail.com
+Arthur O'Dwyer
+arthur.j.odwyer@gmail.com
+Herb Sutter
+hsutter@microsoft.com
 -->
