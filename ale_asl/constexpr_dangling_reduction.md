@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-06-26</td>
+<td>2022-06-27</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -57,6 +57,7 @@ a code
 </style>
 
 <!--
+    - [Value Categories](#value-categories)
 
   - [The conditions](#the-conditions)
     - [Expectations](#expectations)
@@ -76,7 +77,6 @@ a code
 - [implicit constant initialization](#implicit-constant-initialization)
   - [Abstract](#abstract)
   - [Motivating examples](#motivating-examples)
-    - [Value Categories](#value-categories)
     - [Storage Duration](#storage-duration)
     - [Constant Expressions](#constant-expressions)
     - [Constant Initialization](#constant-initialization)
@@ -105,33 +105,39 @@ a code
 
 ## Abstract
 
-This document proposes enhancements to `constant initialization` [^constinit] to decrease the shock of working with constants, literals and constant like expressions in C++ with the ultimate goal of reducing the frequency of encountering dangling references.
+This document proposes enhancements to `constant initialization` [^n4910] <!--6.9.3.2 Static initialization [basic.start.static]--> to decrease the shock of working with constants, literals and constant like expressions in C++ with the ultimate goal of reducing the frequency of encountering dangling references.
 
 ## Motivating Examples
 
-There is a general expectation across programming languages that constants or more specifically constant literals are "immutable values which are known at compile time and do not change for the life of the program".  [^csharpconstants] In most programming languages or rather the most widely used programming languages, constants do not dangle. Constants are so simple, so trivial (English wise), that it is shocking to even have to be conscience of dangling. This is shocking to `C++` beginners, expert programmers from other programming languages who come over to `C++` and at times even shocking to experienced `C++` programmers. The shock is not limited to dangling, though that is the greater one, when it does happen. There are also seemingly inconsistencies with respect to `storage durations` and `value categories`.
+There is a general expectation across programming languages that constants or more specifically constant literals are "immutable values which are known at compile time and do not change for the life of the program".  [^csharpconstants] In most programming languages or rather the most widely used programming languages, constants do not dangle. Constants are so simple, so trivial (English wise), that it is shocking to even have to be conscience of dangling. This is shocking to `C++` beginners, expert programmers from other programming languages who come over to `C++` and at times even shocking to experienced `C++` programmers.
+
+<!--
+
+The shock is not limited to dangling, though that is the greater one, when it does happen. There are also seemingly inconsistencies with respect to `value categories` and `storage durations`.
 
 ### Value Categories
 
-According to `cppreference.com` [^valuecategory], all literals are prvalue expressions except for string literals which are lvalue expressions.
+`Working Draft, Standard for Programming Language C++` [^n4910]
 
-***lvalue***
+**"*7.5.1 Literals [expr.prim.literal]*"**
 
-*The following expressions are lvalue expressions:*
-
-- *a string literal, such as "Hello, world!";*
-
-***prvalue***
-
-*The following expressions are prvalue expressions:*
-
-- *a literal (except for string literal), such as 42, true or nullptr;*
+"*1 The type of a literal is determined based on its form as specifed in 5.13. A string-literal is an lvalue designating a corresponding string literal object (5.13.5), a user-defned-literal has the same value category as the corresponding operator call expression described in 5.13.8, and any other literal is a prvalue.*"
 
 **Should a beginner `C++` programmer need to know `value categories` in order to create and use constants safely!** Besides the seeming inconsistency, I mention value categories because what is being proposed may require fine tuning the value catgories of literals. Accepting this proposal might mean that non string literals will be lvalue when they are constant expressions and prvalue when they are not constant expressions. If this proposal is ever combined with `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] then string literals might also be lvalue when they are constant expressions and prvalue, with automatic storage duration, when they are not constant expressions. Combined, this could unify the behavior of literals, moving the seeming inconsistency from the type of the literal to the constness of the literal were it makes more sense and more valuable from a dangling stand point.
 
+-->
+
 ### Storage Duration
 
-According to `cppreference.com` [^stringliteral], *"string literals have static storage duration, and thus exist in memory for the life of the program."* All the other types of literals have automatic storage duration by default. While that may makes perfect sense for literals that are not constant, constants on other hand are generally believed to be the same value for the life of the program and are ideal candidates to have static storage duration so they can exist in memory for the life of the program. Since literals currently don't behave this way, constant [like] literals are not as simple as they could be, leading to superfluous dangling.
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+**"*5.13.5 String literals [lex.string]*"**
+
+"*9 **Evaluating a string-literal results in a string literal object with static storage duration** (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed.*"
+
+"*[Note 4: The effect of attempting to modify a string literal object is undefined. — end note]*"
+
+String literals have static storage duration, and thus exist in memory for the life of the program. All the other types of literals have automatic storage duration by default. While that may makes perfect sense for literals that are not constant, constants on other hand are generally believed to be the same value for the life of the program and are ideal candidates to have static storage duration so they can exist in memory for the life of the program. Since literals currently don't behave this way, constant [like] literals are not as simple as they could be, leading to superfluous dangling.
 
 <table>
 <tr>
@@ -221,28 +227,34 @@ This proposal just requests, at least in specific scenarios, that instead of res
 
 ### Constant Initialization
 
-According to `cppreference.com` [^constinit], the syntax for `constant initialization` [^constinit] is as follows:
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+"*1 Variables with static storage duration are initialized as a consequence of program initiation. Variables with thread storage duration are initialized as a consequence of thread execution. Within each of these phases of initiation, initialization occurs as follows.*"
+
+"*2 Constant initialization is performed if a variable or temporary object with static or thread storage duration is constant-initialized (7.7).*"
+
+The syntax for `constant initialization` is as follows:
 
 ```cpp
-static T & ref = constexpr;
+static T & ref = constexpr;// constant-initialized required
 
-static T object = constexpr;
+static T object = constexpr;// constant-initialized required
 ```
 
 For the sake of this proposal, I am currently only talking about a subset of `constant initialization` where T is const since the primary focus is on constants.
 
 ```cpp
-static const T & ref = constexpr;
+static const T & ref = constexpr;// constant-initialized required
 
-static const T object = constexpr;
+static const T object = constexpr;// constant-initialized required
 ```
 
 Ironically, at namespace scope, variables are already implicitly static and as such the previous example could simply be written as the following:
 
 ```cpp
-const T & ref = constexpr;
+const T & ref = constexpr;// constant-initialized required
 
-const T object = constexpr;
+const T object = constexpr;// constant-initialized required
 ```
 
 <!--
@@ -828,9 +840,18 @@ GCC even takes this a step forward which is closer to what this proposal is advo
 
 *"**As a GNU extension, GCC allows initialization of objects with static storage duration by compound literals (which is not possible in ISO C99 because the initializer is not a constant).** It is handled as if the object were initialized only with the brace-enclosed list if the types of the compound literal and the object match. **The elements of the compound literal must be constant.** If the object being initialized has array type of unknown size, the size is determined by the size of the compound literal."*
 
-The `C++` standard likely recognized that their are other opportunities for constant initialization. For instance, `cppreference` highlighted this possibility.
+The `C++` standard recognized that their are other opportunities for constant initialization.
 
-*The compiler is permitted to initialize other static and thread-local (since C++11) objects using constant initialization, if it can guarantee that the value would be the same as if the standard order of initialization was followed.* [^constinit]
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+**"*6.9.3.2 Static initialization [basic.start.static]*"**
+
+"*3 An implementation is permitted to perform the initialization of a variable with static or thread storage duration as a static initialization even if such initialization is not required to be done statically, provided that*"
+
+"*(3.1) — the dynamic version of the initialization does not change the value of any other object of static or thread storage duration prior to its initialization, and*"
+
+"*(3.2) — the static version of the initialization produces the same value in the initialized variable as would be produced by the dynamic initialization if all variables not required to be initialized statically were initialized dynamically.*"
+
 
 This proposal is one such opportunity. Besides improving constant initialization, we'll be increasing memory safety by reducing dangling.
 
