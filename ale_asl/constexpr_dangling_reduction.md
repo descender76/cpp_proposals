@@ -103,6 +103,214 @@ a code
   - [Ancillary examples](#ancillary-examples)
 -->
 
+Lifetime issues with references to temporaries can lead to fatal and subtle runtime errors. This applies to
+both:
+
+- Returned references (for example, when using strings or maps) and
+- Returned objects that do not have value semantics (for example using std::string_view).
+
+This paper proposes the standard adopt existing common practices in order to eliminate dangling in some cases and in many other cases, greatly reduce them.
+
+## Motivation
+
+Let’s motivate the feature for both classes not having value semantics and references.
+
+### Classes not Having Value Semantics
+
+C++ allows the definition of classes that do not have value semantics. One pretty new but already famous example is `std::string_view`: The lifetime of a `string_view` object is bound to an underlying string or character sequence.
+
+Because string has an implicit conversion to `string_view`, it is easy to accidentally program a `string_view` to a character sequence that doesn’t exist anymore.
+
+A trivial example is this:
+
+```cpp
+std::string_view sv = "hello world"s;// immediate dangling reference
+```
+
+It is clear from this `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary.
+***What is being proposed is that same example doesn't dangle!***
+If the constant expression `"hello world"s` had static storage duration just like the string literal `"hello world"` has static storage duration [^n4910] <sup>*(5.13.5 String literals [lex.string])*</sup> then `sv` would be a reference to something that is global and as such would not dangle. This is reasonable based on how programmers reason about constants being immutable variables and temporaries which are known at compile time and do not change for the life of the program. There are two facts to take note.
+
+- sv is `constant-initialized` [^n4910] <sup>*(7.7 Constant expressions [expr.const])*</sup>
+- the `constexpr` constructor of `std::string_view` expects a `const` argument
+
+<!--
+This is reasonable based on how users reason about constants, safer because of less dangling and simpler because something as simple as constants shouldn't dangle.
+-->
+
+Dangling can occur more indirectly as follows:
+
+```cpp
+std::string operator+ (std::string_view s1, std::string_view s2) {
+  return std::string{s1} + std::string{s2};
+}
+std::string_view sv = "hi";
+sv = sv + sv; // fatal runtime error: sv refers to deleted temporary string
+```
+
+The problem here is that the lifetime of the temporary is bound to statement in which it was created instead of the block that contains said expression.
+
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+**"*6.7.7 Temporary objects*"**
+
+"*Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created. This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.*"
+
+
+Had the temporary been bound to the enclosing block than it would have been alive for at least as long as the reference. This would reduce dangling but not eliminate it because if the reference out lives its containing block such as by returning than dangling would still occur. These remaining dangling would at least be more visible as they are usually associated with returns, so you know where to look and if we make the proposed changes than there would be fewer dangling to look for.
+
+If you argue that the bugs in these examples are easy to see, consider a template calling operator+
+instead for a passed string view:
+
+```cpp
+template<typename T>
+T add(T x1, T x2) {
+  return x1 + x2 ;
+}
+sv = add(sv, sv); // fatal runtime error
+```
+
+We already see code like this.
+
+We can better support these types by giving the ability to annotate a function declaration to indicate that the lifetime of an object used as part of a parameter's value or the *this object must live at least as long as the return value does.
+
+For example, the problem above can be detected or even just made to work if the constructor defining the implicit conversion is marked so that the lifetime of the created string_view depends on a passed string.
+
+- If the implicit conversion is enabled by a constructor, this might look as follows (with lifetimebound
+representing whatever we might introduce as new feature):
+
+```cpp
+template<class charT, class traits = char_traits<charT>>
+class basic_string_view {
+public:
+...
+  template<class Allocator>
+  basic_string_view(const basic_string<charT, traits, Allocator>& str lifetimebound) noexcept;
+...
+};
+```
+
+- If (as it is the case currently) the conversion is defined by a conversion operator, this might look as follows:
+
+```cpp
+template<class charT, class traits = char_traits<charT>,
+class Allocator = allocator<charT>>
+class basic_string {
+public:
+...
+  operator basic_string_view<charT, traits>() const lifetimebound noexcept;
+...
+};
+```
+
+Note that we could use the feature to
+
+- Either extend the lifetime of prvalues as it is done for references to prvalues.
+- Or enable compilers to warn about code like in the example above.
+
+### Returned References to Temporaries
+
+Similar problems already exists with references.
+
+A trivial example would be the following:
+
+```cpp
+struct X { int a, b; };
+int& f(X& x) { return x.a; } // return value lifetime bound to parameter
+```
+
+Class std::string provides such an interface in the current C++ runtime library. For example:
+
+```cpp
+char& c = std::string{"hello my pretty long string"}[0];
+c = 'x'; // fatal runtime error
+std::cout << "c: " << c << '\n'; // fatal runtime error
+```
+
+Again, we should be able mark the return value of the index operators/functions accordingly to get corresponding
+warnings or the expected behavior:
+
+```cpp
+template<class charT, class traits = char_traits<charT>,
+class Allocator = allocator<charT>>
+class basic_string {
+public:
+...
+  const_reference operator[](size_type pos) const lifetimebound;
+  reference operator[](size_type pos) lifetimebound;
+  const_reference at(size_type n) const lifetimebound;
+  reference at(size_type n) lifetimebound;
+...
+};
+```
+
+There are more tricky cases like this. For example, when using the range-base for loop:
+
+```cpp
+for (auto x : reversed(make_vector()))
+```
+
+with one of the following definitions, either:
+
+
+```cpp
+template<Range R>
+reversed_range reversed(R&& r) {
+  return reversed_range{r}; // return value lifetime bound to parameter
+}
+```
+
+or
+
+```cpp
+template<Range R>
+reversed_range reversed(R r) {
+  return reversed_range{r}; // return value lifetime bound to parameter
+}
+```
+
+Again, we could either make this code work or warn about dangling “references” by marking the return value as lifetime dependent from the parameter.
+
+Finally, such a feature would also help to detect or fix several bugs we see in practice:
+
+Consider we have a function returning the value of a map element or a default value if no such element exists without copying it:
+
+```cpp
+const V& findOrDefault(const std::map<K,V>& m, const K& key, const V& defvalue);
+```
+
+then this results in a classical bug:
+
+```cpp
+std::map<std::string, std::string> myMap;
+const std::string& s = findOrDefault(myMap, key, "none"); // runtime bug if key not found
+```
+
+Again, the marker would help one way or the other:
+
+```cpp
+const V& findOrDefault(const std::map<K,V>& m, const K& key, const V& defvalue lifetimebound);
+```
+<!--
+TODO
+
+```cpp
+struct X { int a, b; };
+const int& f(const X& x) { return x.a; } // return value lifetime bound to parameter
+```
+-->
+## Proposed Wording
+
+**6.9.3.2 Static initialization [basic.start.static]**
+
+...
+
+2 Constant initialization is performed ++explicitly++ if a variable or temporary object with static or thread storage duration is constant-initialized (7.7). ++Constant initialization is performed implicitly if a non mutable const variable or non mutable const temporary object is constant-initialized (7.7).++ If constant initialization is not performed, a variable with static storage duration (6.7.5.2) or thread storage duration (6.7.5.3) is zero-initialized (9.4). Together, zero-initialization and constant initialization are called static initialization; all other initialization is dynamic initialization. All static initialization strongly happens before (6.9.2.2) any dynamic initialization.
+
+...
+
+---
+
 ## Abstract
 
 This document proposes enhancements to `constant initialization` [^n4910] <!--6.9.3.2 Static initialization [basic.start.static]--> to decrease the shock of working with constants, literals and constant like expressions in C++ with the ultimate goal of reducing the frequency of encountering dangling references.
