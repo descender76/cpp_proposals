@@ -82,11 +82,16 @@ a code
 <li><a href="#proposed-wording">Proposed Wording</a></li>
 <li><a href="#in-depth-rationale">In Depth Rationale</a>
 <ul>
+<li><a href="#why-not-before">Why not before</a></li>
 <li><a href="#storage-duration">Storage Duration</a></li>
 <li><a href="#constant-expressions">Constant Expressions</a></li>
-<li><a href="#constant-initialization">Constant Initialization</a></li>
-<li><a href="#why-not-before">Why not before</a></li>
-<li><a href="#other-languages">Other languages</a></li>
+<li><a href="#constant-initialization">Constant Initialization</a>
+<ul>
+<li><a href="#constant-definition-in-class-definitions">constant definition in class definitions</a></li>
+<li><a href="#constant-definition-in-function-body">constant definition in function body</a></li>
+<li><a href="#constant-definition-in-function-parameter-and-arguments">constant definition in function parameter and arguments</a></li>
+</ul>
+</li>
 <li><a href="#impact-on-current-proposals">Impact on current proposals</a>
 <ul>
 <li><a href="#p2255r2">p2255r2</a></li>
@@ -103,9 +108,19 @@ a code
 <ul>
 <li><a href="#c-standard-compund-literals">C Standard Compound Literals</a></li>
 <li><a href="#c-standard">C++ Standard</a></li>
-<li><a href="#outstanding-issues">Outstanding Issues</a></li>
+<li><a href="#outstanding-issues">Outstanding Issues</a>
+<ul>
+<li><a href="#p1018r16">P1018R16</a></li>
+<li><a href="#lwg2432-initializer_list-assignability">LWG2432 initializer_list assignability</a></li>
+<li><a href="#cwg900-lifetime-of-temporaries-in-range-based-for">CWG900 Lifetime of temporaries in range-based for</a></li>
+<li><a href="#cwg1864-list-initialization-of-array-objects">CWG1864 List-initialization of array objects</a></li>
+<li><a href="#cwg2111-array-temporaries-in-reference-binding">CWG2111 Array temporaries in reference binding</a></li>
+<li><a href="#cwg914-value-initialization-of-array-types">CWG914 Value-initialization of array types</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a href="#other-languages">Other languages</a></li>
 </ul>
 </li>
 <li><a href="#summary">Summary</a></li>
@@ -366,6 +381,29 @@ The shock is not limited to dangling, though that is the greater one, when it do
 **Should a beginner `C++` programmer need to know `value categories` in order to create and use constants safely!** Besides the seeming inconsistency, I mention value categories because what is being proposed may require fine tuning the value catgories of literals. Accepting this proposal might mean that non string literals will be lvalue when they are constant expressions and prvalue when they are not constant expressions. If this proposal is ever combined with `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] then string literals might also be lvalue when they are constant expressions and prvalue, with automatic storage duration, when they are not constant expressions. Combined, this could unify the behavior of literals, moving the seeming inconsistency from the type of the literal to the constness of the literal were it makes more sense and more valuable from a dangling stand point.
 
 -->
+<h3 id="why-not-before"><a class="anchor" href="#why-not-before"><span class="octicon octicon-link"></span></a>Why not before</h3>
+<p>Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since <code>C++20</code>, can also be <code>constexpr</code>. This has opened up the door wide for many more types being constructed at compile time.</p>
+<p><strong>C++11</strong></p>
+<ul>
+<li>constexpr</li>
+</ul>
+<p><strong>C++14</strong></p>
+<ul>
+<li>relaxed constexpr restrictions</li>
+</ul>
+<p><strong>C++20</strong></p>
+<ul>
+<li>The spaceship operator</li>
+<li><code>Making std::string constexpr</code> <sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup></li>
+<li><code>Making std::vector constexpr</code> <sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup></li>
+</ul>
+<p><strong>C++23</strong></p>
+<ul>
+<li><code>P2255R2 (A type trait to detect reference binding to temporary)</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup></li>
+<li><code>Missing constexpr in std::optional and std::variant</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup></li>
+<li><code>Making std::unique_ptr constexpr</code> <sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup></li>
+</ul>
+<p>Since <code>C++11</code>, constexpr has continued to gain ground but the final pieces of the feature has only recently landed with stronger comparison via the spaceship operator in C++20 and, if it makes it, the ability to detect temporaries in <code>C++23</code>.</p>
 <h3 id="storage-duration"><a class="anchor" href="#storage-duration"><span class="octicon octicon-link"></span></a>Storage Duration</h3>
 <p><code>Working Draft, Standard for Programming Language C++</code> <sup class="footnote-ref"><a href="#fn1" id="fnref1:5">[1:5]</a></sup></p>
 <p><strong>"<em>5.13.5 String literals [lex.string]</em>"</strong></p>
@@ -418,7 +456,7 @@ maybe_dangling_42(<span class="hljs-number">42</span>);</code></pre></td>
 </tbody></table>
 <p>Even though the usage is the same, the constant string examples do not dangle because they have static storage duration while the dangling, non string literal has automatic storage duration.</p>
 <h3 id="constant-expressions"><a class="anchor" href="#constant-expressions"><span class="octicon octicon-link"></span></a>Constant Expressions</h3>
-<p><code>C++ Core Guidelines: Programming at Compile Time with constexpr</code> <sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup></p>
+<p><code>C++ Core Guidelines: Programming at Compile Time with constexpr</code> <sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup></p>
 <p><em>"A constant expression"</em></p>
 <ul>
 <li><em>"<strong>can</strong> be evaluated at <strong>compile time</strong>."</em></li>
@@ -551,39 +589,6 @@ There is interest in eliminating, if not reducing dangling references. Consider:
 These talks about identify such issues but this proposal would address a small portion of them especially ones that would be considered surprising to programmers.
 
 -->
-<h2 id="why-not-before"><a class="anchor" href="#why-not-before"><span class="octicon octicon-link"></span></a>Why not before</h2>
-<p>Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since <code>C++20</code>, can also be <code>constexpr</code>. This has opened up the door wide for many more types being constructed at compile time.</p>
-<p><strong>C++11</strong></p>
-<ul>
-<li>constexpr</li>
-</ul>
-<p><strong>C++14</strong></p>
-<ul>
-<li>relaxed constexpr restrictions</li>
-</ul>
-<p><strong>C++20</strong></p>
-<ul>
-<li>The spaceship operator</li>
-<li><code>Making std::string constexpr</code> <sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup></li>
-<li><code>Making std::vector constexpr</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup></li>
-</ul>
-<p><strong>C++23</strong></p>
-<ul>
-<li><code>P2255R2 (A type trait to detect reference binding to temporary)</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup></li>
-<li><code>Missing constexpr in std::optional and std::variant</code> <sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup></li>
-<li><code>Making std::unique_ptr constexpr</code> <sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup></li>
-</ul>
-<p>Since <code>C++11</code>, constexpr has continued to gain ground but the final pieces of the feature has only recently landed with stronger comparison via the spaceship operator in C++20 and, if it makes it, the ability to detect temporaries in <code>C++23</code>.</p>
-<h2 id="other-languages"><a class="anchor" href="#other-languages"><span class="octicon octicon-link"></span></a>Other languages</h2>
-<h3 id="many-native-languages"><a class="anchor" href="#many-native-languages"><span class="octicon octicon-link"></span></a>many native languages</h3>
-<p>Many native languages, including C and C++, already provide this capability by storing said instances in the <code>COFF String Table</code> of the <code>portable executable format</code> <sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup>.</p>
-<h3 id="java"><a class="anchor" href="#java"><span class="octicon octicon-link"></span></a>Java</h3>
-<p>Java automatically perform interning on its <code>String class</code> <sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>.</p>
-<h3 id="c-and-other-net-languages"><a class="anchor" href="#c-and-other-net-languages"><span class="octicon octicon-link"></span></a>C# and other .NET languages</h3>
-<p>The .NET languages also performs interning on its <code>String class</code> <sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup></p>
-<h3 id="many-other-languages"><a class="anchor" href="#many-other-languages"><span class="octicon octicon-link"></span></a>many other languages</h3>
-<p>According to Wikipedia's article, <code>String interning</code> <sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup>, Python, PHP, Lua, Ruby, Julia, Lisp, Scheme, Smalltalk and Objective-C's each has this capability in one fashion or another.</p>
-<p>What is proposed here is increasing the interning that C++ already does, but is not limited to just strings, in order to reduce dangling references. The fact is, literals in <code>C++</code> is needless complicated with clearly unnecessary memory safety issues that impedes programmers coming to <code>C++</code> from other languages, even <code>C</code>.</p>
 <!--
 
 ## Ancillary Examples
@@ -641,10 +646,10 @@ some_fuction(std::make_unique<std::string>("hello world"));
 ```
 
 -->
-<h2 id="impact-on-current-proposals"><a class="anchor" href="#impact-on-current-proposals"><span class="octicon octicon-link"></span></a>Impact on current proposals</h2>
-<h3 id="p2255r2"><a class="anchor" href="#p2255r2"><span class="octicon octicon-link"></span></a>p2255r2</h3>
-<p><strong><em><code>A type trait to detect reference binding to temporary</code></em></strong> <sup class="footnote-ref"><a href="#fn7" id="fnref7:1">[7:1]</a></sup></p>
-<p>Following is a slightly modified <code>constexpr</code> example taken from the <code>p2255r2</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7:2">[7:2]</a></sup> proposal. Only the suffix <code>s</code> has been added. It is followed by a non <code>constexpr</code> example. Currently, such an example is immediately dangling. Via <code>p2255r2</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7:3">[7:3]</a></sup>, both examples become ill formed. However, with this proposal the <code>constexpr</code> example becomes valid.</p>
+<h3 id="impact-on-current-proposals"><a class="anchor" href="#impact-on-current-proposals"><span class="octicon octicon-link"></span></a>Impact on current proposals</h3>
+<h4 id="p2255r2"><a class="anchor" href="#p2255r2"><span class="octicon octicon-link"></span></a>p2255r2</h4>
+<p><strong><em><code>A type trait to detect reference binding to temporary</code></em></strong> <sup class="footnote-ref"><a href="#fn6" id="fnref6:1">[6:1]</a></sup></p>
+<p>Following is a slightly modified <code>constexpr</code> example taken from the <code>p2255r2</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6:2">[6:2]</a></sup> proposal. Only the suffix <code>s</code> has been added. It is followed by a non <code>constexpr</code> example. Currently, such an example is immediately dangling. Via <code>p2255r2</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6:3">[6:3]</a></sup>, both examples become ill formed. However, with this proposal the <code>constexpr</code> example becomes valid.</p>
 <table>
 <tbody><tr>
 <td>
@@ -676,7 +681,7 @@ some_fuction(std::make_unique<std::string>("hello world"));
 </tr>
 <tr>
 <td>
-<p><code>p2255r2</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7:4">[7:4]</a></sup></p>
+<p><code>p2255r2</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6:4">[6:4]</a></sup></p>
 </td>
 <td>
 <pre><code class="hljs"><span class="hljs-comment">// ill-formed</span></code></pre></td>
@@ -685,7 +690,7 @@ some_fuction(std::make_unique<std::string>("hello world"));
 </tr>
 <tr>
 <td>
-<p><code>p2255r2</code> <sup class="footnote-ref"><a href="#fn7" id="fnref7:5">[7:5]</a></sup> and this proposal</p>
+<p><code>p2255r2</code> <sup class="footnote-ref"><a href="#fn6" id="fnref6:5">[6:5]</a></sup> and this proposal</p>
 </td>
 <td>
 <pre><code class="hljs"><span class="hljs-comment">// correct</span></code></pre></td>
@@ -694,12 +699,12 @@ some_fuction(std::make_unique<std::string>("hello world"));
 </tr>
 </tbody></table>
 <p>The proposed valid example is reasonable from many programmers perspective because <code>"hello"s</code> is a literal just like <code>"hello"</code> is a safe literal in C++ and C99 compound literals are <strong>safer</strong> literals because the lifetime is the life of the block instead of the expression. More on that latter.</p>
-<h3 id="p2576r0"><a class="anchor" href="#p2576r0"><span class="octicon octicon-link"></span></a>p2576r0</h3>
-<p><strong><em><code>The constexpr specifier for object definitions</code></em></strong> <sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup></p>
-<p>The <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn14" id="fnref14:1">[14:1]</a></sup> proposal is about contributing <code>constexpr</code> back to the <code>C</code> programming language. Interestingly, <code>C++</code> has <code>constexpr</code> in the first place, in part, to allow <code>C99</code> compound literals in <code>C++</code>. In the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn14" id="fnref14:2">[14:2]</a></sup> proposal there are numerous references to "constant expression" and "static storage duration" highlighting that this and my proposal are playing in the same playground. Consider the following:</p>
+<h4 id="p2576r0"><a class="anchor" href="#p2576r0"><span class="octicon octicon-link"></span></a>p2576r0</h4>
+<p><strong><em><code>The constexpr specifier for object definitions</code></em></strong> <sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup></p>
+<p>The <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn10" id="fnref10:1">[10:1]</a></sup> proposal is about contributing <code>constexpr</code> back to the <code>C</code> programming language. Interestingly, <code>C++</code> has <code>constexpr</code> in the first place, in part, to allow <code>C99</code> compound literals in <code>C++</code>. In the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn10" id="fnref10:2">[10:2]</a></sup> proposal there are numerous references to "constant expression" and "static storage duration" highlighting that this and my proposal are playing in the same playground. Consider the following:</p>
 <p><em>"C requires that objects with static storage duration are only initialized with constant expressions.</em></p>
 <p><em>"Because C limits initialization of objects with static storage duration to constant expressions, it can be difficult to create clean abstractions for complicated value generation."</em></p>
-<p>Further, the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn14" id="fnref14:3">[14:3]</a></sup> proposal has a whole section devoted to just storage duration.</p>
+<p>Further, the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn10" id="fnref10:3">[10:3]</a></sup> proposal has a whole section devoted to just storage duration.</p>
 <p><em>"3.4. Storage duration"</em></p>
 <p><em>"For the storage duration of the created objects we go with C++ for compatibility, that is per default we have automatic in block scope and static in file scope. The default for block scope can be overwritten by static or refined by register. It would perhaps be more natural for named constants"</em></p>
 <ul>
@@ -708,7 +713,7 @@ some_fuction(std::make_unique<std::string>("hello world"));
 <li><em>"to have no linkage (similar to typedef or block local static)"</em></li>
 </ul>
 <p><em>"but we decided to go with C++’s choices for compatibility."</em></p>
-<p>My proposal would constitute a delay in the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn14" id="fnref14:4">[14:4]</a></sup> proposal as I am advocating for refining the <code>C++</code> choices before contributing <code>constexpr</code> back to <code>C</code>. I also believe that the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn14" id="fnref14:5">[14:5]</a></sup> proposal fails to consider a fourth alternative with respect to storage duration and that is to go with how <code>C</code> handles compound literals and have <code>C++</code> to conform with it. This will be considered momentarily.</p>
+<p>My proposal would constitute a delay in the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn10" id="fnref10:4">[10:4]</a></sup> proposal as I am advocating for refining the <code>C++</code> choices before contributing <code>constexpr</code> back to <code>C</code>. I also believe that the <code>p2576r0</code> <sup class="footnote-ref"><a href="#fn10" id="fnref10:5">[10:5]</a></sup> proposal fails to consider a fourth alternative with respect to storage duration and that is to go with how <code>C</code> handles compound literals and have <code>C++</code> to conform with it. This will be considered momentarily.</p>
 <!--
 ## Rationale
 
@@ -773,7 +778,7 @@ were ROMable. What is more interesting is that it doesn't matter if it is in the
 <h3 id="past"><a class="anchor" href="#past"><span class="octicon octicon-link"></span></a>Past</h3>
 <p>A brief consideration of the proposals that led to <code>constexpr</code> landing as a feature in <code>C++11</code> bears weight on the justification of refining constant initialization.</p>
 <h4 id="n1511"><a class="anchor" href="#n1511"><span class="octicon octicon-link"></span></a>n1511</h4>
-<p><strong><em><code>Literals for user-defined types</code></em></strong> <sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup></p>
+<p><strong><em><code>Literals for user-defined types</code></em></strong> <sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup></p>
 <p><strong>2003</strong></p>
 <p><em>"This note proposes a notion of <strong>user-defined literals</strong> based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the <strong>C99 notion of compound literals</strong>."</em></p>
 <p><em>"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be <strong>confident that a value <u>will be</u> constructed at compile time</strong> and <strong>potentially stored in ROM</strong>. For example:"</em></p>
@@ -801,7 +806,7 @@ Even if these brittle concerns haven't already been addressed, two things could 
 A more complicated solution for references would require compilers not just to look at 2 types but instead 3: the type of the resolved `constexpr`, the type of the argument and the explicit '&' in front of the `constexpr` when the argument is a pointer.
 -->
 <h4 id="n2235"><a class="anchor" href="#n2235"><span class="octicon octicon-link"></span></a>n2235</h4>
-<p><strong><em><code>Generalized Constant Expressions—Revision 5</code></em></strong> <sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup></p>
+<p><strong><em><code>Generalized Constant Expressions—Revision 5</code></em></strong> <sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup></p>
 <p><strong>2007</strong></p>
 <p><em>"This paper generalizes the notion of constant expressions to include constant-expression functions and user-defined literals"</em></p>
 <p><em>"The goal is ... to <strong>increase C99 compatibility.</strong>"</em></p>
@@ -835,12 +840,12 @@ A more complicated solution for references would require compilers not just to l
 <p>This proposal should also be considered in the light of the current standards. A better idea of our current rules is necessary to understanding how they may be simplied for the betterment of <code>C++</code>.</p>
 <h4 id="c-standard-compound-literals"><a class="anchor" href="#c-standard-compound-literals"><span class="octicon octicon-link"></span></a>C Standard Compound Literals</h4>
 <p>Let's first look at how literals specifically compound literals behave in <code>C</code>. There is still a gap between <code>C99</code> and <code>C++</code> and closing or reducing that gap would not only increase our compatibility but also reduce dangling.</p>
-<p><code>2021/10/18 Meneide, C Working Draft</code> <sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup></p>
+<p><code>2021/10/18 Meneide, C Working Draft</code> <sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup></p>
 <p><em>"6.5.2.5 Compound literals"</em></p>
 <p><strong>paragraph 5</strong></p>
 <p><em>"The value of the compound literal is that of an unnamed object initialized by the initializer list. If the compound literal occurs outside the body of a function, the object has static storage duration; otherwise, it has <strong>automatic storage duration associated with the enclosing block</strong>."</em></p>
 <p>The lifetime of this "enclosing block" is longer than that of <code>C++</code>. In <code>C++</code> under <code>6.7.7 Temporary objects [class.temporary]</code> specifically <code>6.12</code> states a <em>temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer</em>.</p>
-<p><code>GCC</code> <sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup> describes the result of this gap.</p>
+<p><code>GCC</code> <sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup> describes the result of this gap.</p>
 <p><em>"<strong>In C, a compound literal designates an unnamed object with static or automatic storage duration. In C++, a compound literal designates a temporary object that only lives until the end of its full-expression. As a result, well-defined C code that takes the address of a subobject of a compound literal can be undefined in C++</strong>, so G++ rejects the conversion of a temporary array to a pointer."</em></p>
 <p>Simply put <code>C</code> has fewer dangling than <code>C++</code>. What is more is that <code>C</code>'s  solution covers both const and non const temporaries! Even though it is <code>C</code>, it is more like <code>C++</code> than what people give this feature credit for because it is tied to blocks/braces, just like RAII. This adds more weight that the <code>C</code> way is more intuitive. Consequently, the remaining dangling should be easier to spot for developers not having to look at superfluous dangling.</p>
 <p>GCC even takes this a step forward which is closer to what this proposal is advocating. The last reference also says the following.</p>
@@ -948,7 +953,7 @@ A more complicated solution for references would require compilers not just to l
 </tbody></table>
 <p>It should be noted that neither of the "<code>What is C++ doing?</code>" examples even compile. The first because the variable <code>ndc</code> is not accessible to the functional call <code>some_code_after</code>. The second because the class <code>no_default_constructor</code> doesn't have a default constructor and as such does not have a uninitialized state. In short, the current <code>C++</code> behavior of statement scoping of temporaries instead of containing block scoping is more difficult to reason about because the equivalent code cannot be written by the programmer. As such the <code>C99</code> way is simpler, safer and more reasonable.</p>
 <p>Regardless, dangling would still be possible, especially for non constant expressions. Those could be fixed by some future, non constant expression proposals.</p>
-<p>For instance, stackoverflow has a good example of dangling with <code>Compund literals storage duration in C</code> <sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup>.</p>
+<p>For instance, stackoverflow has a good example of dangling with <code>Compund literals storage duration in C</code> <sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>.</p>
 <pre><code class="hljs"><span class="hljs-comment">/* Example 2 - if statements with braces */</span>
 
 <span class="hljs-keyword">double</span> *coefficients, value;
@@ -1008,7 +1013,7 @@ A c = g(); <span class="hljs-comment">// well-formed, c.p can point to c or be d
 }</code></pre><p>Not only would <code>b</code> no longer dangle but the anbiguity of <code>c.p</code> could "point to c or be dangling" would be gone.</p>
 <h4 id="outstanding-issues"><a class="anchor" href="#outstanding-issues"><span class="octicon octicon-link"></span></a>Outstanding Issues</h4>
 <h5 id="p1018r16"><a class="anchor" href="#p1018r16"><span class="octicon octicon-link"></span></a>P1018R16</h5>
-<p>The <code>C++ Language Evolution status pandemic edition</code> <sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup> list some issues that could be effected positively by this proposal. Many of these have the <code>NAD</code>, Not A Defect, designation. While these may not presently have been a defect, they were surprising enough to have been brought forth in the first place.</p>
+<p>The <code>C++ Language Evolution status pandemic edition</code> <sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup> list some issues that could be effected positively by this proposal. Many of these have the <code>NAD</code>, Not A Defect, designation. While these may not presently have been a defect, they were surprising enough to have been brought forth in the first place.</p>
 <h5 id="lwg2432-initializer_list-assignability"><a class="anchor" href="#lwg2432-initializer_list-assignability"><span class="octicon octicon-link"></span></a>LWG2432 initializer_list assignability</h5>
 <pre><code class="hljs"><span class="hljs-keyword">auto</span> il1 = {<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>};
 
@@ -1029,7 +1034,7 @@ il1 = {<span class="hljs-number">7</span>,<span class="hljs-number">8</span>,<sp
 <span class="hljs-keyword">for</span>( <span class="hljs-keyword">auto</span> i : reverse(foo()) ) { <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; i &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>; }</code></pre><p>I am not sure what is more shocking. That this is even an issue or that the current resolution is <code>NAD</code>.</p>
 <p>With <code>implicit constant initialization</code>, if <code>i</code> was <code>const auto</code> instead of <code>auto</code>, if <code>foo</code> was a <code>constexpr</code> and if <code>reverse</code> was a <code>constexpr</code>, this example would not dangle and as such should not be ill-formed.</p>
 <p>With <code>C99</code> literal enclosing block lifetime, this example, AS IS, would not dangle.</p>
-<p>In the identifying paper for this issue, <code>Fix the range‐based for loop, Rev1</code> <sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup>, says the following:</p>
+<p>In the identifying paper for this issue, <code>Fix the range‐based for loop, Rev1</code> <sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>, says the following:</p>
 <p>"<strong><em>The Root Cause for the problem</em></strong>"</p>
 <p>"<em>The reason for the undefined behavior above is that according to the current specification, the range-base
 for loop internally is <strong>expanded to multiple statements</strong>:</em>"</p>
@@ -1174,6 +1179,16 @@ value = evaluate_polynomial(coefficients);
 ```
 
 -->
+<h3 id="other-languages"><a class="anchor" href="#other-languages"><span class="octicon octicon-link"></span></a>Other languages</h3>
+<h4 id="many-native-languages"><a class="anchor" href="#many-native-languages"><span class="octicon octicon-link"></span></a>many native languages</h4>
+<p>Many native languages, including C and C++, already provide this capability by storing said instances in the <code>COFF String Table</code> of the <code>portable executable format</code> <sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>.</p>
+<h4 id="java"><a class="anchor" href="#java"><span class="octicon octicon-link"></span></a>Java</h4>
+<p>Java automatically perform interning on its <code>String class</code> <sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup>.</p>
+<h4 id="c-and-other-net-languages"><a class="anchor" href="#c-and-other-net-languages"><span class="octicon octicon-link"></span></a>C# and other .NET languages</h4>
+<p>The .NET languages also performs interning on its <code>String class</code> <sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup></p>
+<h4 id="many-other-languages"><a class="anchor" href="#many-other-languages"><span class="octicon octicon-link"></span></a>many other languages</h4>
+<p>According to Wikipedia's article, <code>String interning</code> <sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup>, Python, PHP, Lua, Ruby, Julia, Lisp, Scheme, Smalltalk and Objective-C's each has this capability in one fashion or another.</p>
+<p>What is proposed here is increasing the interning that C++ already does, but is not limited to just strings, in order to reduce dangling references. The fact is, literals in <code>C++</code> is needless complicated with clearly unnecessary memory safety issues that impedes programmers coming to <code>C++</code> from other languages, even <code>C</code>.</p>
 <h2 id="summary"><a class="anchor" href="#summary"><span class="octicon octicon-link"></span></a>Summary</h2>
 <p>The advantages to <code>C++</code> with this proposal is manifold.</p>
 <ul>
@@ -1273,41 +1288,41 @@ hsutter@microsoft.com
 </li>
 <li id="fn3" class="footnote-item"><p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants">https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn4" class="footnote-item"><p><a href="https://www.modernescpp.com/index.php/c-core-guidelines-programming-at-compile-time-with-constexpr">https://www.modernescpp.com/index.php/c-core-guidelines-programming-at-compile-time-with-constexpr</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+<li id="fn4" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0980r1.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0980r1.pdf</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn5" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0980r1.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0980r1.pdf</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+<li id="fn5" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1004r2.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1004r2.pdf</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn6" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1004r2.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1004r2.pdf</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+<li id="fn6" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html</a> <a href="#fnref6" class="footnote-backref">↩︎</a> <a href="#fnref6:1" class="footnote-backref">↩︎</a> <a href="#fnref6:2" class="footnote-backref">↩︎</a> <a href="#fnref6:3" class="footnote-backref">↩︎</a> <a href="#fnref6:4" class="footnote-backref">↩︎</a> <a href="#fnref6:5" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn7" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a> <a href="#fnref7:1" class="footnote-backref">↩︎</a> <a href="#fnref7:2" class="footnote-backref">↩︎</a> <a href="#fnref7:3" class="footnote-backref">↩︎</a> <a href="#fnref7:4" class="footnote-backref">↩︎</a> <a href="#fnref7:5" class="footnote-backref">↩︎</a></p>
+<li id="fn7" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2231r1.html">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2231r1.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
 </li>
 <li id="fn8" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2231r1.html">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2231r1.html</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn9" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2231r1.html">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2231r1.html</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+<li id="fn9" class="footnote-item"><p><a href="https://www.modernescpp.com/index.php/c-core-guidelines-programming-at-compile-time-with-constexpr">https://www.modernescpp.com/index.php/c-core-guidelines-programming-at-compile-time-with-constexpr</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn10" class="footnote-item"><p><a href="https://docs.microsoft.com/en-us/windows/win32/debug/pe-format">https://docs.microsoft.com/en-us/windows/win32/debug/pe-format</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+<li id="fn10" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html</a> <a href="#fnref10" class="footnote-backref">↩︎</a> <a href="#fnref10:1" class="footnote-backref">↩︎</a> <a href="#fnref10:2" class="footnote-backref">↩︎</a> <a href="#fnref10:3" class="footnote-backref">↩︎</a> <a href="#fnref10:4" class="footnote-backref">↩︎</a> <a href="#fnref10:5" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn11" class="footnote-item"><p><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#intern%28%29">https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#intern()</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+<li id="fn11" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1511.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1511.pdf</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn12" class="footnote-item"><p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-6.0">https://docs.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-6.0</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+<li id="fn12" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn13" class="footnote-item"><p><a href="https://en.wikipedia.org/wiki/String_interning">https://en.wikipedia.org/wiki/String_interning</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+<li id="fn13" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf">https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn14" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html</a> <a href="#fnref14" class="footnote-backref">↩︎</a> <a href="#fnref14:1" class="footnote-backref">↩︎</a> <a href="#fnref14:2" class="footnote-backref">↩︎</a> <a href="#fnref14:3" class="footnote-backref">↩︎</a> <a href="#fnref14:4" class="footnote-backref">↩︎</a> <a href="#fnref14:5" class="footnote-backref">↩︎</a></p>
+<li id="fn14" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html">https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn15" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1511.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1511.pdf</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+<li id="fn15" class="footnote-item"><p><a href="https://stackoverflow.com/questions/62776214/compund-literals-storage-duration-in-c">https://stackoverflow.com/questions/62776214/compund-literals-storage-duration-in-c</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn16" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+<li id="fn16" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn17" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf">https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+<li id="fn17" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn18" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html">https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
+<li id="fn18" class="footnote-item"><p><a href="https://docs.microsoft.com/en-us/windows/win32/debug/pe-format">https://docs.microsoft.com/en-us/windows/win32/debug/pe-format</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn19" class="footnote-item"><p><a href="https://stackoverflow.com/questions/62776214/compund-literals-storage-duration-in-c">https://stackoverflow.com/questions/62776214/compund-literals-storage-duration-in-c</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+<li id="fn19" class="footnote-item"><p><a href="https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#intern%28%29">https://docs.oracle.com/javase/7/docs/api/java/lang/String.html#intern()</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn20" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html</a> <a href="#fnref20" class="footnote-backref">↩︎</a></p>
+<li id="fn20" class="footnote-item"><p><a href="https://docs.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-6.0">https://docs.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-6.0</a> <a href="#fnref20" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn21" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf">https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf</a> <a href="#fnref21" class="footnote-backref">↩︎</a></p>
+<li id="fn21" class="footnote-item"><p><a href="https://en.wikipedia.org/wiki/String_interning">https://en.wikipedia.org/wiki/String_interning</a> <a href="#fnref21" class="footnote-backref">↩︎</a></p>
 </li>
 </ol>
 </section>

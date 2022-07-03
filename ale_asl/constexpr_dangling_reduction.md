@@ -84,11 +84,13 @@ a code
     - [Returned References to Temporaries](#returned-references-to-temporaries)
   - [Proposed Wording](#proposed-wording)
   - [In Depth Rationale](#in-depth-rationale)
+    - [Why not before](#why-not-before)
     - [Storage Duration](#storage-duration)
     - [Constant Expressions](#constant-expressions)
     - [Constant Initialization](#constant-initialization)
-    - [Why not before](#why-not-before)
-    - [Other languages](#other-languages)
+      - [constant definition in class definitions](#constant-definition-in-class-definitions)
+      - [constant definition in function body](#constant-definition-in-function-body)
+      - [constant definition in function parameter and arguments](#constant-definition-in-function-parameter-and-arguments)
     - [Impact on current proposals](#impact-on-current-proposals)
       - [p2255r2](#p2255r2)
       - [p2576r0](#p2576r0)
@@ -99,6 +101,13 @@ a code
       - [C Standard Compound Literals](#c-standard-compund-literals)
       - [C++ Standard](#c-standard)
       - [Outstanding Issues](#outstanding-issues)
+        - [P1018R16](#p1018r16)
+        - [LWG2432 initializer_list assignability](#lwg2432-initializer_list-assignability)
+        - [CWG900 Lifetime of temporaries in range-based for](#cwg900-lifetime-of-temporaries-in-range-based-for)
+        - [CWG1864 List-initialization of array objects](#cwg1864-list-initialization-of-array-objects)
+        - [CWG2111 Array temporaries in reference binding](#cwg2111-array-temporaries-in-reference-binding)
+        - [CWG914 Value-initialization of array types](#cwg914-value-initialization-of-array-types)
+    - [Other languages](#other-languages)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
@@ -469,6 +478,32 @@ The shock is not limited to dangling, though that is the greater one, when it do
 
 -->
 
+### Why not before
+
+Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time. 
+
+**C++11**
+
+* constexpr
+
+**C++14**
+
+* relaxed constexpr restrictions
+
+**C++20**
+
+* The spaceship operator
+* `Making std::string constexpr` [^string]
+* `Making std::vector constexpr` [^vector]
+
+**C++23**
+
+* `P2255R2 (A type trait to detect reference binding to temporary)` [^p2255r2]
+* `Missing constexpr in std::optional and std::variant` [^optionalvariant]
+* `Making std::unique_ptr constexpr` [^uniqueptr]
+
+Since `C++11`, constexpr has continued to gain ground but the final pieces of the feature has only recently landed with stronger comparison via the spaceship operator in C++20 and, if it makes it, the ability to detect temporaries in `C++23`.
+
 ### Storage Duration
 
 `Working Draft, Standard for Programming Language C++` [^n4910]
@@ -731,52 +766,6 @@ These talks about identify such issues but this proposal would address a small p
 
 -->
 
-## Why not before
-
-Only recently have we had all the pieces to make this happen. Further there is greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time. 
-
-**C++11**
-
-* constexpr
-
-**C++14**
-
-* relaxed constexpr restrictions
-
-**C++20**
-
-* The spaceship operator
-* `Making std::string constexpr` [^string]
-* `Making std::vector constexpr` [^vector]
-
-**C++23**
-
-* `P2255R2 (A type trait to detect reference binding to temporary)` [^p2255r2]
-* `Missing constexpr in std::optional and std::variant` [^optionalvariant]
-* `Making std::unique_ptr constexpr` [^uniqueptr]
-
-Since `C++11`, constexpr has continued to gain ground but the final pieces of the feature has only recently landed with stronger comparison via the spaceship operator in C++20 and, if it makes it, the ability to detect temporaries in `C++23`.
-
-## Other languages
-
-### many native languages
-
-Many native languages, including C and C++, already provide this capability by storing said instances in the `COFF String Table` of the `portable executable format` [^pe].
-
-### Java
-
-Java automatically perform interning on its `String class` [^java].
-
-### C# and other .NET languages
-
-The .NET languages also performs interning on its `String class` [^csharp]
-
-### many other languages
-
-According to Wikipedia's article, `String interning` [^stringinterning], Python, PHP, Lua, Ruby, Julia, Lisp, Scheme, Smalltalk and Objective-C's each has this capability in one fashion or another.
-
-What is proposed here is increasing the interning that C++ already does, but is not limited to just strings, in order to reduce dangling references. The fact is, literals in `C++` is needless complicated with clearly unnecessary memory safety issues that impedes programmers coming to `C++` from other languages, even `C`.
-
 <!--
 
 ## Ancillary Examples
@@ -835,9 +824,9 @@ some_fuction(std::make_unique<std::string>("hello world"));
 
 -->
 
-## Impact on current proposals
+### Impact on current proposals
 
-### p2255r2
+#### p2255r2
 ***`A type trait to detect reference binding to temporary`*** [^p2255r2]
 
 Following is a slightly modified `constexpr` example taken from the `p2255r2` [^p2255r2] proposal. Only the suffix `s` has been added. It is followed by a non `constexpr` example. Currently, such an example is immediately dangling. Via `p2255r2` [^p2255r2], both examples become ill formed. However, with this proposal the `constexpr` example becomes valid.
@@ -945,7 +934,7 @@ std::tuple<const std::string&> x(factory_of_string_at_runtime());
 
 The proposed valid example is reasonable from many programmers perspective because `"hello"s` is a literal just like `"hello"` is a safe literal in C++ and C99 compound literals are **safer** literals because the lifetime is the life of the block instead of the expression. More on that latter.
 
-### p2576r0
+#### p2576r0
 ***`The constexpr specifier for object definitions`*** [^p2576r0]
 
 The `p2576r0` [^p2576r0] proposal is about contributing `constexpr` back to the `C` programming language. Interestingly, `C++` has `constexpr` in the first place, in part, to allow `C99` compound literals in `C++`. In the `p2576r0` [^p2576r0] proposal there are numerous references to "constant expression" and "static storage duration" highlighting that this and my proposal are playing in the same playground. Consider the following:
@@ -1696,6 +1685,26 @@ value = evaluate_polynomial(coefficients);
 ```
 
 -->
+
+### Other languages
+
+#### many native languages
+
+Many native languages, including C and C++, already provide this capability by storing said instances in the `COFF String Table` of the `portable executable format` [^pe].
+
+#### Java
+
+Java automatically perform interning on its `String class` [^java].
+
+#### C# and other .NET languages
+
+The .NET languages also performs interning on its `String class` [^csharp]
+
+#### many other languages
+
+According to Wikipedia's article, `String interning` [^stringinterning], Python, PHP, Lua, Ruby, Julia, Lisp, Scheme, Smalltalk and Objective-C's each has this capability in one fashion or another.
+
+What is proposed here is increasing the interning that C++ already does, but is not limited to just strings, in order to reduce dangling references. The fact is, literals in `C++` is needless complicated with clearly unnecessary memory safety issues that impedes programmers coming to `C++` from other languages, even `C`.
 
 ## Summary
 
