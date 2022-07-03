@@ -355,7 +355,7 @@ const std::string& s = findOrDefault(myMap, key, "none"); // runtime bug if key 
 
 Is this really a bug? With this proposal, it isn't! Here is why. The function `findOrDefault` **expects** a **`const`** `string&` for its third parameter. Since `C++20`, string's constructor is `constexpr`. It **CAN** be constructed as a constant expression. Since all the arguments passed to this `constexpr` constructor are constant expressions, in this case `"none"`, the temporary `string` `defvalue` **IS** also `constant-initialized` [^n4910] <sup>*(7.7 Constant expressions [expr.const])*</sup>. This paper advises that if you have a non `mutable` `const` that it is `constant-initialized`, that the variable or temporary undergoes `constant initialization` [^n4910] <sup>*(6.9.3.2 Static initialization [basic.start.static])*</sup>. In other words it has implicit `static storage duration`. The temporary would actually cease to be a temporary. As such this usage of `findOrDefault` **CAN'T** dangle.
 
-What if `defvalue` can't be `constant-initialized` because it was created at runtime. If the temporary string's lifetime was bound to the containing block instead of the containing statement than chance of dangling is greatly reduced and also made more visible. You can say that it **CAN'T** immediately dangle but still could if the programmer manually propagated the temporary outside of the containing scope.
+What if `defvalue` can't be `constant-initialized` because it was created at runtime. If the temporary string's lifetime was bound to the containing block instead of the containing statement than the chance of dangling is greatly reduced and also made more visible. You can say that it **CAN'T** immediately dangle. However, dangling still could occur if the programmer manually propagated the temporary outside of the containing scope.
 
 While using the containing's scope instead of the statement's scope is a vast improvement. We can actually do a little bit better. Following is an example of delayed initialization.
 
@@ -400,7 +400,7 @@ struct X { int a, b; };
 const int& f(const X& x) { return x.a; } // return value lifetime bound to parameter
 ```
 -->
-The preceding sections of this proposal is identical at times in wording as well as in examples to `p0936r0`, the `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] proposal. This shows that similar problems can be solved with simpler solutions that programmers are already familiar with, such as constants and naming temporaries. It must be conceded that `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] is a more general solution while this proposal is more easily understood by programmers of all experience levels.
+The preceding sections of this proposal is identical at times in wording as well as in examples to `p0936r0`, the `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] proposal. This shows that similar problems can be solved with simpler solutions, that programmers are already familiar with, such as constants and naming temporaries. It must be conceded that `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] is a more general solution while this proposal is more easily understood by programmers of all experience levels.
 
 **Why not just extend the lifetime as prescribed in `Bind Returned/Initialized Objects to the Lifetime of Parameters`?**
 
