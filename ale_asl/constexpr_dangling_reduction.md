@@ -169,7 +169,7 @@ sv = sv + sv; // fatal runtime error: sv refers to deleted temporary string
 
 **"*6.7.7 Temporary objects*"**
 
-"*Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created. This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.*"
+"***Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created.** This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.*"
 
 
 Had the temporary been bound to the enclosing block than it would have been alive for at least as long as the reference. While this does reduce dangling, it does not eliminate it because if the reference out lives its containing block such as by returning than dangling would still occur. These remaining dangling would at least be more visible as they are usually associated with returns, so you know where to look and if we make the proposed changes than there would be far fewer dangling to look for. It should also be noted that **the current lifetime rules of temporaries are like constants, contrary to programmer's expectations**. This becomes more apparent with more complicated examples.
@@ -419,7 +419,7 @@ However, things in the real world tend to be more complicated. Depending upon th
 1. Change automatic storage duration such that a instances' lifetime is just moved higher up the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
 
-If only #1 was applied holistically via p0936r0, -Wlifetime or some such then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
+If only #1 was applied holistically via p0936r0, -Wlifetime or some such, then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
 Personally, `p0936r0` [^bindp] should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
 
@@ -427,7 +427,7 @@ Personally, `p0936r0` [^bindp] should be adopted regardless because we give the 
 
 **6.7.5.4 Automatic storage duration [basic.stc.auto]**
 
-<sub>1</sub> Variables that belong to a block or parameter scope and are not explicitly declared static, thread_local, ~~or~~ extern ++or had not underwent implicit constant initialization++ have automatic storage duration. The storage for these entities lasts until the block in which they are created exits.
+<sub>1</sub> Variables that belong to a block or parameter scope and are not explicitly declared static, thread_local, ~~or~~ extern ++or had not underwent implicit constant initialization (6.9.3.2)++ have automatic storage duration. The storage for these entities lasts until the block in which they are created exits.
 
 ...
 
@@ -443,7 +443,19 @@ created. This is true even if that evaluation ends in throwing an exception. The
 eﬀects of destroying a temporary object are associated only with the full-expression, not with any specifc
 subexpression.~~
 
+**OR**
+
+<sub>4</sub> When an implementation introduces a temporary object of a class that has a non-trivial constructor (11.4.5.2,
+11.4.5.3), it shall ensure that a constructor is called for the temporary object. Similarly, the destructor
+shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed ++when the variable to which the temporary is assigned is destroyed.++~~as
+the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were
+created. This is true even if that evaluation ends in throwing an exception. The value computations and side
+eﬀects of destroying a temporary object are associated only with the full-expression, not with any specifc
+subexpression.~~
+
 ...
+
+**NOTE: Paragraphs 5-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers can not safely use such feature more often.**
 
 **6.9.3.2 Static initialization [basic.start.static]**
 
@@ -1379,7 +1391,7 @@ String literals are traditionally one of the most common literals and in `C++` t
 
 *"[Note 4: **The eﬀect of attempting to modify a string literal object is undefined.** — end note]"*
 
-This proposal aligns or adjusts literals not only with `C` compound literals but also with `C++` string literals. It too should be noted that `C++` is seemingly anbiguous on whether other literals are like string. Are array literals of `static storage duration`? What about if the array was of characters?
+This proposal aligns or adjusts literals not only with `C` compound literals but also with `C++` string literals. It too should be noted that `C++` is seemingly anbiguous on whether other literals are like string. Are array literals of `static storage duration`? What about if the array was of characters? What about string like literals such as std::string and std::string_view?
 
 <!--
 If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
@@ -1744,7 +1756,7 @@ mov <register>,<constant>
 mov <memory>,<constant>
 ```
 
-What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unamed/unaddressable version physically can't dangle.
+What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unnamed/unaddressable version physically can't dangle.
 
 ## References
 

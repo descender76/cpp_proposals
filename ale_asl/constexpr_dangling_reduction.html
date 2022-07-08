@@ -165,7 +165,7 @@ This is reasonable based on how users reason about constants, safer because of l
 sv = sv + sv; <span class="hljs-comment">// fatal runtime error: sv refers to deleted temporary string</span></code></pre><p><strong>The problem here is that the lifetime of the temporary is bound to the statement in which it was created, instead of the block that contains said expression.</strong></p>
 <p><code>Working Draft, Standard for Programming Language C++</code> <sup class="footnote-ref"><a href="#fn1" id="fnref1:2">[1:2]</a></sup></p>
 <p><strong>"<em>6.7.7 Temporary objects</em>"</strong></p>
-<p>"<em>Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created. This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.</em>"</p>
+<p>"<em><strong>Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created.</strong> This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.</em>"</p>
 <p>Had the temporary been bound to the enclosing block than it would have been alive for at least as long as the reference. While this does reduce dangling, it does not eliminate it because if the reference out lives its containing block such as by returning than dangling would still occur. These remaining dangling would at least be more visible as they are usually associated with returns, so you know where to look and if we make the proposed changes than there would be far fewer dangling to look for. It should also be noted that <strong>the current lifetime rules of temporaries are like constants, contrary to programmer's expectations</strong>. This becomes more apparent with more complicated examples.</p>
 <!--
 If you argue that the bugs in these examples are easy to see, consider a template calling operator+
@@ -338,11 +338,11 @@ const int& f(const X& x) { return x.a; } // return value lifetime bound to param
 <li>Change automatic storage duration such that a instances' lifetime is just moved higher up the stack as prescribed in p0936r0.</li>
 <li>Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]</li>
 </ol>
-<p>If only #1 was applied holistically via p0936r0, -Wlifetime or some such then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and <code>p0936r0</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2:2">[2:2]</a></sup> are complimentary.</p>
+<p>If only #1 was applied holistically via p0936r0, -Wlifetime or some such, then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and <code>p0936r0</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2:2">[2:2]</a></sup> are complimentary.</p>
 <p>Personally, <code>p0936r0</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2:3">[2:3]</a></sup> should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the <code>C++</code> compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.</p>
 <h2 id="proposed-wording"><a class="anchor" href="#proposed-wording"><span class="octicon octicon-link"></span></a>Proposed Wording</h2>
 <p><strong>6.7.5.4 Automatic storage duration [basic.stc.auto]</strong></p>
-<p><sub>1</sub> Variables that belong to a block or parameter scope and are not explicitly declared static, thread_local, <s>or</s> extern <ins>or had not underwent implicit constant initialization</ins> have automatic storage duration. The storage for these entities lasts until the block in which they are created exits.</p>
+<p><sub>1</sub> Variables that belong to a block or parameter scope and are not explicitly declared static, thread_local, <s>or</s> extern <ins>or had not underwent implicit constant initialization (6.9.3.2)</ins> have automatic storage duration. The storage for these entities lasts until the block in which they are created exits.</p>
 <p>...</p>
 <p><strong>6.7.7 Temporary objects</strong></p>
 <p>...</p>
@@ -353,7 +353,16 @@ the last step in evaluating the full-expression (6.9.1) that (lexically) contain
 created. This is true even if that evaluation ends in throwing an exception. The value computations and side
 eﬀects of destroying a temporary object are associated only with the full-expression, not with any specifc
 subexpression.</s></p>
+<p><strong>OR</strong></p>
+<p><sub>4</sub> When an implementation introduces a temporary object of a class that has a non-trivial constructor (11.4.5.2,
+11.4.5.3), it shall ensure that a constructor is called for the temporary object. Similarly, the destructor
+shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed <ins>when the variable to which the temporary is assigned is destroyed.</ins><s>as
+the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were
+created. This is true even if that evaluation ends in throwing an exception. The value computations and side
+eﬀects of destroying a temporary object are associated only with the full-expression, not with any specifc
+subexpression.</s></p>
 <p>...</p>
+<p><strong>NOTE: Paragraphs 5-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers can not safely use such feature more often.</strong></p>
 <p><strong>6.9.3.2 Static initialization [basic.start.static]</strong></p>
 <p>...</p>
 <p><sub>2</sub> Constant initialization is performed <ins>explicitly</ins> if a variable or temporary object with static or thread storage duration is constant-initialized (7.7). <ins>Constant initialization is performed implicitly if a non mutable const variable or non mutable const temporary object is constant-initialized (7.7).</ins> If constant initialization is not performed, a variable with static storage duration (6.7.5.2) or thread storage duration (6.7.5.3) is zero-initialized (9.4). Together, zero-initialization and constant initialization are called static initialization; all other initialization is dynamic initialization. All static initialization strongly happens before (6.9.2.2) any dynamic initialization.</p>
@@ -972,7 +981,7 @@ value = evaluate_polynomial(coefficients);</code></pre><p>If <code>coefficients<
 <p><em>"5.13.5 String literals [lex.string]"</em></p>
 <p><em>"9 Evaluating a string-literal results in a string literal object with <strong>static storage duration</strong> (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed."</em></p>
 <p><em>"[Note 4: <strong>The eﬀect of attempting to modify a string literal object is undefined.</strong> — end note]"</em></p>
-<p>This proposal aligns or adjusts literals not only with <code>C</code> compound literals but also with <code>C++</code> string literals. It too should be noted that <code>C++</code> is seemingly anbiguous on whether other literals are like string. Are array literals of <code>static storage duration</code>? What about if the array was of characters?</p>
+<p>This proposal aligns or adjusts literals not only with <code>C</code> compound literals but also with <code>C++</code> string literals. It too should be noted that <code>C++</code> is seemingly anbiguous on whether other literals are like string. Are array literals of <code>static storage duration</code>? What about if the array was of characters? What about string like literals such as std::string and std::string_view?</p>
 <!--
 If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
 -->
@@ -1212,7 +1221,7 @@ This too would reduce dangling in the same way as this proposal and has the adde
 <p>Consider this from an processor and assembly/machine language standpoint. A processor usually has instructions that works with memory. Whether that memory is ROM or is logically so because it is never written to by a program, then we have constants.</p>
 <pre><code class="hljs">mov &lt;<span class="hljs-keyword">register</span>&gt;,&lt;memory&gt;</code></pre><p>A processor may also have specialized versions of common instructions where a constant value is taken as part of the instruction itself. This too is a constant. However, this constant is guaranteed closer to the code because it is physically a part of it.</p>
 <pre><code class="hljs">mov &lt;<span class="hljs-keyword">register</span>&gt;,&lt;constant&gt;
-mov &lt;memory&gt;,&lt;constant&gt;</code></pre><p>What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unamed/unaddressable version physically can't dangle.</p>
+mov &lt;memory&gt;,&lt;constant&gt;</code></pre><p>What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unnamed/unaddressable version physically can't dangle.</p>
 <h2 id="references"><a class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
 <!-- Constant initialization -->
 <!-- Constants (C# Programming Guide) -->
