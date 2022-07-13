@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-06-27</td>
+<td>2022-07-12</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -28,6 +28,9 @@ Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;
 </table>
 
 # implicit constant initialization
+<!--
+# temporaries are anonymously named variables
+-->
 
 <style>
 .inline-link
@@ -127,7 +130,7 @@ This paper proposes the standard adopt existing common practices in order to eli
 
 ## Motivating Examples
 
-Let’s motivate the feature for both classes not having value semantics and references.
+Let’s motivate the feature for both, classes not having value semantics and references.
 
 ### Classes not Having Value Semantics
 
@@ -336,7 +339,7 @@ Now, let's rewrite that expansion, as a programmer would, adding names to everyt
 }
 ```
 
-Like before, the named version doesn't dangle and as such binding the lifetime of the temporary to the containing block makes more sense to the programmer than binding the lifetime of the temporary to the containing statement. It should be noted too that besides increasing the lifespan of a temporary to a reasonable degree not only reduces dangling but also reduces the naming of variables which could be returned and dangled. This will encourage the use of temporaries instead of the present dangling that discourages the use of temporaries.
+Like before, the named version doesn't dangle and as such binding the lifetime of the temporary to the containing block makes more sense to the programmer than binding the lifetime of the temporary to the containing statement. In essence, from a programmer's perspective, **temporaries are anonymously named variables**. It should be noted too that besides increasing the lifespan of a temporary to a reasonable degree not only reduces dangling but also reduces the naming of variables which could be returned and dangled. This will encourage the use of temporaries instead of the present dangling that discourages the use of temporaries.
 
 Finally, such a feature would also help to fix several bugs we see in practice:
 
@@ -416,7 +419,7 @@ In reality, there are three scenarios; warning, **error** or just fix it by exte
 
 However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen, so shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way may not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
 
-1. Change automatic storage duration such that a instances' lifetime is just moved higher up the stack as prescribed in p0936r0.
+1. Change automatic storage duration such that a instances' lifetime is just moved lower on the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
 
 If only #1 was applied holistically via p0936r0, -Wlifetime or some such, then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
@@ -455,7 +458,7 @@ subexpression.~~
 
 ...
 
-**NOTE: Paragraphs 5-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers can not safely use such feature more often.**
+**NOTE: Paragraphs 5-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers rarely intentionally make use of said features.**
 
 **6.9.3.2 Static initialization [basic.start.static]**
 
@@ -1391,13 +1394,13 @@ String literals are traditionally one of the most common literals and in `C++` t
 
 *"[Note 4: **The eﬀect of attempting to modify a string literal object is undefined.** — end note]"*
 
-This proposal aligns or adjusts literals not only with `C` compound literals but also with `C++` string literals. It too should be noted that `C++` is seemingly anbiguous on whether other literals are like string. Are array literals of `static storage duration`? What about if the array was of characters? What about string like literals such as std::string and std::string_view?
+This proposal aligns or adjusts literals not only with `C` compound literals but also with `C++` string literals. It too should be noted that `C++` is seemingly ambiguous or inconsistent on whether other literals are like string. Are array literals of `static storage duration`? What about if the array was of characters? What about string like literals such as std::string and std::string_view?
 
 <!--
 If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
 -->
 
-`C++` also says the *"eﬀect of attempting to modify a string literal object is undefined."* With us having `const` for so long, there is few reasons for this to go undefined. Undefined behavior doesn't make constants and non constant literals any easier to deal with. A string literal could have **static storage duration** for constant expressions and **automatic storage duration** for **non** constant expressions, just like other literals. The lifetime of the `automatic storage duration` could be the `C` rule of the enclosing block since it is safer than `C++`. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have `static storage duration` and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] before nudging string literals closer to non string literals.
+`C++` also says the *"effect of attempting to modify a string literal object is undefined."* With us having `const` for so long, there is few reasons for this to go undefined. Undefined behavior doesn't make constants and non constant literals any easier to deal with. A string literal could have **static storage duration** for constant expressions and **automatic storage duration** for **non** constant expressions, just like other literals. The lifetime of the `automatic storage duration` could be the `C` rule of the enclosing block since it is safer than `C++`. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have `static storage duration` and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] before nudging string literals closer to non string literals.
 
 ---
 

@@ -24,6 +24,9 @@ blockquote { color: inherit !important }
 </tr>
 </tbody></table>
 <h1 id="implicit-constant-initialization"><a class="anchor" href="#implicit-constant-initialization"><span class="octicon octicon-link"></span></a>implicit constant initialization</h1>
+<!--
+# temporaries are anonymously named variables
+-->
 <style>
 .inline-link
 {
@@ -141,7 +144,7 @@ both:</p>
 </ul>
 <p>This paper proposes the standard adopt existing common practices in order to eliminate dangling in some cases and in many other cases, greatly reduce them.</p>
 <h2 id="motivating-examples"><a class="anchor" href="#motivating-examples"><span class="octicon octicon-link"></span></a>Motivating Examples</h2>
-<p>Let’s motivate the feature for both classes not having value semantics and references.</p>
+<p>Let’s motivate the feature for both, classes not having value semantics and references.</p>
 <h3 id="classes-not-having-value-semantics"><a class="anchor" href="#classes-not-having-value-semantics"><span class="octicon octicon-link"></span></a>Classes not Having Value Semantics</h3>
 <p>C++ allows the definition of classes that do not have value semantics. One famous example is <code>std::string_view</code>: The lifetime of a <code>string_view</code> object is bound to an underlying string or character sequence.</p>
 <p>Because string has an implicit conversion to <code>string_view</code>, it is easy to accidentally program a <code>string_view</code> to a character sequence that doesn’t exist anymore.</p>
@@ -278,7 +281,7 @@ public:
     <span class="hljs-keyword">auto</span> x = *pos;
     ...
   }
-}</code></pre><p>Like before, the named version doesn't dangle and as such binding the lifetime of the temporary to the containing block makes more sense to the programmer than binding the lifetime of the temporary to the containing statement. It should be noted too that besides increasing the lifespan of a temporary to a reasonable degree not only reduces dangling but also reduces the naming of variables which could be returned and dangled. This will encourage the use of temporaries instead of the present dangling that discourages the use of temporaries.</p>
+}</code></pre><p>Like before, the named version doesn't dangle and as such binding the lifetime of the temporary to the containing block makes more sense to the programmer than binding the lifetime of the temporary to the containing statement. In essence, from a programmer's perspective, <strong>temporaries are anonymously named variables</strong>. It should be noted too that besides increasing the lifespan of a temporary to a reasonable degree not only reduces dangling but also reduces the naming of variables which could be returned and dangled. This will encourage the use of temporaries instead of the present dangling that discourages the use of temporaries.</p>
 <p>Finally, such a feature would also help to fix several bugs we see in practice:</p>
 <p>Consider we have a function returning the value of a map element or a default value if no such element exists without copying it:</p>
 <pre><code class="hljs"><span class="hljs-function"><span class="hljs-keyword">const</span> V&amp; <span class="hljs-title">findOrDefault</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">map</span>&lt;K,V&gt;&amp; m, <span class="hljs-keyword">const</span> K&amp; key, <span class="hljs-keyword">const</span> V&amp; defvalue)</span></span>;</code></pre><p>then this results in a classical bug:</p>
@@ -335,7 +338,7 @@ const int& f(const X& x) { return x.a; } // return value lifetime bound to param
 <p>In reality, there are three scenarios; warning, <strong>error</strong> or just fix it by extending the lifetime.</p>
 <p>However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen, so shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way may not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.</p>
 <ol>
-<li>Change automatic storage duration such that a instances' lifetime is just moved higher up the stack as prescribed in p0936r0.</li>
+<li>Change automatic storage duration such that a instances' lifetime is just moved lower on the stack as prescribed in p0936r0.</li>
 <li>Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]</li>
 </ol>
 <p>If only #1 was applied holistically via p0936r0, -Wlifetime or some such, then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and <code>p0936r0</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2:2">[2:2]</a></sup> are complimentary.</p>
@@ -362,7 +365,7 @@ created. This is true even if that evaluation ends in throwing an exception. The
 eﬀects of destroying a temporary object are associated only with the full-expression, not with any specifc
 subexpression.</s></p>
 <p>...</p>
-<p><strong>NOTE: Paragraphs 5-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers can not safely use such feature more often.</strong></p>
+<p><strong>NOTE: Paragraphs 5-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers rarely intentionally make use of said features.</strong></p>
 <p><strong>6.9.3.2 Static initialization [basic.start.static]</strong></p>
 <p>...</p>
 <p><sub>2</sub> Constant initialization is performed <ins>explicitly</ins> if a variable or temporary object with static or thread storage duration is constant-initialized (7.7). <ins>Constant initialization is performed implicitly if a non mutable const variable or non mutable const temporary object is constant-initialized (7.7).</ins> If constant initialization is not performed, a variable with static storage duration (6.7.5.2) or thread storage duration (6.7.5.3) is zero-initialized (9.4). Together, zero-initialization and constant initialization are called static initialization; all other initialization is dynamic initialization. All static initialization strongly happens before (6.9.2.2) any dynamic initialization.</p>
@@ -981,11 +984,11 @@ value = evaluate_polynomial(coefficients);</code></pre><p>If <code>coefficients<
 <p><em>"5.13.5 String literals [lex.string]"</em></p>
 <p><em>"9 Evaluating a string-literal results in a string literal object with <strong>static storage duration</strong> (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed."</em></p>
 <p><em>"[Note 4: <strong>The eﬀect of attempting to modify a string literal object is undefined.</strong> — end note]"</em></p>
-<p>This proposal aligns or adjusts literals not only with <code>C</code> compound literals but also with <code>C++</code> string literals. It too should be noted that <code>C++</code> is seemingly anbiguous on whether other literals are like string. Are array literals of <code>static storage duration</code>? What about if the array was of characters? What about string like literals such as std::string and std::string_view?</p>
+<p>This proposal aligns or adjusts literals not only with <code>C</code> compound literals but also with <code>C++</code> string literals. It too should be noted that <code>C++</code> is seemingly ambiguous or inconsistent on whether other literals are like string. Are array literals of <code>static storage duration</code>? What about if the array was of characters? What about string like literals such as std::string and std::string_view?</p>
 <!--
 If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
 -->
-<p><code>C++</code> also says the <em>"eﬀect of attempting to modify a string literal object is undefined."</em> With us having <code>const</code> for so long, there is few reasons for this to go undefined. Undefined behavior doesn't make constants and non constant literals any easier to deal with. A string literal could have <strong>static storage duration</strong> for constant expressions and <strong>automatic storage duration</strong> for <strong>non</strong> constant expressions, just like other literals. The lifetime of the <code>automatic storage duration</code> could be the <code>C</code> rule of the enclosing block since it is safer than <code>C++</code>. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have <code>static storage duration</code> and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via <code>Bind Returned/Initialized Objects to the Lifetime of Parameters</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2:5">[2:5]</a></sup> before nudging string literals closer to non string literals.</p>
+<p><code>C++</code> also says the <em>"effect of attempting to modify a string literal object is undefined."</em> With us having <code>const</code> for so long, there is few reasons for this to go undefined. Undefined behavior doesn't make constants and non constant literals any easier to deal with. A string literal could have <strong>static storage duration</strong> for constant expressions and <strong>automatic storage duration</strong> for <strong>non</strong> constant expressions, just like other literals. The lifetime of the <code>automatic storage duration</code> could be the <code>C</code> rule of the enclosing block since it is safer than <code>C++</code>. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have <code>static storage duration</code> and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via <code>Bind Returned/Initialized Objects to the Lifetime of Parameters</code> <sup class="footnote-ref"><a href="#fn2" id="fnref2:5">[2:5]</a></sup> before nudging string literals closer to non string literals.</p>
 <hr>
 <p>The section of the <code>C++</code> standard on temporary objects has an example of dangling.</p>
 <p><em>"6.7.7 Temporary objects [class.temporary]"</em></p>
