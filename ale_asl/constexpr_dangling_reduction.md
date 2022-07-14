@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>D****R0</td>
+<td>P2623R0</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-07-12</td>
+<td>2022-07-13</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -395,6 +395,42 @@ int main()
 ```
 
 According to this proposal, `ref2pointer({2, 4})` would undergo implicit `static storage duration` so that expression would not dangle. The variable would dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the containing statement. The variable would also dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the containing block. The variable would NOT dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the lifetime of the variable to which the temporary is assigned, in this case `x`.
+
+Extending the lifetime of the temporary to be the lifetime of the variable to which it is assigned is not unreasonable for C++. Matter of fact it is already happening but the rules are so restrictive that it limits its use by many programmers as the following examples illustrate.
+
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+**"*6.7.7 Temporary objects*"**
+
+...
+
+**"*<sub>5</sub> There are ... contexts in which temporaries are destroyed at a diﬀerent point than the end of the fullexpression.*"**
+
+...
+
+**"*(6.8)*"**
+
+```cpp
+template<typename T> using id = T;
+
+int i = 1;
+int&& a = id<int[3]>{1, 2, 3}[i]; // temporary array has same lifetime as a
+const int& b = static_cast<const int&>(0); // temporary int has same lifetime as b
+int&& c = cond ? id<int[3]>{1, 2, 3}[i] : static_cast<int&&>(0);
+// exactly one of the two temporaries is lifetime-extended
+```
+
+```cpp
+const int& x = (const int&)1; // temporary for value 1 has same lifetime as x
+```
+
+```cpp
+struct S {
+  const int& m;
+};
+const S& s = S{1}; // both S and int temporaries have lifetime of s
+```
+
 <!--
 TODO
 
@@ -440,25 +476,144 @@ Personally, `p0936r0` [^bindp] should be adopted regardless because we give the 
 
 <sub>4</sub> When an implementation introduces a temporary object of a class that has a non-trivial constructor (11.4.5.2,
 11.4.5.3), it shall ensure that a constructor is called for the temporary object. Similarly, the destructor
-shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed ++via automatic storage duration (6.7.5.4) as if the compiler was naming the temporaries anonymously.++~~as
-the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were
-created. This is true even if that evaluation ends in throwing an exception. The value computations and side
-eﬀects of destroying a temporary object are associated only with the full-expression, not with any specifc
-subexpression.~~
+shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed ++via automatic storage duration (6.7.5.4) as if the compiler was naming the temporaries anonymously or when the variable to which the temporary is assigned is destroyed, whichever is greater lifetime.++~~as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created. This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.~~
 
-**OR**
+~~<sub>5</sub> There are three contexts in which temporaries are destroyed at a diﬀerent point than the end of the full expression. The frst context is when a default constructor is called to initialize an element of an array with no corresponding initializer (9.4). The second context is when a copy constructor is called to copy an element of an array while the entire array is copied (7.5.5.3, 11.4.5.3). In either case, if the constructor has one or more default arguments, the destruction of every temporary created in a default argument is sequenced before the construction of the next array element, if any.~~
 
-<sub>4</sub> When an implementation introduces a temporary object of a class that has a non-trivial constructor (11.4.5.2,
-11.4.5.3), it shall ensure that a constructor is called for the temporary object. Similarly, the destructor
-shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed ++when the variable to which the temporary is assigned is destroyed.++~~as
-the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were
-created. This is true even if that evaluation ends in throwing an exception. The value computations and side
-eﬀects of destroying a temporary object are associated only with the full-expression, not with any specifc
-subexpression.~~
+~~<sub>6</sub> The third context is when a reference binds to a temporary object.<sup>29</sup> The temporary object to which the reference is bound or the temporary object that is the complete object of a subobject to which the reference is bound persists for the lifetime of the reference if the glvalue to which the reference is bound was obtained through one of the following:~~
 
-...
+~~<sub>(6.1)</sub> — a temporary materialization conversion (7.3.5),~~
 
-**NOTE: Paragraphs 5-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers rarely intentionally make use of said features.**
+~~<sub>(6.2)</sub> — ( expression ), where expression is one of these expressions,~~
+
+~~<sub>(6.3)</sub> — subscripting (7.6.1.2) of an array operand, where that operand is one of these expressions,~~
+
+~~<sub>(6.4)</sub> — a class member access (7.6.1.5) using the . operator where the left operand is one of these expressions and the right operand designates a non-static data member of non-reference type,~~
+
+~~<sub>(6.5)</sub> — a pointer-to-member operation (7.6.4) using the .* operator where the left operand is one of these expressions and the right operand is a pointer to data member of non-reference type,~~
+
+~~<sub>(6.6)</sub> — a~~
+
+~~<sub>(6.6.1)</sub> — const_cast (7.6.1.11),~~
+
+~~<sub>(6.6.2)</sub> — static_cast (7.6.1.9),~~
+
+~~<sub>(6.6.3)</sub> — dynamic_cast (7.6.1.7), or~~
+
+~~<sub>(6.6.4)</sub> — reinterpret_cast (7.6.1.10)~~
+
+~~converting, without a user-defned conversion, a glvalue operand that is one of these expressions to a glvalue that refers to the object designated by the operand, or to its complete object or a subobject thereof,~~
+
+~~<sub>(6.7)</sub> — a conditional expression (7.6.16) that is a glvalue where the second or third operand is one of these expressions, or~~
+
+~~<sub>(6.8)</sub> — a comma expression (7.6.20) that is a glvalue where the right operand is one of these expressions.~~
+
+~~[Example 2:~~
+
+<s>
+
+```cpp
+template<typename T> using id = T;
+
+int i = 1;
+int&& a = id<int[3]>{1, 2, 3}[i]; // temporary array has same lifetime as a
+const int& b = static_cast<const int&>(0); // temporary int has same lifetime as b
+int&& c = cond ? id<int[3]>{1, 2, 3}[i] : static_cast<int&&>(0);
+// exactly one of the two temporaries is lifetime-extended
+```
+
+</s>
+
+~~— end example]~~
+
+~~[Note 5: An explicit type conversion (7.6.1.4, 7.6.3) is interpreted as a sequence of elementary casts, covered above.~~
+
+~~[Example 3:~~
+
+<s>
+
+```cpp
+const int& x = (const int&)1; // temporary for value 1 has same lifetime as x
+```
+
+</s>
+
+~~— end example]~~
+
+~~— end note]~~
+
+~~[Note 6: If a temporary object has a reference member initialized by another temporary object, lifetime extension applies recursively to such a member’s initializer.~~
+
+~~[Example 4:~~
+
+<s>
+
+```cpp
+struct S {
+  const int& m;
+};
+const S& s = S{1}; // both S and int temporaries have lifetime of s
+```
+
+</s>
+
+~~— end example]~~
+
+~~— end note]~~
+
+~~The exceptions to this lifetime rule are:~~
+
+~~<sub>(6.9)</sub> — A temporary object bound to a reference parameter in a function call (7.6.1.3) persists until the completion of the full-expression containing the call.~~
+
+~~<sub>(6.10)</sub> — A temporary object bound to a reference element of an aggregate of class type initialized from a parenthesized expression-list (9.4) persists until the completion of the full-expression containing the expression-list.~~
+
+~~<sub>(6.11)</sub> — The lifetime of a temporary bound to the returned value in a function return statement (8.7.4) is not extended; the temporary is destroyed at the end of the full-expression in the return statement.~~
+
+~~<sub>(6.12)</sub> — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer.~~
+
+~~[Note 7: This might introduce a dangling reference. — end note]~~
+
+~~[Example 5:~~
+
+<s>
+
+```cpp
+struct S { int mi; const std::pair<int,int>& mp; };
+S a { 1, {2,3} };
+S* p = new S{ 1, {2,3} }; // creates dangling reference
+```
+
+</s>
+
+~~— end example]~~
+
+~~<sub>7</sub> The destruction of a temporary whose lifetime is not extended by being bound to a reference is sequenced before the destruction of every temporary which is constructed earlier in the same full-expression. If the lifetime of two or more temporaries to which references are bound ends at the same point, these temporaries are destroyed at that point in the reverse order of the completion of their construction. In addition, the destruction of temporaries bound to references shall take into account the ordering of destruction of objects with static, thread, or automatic storage duration (6.7.5.2, 6.7.5.3, 6.7.5.4); that is, if obj1 is an object with the same storage duration as the temporary and created before the temporary is created the temporary shall be destroyed before obj1 is destroyed; if obj2 is an object with the same storage duration as the temporary and created after the temporary is created the temporary shall be destroyed after obj2 is destroyed.~~
+
+~~<sub>8</sub> [Example 6:~~
+
+<s>
+
+```cpp
+struct S {
+  S();
+  S(int);
+  friend S operator+(const S&, const S&);
+  ~S();
+};
+S obj1;
+const S& cr = S(16)+S(23);
+S obj2;
+```
+
+</s>
+
+~~The expression S(16) + S(23) creates three temporaries: a frst temporary T1 to hold the result of the expression S(16), a second temporary T2 to hold the result of the expression S(23), and a third temporary T3 to hold the result of the addition of these two expressions. The temporary T3 is then bound to the reference cr. It is unspecifed whether T1 or T2 is created frst. On an implementation where T1 is created before T2, T2 shall be destroyed before T1. The temporaries T1 and T2 are bound to the reference parameters of operator+; these temporaries are destroyed at the end of the full-expression containing the call to operator+. The temporary T3 bound to the reference cr is destroyed at the end of cr’s lifetime, that is, at the end of the program. In addition, the order in which T3 is destroyed takes into account the destruction order of other objects with static storage duration. That is, because obj1 is constructed before T3, and T3 is constructed before obj2, obj2 shall be destroyed before T3, and T3 shall be destroyed before obj1.~~
+
+~~— end example]~~
+
+<!--
+**NOTE: Paragraphs 7-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers can not safely use such feature more often.**
+-->
 
 **6.9.3.2 Static initialization [basic.start.static]**
 
