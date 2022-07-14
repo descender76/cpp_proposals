@@ -358,7 +358,7 @@ const std::string& s = findOrDefault(myMap, key, "none"); // runtime bug if key 
 
 Is this really a bug? With this proposal, it isn't! Here is why. The function `findOrDefault` **expects** a **`const`** `string&` for its third parameter. Since `C++20`, string's constructor is `constexpr`. It **CAN** be constructed as a constant expression. Since all the arguments passed to this `constexpr` constructor are constant expressions, in this case `"none"`, the temporary `string` `defvalue` **IS** also `constant-initialized` [^n4910] <sup>*(7.7 Constant expressions [expr.const])*</sup>. This paper advises that if you have a non `mutable` `const` that it is `constant-initialized`, that the variable or temporary undergoes `constant initialization` [^n4910] <sup>*(6.9.3.2 Static initialization [basic.start.static])*</sup>. In other words it has implicit `static storage duration`. The temporary would actually cease to be a temporary. As such this usage of `findOrDefault` **CAN'T** dangle.
 
-What if `defvalue` can't be `constant-initialized` because it was created at runtime. If the temporary string's lifetime was bound to the containing block instead of the containing statement than the chance of dangling is greatly reduced and also made more visible. You can say that it **CAN'T** immediately dangle. However, dangling still could occur if the programmer manually propagated the temporary outside of the containing scope.
+What if `defvalue` can't be `constant-initialized` because it was created at runtime. If the temporary string's lifetime was bound to the containing block instead of the containing statement than the chance of dangling is greatly reduced and also made more visible. You can say that it **CAN'T** immediately dangle. However, dangling still could occur if the programmer manually propagated the returned value that depends upon the temporary outside of the containing scope.
 
 While using the containing's scope instead of the statement's scope is a vast improvement. We can actually do a little bit better. Following is an example of delayed initialization.
 
@@ -458,7 +458,7 @@ However, things in the real world tend to be more complicated. Depending upon th
 1. Change automatic storage duration such that a instances' lifetime is just moved lower on the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
 
-If only #1 was applied holistically via p0936r0, -Wlifetime or some such, then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
+If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
 Personally, `p0936r0` [^bindp] should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
 
@@ -1437,7 +1437,7 @@ void main()
 </tr>
 </table>
 
-This is contrary to general programmer expectations and how it behaves in `C99`. Besides the fact that a large portion of the `C++` community has their start in `C` and besides the fact that no one, in their right mind, would ever write/expand the second example, for every function call that have arguments, their is a more fundamental reason why it is contrary to general programmer expectations. It can actually be impossible to write it that way. Consider another example, now with a return value.
+This is contrary to general programmer expectations and how it behaves in `C99`. Besides the fact that a large portion of the `C++` community has their start in `C` and besides the fact that no one, in their right mind, would ever write/expand the second example, for every function call that have arguments, their is a more fundamental reason why it is contrary to general programmer expectations. It can actually be impossible to write it that way. Consider another example, now with a return value in which the type does not have a default constructor.
 
 **Given**
 
