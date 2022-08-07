@@ -123,7 +123,7 @@ a code
 - Clarified existing attribution by
   - adding more links to existing references
   - judicially used boxes to group quoted material together to improve visibility
-- Numerous verbiage claifications
+- Numerous verbiage clarifications
 - Greatly reduced the `Why not before` section
 <!--
   - [Ancillary examples](#ancillary-examples)
@@ -178,14 +178,21 @@ sv = sv + sv; // fatal runtime error: sv refers to deleted temporary string
  
 **The problem here is that the lifetime of the temporary is bound to the statement in which it was created, instead of the block that contains said expression.**
 
+<table>
+<tr>
+<td>
+
 `Working Draft, Standard for Programming Language C++` [^n4910]
 
 **"*6.7.7 Temporary objects*"**
 
-"***Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created.** This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.*"
+"***Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created.** This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specific subexpression.*"
 
+</td>
+</tr>
+</table>
 
-Had the temporary been bound to the enclosing block than it would have been alive for at least as long as the returned reference. While this does reduce dangling, it does not eliminate it because if the reference out lives its containing block such as by returning than dangling would still occur. These remaining dangling would at least be more visible as they are usually associated with returns, so you know where to look and if we make the proposed changes than there would be far fewer dangling to look for. It should also be noted that **the current lifetime rules of temporaries are like constants, contrary to programmer's expectations**. This becomes more apparent with more complicated examples.
+Had the temporary been bound to the enclosing block than it would have been alive for at least as long as the returned reference. While this does reduce dangling, it does not eliminate it because if the reference out lives its containing block such as by returning than dangling would still occur. These remaining dangling would at least be more visible as they are usually associated with returns, so you know where to look and if we make the proposed changes than there would be far fewer dangling to look for. It should also be noted that **the current lifetime rules of temporaries are like constants, contrary to programmer's expectations**. This becomes more apparent with slightly more complicated examples.
 <!--
 If you argue that the bugs in these examples are easy to see, consider a template calling operator+
 instead for a passed string view:
@@ -465,12 +472,12 @@ In that proposal, a question was raised.
 
 In reality, there are three scenarios; warning, **error** or just fix it by extending the lifetime.
 
-However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically, some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen, so shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way may not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
+However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically, some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen or worse so complicated that the developer no longer can understand the lifetimes of the objects created. Shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way would not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
 
 1. Change automatic storage duration such that a instances' lifetime is just moved lower on the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
 
-If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate/reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
+If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
 Personally, `p0936r0` [^bindp] should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
 
@@ -642,7 +649,7 @@ This document proposes enhancements to `constant initialization` [^n4910] <sup>6
 -->
 ## In Depth Rationale
 
-There is a general expectation across programming languages that constants or more specifically constant literals are "immutable values which are known at compile time and do not change for the life of the program".  [^csharpconstants] In most programming languages or rather the most widely used programming languages, constants do not dangle. Constants are so simple, so trivial (human language wise), that it is shocking to even have to be conscience of dangling. This is shocking to `C++` beginners, expert programmers from other programming languages who come over to `C++` and at times even shocking to experienced `C++` programmers.
+There is a general expectation across programming languages that constants or more specifically constant literals are "immutable values which are known at compile time and do not change for the life of the program".  [^csharpconstants] In most programming languages or rather the most widely used programming languages, constants do not dangle. Constants are so simple, so trivial (English wise), that it is shocking to even have to be conscience of dangling. This is shocking to `C++` beginners, expert programmers from other programming languages who come over to `C++` and at times even shocking to experienced `C++` programmers.
 
 <!--
 
@@ -870,7 +877,7 @@ technically I am only talking about static const
 and still temporary
 -->
 
-Unfortunately, the static storage duration doesn't come from the fact that it is a constant expression and that a constant was expected/requested. Consider for a moment, if it did, that is implicit static storage duration by looking at this from the perspective of constant definitions in class definition, function body and parameters/arguments.
+Unfortunately, the static storage duration doesn't come from the fact that it is a constant-initialized constant expression and that a constant was expected/requested. Consider for a moment, if it did, that is implicit static storage duration by looking at this from the perspective of constant definitions in class definition, function body and parameters/arguments.
 
 #### constant definition in class definitions
 
@@ -1161,7 +1168,7 @@ std::tuple<const std::string&> x(factory_of_string_at_runtime());
 </tr>
 </table>
 
-The proposed valid example is reasonable from many programmers perspective because `"hello"s` is a literal just like `"hello"` is a safe literal in C++. Implicit constant initialization turns temporaries into just global variables as such they are no longer temporaries and such would not impact this proposal.
+The proposed valid example is reasonable from many programmers perspective because `"hello"s` is a literal just like `"hello"` is a safe literal in C++. Implicit constant initialization turns constant temporaries into just global variables as such they are no longer temporaries and such would not impact this proposal.
 
 C99 compound literals are **safer** literals because the lifetime is the life of the block containing the temporary instead of the expression. As such turning temporaries into anonymously named variables would remove the need to use this trait to prevent dangling since their would be valid mutable usage of temporaries that no longer immediately dangle. <!--More on that latter.-->
 
@@ -1202,7 +1209,7 @@ Further, the `p2576r0` [^p2576r0] proposal has a whole section devoted to just s
 </tr>
 </table>
 
-My proposal would constitute a delay in the `p2576r0` [^p2576r0] proposal as I am advocating for refining the `C++` choices before contributing `constexpr` back to `C`. I also believe that the `p2576r0` [^p2576r0] proposal fails to consider a fourth alternative with respect to storage duration and that is to go with how `C` handles compound literals, improve upon it and have `C++` to conform with it.<!--This will be considered momentarily.-->
+My proposal would constitute a delay in the `p2576r0` [^p2576r0] proposal as I am advocating for refining the `C++` choices before contributing `constexpr` back to `C`. I also believe that the `p2576r0` [^p2576r0] proposal fails to consider a fourth alternative with respect to storage duration and that is to go with how `C` handles compound literals, improve upon it and have `C++` to conform with it. That scenario is the second feature proposed by this proposal.<!--This will be considered momentarily.-->
 
 <!--
 ## Rationale
@@ -1331,7 +1338,7 @@ complex z(1,2); // the variable z can be constructed at compile time
 const complex cz(1,2); // the const cz can potentially be put in ROM
 ```
 
-While both constant expressions are the same, the detail that decides whether it is a literal that can even be placed in ROM was the `const` keyword. So, `const` constant-initialized constant expressions are constant literals or simply, constants.
+While both constant-initialized constant expressions are the same, the detail that decides whether it is a literal that can even be placed in ROM was the `const` keyword. So, `const` constant-initialized constant expressions are constant literals or simply, constants.
 
 <!--
 It wouldn't hurt to fix any brittle rules and in the 10++ years since we got `constexpr` some of these may have already been fixed and it could be time to review these finer points.
@@ -1438,14 +1445,14 @@ The lifetime of this "enclosing block" is longer than that of `C++`. In `C++` un
 
 *"**In C, a compound literal designates an unnamed object with static or automatic storage duration. In C++, a compound literal designates a temporary object that only lives until the end of its full-expression. As a result, well-defined C code that takes the address of a subobject of a compound literal can be undefined in C++**, so G++ rejects the conversion of a temporary array to a pointer."*
 
-Simply put `C` has fewer dangling than `C++`. What is more is that `C`'s  solution covers both const and non const temporaries! Even though it is `C`, it is more like `C++` than what people give this feature credit for because it is tied to blocks/braces, just like RAII. This adds more weight that the `C` way is more intuitive. Consequently, the remaining dangling should be easier to spot for developers not having to look at superfluous dangling.
+Simply put `C` has fewer dangling than `C++`! What is more is that `C`'s  solution covers both const and non const temporaries! Even though it is `C`, it is more like `C++` than what people give this feature credit for because it is tied to blocks/braces, just like RAII. This adds more weight that the `C` way is more intuitive. Consequently, the remaining dangling should be easier to spot for developers not having to look at superfluous dangling.
 
 GCC even takes this a step forward which is closer to what this proposal is advocating. The last reference also says the following.
 
 
 *"**As a GNU extension, GCC allows initialization of objects with static storage duration by compound literals (which is not possible in ISO C99 because the initializer is not a constant).** It is handled as if the object were initialized only with the brace-enclosed list if the types of the compound literal and the object match. **The elements of the compound literal must be constant.** If the object being initialized has array type of unknown size, the size is determined by the size of the compound literal."*
 
-The `C++` standard recognized that their are other opportunities for constant initialization.
+Even the `C++` standard recognized that their are other opportunities for constant initialization.
 
 <table>
 <tr>
@@ -1547,7 +1554,7 @@ void main()
 </tr>
 </table>
 
-This is contrary to general programmer expectations and how it behaves in `C99`. Besides the fact that a large portion of the `C++` community has their start in `C` and besides the fact that no one, in their right mind, would ever write/expand the second example, for every function call that have arguments, their is a more fundamental reason why it is contrary to general programmer expectations. It can actually be impossible to write it that way. Consider another example, now with a return value in which the type does not have a default constructor.
+This is contrary to general programmer expectations and how it behaves in `C99`. Besides the fact that a large portion of the `C++` community has their start in `C` and besides the fact that no one, in their right mind, would ever litter their code with superfluous braces for every variable that they would like to be a temporary, their is a more fundamental reason why it is contrary to general programmer expectations. It can actually be impossible to write it that way. Consider another example, now with a return value in which the type does not have a default constructor.
 
 **Given**
 
@@ -2012,8 +2019,8 @@ The advantages to `C++` with this proposal is manifold.
 - Reduce the gap between `C++` and `C99` compound literals
 - Improve the potential contribution of `C++`'s `constexpr` back to `C`
 - Make string literals and `C++` literals more consistent with one another
-- Reduce undefined behavior
-- Reduce unitialized errors
+- Reduce unitialized and delayed initialization errors
+- Taking a step closer to reducing undefined behavior in string literals
 - Increase and improve upon the utilization of ROM and the benefits that entails
 
 ## Frequently Asked Questions
