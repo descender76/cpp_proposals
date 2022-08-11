@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-06</td>
+<td>2022-08-011</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -125,6 +125,7 @@ a code
   - judicially used boxes to group quoted material together to improve visibility
 - Numerous verbiage clarifications
 - Greatly reduced the `Why not before` section
+- `std::initializer_list` example automatically fixed without using `const`
 <!--
   - [Ancillary examples](#ancillary-examples)
 -->
@@ -379,7 +380,7 @@ Is this really a bug? With this proposal, it isn't! Here is why. The function `f
 
 What if `defvalue` can't be `constant-initialized` because it was created at runtime. If the temporary string's lifetime was bound to the containing block instead of the containing statement than the chance of dangling is greatly reduced and also made more visible. You can say that it **CAN'T** immediately dangle. However, dangling still could occur if the programmer manually propagated the returned value that depends upon the temporary outside of the containing scope.
 
-While using the containing's scope instead of the statement's scope is a vast improvement. We can actually do a little bit better. Following is an example of delayed initialization.
+While using the containing's scope instead of the statement's scope is a vast improvement. We can actually do a little bit better. Following is an example of uninitialized and delayed initialization.
 
 ```cpp
 bool test();
@@ -405,7 +406,7 @@ int main()
   }
   else
   {
-    x = ref2pointer(x_factory(4, 2));
+    x = ref2pointer(x_factory(4, 2));// delayed initialization
     // statement scope or
     // containing scope or
     // scope of the variable to which the temporary is assigned
@@ -472,7 +473,7 @@ In that proposal, a question was raised.
 
 In reality, there are three scenarios; warning, **error** or just fix it by extending the lifetime.
 
-However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically, some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen or worse so complicated that the developer no longer can understand the lifetimes of the objects created. Shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way would not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
+However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically, some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen or worse be so complicated that the developer no longer can understand the lifetimes of the objects created. Shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way would not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
 
 1. Change automatic storage duration such that a instances' lifetime is just moved lower on the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
@@ -1680,7 +1681,7 @@ This proposal aligns or adjusts [constant] literals not only with `C` compound l
 If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
 -->
 
-`C++` also says the *"effect of attempting to modify a string literal object is undefined."* With us having `const` for so long, there is few reasons for this to go undefined. Undefined behavior doesn't make constants and non constant literals any easier to deal with. A string literal could have **static storage duration** for constant expressions and **automatic storage duration** for **non** constant expressions, just like other literals. The lifetime of the `automatic storage duration` could be the `C` rule of the enclosing block since it is safer than `C++`. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have `static storage duration` and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] before nudging string literals closer to non string literals.
+`C++` also says the *"effect of attempting to modify a string literal object is undefined."* With us having `const` for so long, there is few reasons left for this to go undefined. Undefined behavior doesn't make constants and non constant literals any easier to deal with. A string literal could have **static storage duration** for constant expressions and **automatic storage duration** for **non** constant expressions, just like other literals. The lifetime of the `automatic storage duration` could be the `C` rule of the enclosing block since it is safer than `C++`. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have `static storage duration` and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] before nudging string literals closer to non string literals.
 
 ---
 
@@ -1711,7 +1712,7 @@ S* p = new S{ 1, {2,3} }; // creates dangling reference
 </tr>
 </table>
 
-It should be noted that this example is not an example of dangling in `C99` or with my proposal.
+It should be noted that this example is not an example of dangling in `C99` or with my proposal because the temporaries would live as long as their containing block which is sufficient for `a` and `p` in this limited example. Further, since `mp` expects a constant, `std::pair` can be constructed at compile time and was constant-initialized than implicit constant initialization could also occur.
 
 ---
 
@@ -1729,7 +1730,7 @@ A a4(1.0, 1); // well-formed, but dangling reference
 A a5(1.0, std::move(n)); // OK
 ```
 
-Provided that A has a constexpr constuctor and the second parameter was `const`, with this proposal, `a2` would not be dangling if f() too was a constant expression. Also `a4` would also not be dangling. The `a4` example does not need jumping to the signature of a function to figure out if it is a constant expression as is the case of the `a2` example. Really the `a4` example is surprising to current developers that it would be dangling since the native literals 1.0 and 1 can be constant expressions.
+Provided that A has a constexpr constuctor and the second parameter was `const`, with this proposal, `a2` would not be dangling if f() too was a constant expression. Also `a4` would also not be dangling. The `a4` example does not need jumping to the signature of the `f` function to figure out if it is a constant expression as is the case of the `a2` example. Really the `a4` example is surprising to current developers that it would be dangling since the native literals 1.0 and 1 can be constant expressions.
 
 It should also be noted that the `C++11` brace initialization does not or should not create another block scope.
 
@@ -1744,7 +1745,9 @@ A() : i4{ 1, 2, 3 } {} // ill-formed, would create a dangling reference
 };
 ```
 
-According to this proposal, if const was added i4, then this example would neither be ill formed or dangling.
+<!--According to this proposal, if const was added i4, then this example would neither be ill formed or dangling.-->
+
+According to this proposal, this example would neither be ill formed or dangling as initializer lists expects a const array, arrays can be constexpr constructed and the array was constant-initialized.
 
 ---
 
