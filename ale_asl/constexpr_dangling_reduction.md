@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-011</td>
+<td>2022-08-014</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -160,8 +160,8 @@ It is clear from this `string_view` example that it dangles because `sv` is a re
 If the evaluated constant expression `"hello world"s` had static storage duration just like the string literal `"hello world"` has static storage duration [^n4910] <sup>*(5.13.5 String literals [lex.string])*</sup> then `sv` would be a reference to something that is global and as such would not dangle. This is reasonable based on how programmers reason about constants being immutable variables and temporaries which are known at compile time and do not change for the life of the program. There are a few facts to take note of in the previous example.
 
 - constants, whether `"hello world"` or `"hello world"s`, **are not expected by programmers** to dangle but rather to be immutable and available for the life of the program in other words `const` and `static storage duration`
-- sv is `constant-initialized` [^n4910] <sup>*(7.7 Constant expressions [expr.const])*</sup>
 - the `constexpr` constructor of `std::string_view` **expects** a `const` argument
+- sv is `constant-initialized` [^n4910] <sup>*(7.7 Constant expressions [expr.const])*</sup>
 
 <!--
 This is reasonable based on how users reason about constants, safer because of less dangling and simpler because something as simple as constants shouldn't dangle.
@@ -414,7 +414,9 @@ int main()
 }
 ```
 
-According to this proposal, `ref2pointer({2, 4})` would undergo implicit `static storage duration` so that expression would not dangle. The variable would dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the containing statement. The variable would also dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the containing block. The variable would NOT dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the lifetime of the variable to which the temporary is assigned, in this case `x`.
+According to this proposal, `ref2pointer({2, 4})` would undergo implicit `constant initialization` so that expression would not dangle.
+
+The variable `x` would dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the containing statement. The variable would also dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the containing block. The variable would NOT dangle if initialized with the expression `ref2pointer(x_factory(4, 2))` when the scope is bound to the lifetime of the variable to which the temporary is assigned, in this case `x`.
 
 Extending the lifetime of the temporary to be the lifetime of the variable to which it is assigned is not unreasonable for C++. Matter of fact it is already happening but the rules are so restrictive that it limits its use by many programmers as the following examples illustrate.
 
@@ -478,7 +480,7 @@ However, things in the real world tend to be more complicated. Depending upon th
 1. Change automatic storage duration such that a instances' lifetime is just moved lower on the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
 
-If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but MAY make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
+If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but DOES make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
 Personally, `p0936r0` [^bindp] should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
 
