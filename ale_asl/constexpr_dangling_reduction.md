@@ -2121,33 +2121,90 @@ What is more interesting is these two examples of constants have different value
 -->
 <!--
 recipients
+Tomasz Kamiński <tomaszkam@gmail.com>,
+Gašper Ažman <gasper.azman@gmail.com>,
+t.canens.cpp@gmail.com,
+gdr@microsoft.com,
+Bjarne Stroustrup <bjarne@stroustrup.com>,
+nico@josuttis.de,
+victor.zverovich@gmail.com,
+filipemulonde@gmail.com,
+Arthur O'Dwyer <arthur.j.odwyer@gmail.com>,
+Herb Sutter <hsutter@microsoft.com>,
+Zhihao Yuan <zy@miator.net>,
 std-proposals@lists.isocpp.org
+
 C++ Library Evolution Working Group
 lib-ext@lists.isocpp.org
+changed to
+std-proposals@lists.isocpp.org
+
 Tomasz Kamiński
 tomaszkam@gmail.com
 Gašper Ažman
 gasper.azman@gmail.com
+
 Tim Song
 t.canens.cpp@gmail.com
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html
+A type trait to detect reference binding to temporary
+
 Alex Gilding (Perforce UK)
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html
+The constexpr specifier for object definitions
+
 Jens Gustedt (INRIA France)
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html
+The constexpr specifier for object definitions
+
 Martin Uecker
+
 Joseph Myers
+
 Bjarne Stroustrup
 bjarne@stroustrup.com
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1511.pdf
+Literals for user-defined types
+
 Jens Maurer
 Jens.Maurer@gmx.net
+
 Gabriel Dos Reis
 gdr@microsoft.com
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf
+Generalized Constant Expressions — Revision 5
+
 Nicolai Josuttis
 nico@josuttis.de
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf
+Bind Returned/Initialized Objects to Lifetime of Parameters
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
+Fix the range‐based for loop, Rev1
+
 Victor Zverovich
 victor.zverovich@gmail.com
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
+Fix the range‐based for loop, Rev1
+
 Filipe Mulonde
 filipemulonde@gmail.com
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
+Fix the range‐based for loop, Rev1
+
 Arthur O'Dwyer
 arthur.j.odwyer@gmail.com
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
+Fix the range‐based for loop, Rev1
+
 Herb Sutter
 hsutter@microsoft.com
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html
+CWG900 Lifetime of temporaries in range-based for
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1179r1.pdf
+Lifetime safety: Preventing common dangling
+-->
+<!--
+Richard Smith (richardsmith@google.com)
+https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf
+P0936R0 Bind Returned/Initialized Objects to Lifetime of Parameters 
 -->
