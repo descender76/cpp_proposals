@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2623R1</td>
+<td>P2623R2</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-14</td>
+<td>2022-08-21</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -111,12 +111,17 @@ a code
         - [CWG1864 List-initialization of array objects](#cwg1864-list-initialization-of-array-objects)
         - [CWG2111 Array temporaries in reference binding](#cwg2111-array-temporaries-in-reference-binding)
         - [CWG914 Value-initialization of array types](#cwg914-value-initialization-of-array-types)
+    - [Other Anonymous Things](#other-anonymous-things)
     - [Other languages](#other-languages)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
 
 ## Changelog
+
+### R2
+
+- added new "Other Anonymous Things" section which covers lambda functions and coroutines
 
 ### R1
 
@@ -1994,6 +1999,74 @@ value = evaluate_polynomial(coefficients);
 ```
 
 -->
+### Other Anonymous Things
+
+The pain of immediate dangling associated with temporaries are especially felt when working with other anonymous language features of `C++` such lambda functions and coroutines.
+
+#### Lambda functions
+
+Whenever a lambda function captures a reference to a temporary it immediately dangles before an opportunity is given to call it unless it is a immediately invoked lambda/function expression.
+
+```cpp
+[&c1 = "hello"s](const std::string& s)// OK
+{
+    return c1 + " "s + s;
+}("world"s);
+
+auto lambda = [&c1 = "hello"s](const std::string& s)// immediate dangling
+{
+    return c1 + " "s + s;
+}
+lambda("world"s);
+```
+
+This problem is resolved when the scope of temporaries is to the enclosing block instead of the containing expression. This is the same had the temporary been named.
+
+```cpp
+auto anonymous = "hello"s;
+auto lambda = [&c1 = anonymous](const std::string& s)
+{
+    return c1 + " "s + s;
+}
+lambda("world"s);
+```
+
+#### Coroutines
+
+Similarly, whenever a coroutine gets constructed with a reference to a temporary it immediately dangles before an opportunity is given for it to be `co_await`ed upon.
+
+```cpp
+generator<char> each_char(const std::string& s) {
+    for (char ch : s) {
+        co_yield ch;
+    }
+}
+
+int main() {
+    for (char ch : each_char("hello world")) {// immediate dangling
+        std::print(ch);
+    }
+}
+```
+
+This problem is also resolved when the scope of temporaries is to the enclosing block instead of the containing expression. This also is the same had the temporary been named.
+
+```cpp
+generator<char> each_char(const std::string& s) {
+    for (char ch : s) {
+        co_yield ch;
+    }
+}
+
+int main() {
+    auto s = "hello world"s;
+    for (char ch : each_char(s)) {
+        std::print(ch);
+    }
+}
+```
+
+Unless resolved, this problem will continue to be a problem for future `C++` features, type erased or not, anonymous or not, where there are a separate construction and execution steps.
 
 ### Other languages
 
