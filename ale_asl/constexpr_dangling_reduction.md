@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-21</td>
+<td>2022-08-22</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -122,6 +122,7 @@ a code
 ### R2
 
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
+- elaborated on the "Summary" section
 
 ### R1
 
@@ -168,10 +169,6 @@ If the evaluated constant expression `"hello world"s` had static storage duratio
 - the `constexpr` constructor of `std::string_view` **expects** a `const` argument
 - sv is `constant-initialized` [^n4910] <sup>*(7.7 Constant expressions [expr.const])*</sup>
 
-<!--
-This is reasonable based on how users reason about constants, safer because of less dangling and simpler because something as simple as constants shouldn't dangle.
--->
-
 Dangling *"can occur more indirectly as follows:"* [^bindp]
 
 ```cpp
@@ -199,56 +196,7 @@ sv = sv + sv; // fatal runtime error: sv refers to deleted temporary string
 </table>
 
 Had the temporary been bound to the enclosing block than it would have been alive for at least as long as the returned reference. While this does reduce dangling, it does not eliminate it because if the reference out lives its containing block such as by returning than dangling would still occur. These remaining dangling would at least be more visible as they are usually associated with returns, so you know where to look and if we make the proposed changes than there would be far fewer dangling to look for. It should also be noted that **the current lifetime rules of temporaries are like constants, contrary to programmer's expectations**. This becomes more apparent with slightly more complicated examples.
-<!--
-If you argue that the bugs in these examples are easy to see, consider a template calling operator+
-instead for a passed string view:
 
-```cpp
-template<typename T>
-T add(T x1, T x2) {
-  return x1 + x2 ;
-}
-sv = add(sv, sv); // fatal runtime error
-```
-
-We already see code like this.
-
-We can better support these types by giving the ability to annotate a function declaration to indicate that the lifetime of an object used as part of a parameter's value or the *this object must live at least as long as the return value does.
-
-For example, the problem above can be detected or even just made to work if the constructor defining the implicit conversion is marked so that the lifetime of the created string_view depends on a passed string.
-
-- If the implicit conversion is enabled by a constructor, this might look as follows (with lifetimebound
-representing whatever we might introduce as new feature):
-
-```cpp
-template<class charT, class traits = char_traits<charT>>
-class basic_string_view {
-public:
-...
-  template<class Allocator>
-  basic_string_view(const basic_string<charT, traits, Allocator>& str lifetimebound) noexcept;
-...
-};
-```
-
-- If (as it is the case currently) the conversion is defined by a conversion operator, this might look as follows:
-
-```cpp
-template<class charT, class traits = char_traits<charT>,
-class Allocator = allocator<charT>>
-class basic_string {
-public:
-...
-  operator basic_string_view<charT, traits>() const lifetimebound noexcept;
-...
-};
-```
-
-Note that we could use the feature to
-
-- Either extend the lifetime of prvalues as it is done for references to prvalues.
-- Or enable compilers to warn about code like in the example above.
--->
 ### *"Returned References to Temporaries"* [^bindp]
 
 *"Similar problems already exists with references."* [^bindp]
@@ -288,24 +236,6 @@ std::cout << "c: " << c << '\n'; // fatal runtime error
 
 Even though, the code is the same from a programmer's perspective, the latter does not dangle while the former do. **Should just naming temporaries, thus turning them into variables, fix memory issues? Should just leaving variables unnamed as temporaries introduce memory issues?** Again, contrary to programmer's expectations. If we viewed unnecessary/superfluous/immediate dangling as overhead, then the current rules of temporary and constant initialization could be viewed as violations of the zero-overhead principle since just naming temporaries is reasonably written better by hand.
 
-<!--
-Again, we should be able mark the return value of the index operators/functions accordingly to get corresponding
-warnings or the expected behavior:
-
-```cpp
-template<class charT, class traits = char_traits<charT>,
-class Allocator = allocator<charT>>
-class basic_string {
-public:
-...
-  const_reference operator[](size_type pos) const lifetimebound;
-  reference operator[](size_type pos) lifetimebound;
-  const_reference at(size_type n) const lifetimebound;
-  reference at(size_type n) lifetimebound;
-...
-};
-```
--->
 *"There are more tricky cases like this. For example, when using the range-base for loop:"* [^bindp]
 
 ```cpp
@@ -458,14 +388,6 @@ struct S {
 const S& s = S{1}; // both S and int temporaries have lifetime of s
 ```
 
-<!--
-TODO
-
-```cpp
-struct X { int a, b; };
-const int& f(const X& x) { return x.a; } // return value lifetime bound to parameter
-```
--->
 The preceding sections of this proposal is identical at times in wording, in structure as well as in examples to `p0936r0`, the `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] proposal. This shows that similar problems can be solved with simpler solutions, that programmers are already familiar with, such as constants and naming temporaries. It must be conceded that `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] is a more general solution that fixes more dangling while this proposal is more easily understood by programmers of all experience levels but fixes less dangling.
 
 **Why not just extend the lifetime as prescribed in `Bind Returned/Initialized Objects to the Lifetime of Parameters`?**
@@ -638,72 +560,19 @@ S obj2;
 
 ~~— end example]~~
 
-<!--
-**NOTE: Paragraphs 7-8 concerning the "three contexts in which temporaries are destroyed at a different point than the end of the fullexpression" will either need to be removed or heavily revised. Also it should be noted that these scenarios includes the concept of extending the lifetime of the temporary to the assigned variable but the scenarios are so specific and the rules are so complicated that programmers can not safely use such feature more often.**
--->
-
 **6.9.3.2 Static initialization [basic.start.static]**
 
 ...
 
 <sub>2</sub> Constant initialization is performed ++explicitly++ if a variable or temporary object with static or thread storage duration is constant-initialized (7.7). ++Constant initialization is performed implicitly if a non mutable const variable or non mutable const temporary object is constant-initialized (7.7).++ If constant initialization is not performed, a variable with static storage duration (6.7.5.2) or thread storage duration (6.7.5.3) is zero-initialized (9.4). Together, zero-initialization and constant initialization are called static initialization; all other initialization is dynamic initialization. All static initialization strongly happens before (6.9.2.2) any dynamic initialization.
 
-<!--
-## Abstract
-
-This document proposes enhancements to `constant initialization` [^n4910] <sup>6.9.3.2 Static initialization [basic.start.static]<sup> to decrease the shock of working with constants, literals and constant like expressions in C++ with the ultimate goal of reducing the frequency of encountering dangling references.
-
-## Motivating Examples
--->
 ## In Depth Rationale
 
 There is a general expectation across programming languages that constants or more specifically constant literals are "immutable values which are known at compile time and do not change for the life of the program".  [^csharpconstants] In most programming languages or rather the most widely used programming languages, constants do not dangle. Constants are so simple, so trivial (English wise), that it is shocking to even have to be conscience of dangling. This is shocking to `C++` beginners, expert programmers from other programming languages who come over to `C++` and at times even shocking to experienced `C++` programmers.
 
-<!--
-
-The shock is not limited to dangling, though that is the greater one, when it does happen. There are also seemingly inconsistencies with respect to `value categories` and `storage durations`.
-
-### Value Categories
-
-`Working Draft, Standard for Programming Language C++` [^n4910]
-
-**"*7.5.1 Literals [expr.prim.literal]*"**
-
-"*1 The type of a literal is determined based on its form as specifed in 5.13. A string-literal is an lvalue designating a corresponding string literal object (5.13.5), a user-defned-literal has the same value category as the corresponding operator call expression described in 5.13.8, and any other literal is a prvalue.*"
-
-**Should a beginner `C++` programmer need to know `value categories` in order to create and use constants safely!** Besides the seeming inconsistency, I mention value categories because what is being proposed may require fine tuning the value catgories of literals. Accepting this proposal might mean that non string literals will be lvalue when they are constant expressions and prvalue when they are not constant expressions. If this proposal is ever combined with `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] then string literals might also be lvalue when they are constant expressions and prvalue, with automatic storage duration, when they are not constant expressions. Combined, this could unify the behavior of literals, moving the seeming inconsistency from the type of the literal to the constness of the literal were it makes more sense and more valuable from a dangling stand point.
-
--->
-
 ### Why not before
 
 There is greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time. 
-
-<!--
-    
-**C++11**
-
-* constexpr
-
-**C++14**
-
-* relaxed constexpr restrictions
-
-**C++20**
-
-* The spaceship operator
-* `Making std::string constexpr` [^string]
-* `Making std::vector constexpr` [^vector]
-
-**C++23**
-
-* `P2255R2 (A type trait to detect reference binding to temporary)` [^p2255r2]
-* `Missing constexpr in std::optional and std::variant` [^optionalvariant]
-* `Making std::unique_ptr constexpr` [^uniqueptr]
-
-Since `C++11`, constexpr has continued to gain ground but the final pieces of the feature has only recently landed with stronger comparison via the spaceship operator in C++20 and, if it makes it, the ability to detect temporaries in `C++23`.
-
--->
 
 ### Storage Duration
 
@@ -878,13 +747,6 @@ const T & ref = constexpr;// constant-initialized required
 const T object = constexpr;// constant-initialized required
 ```
 
-<!--
-6.7.5.2 Static storage duration
-namespace sope is already implicitly static
-technically I am only talking about static const
-and still temporary
--->
-
 Unfortunately, the static storage duration doesn't come from the fact that it is a constant-initialized constant expression and that a constant was expected/requested. Consider for a moment, if it did, that is implicit static storage duration by looking at this from the perspective of constant definitions in class definition, function body and parameters/arguments.
 
 #### constant definition in class definitions
@@ -931,142 +793,6 @@ maybe_dangling_42(42);
 ```
 
 This is expected to be a non breaking change because a parameter that takes a const& argument doesn't know whether the instance was created locally, statically or even dynamically. The advantage of adding implicit constant initialization here would be that those temporary const argument scenarios would no longer dangle. Static storage duration for arguments is actually the primary goal of this paper. It should also be noted that while `static` can be applied explicitly in class data member definition and in function bodies, static isn't even an option as a modifier to a function argument, so the user doesn't have a choice and the current default of automatic storage duration instead of static storage duration is less intuitive when constants of constant expressions are involved. Even if the keyword `static` could be applied to arguments, programmer's code will be littered with that keyword as they will start applying it to every argument initialized in a constant expression fashion.
-
-
-<!--
-
-### C++20
-
-This should be able to force static storage duration for arguments.
-
-https://en.cppreference.com/w/cpp/language/template_parameters
-
-```cpp
-template<auto constant_expression>
-const auto constant()
-{
-    return &constant_expression;
-}
-
-some_function(constant<constant_expression>());
-```
-
--->
-<!--
-### A common example
-
-After applying this proposal and ensuring `std::string_view` and other reference types have a `constexpr` constructor that can take `const` parameters. Does the following example still dangle?
-
-```cpp
-std::string_view sv = "hello world"s;// immediate dangling reference
-```
--->
-<!--
-Example
-
-// x86-64 clang (trunk)
-// -std=c++20 -O2 -Wdangling-gsl
-#include <iostream>
-#include <string>
-
-using namespace std::string_literals;
-
-int main() {
-    std::string_view sv = "hello world"s;
-    std::cout << sv << std::endl;
-    return 42;
-}
--->
-<!--
-It is clear from this `string_view` example that it dangles because `sv` is a reference and `""s` is a temporary.
-***What is being proposed is that same example doesn't dangle!***
-If the constant expression `"hello world"s` was promoted to static storage duration then `sv` could be a reference to something that is global and as such would not dangle. This is reasonable based on how users reason about constants, safer because of less dangling and simpler because something as simple as constants shouldn't dangle.
--->
-<!--
-
-That given simple reasonable conditions, the lifetime of the temporary gets automatically extended.
-
-## The conditions
-
-1. the argument would, prior to this proposal, be a temporary
-1. the type of the parameter is a constant reference or constant pointer
-1. type of the temporary argument has a constexpr constructor
-1. **[Optional]** type of the temporary argument has compile time comparison; constexpr <=>
-
-What is being proposed is that the storage duration of the argument, under these specific conditions, be changed from automatic to static!
-In other words, the temporary argument would be constructed with the constexpr constructor, stored statically in read only memory and automatically deduplicated if this unnamed constant expression was used more than once provided the type has an optional `constexpr` spaceship operator.
-
-This is reasonable because a constant reference/pointer parameter doesn't care how the object was constructed. Further, if the compiler has the choice to constexpr construct the object once rather than repeatedly throughout the execution of the program, than why wouldn't a developer want that.
-
-This feature is also similar to existing features/concepts that programmers are familiar with. This feature is an implicit anonymous `constant`. It is more like an implicit anonymous `static local`. Really, at the end of the day, it is just another literal. For new `C++` programmers, old programmers from other programming languages and even old `C++` programmers it can be surprising when something as simple and trivial as a literal fails. No less, why one has to be overly attentive to it in the first place.
-
-There is interest in eliminating, if not reducing dangling references. Consider:
-
-1. `Why lifetime of temporary doesn't extend till lifetime of enclosing object?` [^soauto]
-1. `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp]
-1. `Lifetime safety: Preventing common dangling` [^lifetimesafety]
-
-These talks about identify such issues but this proposal would address a small portion of them especially ones that would be considered surprising to programmers.
-
--->
-
-<!--
-
-## Ancillary Examples
-
-```cpp
-void some_function(const char*);
-
-// native strings can also be created at compile time
-some_fuction("hello world");
-```
-
----
-
-```cpp
-void some_function(const std::string&);
-
-// As of C++20, std::string can be constructed constexpr
-some_fuction("hello world"s);
-```
-
----
-
-```cpp
-void some_function(const std::vector<std::string>&);
-
-// As of C++20, std::vector and std::string can be constructed constexpr
-some_fuction({"hello", "world"});
-```
-
----
-
-```cpp
-void some_function(const std::optional<std::string>&);
-
-// As of C++23, std::optional and std::string can be constructed constexpr
-some_fuction("hello world"s);
-```
-
----
-
-```cpp
-void some_function(const std::variant<std::string>&);
-
-// As of C++23, std::variant and std::string can be constructed constexpr
-some_fuction("hello world"s);
-```
-
----
-
-```cpp
-void some_function(const std::unique_ptr<std::string>&);
-
-// As of C++23, std::unique_ptr can be constructed constexpr
-some_fuction(std::make_unique<std::string>("hello world"));
-```
-
--->
 
 ### Impact on current proposals
 
@@ -1217,69 +943,7 @@ Further, the `p2576r0` [^p2576r0] proposal has a whole section devoted to just s
 </tr>
 </table>
 
-My proposal would constitute a delay in the `p2576r0` [^p2576r0] proposal as I am advocating for refining the `C++` choices before contributing `constexpr` back to `C`. I also believe that the `p2576r0` [^p2576r0] proposal fails to consider a fourth alternative with respect to storage duration and that is to go with how `C` handles compound literals, improve upon it and have `C++` to conform with it. That scenario is the second feature proposed by this proposal.<!--This will be considered momentarily.-->
-
-<!--
-## Rationale
-
-
-### Expectations
-
-There is a general expectation that constant expressions are already of static storage duration. While that is partially wrong, that expectation is still there. Consider the following examples. Everywhere you see ROMable, you might as well say constant and global/static.
-
-**December 19, 2012**
-
-`Using constexpr to Improve Security, Performance and Encapsulation in C++` [^smartbear]
-
-*"One of the advantages of **user-defined literals** with a small memory footprint is that an implementation can store them in the system’s **ROM**. Without a **constexpr constructor**, the object would require dynamic initialization and therefore wouldn’t be **ROM-able**."*
-
-...
-
-*"**Compile-time evaluation of expressions** often leads to more efficient code and enables the compiler to store the result in the system’s **ROM**."*
-
-**May 21, 2015**
-
-`Bitesize Modern C++ : constexpr` [^bitesize]
-
-*"**ROM-able** types"*
-
-...
-
-*"<u>Since everything required to construct the **Rommable** object is known at **compile-time** it can be constructed in **read-only memory**.</u>"*
-
-**4 February 2019**
-
-`C++ Core Guidelines: Programming at Compile Time with constexpr` [^guidelines]
-
-*"A constant expression"*
-
--  *"**can** be evaluated at **compile time**."*
--  *"give the compiler deep insight into the code."*
--  *"are implicitly thread-safe."*
--  *"**can** be constructed in the **read-only memory (ROM-able)**."*
-
-It isn't just that resolved constant expressions **can** be placed in ROM which makes programmers believe these **should** be stored globally but also the fact that fundamentally **these expressions are executed at compile time**. Along with templates, constant expressions are the closest thing `C++` has to **pure** functions. That means the results are the same given the parameters, and since these expressions run at compile time, than the resultant values are the same, no matter where or when in the `C++` program. This is essentially global to the program; technically across programs too.
-
-This proposal just requests that at least in specific scenarios that instead of resolved constant expressions **CAN** be ROMable but rather that they **HAVE** to be or at least the next closest thing; constant and `static storage duration`.
-
-Let's also consider the view of compiler writers briefly.
-
-**Asked 9 years, 10++ months ago**
-
-`How can I get GCC to place a C++ constexpr in ROM?` [^gccconstexprrom]
-
-...
-
-*"As far as I understand the ffx object in the code below should end up in **ROM (code)**, but instead it is placed in **DATA**."*
-
-...
-
-*"This is indeed fixed in gcc 4.7.0"*
-
-So there is at least some understanding among compiler writers that instances produced from constexpr expressions
-were ROMable. What is more interesting is that it doesn't matter if it is in the ROM/code/text segment or the DATA segment, it is still global regardless of which. One is just read only. If we can guarantee `static storage duration` for constant temporaries we can reduce danglings.
-
--->
+My proposal would constitute a delay in the `p2576r0` [^p2576r0] proposal as I am advocating for refining the `C++` choices before contributing `constexpr` back to `C`. I also believe that the `p2576r0` [^p2576r0] proposal fails to consider a fourth alternative with respect to storage duration and that is to go with how `C` handles compound literals, improve upon it and have `C++` to conform with it. That scenario is the second feature proposed by this proposal.
 
 ### Past
 
@@ -1347,14 +1011,6 @@ const complex cz(1,2); // the const cz can potentially be put in ROM
 ```
 
 While both constant-initialized constant expressions are the same, the detail that decides whether it is a literal that can even be placed in ROM was the `const` keyword. So, `const` constant-initialized constant expressions are constant literals or simply, constants.
-
-<!--
-It wouldn't hurt to fix any brittle rules and in the 10++ years since we got `constexpr` some of these may have already been fixed and it could be time to review these finer points.
-
-Even if these brittle concerns haven't already been addressed, two things could be performed to mitigate these concerns. For instance a automatic conversion from lvalue reference to pointer would allow passing implicit and explicit, via `&`, references to pointer arguments. Along with static duration, `C++` would then support the address of `C99` compound literal syntax.
-
-A more complicated solution for references would require compilers not just to look at 2 types but instead 3: the type of the resolved `constexpr`, the type of the argument and the explicit '&' in front of the `constexpr` when the argument is a pointer.
--->
 
 #### n2235
 
@@ -1915,90 +1571,6 @@ That statement and the fact that all of the examples were `const` constant expre
 
 I don't believe this issue is related to or would be benefited from this proposal.
 
-<!--
-
-### Future
-
-There are many paths to reducing dangling via using `static storage duration`. The question that need answering is too what degree do we do it and whether or not we also reduce the gap between `C` and `C++`.
-
-#### Proposal #1: `C++` with `static storage duration`
-
-##### Wording
-
-6.7.7 Temporary objects [class.temporary]
-
-(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer ++unless the expected type is constant and the temporary possesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
-
-NOTE: All examples of dangling need to be revised for not involving constant expressions.
-
-#### Proposal #2: `C compound literals` with `static storage duration`
-
-##### Wording
-
-6.7.7 Temporary objects [class.temporary]
-
-(6.12) — A temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the ++enclosing block of the++ full-expression containing the new-initializer ++unless the expected type is constant and the temporary possesses a constexpr constructor in which case the temporary is no longer a temporary but rather is of static storage duration++.
-
-NOTE: All examples of dangling need to be revised for not involving constant expressions.
-
-#### Optional Addendum #1 - Deduplication
-
-##### Wording
-
-5.13.5 String literals [lex.string]
-
-9 Evaluating a string-literal results in a string literal object with static storage duration (6.7.5). Whether ~~all~~ string-literals ++bound to a character pointer++ are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed. ++All successive evaluations of a string-literals bound to a const pointer should yield the same object. Similarly too, all successive evaluations of a custom string-like-literals bound to a const pointer should yield the same object. Further, std::basic_string_view should be stored in overlapping objects.++
-
-[Note 4: The eﬀect of attempting to modify a string literal object is undefned. — end note]
-
-#### Optional Addendum #2 - Undefined Strings
-
-##### Wording
-
-5.13.5 String literals [lex.string]
-
-9 ++Evaluating a string-literal bound to a character pointer results in a string literal object with automatic storage duration (6.7.5).++ Evaluating a string-literal ++bound to a const character pointer++ results in a string literal object with static storage duration (6.7.5). Whether all string-literals are distinct (that is, are stored in nonoverlapping objects) and whether successive evaluations of a string-literal yield the same or a diﬀerent object is unspecifed.
-
-~~[Note 4: The eﬀect of attempting to modify a string literal object is undefined. — end note]~~
-
-#### Optional Addendum #3 - Arrays
-
-Similar wording as for string-literals is needed for native arrays, const std::array, const std::span and initializer lists.
-
-#### Optional Addendum #4 - Address of literal
-
-In order to allow taking the address of a literal, either a new conversion needs adding or the lvalue reference composition rules need revising.
-
-```cpp
-f(&(struct foo) { 1,2 });
-```
-
-++7.3.16 Lvalue-to-pointer conversion [conv.lval.pointer]++
-
-++1 An lvalue of type T can be converted to a type “pointer to T”.++
-
-++or++
-
-++Taking the explicit address, `&`, of a lvalue reference yields the lvalue reference unless a pointer of compatible type is expected.++
-
-#### Optional Addendum #5 - Delayed Initialization
-
-Assigning a literal to a non const uninitialiated variable results in the lifetime of the literal being the block that contains the declaration of said variable. This one is for that earlier example found on stack overflow.
-
-```cpp
-/* Example 2 - if statements with braces */
-
-double *coefficients, value;
-
-if(x){
-    coefficients = (double[3]) {1.5, -3.0, 6.0};
-}else{
-    coefficients = (double[3]) {4.5, 1.0, -3.5};
-}
-value = evaluate_polynomial(coefficients);
-```
-
--->
 ### Other Anonymous Things
 
 The pain of immediate dangling associated with temporaries are especially felt when working with other anonymous language features of `C++` such lambda functions and coroutines.
@@ -2030,6 +1602,8 @@ auto lambda = [&c1 = anonymous](const std::string& s)
 }
 lambda("world"s);
 ```
+
+This specific immediately dangling example is also fixed by implicit constant initialization provided `c1` resolves to a `const std::string&` since `c1` was constant-initialized.
 
 #### Coroutines
 
@@ -2066,6 +1640,8 @@ int main() {
 }
 ```
 
+This specific immediately dangling example also is also fixed by implicit constant initialization since the parameter `s` expects a `const std::string&` and it was constant-initialized.
+
 Unless resolved, this problem will continue to be a problem for future `C++` features, type erased or not, anonymous or not, where there are a separate construction and execution steps.
 
 ### Other languages
@@ -2090,9 +1666,17 @@ What is proposed here is increasing the interning that C++ already does, but is 
 
 ## Summary
 
-The advantages to `C++` with this proposal is manifold.
+There are two principles repeated throughout this proposal.
 
-- Reduce dangling
+1. Let constants be constants/free your constants/implicit constant initialization
+2. Temporaries are just anonymously named variables/`C99` compound literals lifetime rule
+
+The advantages to `C++` with adopting this proposal is manifold.
+
+- Eliminate dangling of what should be constants
+- Eliminate immediate dangling
+- Reduce all remaining dangling
+- Simplify `C++` temporary lifetime extension rules
 - Make constexpr literals less surprising for new and old developers alike
 - Reduce the gap between `C++` and `C99` compound literals
 - Improve the potential contribution of `C++`'s `constexpr` back to `C`
@@ -2102,12 +1686,6 @@ The advantages to `C++` with this proposal is manifold.
 - Increase and improve upon the utilization of ROM and the benefits that entails
 
 ## Frequently Asked Questions
-
-<!--
-### Why not just make the evaluation of all constant expressions by default of `static storage duration`?
-
-This too would reduce dangling in the same way as this proposal and has the added benefit of being even simpler rules. [To be decided]
--->
 
 ### What about locality of reference?
 
@@ -2127,6 +1705,34 @@ mov <memory>,<constant>
 ```
 
 What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unnamed/unaddressable version physically can't dangle.
+
+### Won't this break a lot of existing code?
+
+NO, if any. To the contrary, code that is broken is now fixed. Code that would be invalid is now valid, makes sense and can be rationally explained. Let me summarize based on the two features of this proposal.
+
+#### Let constants be constants/free your constants/implicit constant initialization
+
+This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely something must be broken. From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
+
+<table>
+<tr>
+<td>
+
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+**"*6.9.3.2 Static initialization [basic.start.static]*"**
+
+"*3 An implementation is permitted to perform the initialization of a variable with static or thread storage duration as a static initialization even if such initialization is not required to be done statically ...*"
+
+</td>
+</tr>
+</table>
+
+So what is the point! For the instances that would benefit from implicit constant initialization, their are currently NO guarantees as far as their lifetime and as such is non deterministic. With this portion of the proposal, a guarantee is given and as such that which was non deterministic becomes deterministic.
+
+#### Temporaries are just anonymously named variables/`C99` compound literals lifetime rule
+
+TODO
 
 ## References
 
