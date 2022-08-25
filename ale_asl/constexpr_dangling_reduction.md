@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-22</td>
+<td>2022-08-25</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -123,6 +123,7 @@ a code
 
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
 - elaborated on the "Summary" section
+- added to "Frequently Asked Questions" section information concerning breakiage and use
 
 ### R1
 
@@ -1710,7 +1711,7 @@ What is more interesting is these two examples of constants have different value
 
 NO, if any. To the contrary, code that is broken is now fixed. Code that would be invalid is now valid, makes sense and can be rationally explained. Let me summarize based on the two features of this proposal.
 
-#### Let constants be constants/free your constants/implicit constant initialization
+#### Let constants be constants / free your constants / implicit constant initialization
 
 This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely something must be broken. From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
 
@@ -1728,11 +1729,70 @@ This feature not only changes the point of destruction but also the point of con
 </tr>
 </table>
 
-So what is the point! For the instances that would benefit from implicit constant initialization, their are currently NO guarantees as far as their lifetime and as such is non deterministic. With this portion of the proposal, a guarantee is given and as such that which was non deterministic becomes deterministic.
+So what is the point! For the instances that would benefit from implicit constant initialization, their are currently NO guarantees as far as their lifetime and as such is indeterminite. With this portion of the proposal, a guarantee is given and as such that which was non determinite becomes determinite.
+
+It should also be noted that while this enhancement is applied implicitly, programmers has opted into this up to three times.
+
+1. The programmer of the type must have provided a means for the type to be constructed at compile time likely by having a `constexpr` constructor.
+1. The programmer of the variable or function parameter must have stated that they want a `const`.
+1. The end programmer have `const-initialized` the type.
+
+Having expressed contant requirements three times, it is pretty certain that the end programmer wanted a constant even if it is anonymous.
 
 #### Temporaries are just anonymously named variables/`C99` compound literals lifetime rule
 
-TODO
+When programmers use temporaries, unnamed variables, instead of named variables, then they give up control of the initialization order.
+
+<table>
+<tr>
+<td>
+
+`Working Draft, Standard for Programming Language C++` [^n4910]
+
+**"*7.6.1.3 Function call [expr.call]*"**
+
+"*8 The postfx-expression is sequenced before each expression in the expression-list and any default argument. The initialization of a parameter, including every associated value computation and side eﬀect, is **indeterminately** sequenced with respect to that of any other parameter.*"
+
+"*[Note 8: All side eﬀects of argument evaluations are sequenced before the function is entered (see 6.9.1). — end note]*"
+
+</td>
+</tr>
+</table>
+
+Consequently, this indeterminiteness remains regards of whether the temporary was scoped to the statement or the block. While the point of creation remains the same, the point of deletion gets extended just enough to remove **immediate** dangling. Since the temporary variable is by definition unnamed, any chance of breakiage is greatly minimized because other than the parameter it was directly passed to, nothing else has a reference to it.
+
+### Who would even use these features? Their isn't sufficient use to justify these changes.
+
+Everyone ... Quite a bit, actually
+
+Consider all the examples littered throughout this paper, these are what gets fixed
+
+- dangling reported on normal use of the `STL`
+- dangling examples reported in the `C++` standard
+- real world dangling reported in NAD, not a defect, reports
+
+This doesn't even include the countless examples found in numerous articles comparing `C++` with other nameless programming languages which would be fixed. However, the best proof can be found in our usage and other proposals.
+
+<table>
+<tr>
+<td>
+
+`C++ Core Guidelines` [^cppcgrfin]
+
+***F.16: For "in" parameters, pass cheaply-copied types by value and others by reference to const***
+
+</td>
+</tr>
+</table>
+
+In `C++`, we use `const` parameters alot. This is the first of three requirements of `implicit constant initialization`. What about the use of types that can be constructed at compile time?
+
+- **`C++20`**: `std::pair`, `std::tuple`, `std::string`, `std::vector`
+- **`C++23`**: `std::optional`, `std::variant`, `std::unique_ptr`
+
+As their was sufficient use to justify making the constructors of these types to be `constexpr` than their would be sufficient use of the `implicit constant initialization` feature as this satisfies its second and third requirement that the instances be constructable at compile time and `constant-initialized`.
+
+As far as the "temporaries are just anonymously named variables" feature, one of biggest gripes with the `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] proposal was that it would require a viral attribution effort. While that may be inevitable in order to fix or identify dangling in the language, that viral effort helps to identify the magnitude of `C++` `STL` functions that has the potential of dangling in the first place and with this feature would no longer immediately dangle which is the most shocking type of dangling to end programmers.
 
 ## References
 
@@ -1794,6 +1854,8 @@ TODO
 [^p1018r16]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html>
 <!--Fix the range‐based for loop, Rev1-->
 [^p2012r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf>
+<!--C++ Core Guidelines-->
+[^cppcgrfin]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rf-in>
 <!---->
 <!--
 [^]: <>
