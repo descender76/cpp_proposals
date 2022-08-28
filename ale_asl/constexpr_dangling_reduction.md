@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-25</td>
+<td>2022-08-28</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -123,7 +123,7 @@ a code
 
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
 - elaborated on the "Summary" section
-- added to "Frequently Asked Questions" section information concerning breakiage and use
+- added to "Frequently Asked Questions" section information concerning breakiage, use and impact on static analyzers
 
 ### R1
 
@@ -1584,12 +1584,13 @@ Whenever a lambda function captures a reference to a temporary it immediately da
 [&c1 = "hello"s](const std::string& s)// OK
 {
     return c1 + " "s + s;
-}("world"s);
+}("world"s);// immediately invoked lambda/function expression
 
 auto lambda = [&c1 = "hello"s](const std::string& s)// immediate dangling
 {
     return c1 + " "s + s;
 }
+// ...
 lambda("world"s);
 ```
 
@@ -1601,6 +1602,7 @@ auto lambda = [&c1 = anonymous](const std::string& s)
 {
     return c1 + " "s + s;
 }
+// ...
 lambda("world"s);
 ```
 
@@ -1669,8 +1671,8 @@ What is proposed here is increasing the interning that C++ already does, but is 
 
 There are two principles repeated throughout this proposal.
 
-1. Let constants be constants/free your constants/implicit constant initialization
-2. Temporaries are just anonymously named variables/`C99` compound literals lifetime rule
+1. Let constants be constants / free your constants / implicit constant initialization
+2. Temporaries are just anonymously named variables / `C99` compound literals lifetime rule
 
 The advantages to `C++` with adopting this proposal is manifold.
 
@@ -1713,7 +1715,7 @@ NO, if any. To the contrary, code that is broken is now fixed. Code that would b
 
 #### Let constants be constants / free your constants / implicit constant initialization
 
-This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely something must be broken. From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
+This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken. From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
 
 <table>
 <tr>
@@ -1739,7 +1741,7 @@ It should also be noted that while this enhancement is applied implicitly, progr
 
 Having expressed contant requirements three times, it is pretty certain that the end programmer wanted a constant even if it is anonymous.
 
-#### Temporaries are just anonymously named variables/`C99` compound literals lifetime rule
+#### Temporaries are just anonymously named variables / `C99` compound literals lifetime rule
 
 When programmers use temporaries, unnamed variables, instead of named variables, then they give up control of the initialization order.
 
@@ -1793,6 +1795,16 @@ In `C++`, we use `const` parameters alot. This is the first of three requirement
 As their was sufficient use to justify making the constructors of these types to be `constexpr` than their would be sufficient use of the `implicit constant initialization` feature as this satisfies its second and third requirement that the instances be constructable at compile time and `constant-initialized`.
 
 As far as the "temporaries are just anonymously named variables" feature, one of biggest gripes with the `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] proposal was that it would require a viral attribution effort. While that may be inevitable in order to fix or identify dangling in the language, that viral effort helps to identify the magnitude of `C++` `STL` functions that has the potential of dangling in the first place and with this feature would no longer immediately dangle which is the most shocking type of dangling to end programmers.
+
+### Why not just use a static analyzer?
+
+Typically a static analyzer doesn't fix code. Instead, it just produces warnings and errors. It is the programmer's responsibility to fix code by deciding whether the incident was a false positive or not and making the corresponding code changes. This proposal does fix some dangling but others go unresolved and unidentified. As such this proposal and static analyzers are complimentary. Combined this proposal can fix some dangling and a static analyzer could be used to identify what is remaining. As such those who still ask, "why not just use a static analyzer", might really be saying **this proposal's language enhancements might break their static analyzer**. To which I say, the standard dictates the analyzer not the other way around. That is true for all tools. However, let's explore the potential impact of this proposal on static analyzers.
+
+The `C++` language is complex. It stands to reason that our tools would have some degree of complexity since they would need to take some subset of our language's rules into consideration. In any proposal, mine included, fixes to any dangling would result in potential dangling incidents identified by a static analyzer that overlap with said proposal would become false positives. The false positives would join those that a static analyzer already has for not factoring existing language rules into consideration just as it would for any new language rules.
+
+With `implicit constant initialization`, existing static analyzers would need to be enhanced to track the `const`ness of variables and parameters, whether or not the types of variables and parameters can be constructed at compile time and whether or not instances were constant-initialized. Until that happens, an existing dangling incident reported by static analyzer will just be a false positive. The total number of incidents remain the same and the programmer just need to recognize that it was a false positive which should be easy to do since constants are trivial and these rules are simple.
+
+What about the `temporaries are just anonymously named variables` feature! Static analyzers need to understand the lifetimes of variables with automatic storage duration regardless. Not quantifying the current life of any given instance and determining whether it even needs to be extended would result in false positives. This already requires tracking braces/blocks/scopes. As such tracking the statement that contains a temporary is not significantly more complicated than tracking the block that contains said expression and temporary. In all likelihood, that is already being performed. Further, the proposed rules are significantly simpler than the current rules once lifetime extension reduction gets factored in. This was identified by the numerous removals in the "Proposed Wording" section.
 
 ## References
 
