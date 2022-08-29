@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-28</td>
+<td>2022-08-29</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -124,6 +124,7 @@ a code
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
 - elaborated on the "Summary" section
 - added to "Frequently Asked Questions" section information concerning breakiage, use and impact on static analyzers
+- verbiage clarifications
 
 ### R1
 
@@ -216,7 +217,7 @@ int& a = f({4, 2});
 a = 5; // fatal runtime error
 ```
 
-If the lifetime of the temporary, `{4, 2}`, was bound to the lifetime of its containing block instead of its containing statement than `a` would not immediately dangle. Further, `{4, 2}` is constant initialized, so if function `f`'s signature was changed to be `int& f(const X& x)`, since it does not change x, then this example would not dangle at all.
+If the lifetime of the temporary, `{4, 2}`, was bound to the lifetime of its containing block instead of its containing statement than `a` would not immediately dangle. Further, `{4, 2}` is constant initialized, so if function `f`'s signature was changed to be `int& f(const X& x)`, since it does not change x, then this example would not dangle at all with this proposal.
 
 *"Class std::string provides such an interface in the current C++ runtime library. For example:"* [^bindp]
 
@@ -323,12 +324,12 @@ bool test();
 
 struct X { int a, b; };
 
-const X* ref2pointer(const X& ref)
+constexpr const X* ref2pointer(const X& ref)
 {
     return &ref;
 }
 
-X x_factory(int a, int b)
+X x_factory(int a, int b)// not constexpr, runtime construction
 {
     return {a, b};
 }
@@ -403,7 +404,7 @@ In that proposal, a question was raised.
 
 In reality, there are three scenarios; warning, **error** or just fix it by extending the lifetime.
 
-However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically, some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen or worse be so complicated that the developer no longer can understand the lifetimes of the objects created. Shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way would not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
+However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically, some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen or worse be so complicated that the developer, who is ultimately responsible for fixing the code, can no longer understand the lifetimes of the objects created. Shouldn't we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way would not even be desirable. Let's consider a real scenario. Extending one's lifetime could mean 2 different things.
 
 1. Change automatic storage duration such that a instances' lifetime is just moved lower on the stack as prescribed in p0936r0.
 1. Change automatic storage duration to static storage duration. [This is what I am proposing but only for those that it logically applies to.]
@@ -426,7 +427,7 @@ Personally, `p0936r0` [^bindp] should be adopted regardless because we give the 
 
 <sub>4</sub> When an implementation introduces a temporary object of a class that has a non-trivial constructor (11.4.5.2,
 11.4.5.3), it shall ensure that a constructor is called for the temporary object. Similarly, the destructor
-shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed ++via automatic storage duration (6.7.5.4) as if the compiler was naming the temporaries anonymously or when the variable to which the temporary is assigned is destroyed, whichever is greater lifetime.++~~as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created. This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.~~
+shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed ++via automatic storage duration (6.7.5.4) associated with the enclosing block of the expression as if the compiler was naming the temporaries anonymously or via automatic storage duration associated with the enclosing block of the variable to which the temporary is assigned, whichever is greater lifetime.++~~as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created. This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.~~
 
 ~~<sub>5</sub> There are three contexts in which temporaries are destroyed at a diﬀerent point than the end of the full expression. The frst context is when a default constructor is called to initialize an element of an array with no corresponding initializer (9.4). The second context is when a copy constructor is called to copy an element of an array while the entire array is copied (7.5.5.3, 11.4.5.3). In either case, if the constructor has one or more default arguments, the destruction of every temporary created in a default argument is sequenced before the construction of the next array element, if any.~~
 
@@ -1386,17 +1387,36 @@ Similarly, the section of the `C++` standard on initializer has multiple example
 
 *"9.4.1 General [dcl.init.general]"*
 
+*"(16.6.2.2)"*
+
 ```cpp
+struct A {
+  int a;
+  int&& r;
+};
+
+int f();
+int n = 10;
+
 A a1{1, f()}; // OK, lifetime is extended
 A a2(1, f()); // well-formed, but dangling reference
 A a3{1.0, 1}; // error: narrowing conversion
 A a4(1.0, 1); // well-formed, but dangling reference
 A a5(1.0, std::move(n)); // OK
 ```
-
-Provided that A has a constexpr constuctor and the second parameter was `const`, with this proposal, `a2` would not be dangling if f() too was a constant expression. Also `a4` would also not be dangling. The `a4` example does not need jumping to the signature of the `f` function to figure out if it is a constant expression as is the case of the `a2` example. Really the `a4` example is surprising to current developers that it would be dangling since the native literals 1.0 and 1 can be constant expressions.
+<!--
+The `struct` `A` is a `LiteralType` so it can be constructed at compile time. Provided that the second parameter was `const`, with this proposal, `a2` would not be dangling if f() too was a constant expression. Also `a4` would also not be dangling. The `a4` example does not need jumping to the signature of the `f` function to figure out if it is a constant expression as is the case of the `a2` example. Really the `a4` example is surprising to current developers that it would be dangling since the native literals 1.0 and 1 can be constant expressions.
 
 It should also be noted that the `C++11` brace initialization does not or should not create another block scope.
+-->
+The `a2` and `a4` initializations would no longer dangle when the temporary has automatic storage duration associated with the enclosing block as the code would be same had it been written as follows:
+
+```cpp
+int anonymous1 = f();
+A a2(1, anonymous1); // well-formed
+int anonymous2 = 1;
+A a4(1.0, anonymous2); // well-formed
+```
 
 *"9.4.5 List-initialization [dcl.init.list]"*
 
@@ -1411,7 +1431,7 @@ A() : i4{ 1, 2, 3 } {} // ill-formed, would create a dangling reference
 
 <!--According to this proposal, if const was added i4, then this example would neither be ill formed or dangling.-->
 
-According to this proposal, this example would neither be ill formed or dangling as initializer lists expects a const array, arrays can be constexpr constructed and the array was constant-initialized.
+According to this proposal, this example would neither be ill formed or dangling as initializer lists expects a const array, arrays can be constexpr constructed and the array was constant-initialized. Thus implicit constant initialization would kick in.
 
 ---
 
@@ -1578,7 +1598,7 @@ The pain of immediate dangling associated with temporaries are especially felt w
 
 #### Lambda functions
 
-Whenever a lambda function captures a reference to a temporary it immediately dangles before an opportunity is given to call it unless it is a immediately invoked lambda/function expression.
+Whenever a lambda function captures a reference to a temporary it immediately dangles before an opportunity is given to call it, unless it is a immediately invoked lambda/function expression.
 
 ```cpp
 [&c1 = "hello"s](const std::string& s)// OK
@@ -1671,8 +1691,9 @@ What is proposed here is increasing the interning that C++ already does, but is 
 
 There are two principles repeated throughout this proposal.
 
-1. Let constants be constants / free your constants / implicit constant initialization
-2. Temporaries are just anonymously named variables / `C99` compound literals lifetime rule
+1. Let constants be constants / free your constants / **implicit constant initialization**
+1. **Temporaries are just anonymously named variables** / `C99` compound literals lifetime rule
+    - **general lifetime extension**: sometimes, especially in blocks / not arguments, it is better for a temporary to have automatic storage duration associated with the enclosing block of the variable to which the temporary is assigned instead of being associated with the enclosing block of the temporary expression
 
 The advantages to `C++` with adopting this proposal is manifold.
 
