@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-29</td>
+<td>2022-08-31</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -123,7 +123,7 @@ a code
 
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
 - elaborated on the "Summary" section
-- added to "Frequently Asked Questions" section information concerning breakiage, use and impact on static analyzers
+- added to "Frequently Asked Questions" section information concerning breakiage, use, impact on static analyzers and `constinit`
 - verbiage clarifications
 
 ### R1
@@ -1826,6 +1826,25 @@ The `C++` language is complex. It stands to reason that our tools would have som
 With `implicit constant initialization`, existing static analyzers would need to be enhanced to track the `const`ness of variables and parameters, whether or not the types of variables and parameters can be constructed at compile time and whether or not instances were constant-initialized. Until that happens, an existing dangling incident reported by static analyzer will just be a false positive. The total number of incidents remain the same and the programmer just need to recognize that it was a false positive which should be easy to do since constants are trivial and these rules are simple.
 
 What about the `temporaries are just anonymously named variables` feature! Static analyzers need to understand the lifetimes of variables with automatic storage duration regardless. Not quantifying the current life of any given instance and determining whether it even needs to be extended would result in false positives. This already requires tracking braces/blocks/scopes. As such tracking the statement that contains a temporary is not significantly more complicated than tracking the block that contains said expression and temporary. In all likelihood, that is already being performed. Further, the proposed rules are significantly simpler than the current rules once lifetime extension reduction gets factored in. This was identified by the numerous removals in the "Proposed Wording" section.
+
+### Why not just allow `constinit` to be used on function arguments?
+
+```cpp
+some_function_call(constinit "Hello World"s);
+```
+
+I am not opposed to this as this would provide access to much of the same benefits as `implicit constant initialization`. However, there is at least one pro and couple of con(s) to be considered. The case could be made that both be supported.
+
+#### Pro
+
+1. asserts that the argument was constant initialized
+
+#### Con(s)
+
+1. liberally/virally applied to arguments making code more verbose
+1. This doesn't actually remove any dangling from the language. It would still be a manual programmer effort.
+
+By itself, this does not address `temporaries are just anonymously named variables` and `general lifetime extension`.
 
 ## References
 
