@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2603R0</td>
+<td>P2603R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-06-14</td>
+<td>2022-08-31</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -69,6 +69,14 @@ a code
   - [Summary](#summary)
   - [Prior work](#prior-work)
   - [References](#references)
+
+## Changelog
+
+### R1
+
+- shortened `member_function_pointer_to_free_function_pointer` to `to_free_function_pointer`
+- clarified `consteval`
+- added support of free function pointer passthrough
 
 ## Abstract
 
@@ -217,6 +225,18 @@ int main()
 
     return 0;
 }
+
+void Base_some_virtual_function(Base& instance)
+{
+     // Direct call to Base::some_virtual_function
+    instance.Base::some_virtual_function();
+}
+
+void const_Base_some_virtual_function(const Base& instance)
+{
+     // Direct call to Base::some_virtual_function
+    instance.Base::some_virtual_function();
+}
 ```
 
 The most relevant lines in question are the following:
@@ -296,15 +316,18 @@ void (Base::*bmfp1)() = &Base::some_virtual_function direct;
 void (Base::*bmfp2)() = &Base::some_virtual_function virtual;
 ```
 
-What is desired is no change to member function pointer, at all! Rather, a new intrinsic constexpr function would be created called `member_function_pointer_to_free_function_pointer`. This function would not take member function pointer at runtime but only a member function pointer initialization statement, `&class_name::member_function_name`, at compile time. Technically, it could also take a static_cast of a member function pointer initialization to a specific member function pointer type to allow explicit choosing of overloaded methods. What gets returned is just a free function pointer that points to the actual member function or a thunk where the `this` reference is the first parameter. For `Deducing this` [^p0847r7] member functions, the `this` type could be a value instead of a reference and as such this new function would just be a passthrough. 
+What is desired is no change to member function pointer, at all! Rather, a new intrinsic `consteval` function would be created called `to_free_function_pointer`. This function would not take member function pointer at runtime but only a member function pointer initialization statement, `&class_name::member_function_name`, at compile time. Technically, it could also take a static_cast of a member function pointer initialization to a specific member function pointer type to allow explicit choosing of overloaded methods. What gets returned is just a free function pointer that points to the actual member function or a thunk where the `this` reference is the first parameter. For `Deducing this` [^p0847r7] member functions, the `this` type could be a value instead of a reference and as such this new function would just be a passthrough. This intrinsic function would also be overloaded for free functions in which case it would just be a passthrough. 
 
 ```cpp
 Derived derived;
-
-void (*bfp)(Base&) = member_function_pointer_to_free_function_pointer(&Base::some_virtual_function);
-void (*dfp)(Derived&) = member_function_pointer_to_free_function_pointer(&Derived::some_virtual_function);
-void (*dfpc)(const Derived&) = member_function_pointer_to_free_function_pointer(static_cast<void (Derived::*)() const>(&Derived::some_virtual_function));
-void (*ddtfp)(Derived) = member_function_pointer_to_free_function_pointer(&Derived::some_deducing_this_member_function);
+// initialized with member functions
+void (*bfp1)(Base&) = to_free_function_pointer(&Base::some_virtual_function);
+void (*dfp)(Derived&) = to_free_function_pointer(&Derived::some_virtual_function);
+void (*dfpc)(const Derived&) = to_free_function_pointer(static_cast<void (Derived::*)() const>(&Derived::some_virtual_function));
+void (*ddtfp)(Derived) = to_free_function_pointer(&Derived::some_deducing_this_member_function);
+// initialized with free functions (always passthrough)
+void (*bfp2)(Base&) = to_free_function_pointer(Base_some_virtual_function);
+void (*bfp3)(const Base&) = to_free_function_pointer(const_Base_some_virtual_function);
 ```
 
 With this, `Base::some_virtual_function` can be called at runtime, simply initialized, like [member] function pointers, without having to use a lambda. The end result is member function pointers' initialization syntax can be used to select member functions with the knowledge that the selected is the one that actually will be called.
@@ -312,10 +335,13 @@ With this, `Base::some_virtual_function` can be called at runtime, simply initia
 NOTE: The following is invalid code because there is no function when the member function declaration is pure.
 
 ```cpp
-void (*bfp)(Abstract&) = member_function_pointer_to_free_function_pointer(&Abstract::some_virtual_function);
+void (*bfp)(Abstract&) = to_free_function_pointer(&Abstract::some_virtual_function);
 ```
 
-The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly. Though, I wouldn't want to rule anything out. 
+The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly.
+<!--
+Though, I wouldn't want to rule anything out.
+-->
 
 ## Summary
 
