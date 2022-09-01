@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-31</td>
+<td>2022-09-01</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -349,6 +349,7 @@ The advantages to `C++` with this proposal is manifold.
 
 - A seemingly oversight in `C++` gets fixed by allowing calling a base member function from a derived instance at runtime
 - Mitigates a bifurcation by allowing one to interact with member functions regardless of whether they are a `Deducing this` [^p0847r7] member function or a legacy member function
+- Mitigates another bifurcation by allowing one to interact with functions regardless of whether they are a member function or a free function
 - Matches existing practice by allowing users to use member function pointer initialization to select member functions with the confidence that it is the function that will be called
 
 ## Prior work

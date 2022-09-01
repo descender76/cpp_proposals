@@ -45,7 +45,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-31</td>
+<td>2022-09-01</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -212,6 +212,7 @@ function_ref<span class="token operator">&lt;</span><span class="token keyword">
 </code></pre><p><span>The brevity of the name of the intrinsic function is less relevant as it will in all likelihood be concealed in library implementations rather than used directly.</span></p><h2 id="Summary" data-id="Summary"><a class="anchor hidden-xs" href="#Summary" title="Summary"><span class="octicon octicon-link"></span></a><span>Summary</span></h2><p><span>The advantages to </span><code>C++</code><span> with this proposal is manifold.</span></p><ul>
 <li><span>A seemingly oversight in </span><code>C++</code><span> gets fixed by allowing calling a base member function from a derived instance at runtime</span></li>
 <li><span>Mitigates a bifurcation by allowing one to interact with member functions regardless of whether they are a </span><code>Deducing this</code><span> </span><sup class="footnote-ref"><a href="#fn7" id="fnref7:1">[7:1]</a></sup><span> member function or a legacy member function</span></li>
+<li><span>Mitigates another bifurcation by allowing one to interact with functions regardless of whether they are a member function or a free function</span></li>
 <li><span>Matches existing practice by allowing users to use member function pointer initialization to select member functions with the confidence that it is the function that will be called</span></li>
 </ul><h2 id="Prior-work" data-id="Prior-work"><a class="anchor hidden-xs" href="#Prior-work" title="Prior-work"><span class="octicon octicon-link"></span></a><span>Prior work</span></h2><p><span>GCC has support acquiring the function pointer from a member function pointer via its </span><code>bound member function</code><span> </span><sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup><span> feature. While their implementation supports the functionality at both runtime and at compile time, this proposal is solely concerned about compile time. Also, while GCC uses a casting mechanism, this proposal is asking for a intrinsic function to better support automatic type deduction.</span></p><h2 id="References" data-id="References"><a class="anchor hidden-xs" href="#References" title="References"><span class="octicon octicon-link"></span></a><span>References</span></h2><hr class="footnotes-sep"><section class="footnotes">
 <ol class="footnotes-list">
