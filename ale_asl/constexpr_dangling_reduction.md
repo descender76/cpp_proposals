@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-08-31</td>
+<td>2022-09-01</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -125,6 +125,7 @@ a code
 - elaborated on the "Summary" section
 - added to "Frequently Asked Questions" section information concerning breakiage, use, impact on static analyzers and `constinit`
 - verbiage clarifications
+- a little pruning
 
 ### R1
 
@@ -1024,29 +1025,29 @@ While both constant-initialized constant expressions are the same, the detail th
 
 **2007**
 
-*"This paper generalizes the notion of constant expressions to include constant-expression functions and user-defined literals"*
+*"This paper generalizes the notion of constant expressions to include constant-expression functions and **user-defined literals**"*
 
 *"The goal is ... to **increase C99 compatibility.**"*
 
-*"This paper generalizes the notion of constant expressions to include calls to “sufficiently simple” functions (constexpr functions) and objects of user-defined types constructed from “sufficiently simple” constructors (constexpr constructors.)"*
+...
 
 *"**simplify the language** definition in the area of constant expression **to match existing practice**"*
 
-*"Any enhancement of the notion of constant expressions has to carefully consider the entanglement of many different notions, but strongly related. Indeed, the notion of constant expression appears in different contexts:"*
+...
 
-*"3. Static initialization of objects with static storage."*
+*"**3. Static initialization of objects with static storage.**"*
 
 *"Similarly, we do not propose to change the already complex and subtle distinction between “static initialization” and “dynamic initialization”. However **we strive for more uniform and consistency among related C++ language features and compatibility**"*
 
-*"3 Problems"*
+*"**3 Problems**"*
 
-*"Most of the problems addressed by this proposal have been discussed in previous papers, especially the initial proposal for Generalized Constant Expressions [DR03], the proposal for Literals for user-defined types [Str03], Generalized initializer lists [DRS03], Initializer lists [SDR05]. What follows is a brief summary."*
+...
 
-*"3.4 Unexpected dynamic initialization"*
+*"**3.4 Unexpected dynamic initialization**"*
 
 *"**However, it is possible to be surprised by expressions that (to someone) “look const” but are not.**"*
 
-*"3.5 Complex rules for simple things"*
+*"**3.5 Complex rules for simple things**"*
 
 *"The focus of this proposal is to address the issues mentioned in preceding sections. However, discussions in the Core Working Group at the Berlin meeting (April 2006) concluded that the current rules for integral constant expressions are too complicated, and source of several Defect Reports. **Consequently, a “cleanup”, i.e. adoption of simpler, more general rules is suggested.**"*
 
@@ -1802,7 +1803,7 @@ This doesn't even include the countless examples found in numerous articles comp
 
 `C++ Core Guidelines` [^cppcgrfin]
 
-***F.16: For "in" parameters, pass cheaply-copied types by value and others by reference to const***
+***F.16: For "in" parameters, pass** cheaply-copied types by value and others **by reference to const***
 
 </td>
 </tr>
@@ -1819,13 +1820,13 @@ As far as the "temporaries are just anonymously named variables" feature, one of
 
 ### Why not just use a static analyzer?
 
-Typically a static analyzer doesn't fix code. Instead, it just produces warnings and errors. It is the programmer's responsibility to fix code by deciding whether the incident was a false positive or not and making the corresponding code changes. This proposal does fix some dangling but others go unresolved and unidentified. As such this proposal and static analyzers are complimentary. Combined this proposal can fix some dangling and a static analyzer could be used to identify what is remaining. As such those who still ask, "why not just use a static analyzer", might really be saying **this proposal's language enhancements might break their static analyzer**. To which I say, the standard dictates the analyzer not the other way around. That is true for all tools. However, let's explore the potential impact of this proposal on static analyzers.
+Typically a static analyzer doesn't fix code. Instead, it just produces warnings and errors. It is the programmer's responsibility to fix code by deciding whether the incident was a false positive or not and making the corresponding code changes. This proposal does fix some dangling but others go unresolved and unidentified. As such this proposal and static analyzers are complimentary. Combined this proposal can fix some dangling and a static analyzer could be used to identify what is remaining. As such those who still ask, "why not just use a static analyzer", might really be saying **this proposal's language enhancements might break their static analyzer**. To which I say, the standard dictates the analyzer, not the other way around. That is true for all tools. However, let's explore the potential impact of this proposal on static analyzers.
 
-The `C++` language is complex. It stands to reason that our tools would have some degree of complexity since they would need to take some subset of our language's rules into consideration. In any proposal, mine included, fixes to any dangling would result in potential dangling incidents identified by a static analyzer that overlap with said proposal would become false positives. The false positives would join those that a static analyzer already has for not factoring existing language rules into consideration just as it would for any new language rules.
+The `C++` language is complex. It stands to reason that our tools would have some degree of complexity, since they would need to take some subset of our language's rules into consideration. In any proposal, mine included, fixes to any dangling would result in potential dangling incidents identified by a static analyzer that overlap with said proposal would become false positives. The false positives would join those that a static analyzer already has for not factoring existing language rules into consideration just as it would for any new language rules.
 
 With `implicit constant initialization`, existing static analyzers would need to be enhanced to track the `const`ness of variables and parameters, whether or not the types of variables and parameters can be constructed at compile time and whether or not instances were constant-initialized. Until that happens, an existing dangling incident reported by static analyzer will just be a false positive. The total number of incidents remain the same and the programmer just need to recognize that it was a false positive which should be easy to do since constants are trivial and these rules are simple.
 
-What about the `temporaries are just anonymously named variables` feature! Static analyzers need to understand the lifetimes of variables with automatic storage duration regardless. Not quantifying the current life of any given instance and determining whether it even needs to be extended would result in false positives. This already requires tracking braces/blocks/scopes. As such tracking the statement that contains a temporary is not significantly more complicated than tracking the block that contains said expression and temporary. In all likelihood, that is already being performed. Further, the proposed rules are significantly simpler than the current rules once lifetime extension reduction gets factored in. This was identified by the numerous removals in the "Proposed Wording" section.
+What about the `temporaries are just anonymously named variables` feature! Static analyzers need to understand the lifetimes of variables with automatic storage duration regardless. Not quantifying the current life of any given instance and determining whether it even needs to be extended would result in false positives. This already requires tracking braces/blocks/scopes. As such, tracking the statement that contains a temporary is not significantly more complicated than tracking the block that contains said expression and temporary. In all likelihood, that is already being performed. Further, the proposed rules are significantly simpler than the current rules once `general lifetime extension` gets factored in. This was identified by the numerous removals in the "Proposed Wording" section.
 
 ### Why not just allow `constinit` to be used on function arguments?
 
@@ -1844,7 +1845,7 @@ I am not opposed to this as this would provide access to much of the same benefi
 1. liberally/virally applied to arguments making code more verbose
 1. This doesn't actually remove any dangling from the language. It would still be a manual programmer effort.
 
-By itself, this does not address `temporaries are just anonymously named variables` and `general lifetime extension`.
+By itself, `constinit` arguments does not address `temporaries are just anonymously named variables` and `general lifetime extension`.
 
 ## References
 
