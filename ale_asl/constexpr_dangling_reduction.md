@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-01</td>
+<td>2022-09-03</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -125,7 +125,8 @@ a code
 - elaborated on the "Summary" section
 - added to "Frequently Asked Questions" section information concerning breakiage, use, impact on static analyzers and `constinit`
 - verbiage clarifications
-- a little pruning
+- some pruning
+- added the fundamental flaw segment
 
 ### R1
 
@@ -1298,6 +1299,33 @@ void main()
 
 It should be noted that neither of the "`What is C++ doing?`" examples even compile. The first because the variable `ndc` is not accessible to the functional call `some_code_after`. The second because the class `no_default_constructor` doesn't have a default constructor and as such does not have a uninitialized state. In short, the current `C++` behavior of statement scoping of temporaries instead of containing block scoping is more difficult to reason about because the equivalent code cannot be written by the programmer. As such the `C99` way is simpler, safer and more reasonable.
 
+**The fundamental flaw**
+
+Consider for a moment if the C++ rules were that all variables, named or unnamed/temporaries, ***persists until the completion of the full-expression containing the new-initializer***. [^n4910] How useful would that be?
+
+```cpp
+auto s = "hello world"s;// immediate dangling reference
+std::string_view sv = "hello world"s;// immediate dangling reference
+auto reference = some_function("hello world"s);
+use_the_ref(reference);// dangle
+```
+
+The variable `s` would mostly not be usable. All variables would mostly be immediately dangling. The variable `s` could not be used safely by any statements that follow its initialization. It could not be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. The only place the variable could be used safely if it was anonymously passed as a argument to a function. That would allow multiple statements inside the function call to make use of the instance. If the function returned a reference to the argument or any part of it than there would be further dangling even though it is not unreasonable for a function to return a reference to a portion of or a whole instance especially when the instance is known to already be alive lower on the stack. In essence, such a rule **divorces the lifetime of the instance from the variable name**. The only use of this from a programmer's perspective is the anonymity of not naming variables as a form of access control. In short, programmers could not program. Doesn't this sound familiar, for it is our current temporary lifetime rule!
+
+Now, consider for a moment if the C++ rules were that all variables that do not have static storage duration, has automatic storage duration associated with the enclosing block of the expression as if the compiler was naming the temporaries anonymously or associated with the enclosing block of the variable to which the initialization is assigned, whichever is greater lifetime. How useful would that be?
+
+```cpp
+auto s = "hello world"s;
+std::string_view sv = "hello world"s;
+auto reference = some_function("hello world"s);
+use_the_ref(reference);
+```
+
+The variable `s` would mostly be usable. No variables would immediately dangle. The variable `s` could be used safely by any statements that follow its initialization. It could be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. By default, the variable could be used safely when anonymously passed as a argument to a function. If the function returned a reference to the argument or any part of it than there would not be further dangling unless the developer manually propagated the reference lower on the stack such as with a return. Even the benefit of anonymity when using temporaries are not lost and the longer lifetime doesn't impact other instances that don't even have access to said temporary. In short, programmers are freed from much dangling and much the remaining dangling coalesces around returns and yields.
+
+<!--
+---
+
 Regardless, dangling would still be possible, especially for non constant expressions. Those could be fixed by some future, non constant expression proposals.
 
 For instance, stackoverflow has a good example of dangling with `Compund literals storage duration in C` [^sogcccompoundliterals].
@@ -1318,6 +1346,7 @@ value = evaluate_polynomial(coefficients);
 If `coefficients` was const, as it should be since all control paths lead to constant expressions, than even this example would not dangle with this proposal. While this example is an example of dangling, it is also an example of uninitialized or more specifically delayed initialization. Interestingly, perhaps in the future, the binding block in question could be the block where `coefficients` is defined, that is the block containing the unitialized variable that is assigned to a constant expression, instead of the block where the uninitialized `coefficients` is initiated. This refinement to the `C` and `C++` rules would fix even more non constexpr dangling in a simple reasonable way.
 
 Once these trivial dangling is removed from the language, the remaining non const dangling could be handled by `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] or by some similar proposal preferably by fixing it if it makes sense or by a hard error if it really is a decision that the programmer must make.
+-->
 
 #### C++ Standard
 
