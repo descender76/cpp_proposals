@@ -413,7 +413,7 @@ However, things in the real world tend to be more complicated. Depending upon th
 
 If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but DOES make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
-Personally, `p0936r0` [^bindp] should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
+Personally, `p0936r0` [^bindp] or something similar should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
 
 ## Proposed Wording
 
@@ -726,6 +726,8 @@ static const T & ref = constexpr;// constant-initialized required
 static const T object = constexpr;// constant-initialized required
 ```
 
+Ironically, at namespace scope, variables are already implicitly static.
+
 <table>
 <tr>
 <td>
@@ -743,7 +745,7 @@ static const T object = constexpr;// constant-initialized required
 </tr>
 </table>
 
-Ironically, at namespace scope, variables are already implicitly static and as such the previous example could simply be written as the following:
+As such, the previous example could simply be written as the following:
 
 ```cpp
 const T & ref = constexpr;// constant-initialized required
@@ -900,6 +902,27 @@ std::tuple<const std::string&> x(factory_of_string_at_runtime());
 
 ```cpp
 // ill-formed
+```
+
+</td>
+</tr>
+<tr>
+<td>
+
+this proposal only
+
+</td>
+<td>
+
+```cpp
+// correct
+```
+
+</td>
+<td>
+
+```cpp
+// well-formed but may dangle latter
 ```
 
 </td>
@@ -1321,7 +1344,7 @@ auto reference = some_function("hello world"s);
 use_the_ref(reference);
 ```
 
-The variable `s` would mostly be usable. No variables would immediately dangle. The variable `s` could be used safely by any statements that follow its initialization. It could be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. By default, the variable could be used safely when anonymously passed as a argument to a function. If the function returned a reference to the argument or any part of it than there would not be further dangling unless the developer manually propagated the reference lower on the stack such as with a return. Even the benefit of anonymity when using temporaries are not lost and the longer lifetime doesn't impact other instances that don't even have access to said temporary. In short, programmers are freed from much dangling and much the remaining dangling coalesces around returns and yields.
+The variable `s` would mostly be usable. No variables would immediately dangle. The variable `s` could be used safely by any statements that follow its initialization. It could be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. By default, the variable could be used safely when anonymously passed as a argument to a function. If the function returned a reference to the argument or any part of it than there would not be further dangling unless the developer manually propagated the reference lower on the stack such as with a return. Even the benefit of anonymity when using temporaries are not lost and the longer lifetime doesn't impact other instances that don't even have access to said temporary. In short, programmers are freed from much dangling. Further, much the remaining dangling coalesces around returns and yields.
 
 <!--
 ---
@@ -1624,7 +1647,7 @@ I don't believe this issue is related to or would be benefited from this proposa
 
 ### Other Anonymous Things
 
-The pain of immediate dangling associated with temporaries are especially felt when working with other anonymous language features of `C++` such lambda functions and coroutines.
+The pain of immediate dangling associated with temporaries are especially felt when working with other anonymous language features of `C++` such as lambda functions and coroutines.
 
 #### Lambda functions
 
@@ -1743,7 +1766,7 @@ The advantages to `C++` with adopting this proposal is manifold.
 
 ### What about locality of reference?
 
-It is true that globals can be slower than locals because they are farther in memory from the code that uses them. So let me clarify, when I say `static storage duration`, I really mean **logically** `static storage duration`. If a type has a `constexpr` copy constructor or is a `POD` than there is nothing preventing the compiler from copying the global to a local that is closer to the executing code. Rather, the compiler **must** ensure that the code is always available; **effectively** `static storage duration`.
+It is true that globals can be slower than locals because they are farther in memory from the code that uses them. So let me clarify, when I say `static storage duration`, I really mean **logically** `static storage duration`. If a type has a `constexpr` copy constructor or is a `POD` than there is nothing preventing the compiler from copying the global to a local that is closer to the executing code. Rather, the compiler **must** ensure that the instance is always available; **effectively** `static storage duration`.
 
 Consider this from an processor and assembly/machine language standpoint. A processor usually has instructions that works with memory. Whether that memory is ROM or is logically so because it is never written to by a program, then we have constants.
 
@@ -1766,7 +1789,7 @@ NO, if any. To the contrary, code that is broken is now fixed. Code that would b
 
 #### Let constants be constants / free your constants / implicit constant initialization
 
-This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken. From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
+This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken! From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
 
 <table>
 <tr>
@@ -1782,7 +1805,7 @@ This feature not only changes the point of destruction but also the point of con
 </tr>
 </table>
 
-So what is the point! For the instances that would benefit from implicit constant initialization, their are currently NO guarantees as far as their lifetime and as such is indeterminite. With this portion of the proposal, a guarantee is given and as such that which was non determinite becomes determinite.
+So, what is the point? For the instances that would benefit from implicit constant initialization, their are currently NO guarantees as far as their lifetime and as such is indeterminite. With this portion of the proposal, a guarantee is given and as such that which was non determinite becomes determinite.
 
 It should also be noted that while this enhancement is applied implicitly, programmers has opted into this up to three times.
 
@@ -1843,7 +1866,7 @@ In `C++`, we use `const` parameters alot. This is the first of three requirement
 - **`C++20`**: `std::pair`, `std::tuple`, `std::string`, `std::vector`
 - **`C++23`**: `std::optional`, `std::variant`, `std::unique_ptr`
 
-As their was sufficient use to justify making the constructors of these types to be `constexpr` than their would be sufficient use of the `implicit constant initialization` feature as this satisfies its second and third requirement that the instances be constructable at compile time and `constant-initialized`.
+As their was sufficient use to justify making the constructors of any one of these listed above types to be `constexpr` than their would be sufficient use of the `implicit constant initialization` feature which would use them all as this satisfies its second and third requirement that the instances be constructable at compile time and `constant-initialized`.
 
 As far as the "temporaries are just anonymously named variables" feature, one of biggest gripes with the `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] proposal was that it would require a viral attribution effort. While that may be inevitable in order to fix or identify dangling in the language, that viral effort helps to identify the magnitude of `C++` `STL` functions that has the potential of dangling in the first place and with this feature would no longer immediately dangle which is the most shocking type of dangling to end programmers.
 
@@ -1851,7 +1874,7 @@ As far as the "temporaries are just anonymously named variables" feature, one of
 
 Typically a static analyzer doesn't fix code. Instead, it just produces warnings and errors. It is the programmer's responsibility to fix code by deciding whether the incident was a false positive or not and making the corresponding code changes. This proposal does fix some dangling but others go unresolved and unidentified. As such this proposal and static analyzers are complimentary. Combined this proposal can fix some dangling and a static analyzer could be used to identify what is remaining. As such those who still ask, "why not just use a static analyzer", might really be saying **this proposal's language enhancements might break their static analyzer**. To which I say, the standard dictates the analyzer, not the other way around. That is true for all tools. However, let's explore the potential impact of this proposal on static analyzers.
 
-The `C++` language is complex. It stands to reason that our tools would have some degree of complexity, since they would need to take some subset of our language's rules into consideration. In any proposal, mine included, fixes to any dangling would result in potential dangling incidents identified by a static analyzer that overlap with said proposal would become false positives. The false positives would join those that a static analyzer already has for not factoring existing language rules into consideration just as it would for any new language rules.
+The `C++` language is complex. It stands to reason that our tools would have some degree of complexity, since they would need to take some subset of our language's rules into consideration. In any proposal, mine included, fixes to any dangling would result in potential dangling incidents becoming false positives between those identified by a static analyzer that overlap with said proposal. The false positives would join those that a static analyzer already has for not factoring existing language rules into consideration just as it would for any new language rules.
 
 With `implicit constant initialization`, existing static analyzers would need to be enhanced to track the `const`ness of variables and parameters, whether or not the types of variables and parameters can be constructed at compile time and whether or not instances were constant-initialized. Until that happens, an existing dangling incident reported by static analyzer will just be a false positive. The total number of incidents remain the same and the programmer just need to recognize that it was a false positive which should be easy to do since constants are trivial and these rules are simple.
 
