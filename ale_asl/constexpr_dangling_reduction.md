@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-03</td>
+<td>2022-09-05</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -123,7 +123,7 @@ a code
 
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
 - elaborated on the "Summary" section
-- added to "Frequently Asked Questions" section information concerning breakiage, use, impact on static analyzers and `constinit`
+- added to "Frequently Asked Questions" section information concerning breakage, use, impact on static analyzers and `constinit`
 - verbiage clarifications
 - some pruning
 - added the fundamental flaw segment
@@ -1835,7 +1835,7 @@ When programmers use temporaries, unnamed variables, instead of named variables,
 </tr>
 </table>
 
-Consequently, this indeterminiteness remains regards of whether the temporary was scoped to the statement or the block. While the point of creation remains the same, the point of deletion gets extended just enough to remove **immediate** dangling. Since the temporary variable is by definition unnamed, any chance of breakiage is greatly minimized because other than the parameter it was directly passed to, nothing else has a reference to it.
+Consequently, this indeterminiteness remains regards of whether the temporary was scoped to the statement or the block. While the point of creation remains the same, the point of deletion gets extended just enough to remove **immediate** dangling. Since the temporary variable is by definition unnamed, any chance of breakage is greatly minimized because other than the parameter it was directly passed to, nothing else has a reference to it.
 
 ### Who would even use these features? Their isn't sufficient use to justify these changes.
 
