@@ -59,25 +59,6 @@ a code
 }
 </style>
 
-<!--
-    - [Value Categories](#value-categories)
-
-  - [The conditions](#the-conditions)
-    - [Expectations](#expectations)
-
-    - [Future](#future)
-      - [Proposal #1: `C++` with `static storage duration`](#proposal-1-c-with-static-storage-duration)
-      - [Proposal #2: `C` `compound literals` with `static storage duration`](#proposal-2-c-compound-literals-with-static-storage-duration)
-      - [Optional Addendum #1 - Deduplication](#optional-addendum-1-deduplication)
-      - [Optional Addendum #2 - Undefined Strings](#optional-addendum-2-undefined-strings)
-      - [Optional Addendum #3 - Arrays](#optional-addendum-3-arrays)
-      - [Optional Addendum #4 - Address of literal](#optional-addendum-4-address-of-literal)
-      - [Optional Addendum #5 - Delayed Initialization](#optional-addendum-5-delayed-initialization)
-    - [A common example](#a-common-example)
-  - [The conditions](#the-conditions)
-  - [Rationale](#rationale)
--->
-
 ## Table of contents
 
 - [implicit constant initialization](#implicit-constant-initialization)
@@ -431,7 +412,7 @@ Personally, `p0936r0` [^bindp] or something similar should be adopted regardless
 11.4.5.3), it shall ensure that a constructor is called for the temporary object. Similarly, the destructor
 shall be called for a temporary with a non-trivial destructor (11.4.7). Temporary objects are destroyed ++via automatic storage duration (6.7.5.4) associated with the enclosing block of the expression as if the compiler was naming the temporaries anonymously or via automatic storage duration associated with the enclosing block of the variable to which the temporary is assigned, whichever is greater lifetime.++~~as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created. This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specifc subexpression.~~
 
-~~<sub>5</sub> There are three contexts in which temporaries are destroyed at a diﬀerent point than the end of the full expression. The frst context is when a default constructor is called to initialize an element of an array with no corresponding initializer (9.4). The second context is when a copy constructor is called to copy an element of an array while the entire array is copied (7.5.5.3, 11.4.5.3). In either case, if the constructor has one or more default arguments, the destruction of every temporary created in a default argument is sequenced before the construction of the next array element, if any.~~
+~~<sub>5</sub> There are three contexts in which temporaries are destroyed at a different point than the end of the full expression. The first context is when a default constructor is called to initialize an element of an array with no corresponding initializer (9.4). The second context is when a copy constructor is called to copy an element of an array while the entire array is copied (7.5.5.3, 11.4.5.3). In either case, if the constructor has one or more default arguments, the destruction of every temporary created in a default argument is sequenced before the construction of the next array element, if any.~~
 
 ~~<sub>6</sub> The third context is when a reference binds to a temporary object.<sup>29</sup> The temporary object to which the reference is bound or the temporary object that is the complete object of a subobject to which the reference is bound persists for the lifetime of the reference if the glvalue to which the reference is bound was obtained through one of the following:~~
 
@@ -1837,6 +1818,35 @@ When programmers use temporaries, unnamed variables, instead of named variables,
 
 Consequently, this indeterminiteness remains regards of whether the temporary was scoped to the statement or the block. While the point of creation remains the same, the point of deletion gets extended just enough to remove **immediate** dangling. Since the temporary variable is by definition unnamed, any chance of breakage is greatly minimized because other than the parameter it was directly passed to, nothing else has a reference to it.
 
+#### general lifetime extension
+
+The proposed lifetimes matches or exceeds those of the current temporary lifetime extension rules in `C++`. In all of the standard examples the temporary lifetime is extended to the assigned variable.
+
+**6.7.7 Temporary objects** [^n4910]
+
+```cpp
+template<typename T> using id = T;
+
+int i = 1;
+int&& a = id<int[3]>{1, 2, 3}[i]; // temporary array has same lifetime as a
+const int& b = static_cast<const int&>(0); // temporary int has same lifetime as b
+int&& c = cond ? id<int[3]>{1, 2, 3}[i] : static_cast<int&&>(0);
+// exactly one of the two temporaries is lifetime-extended
+
+// ...
+
+const int& x = (const int&)1; // temporary for value 1 has same lifetime as x
+
+// ...
+
+struct S {
+  const int& m;
+};
+const S& s = S{1}; // both S and int temporaries have lifetime of s
+```
+
+However, in reality, since all of these initial assignments are to the block then the real lifetime is to the block that contains the expression that contains the temporary. This is the same as the "Temporaries are just anonymously named variables" feature. However, when the initialization statement is passed directly as an argument of a function call than it is the current statement lifetime since the argument is the variable. In other words, no additional life was given. The "Temporaries are just anonymously named variables" feature improves the consistency by giving these argument temporaries the same block lifetime in order to eliminate immediate dangling and reduce further dangling. The "general lifetime extension" feature examines the `?:` ternary operator example and asks the question shouldn't this work for variables that are delayed initialized or reinitialized inside of the `if` and `else` clauses of `if/else` statements? Shouldn't the block of the variable declared above a `if/else` statement be used over the blocks of `if` and `else` clause where the temporary was assigned? This seems reasonable and would fix even more dangling. With all three features most if not all moderate dangling is fixed within any given function and all we are left with are the ultra complicated and rarely done dangling or the ultra easy returning reference dangling that only occurs in predictable places between functions when returning or coawaiting.
+
 ### Who would even use these features? Their isn't sufficient use to justify these changes.
 
 Everyone ... Quite a bit, actually
@@ -1898,6 +1908,34 @@ I am not opposed to this as this would provide access to much of the same benefi
 1. This doesn't actually remove any dangling from the language. It would still be a manual programmer effort.
 
 By itself, `constinit` arguments does not address `temporaries are just anonymously named variables` and `general lifetime extension`.
+
+### Doesn't this make C++ harder to teach?
+
+Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners. As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.
+
+So, what do we teach now and what bearing does these teachings, the `C++` standard and this proposal have on one another.
+
+**C++ Core Guidelines**<br/>**F.42: Return a `T*` to indicate a position (only)** [^cppcgrf42]<br/>***Note** Do not return a pointer to something that is not in the caller’s scope; see F.43.* [^cppcgrf43]
+
+Returning references to something in the caller's scope is only natural. It is a part of our reference delegating programming model. A function when given a reference does not know how the instance was created and it doesn't care as long as it is good for the life of the function call (and beyond).  Unfortunately, scoping temporary arguments to the statement instead of the containing block doesn't just create immediate dangling but it provides to functions references to instances that are near death. These instances are almost dead on arrival. Having the ability to return a reference to a caller's instance or a sub-instance thereof assumes, correctly, that reference from the caller's scope would still be alive after this function call. The fact that temporary rules shortened the life to the statement is at odds with what we teach. This proposal restores to temporaries the lifetime of anonymously named variables which is not only natural but also consistent with what programmers already know. It is also in line with what we teach as was codified in the C++ Core Guidelines.
+
+Other types of dangling can still occur. One simple type is directly called out in the C++ Core Guidelines.
+
+**C++ Core Guidelines**<br/>**F.43: Never (directly or indirectly) return a pointer or a reference to a local object** [^cppcgrf43]
+
+***Reason** To avoid the crashes and data corruption that can result from the use of such a dangling pointer.* [^cppcgrf43]
+
+Other than turning some of these locals into global, this proposal does not solve nor contradict this teaching. If anything, by cleaning up the other dangling it makes the remaining more visible. Also by hollowing out the majority and most common dangling in the middle, programmers are left with only these ultra trivial, such as F.43 [^cppcgrf43], or the ultra rare and ultimately more complex dangling, which is naturally avoided by keeping one's code simple.
+
+Further, what is proposed is easy to teach because we already teach it and it makes `C++` even easier to teach.
+
+- We already teach that native string literals don't dangle because they have static storage duration. This proposal just extends the concept to other literals particularly constants as expected. This increases good consistency and reduces a bifurcation that is currently taught.
+- We already teach RAII and that local variables are scoped to the block that contains them. This proposal just extends the concept to temporaries. This increases good consistency and removes or reduces a bifurcation that is currently taught; that variables and temporaries are all that different or that named and unnamed variables are different.
+- Somehow we already teach the temporary lifetime extension rules which consist of numerous paragraphs and exception examples. These get replaced or greatly reduced to a few lines of verbage derived from `C`'s rule which is only a couple of sentences.
+    
+All of this can be done without adding any new keywords or any attributes. We just use concept and variable concepts that beginners are already familiar with.
+
+`C++` programmers are trapeze artists flying over the flames of dangling. This proposal shines a spotlight on the safety net that `C++` already has via constants on one axis and variables on the opposing axis. Isn't it high time we raise the net off of the ground floor so it can help catch us when we inevitably fall.
 
 ## References
 
@@ -1961,6 +1999,10 @@ By itself, `constinit` arguments does not address `temporaries are just anonymou
 [^p2012r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf>
 <!--C++ Core Guidelines-->
 [^cppcgrfin]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rf-in>
+<!--C++ Core Guidelines - F.42: Return a T* to indicate a position (only) -->
+[^cppcgrf42]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only>
+<!--C++ Core Guidelines - F.43: Never (directly or indirectly) return a pointer or a reference to a local object-->
+[^cppcgrf43]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object>
 <!---->
 <!--
 [^]: <>
