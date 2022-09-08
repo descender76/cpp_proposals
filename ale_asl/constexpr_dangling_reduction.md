@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-05</td>
+<td>2022-09-07</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -104,7 +104,7 @@ a code
 
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
 - elaborated on the "Summary" section
-- added to "Frequently Asked Questions" section information concerning breakage, use, impact on static analyzers and `constinit`
+- added to "Frequently Asked Questions" section information concerning breakage, use, impact on static analyzers, `constinit`, implementability and teachability
 - verbiage clarifications
 - some pruning
 - added the fundamental flaw segment
@@ -117,9 +117,7 @@ a code
 - Numerous verbiage clarifications
 - Greatly reduced the `Why not before` section
 - `std::initializer_list` example automatically fixed without using `const`
-<!--
-  - [Ancillary examples](#ancillary-examples)
--->
+
 ## Abstract
 
 *"Lifetime issues with references to temporaries can lead to fatal and subtle runtime errors. This applies to
@@ -1327,31 +1325,6 @@ use_the_ref(reference);
 
 The variable `s` would mostly be usable. No variables would immediately dangle. The variable `s` could be used safely by any statements that follow its initialization. It could be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. By default, the variable could be used safely when anonymously passed as a argument to a function. If the function returned a reference to the argument or any part of it than there would not be further dangling unless the developer manually propagated the reference lower on the stack such as with a return. Even the benefit of anonymity when using temporaries are not lost and the longer lifetime doesn't impact other instances that don't even have access to said temporary. In short, programmers are freed from much dangling. Further, much the remaining dangling coalesces around returns and yields.
 
-<!--
----
-
-Regardless, dangling would still be possible, especially for non constant expressions. Those could be fixed by some future, non constant expression proposals.
-
-For instance, stackoverflow has a good example of dangling with `Compund literals storage duration in C` [^sogcccompoundliterals].
-
-```cpp
-/* Example 2 - if statements with braces */
-
-double *coefficients, value;
-
-if(x){
-    coefficients = (double[3]) {1.5, -3.0, 6.0};
-}else{
-    coefficients = (double[3]) {4.5, 1.0, -3.5};
-}
-value = evaluate_polynomial(coefficients);
-```
-
-If `coefficients` was const, as it should be since all control paths lead to constant expressions, than even this example would not dangle with this proposal. While this example is an example of dangling, it is also an example of uninitialized or more specifically delayed initialization. Interestingly, perhaps in the future, the binding block in question could be the block where `coefficients` is defined, that is the block containing the unitialized variable that is assigned to a constant expression, instead of the block where the uninitialized `coefficients` is initiated. This refinement to the `C` and `C++` rules would fix even more non constexpr dangling in a simple reasonable way.
-
-Once these trivial dangling is removed from the language, the remaining non const dangling could be handled by `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] or by some similar proposal preferably by fixing it if it makes sense or by a hard error if it really is a decision that the programmer must make.
--->
-
 #### C++ Standard
 
 It is also good to consider how the `C++` standard impacts this proposal and how the standard may be impacted by such a proposal.
@@ -1375,10 +1348,6 @@ String literals are traditionally one of the most common literals and in `C++` t
 </table>
 
 This proposal aligns or adjusts [constant] literals not only with `C` compound literals but also with `C++` string literals. It too should be noted that `C++` is seemingly inconsistent on whether other string like literals should behave lifetime wise like string. Are array literals of `static storage duration`? What about if the array was of characters? What about string like literals such as std::string and std::string_view?
-
-<!--
-If currently unspecifed, this proposal favors making both native and custom literals that are constant expressions into `static storage duration`.
--->
 
 `C++` also says the *"effect of attempting to modify a string literal object is undefined."* With us having `const` for so long, there is few reasons left for this to go undefined. Undefined behavior doesn't make constants and non constant literals any easier to deal with. A string literal could have **static storage duration** for constant expressions and **automatic storage duration** for **non** constant expressions, just like other literals. The lifetime of the `automatic storage duration` could be the `C` rule of the enclosing block since it is safer than `C++`. This would further increase the consistency between string literals and custom/constexpr literals. However, considering that string literals currently have `static storage duration` and we want to reduce dangling instead of increasing it by making the lifetime too narrow, it would be reasonable to include rules for uninitialized and general lifetime extension via `Bind Returned/Initialized Objects to the Lifetime of Parameters` [^bindp] before nudging string literals closer to non string literals.
 
@@ -1438,11 +1407,7 @@ A a3{1.0, 1}; // error: narrowing conversion
 A a4(1.0, 1); // well-formed, but dangling reference
 A a5(1.0, std::move(n)); // OK
 ```
-<!--
-The `struct` `A` is a `LiteralType` so it can be constructed at compile time. Provided that the second parameter was `const`, with this proposal, `a2` would not be dangling if f() too was a constant expression. Also `a4` would also not be dangling. The `a4` example does not need jumping to the signature of the `f` function to figure out if it is a constant expression as is the case of the `a2` example. Really the `a4` example is surprising to current developers that it would be dangling since the native literals 1.0 and 1 can be constant expressions.
 
-It should also be noted that the `C++11` brace initialization does not or should not create another block scope.
--->
 The `a2` and `a4` initializations would no longer dangle when the temporary has automatic storage duration associated with the enclosing block as the code would be same had it been written as follows:
 
 ```cpp
@@ -1462,8 +1427,6 @@ std::initializer_list<int> i4;
 A() : i4{ 1, 2, 3 } {} // ill-formed, would create a dangling reference
 };
 ```
-
-<!--According to this proposal, if const was added i4, then this example would neither be ill formed or dangling.-->
 
 According to this proposal, this example would neither be ill formed or dangling as initializer lists expects a const array, arrays can be constexpr constructed and the array was constant-initialized. Thus implicit constant initialization would kick in.
 
@@ -1766,7 +1729,7 @@ What is more interesting is these two examples of constants have different value
 
 ### Won't this break a lot of existing code?
 
-NO, if any. To the contrary, code that is broken is now fixed. Code that would be invalid is now valid, makes sense and can be rationally explained. Let me summarize based on the two features of this proposal.
+NO, if any. To the contrary, code that is broken is now fixed. Code that would be invalid is now valid, makes sense and can be rationally explained. Let me summarize based on the three features of this proposal.
 
 #### Let constants be constants / free your constants / implicit constant initialization
 
@@ -1792,7 +1755,7 @@ It should also be noted that while this enhancement is applied implicitly, progr
 
 1. The programmer of the type must have provided a means for the type to be constructed at compile time likely by having a `constexpr` constructor.
 1. The programmer of the variable or function parameter must have stated that they want a `const`.
-1. The end programmer have `const-initialized` the type.
+1. The end programmer have `const-initialized` the variable or argument.
 
 Having expressed contant requirements three times, it is pretty certain that the end programmer wanted a constant even if it is anonymous.
 
@@ -1816,7 +1779,7 @@ When programmers use temporaries, unnamed variables, instead of named variables,
 </tr>
 </table>
 
-Consequently, this indeterminiteness remains regards of whether the temporary was scoped to the statement or the block. While the point of creation remains the same, the point of deletion gets extended just enough to remove **immediate** dangling. Since the temporary variable is by definition unnamed, any chance of breakage is greatly minimized because other than the parameter it was directly passed to, nothing else has a reference to it.
+Consequently, this indeterminiteness remains regards of whether the temporary was scoped to the statement or the block. In this proposal, while the point of creation remains the same, the point of deletion gets extended just enough to remove **immediate** dangling. Since the temporary variable is by definition unnamed, any chance of breakage is greatly minimized because other than the parameter it was directly passed to, nothing else has a reference to it.
 
 #### general lifetime extension
 
@@ -1909,6 +1872,30 @@ I am not opposed to this as this would provide access to much of the same benefi
 
 By itself, `constinit` arguments does not address `temporaries are just anonymously named variables` and `general lifetime extension`.
 
+### Can this even be implemented?
+
+Again, let's look at this on a feature by feature basis.
+
+#### Let constants be constants / free your constants / implicit constant initialization
+
+`C++` already provides static storage duration guarantee for instances of one type and allows it for many others.
+
+- native string literals already have static storage duration
+- compilers have been free for a long time to promote compile time constructed instances to have static storage duration
+- any `LiteralType` instances that are constant-initialized are already prime candidates for compilers to promote to having static storage duration
+
+#### Temporaries are just anonymously named variables / `C99` compound literals lifetime rule
+
+`C++` is already doing this for variable and for some instances of temporaries. What is proposed is that all temporaries should consistently benefit from this feature and for even temporaries to be made consistent with variables.
+
+#### general lifetime extension
+
+Let's say for a moment that this feature can't be implemented (easily). That is OK. It is an optional addendum to the "Temporaries are just anonymously named variables" feature. The two primary features already provides significant value whether individually or combined. It may even be advisable to release the primary functionality in one release, let the dust settle and then consider the addendum in another release.
+
+However, this feature is simple. A compiler already knows when any variable is destroyed. So for this feature to work the compiler just needs a index on a per function basis to allow looking up the point of variable destruction given the variable again assuming this isn't already a part of the variable metadata in the compiler. Best case this is a member access. Worst case it is a map.
+
+This cost, additional or not, pails in comparison to proposals that fix dangling generally. Those have quadratic or exponential costs resolving variable dependency graphs. So it is a little hard to object to this proposal's cost without swearing off fixing dangling in the language altogether. Further, `C++` is already doing something similar with the `?:` ternary temporary lifetime extension example; *6.7.7 Temporary objects* [^n4910].
+
 ### Doesn't this make C++ harder to teach?
 
 Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners. As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.
@@ -1925,7 +1912,7 @@ Other types of dangling can still occur. One simple type is directly called out 
 
 ***Reason** To avoid the crashes and data corruption that can result from the use of such a dangling pointer.* [^cppcgrf43]
 
-Other than turning some of these locals into global, this proposal does not solve nor contradict this teaching. If anything, by cleaning up the other dangling it makes the remaining more visible. Also by hollowing out the majority and most common dangling in the middle, programmers are left with only these ultra trivial, such as F.43 [^cppcgrf43], or the ultra rare and ultimately more complex dangling, which is naturally avoided by keeping one's code simple.
+Other than turning some of these locals into globals, this proposal does not solve nor contradict this teaching. If anything, by cleaning up the other dangling it makes the remaining more visible. Also by hollowing out the majority and most common dangling in the middle, programmers are left with only these ultra trivial, such as F.43 [^cppcgrf43], or the ultra rare and ultimately more complex dangling, which is naturally avoided by keeping one's code simple.
 
 Further, what is proposed is easy to teach because we already teach it and it makes `C++` even easier to teach.
 
@@ -1933,7 +1920,7 @@ Further, what is proposed is easy to teach because we already teach it and it ma
 - We already teach RAII and that local variables are scoped to the block that contains them. This proposal just extends the concept to temporaries. This increases good consistency and removes or reduces a bifurcation that is currently taught; that variables and temporaries are all that different or that named and unnamed variables are different.
 - Somehow we already teach the temporary lifetime extension rules which consist of numerous paragraphs and exception examples. These get replaced or greatly reduced to a few lines of verbage derived from `C`'s rule which is only a couple of sentences.
     
-All of this can be done without adding any new keywords or any attributes. We just use concept and variable concepts that beginners are already familiar with.
+All of this can be done without adding any new keywords or any new attributes. We just use constant and variable concepts that beginners are already familiar with.
 
 `C++` programmers are trapeze artists flying over the flames of dangling. This proposal shines a spotlight on the safety net that `C++` already has via constants on one axis and variables on the opposing axis. Isn't it high time we raise the net off of the ground floor so it can help catch us when we inevitably fall.
 
