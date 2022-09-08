@@ -28,9 +28,6 @@ Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;
 </table>
 
 # implicit constant initialization
-<!--
-# temporaries are anonymously named variables
--->
 
 <style>
 .inline-link
@@ -105,8 +102,7 @@ a code
 - added new "Other Anonymous Things" section which covers lambda functions and coroutines
 - elaborated on the "Summary" section
 - added to "Frequently Asked Questions" section information concerning breakage, use, impact on static analyzers, `constinit`, implementability and teachability
-- verbiage clarifications
-- some pruning
+- verbiage clarifications and pruning
 - added the fundamental flaw segment
 
 ### R1
@@ -974,7 +970,7 @@ complex z(1,2); // the variable z can be constructed at compile time
 const complex cz(1,2); // the const cz can potentially be put in ROM
 ```
 
-*"**Personally, I prefer (1): basically, a value is a literal if it is composed out of literals and implemented by a literal constructor. The problem with that is that some people will not trust compilers to do proper resolution, placement in ROM, placement in text segment**, etc. Choosing that solution would require text in the standard to constrain and/or guide implementations."*
+*"**Personally, I prefer (1): basically, a value is a literal if it is composed out of literals and implemented by a literal constructor. The problem with that is that some people will not trust compilers to do proper resolution, placement in ROM, placement in text segment**"*
 
 *"**C99 compound literals**"*
 
@@ -984,26 +980,9 @@ const complex cz(1,2); // the const cz can potentially be put in ROM
 f(&(struct foo) { 1,2 });
 ```
 
-*"**This makes sense only if we assume that the {1,2} is stored in a data segment (like a string literal**, but different from a int literal). **I see no problem allowing that, as long as it is understood that unless & is explicitly used or the literal, a user-defined literal is an rvalue** with which the optimizer has a free hand."*
+*"**This makes sense only if we assume that the {1,2} is stored in a data segment (like a string literal**, but different from a int literal). **I see no problem allowing that**"*
 
-*"**It would be tempting to expand this rule to user-defined literals bound to references.** For example:"*
-
-```cpp
- void f(complex&);
- // …
- f(complex(1,2)); // ok?
-```
-
-*"However, this would touch upon some rather brittle parts of the overload resolution rules to do with rvalue vs. lvalue. For example:"*
-
-```cpp
- vector<int> v;
- // ...
- vector<int>().swap(v); // ok
- swap(vector<int>(), v); // would become ok
-```
-
-*"I suggest we don’t touch this **unless we are looking at the rvalue/lvalue rules for other reasons.**"*
+*"**It would be tempting to expand this rule to user-defined literals bound to references.**"*
 
 </td>
 </tr>
@@ -1040,7 +1019,7 @@ While both constant-initialized constant expressions are the same, the detail th
 
 *"**3. Static initialization of objects with static storage.**"*
 
-*"Similarly, we do not propose to change the already complex and subtle distinction between “static initialization” and “dynamic initialization”. However **we strive for more uniform and consistency among related C++ language features and compatibility**"*
+*"... However **we strive for more uniform and consistency among related C++ language features and compatibility**"*
 
 *"**3 Problems**"*
 
@@ -1054,13 +1033,7 @@ While both constant-initialized constant expressions are the same, the detail th
 
 *"The focus of this proposal is to address the issues mentioned in preceding sections. However, discussions in the Core Working Group at the Berlin meeting (April 2006) concluded that the current rules for integral constant expressions are too complicated, and source of several Defect Reports. **Consequently, a “cleanup”, i.e. adoption of simpler, more general rules is suggested.**"*
 
-*"4 Suggestions for C++0x"*
-
-*"Second, we introduce “literals for user-defined type” based on the notion of constant expression constructors."*
-
-*"4.2 Constant-expression data"*
-
-*"A constant-expression value is a variable or data member declared with the constexpr specifier."*
+...
 
 *"As for other const variables, storage need not be allocated for a constant expression datum, unless its address is taken."*
 
@@ -1896,6 +1869,38 @@ However, this feature is simple. A compiler already knows when any variable is d
 
 This cost, additional or not, pails in comparison to proposals that fix dangling generally. Those have quadratic or exponential costs resolving variable dependency graphs. So it is a little hard to object to this proposal's cost without swearing off fixing dangling in the language altogether. Further, `C++` is already doing something similar with the `?:` ternary temporary lifetime extension example; *6.7.7 Temporary objects* [^n4910].
 
+### Doesn't the `implicit constant initialization` feature make it harder for programmers to identify dangling and thus harder to teach?
+
+If there was no dangling than there would be nothing to teach with respect to any dangling feature as the whole standard is not taught. So the more dangling we fix in the language, the less dangling that has to be taught to beginners. Consider the following example, does the new features make it easier or harder to identify dangling?
+
+```cpp
+f({1,2});// implicit constant initialization
+// vs.
+int i = 1;
+f({i, 2});// no implicit constant initialization
+```
+
+The `implicit constant initialization` feature is complimented by the `temporaries are just anonymously named variables` and `general lifetime extension` features. The `temporaries are just anonymously named variables` feature fixes immediate dangling whether it was const or not, whether it was const-initialized or not. It also reduces further dangling by providing life to temporary arguments after the call is made to them.  It doesn't matter if the temporary argument was `implicit constant initialization` or not, as it is usually fixed, either way. As such, programmers look at temporary arguments for dangling a whole lot less. The only time it becomes an issue if the reference provided to the function is returned and propagated **manually** outside the containing scope. The `general lifetime extension` feature takes this a step further by removing or reducing dangling caused by uninitialized, delayed initialization and re-initialization.
+
+Let's say the `C++` community don't want the `temporaries are just anonymously named variables` feature, does `implicit constant initialization`, by itself, make it harder for programmers to identify dangling? In reality, it is a tradeoff, leaning heavily to easier.
+
+It is plain to see that `{1,2}` is constant-initialized as it is composed entirely of `LiteralType`(s). It is also plain to see that `{i,2}` is modifiable as its initialization statement is variable and dynamic due to the variable `i`. So the real questions are as follows:
+
+- Is the first parameter to the function `f` const?
+- Is the type of the first parameter to the function `f` a `LiteralType`?
+
+The fact is some programmer had to have known the answer to both questions in order to have writtern  `f({1,2})` in the first place. The case could be made that it would be nice to be able to use the `constinit` keyword on temporary arguments, `f(constinit {1, 2})`, as this would allow those who don't write the code, such as code reviewers, to quickly validate the code. Even the programmer would benefit, some, if the code was copied. However, `constinit` would mostly be superfluous, if the `temporaries are just anonymously named variables` feature is added and, as such, `constinit` should be optional. Consequently, the negative impact upon identifying and teaching dangling is negligible.
+
+Yet, the `implicit constant initialization` feature, by itself, makes it easier to identify and teach dangling.
+
+**C++ Core Guidelines**<br/>**F.43: Never (directly or indirectly) return a pointer or a reference to a local object** [^cppcgrf43]
+
+...
+
+***Note** This applies only to non-static local variables. All static variables are (as their name indicates) statically allocated, so that pointers to them cannot dangle.* [^cppcgrf43]
+
+Instances that have static storage duration can't dangle. Currently in `C++`, instances that don't immediately dangle can still dangle later such as by returning. Using `static storage duration` short circuits the dangling identification process. An instance, once identified, doesn't need to be factored into any additional dangling decision making process. Using more `static storage duration` speeds up the dangling identification process. This would also be of benefit to static analyzers that goes through a similar thought process.
+
 ### Doesn't this make C++ harder to teach?
 
 Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners. As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.
@@ -1917,7 +1922,10 @@ Other than turning some of these locals into globals, this proposal does not sol
 Further, what is proposed is easy to teach because we already teach it and it makes `C++` even easier to teach.
 
 - We already teach that native string literals don't dangle because they have static storage duration. This proposal just extends the concept to other literals particularly constants as expected. This increases good consistency and reduces a bifurcation that is currently taught.
-- We already teach RAII and that local variables are scoped to the block that contains them. This proposal just extends the concept to temporaries. This increases good consistency and removes or reduces a bifurcation that is currently taught; that variables and temporaries are all that different or that named and unnamed variables are different.
+- We already teach RAII and that local variables are scoped to the block that contains them. This proposal just extends the concept to temporaries. This increases good consistency and removes or reduces multiple bifurcations that are currently taught;
+  - that certain temporaries gets extended when assigned to a block but not when assigned to a argument
+  - that variables and temporaries are all that different
+  - that named and unnamed variables are different
 - Somehow we already teach the temporary lifetime extension rules which consist of numerous paragraphs and exception examples. These get replaced or greatly reduced to a few lines of verbage derived from `C`'s rule which is only a couple of sentences.
     
 All of this can be done without adding any new keywords or any new attributes. We just use constant and variable concepts that beginners are already familiar with.
@@ -1990,96 +1998,3 @@ All of this can be done without adding any new keywords or any new attributes. W
 [^cppcgrf42]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only>
 <!--C++ Core Guidelines - F.43: Never (directly or indirectly) return a pointer or a reference to a local object-->
 [^cppcgrf43]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object>
-<!---->
-<!--
-[^]: <>
--->
-<!--
-recipients
-Tomasz Kamiński <tomaszkam@gmail.com>,
-Gašper Ažman <gasper.azman@gmail.com>,
-t.canens.cpp@gmail.com,
-gdr@microsoft.com,
-Bjarne Stroustrup <bjarne@stroustrup.com>,
-nico@josuttis.de,
-victor.zverovich@gmail.com,
-filipemulonde@gmail.com,
-Arthur O'Dwyer <arthur.j.odwyer@gmail.com>,
-Herb Sutter <hsutter@microsoft.com>,
-Zhihao Yuan <zy@miator.net>,
-std-proposals@lists.isocpp.org
-
-C++ Library Evolution Working Group
-lib-ext@lists.isocpp.org
-changed to
-std-proposals@lists.isocpp.org
-
-Tomasz Kamiński
-tomaszkam@gmail.com
-Gašper Ažman
-gasper.azman@gmail.com
-
-Tim Song
-t.canens.cpp@gmail.com
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html
-A type trait to detect reference binding to temporary
-
-Alex Gilding (Perforce UK)
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html
-The constexpr specifier for object definitions
-
-Jens Gustedt (INRIA France)
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2576r0.html
-The constexpr specifier for object definitions
-
-Martin Uecker
-
-Joseph Myers
-
-Bjarne Stroustrup
-bjarne@stroustrup.com
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2003/n1511.pdf
-Literals for user-defined types
-
-Jens Maurer
-Jens.Maurer@gmx.net
-
-Gabriel Dos Reis
-gdr@microsoft.com
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf
-Generalized Constant Expressions — Revision 5
-
-Nicolai Josuttis
-nico@josuttis.de
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf
-Bind Returned/Initialized Objects to Lifetime of Parameters
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
-Fix the range‐based for loop, Rev1
-
-Victor Zverovich
-victor.zverovich@gmail.com
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
-Fix the range‐based for loop, Rev1
-
-Filipe Mulonde
-filipemulonde@gmail.com
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
-Fix the range‐based for loop, Rev1
-
-Arthur O'Dwyer
-arthur.j.odwyer@gmail.com
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf
-Fix the range‐based for loop, Rev1
-
-Herb Sutter
-hsutter@microsoft.com
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1018r16.html
-CWG900 Lifetime of temporaries in range-based for
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1179r1.pdf
-Lifetime safety: Preventing common dangling
--->
-<!--
-Richard Smith (richardsmith@google.com)
-https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf
-P0936R0 Bind Returned/Initialized Objects to Lifetime of Parameters 
--->
