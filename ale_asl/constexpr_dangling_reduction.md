@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-07</td>
+<td>2022-09-12</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -388,7 +388,7 @@ However, things in the real world tend to be more complicated. Depending upon th
 
 If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but DOES make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
-Personally, `p0936r0` [^bindp] or something similar should be adopted regardless because we give the compiler more information than it had before, that argument(s) lifetime is dependent upon the return(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
+Personally, `p0936r0` [^bindp] or something similar should be adopted regardless because we give the compiler more information than it had before, that a return's lifetime is dependent upon argument(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
 
 ## Proposed Wording
 
@@ -1285,7 +1285,7 @@ auto reference = some_function("hello world"s);
 use_the_ref(reference);// dangle
 ```
 
-The variable `s` would mostly not be usable. All variables would mostly be immediately dangling. The variable `s` could not be used safely by any statements that follow its initialization. It could not be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. The only place the variable could be used safely if it was anonymously passed as a argument to a function. That would allow multiple statements inside the function call to make use of the instance. If the function returned a reference to the argument or any part of it than there would be further dangling even though it is not unreasonable for a function to return a reference to a portion of or a whole instance especially when the instance is known to already be alive lower on the stack. In essence, such a rule **divorces the lifetime of the instance from the variable name**. The only use of this from a programmer's perspective is the anonymity of not naming variables as a form of access control. In short, programmers could not program. Doesn't this sound familiar, for it is our current temporary lifetime rule!
+The variable `s` would not be usable. All variables would mostly be immediately dangling. The variable `s` could not be used safely by any statements that follow its initialization. It could not be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. The only place the variable could be used safely if it was anonymously passed as a argument to a function. That would allow multiple statements inside the function call to make use of the instance. If the function returned a reference to the argument or any part of it than there would be further dangling even though it is not unreasonable for a function to return a reference to a portion of or a whole instance, especially when the instance is known to already be alive lower on the stack. In essence, such a rule **divorces the lifetime of the instance from the variable name**. The only use of this from a programmer's perspective is the anonymity of not naming variables as a form of access control. In short, programmers could not program. Doesn't this sound familiar, for it is our current temporary lifetime rule!
 
 Now, consider for a moment if the C++ rules were that all variables that do not have static storage duration, has automatic storage duration associated with the enclosing block of the expression as if the compiler was naming the temporaries anonymously or associated with the enclosing block of the variable to which the initialization is assigned, whichever is greater lifetime. How useful would that be?
 
@@ -1296,7 +1296,7 @@ auto reference = some_function("hello world"s);
 use_the_ref(reference);
 ```
 
-The variable `s` would mostly be usable. No variables would immediately dangle. The variable `s` could be used safely by any statements that follow its initialization. It could be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. By default, the variable could be used safely when anonymously passed as a argument to a function. If the function returned a reference to the argument or any part of it than there would not be further dangling unless the developer manually propagated the reference lower on the stack such as with a return. Even the benefit of anonymity when using temporaries are not lost and the longer lifetime doesn't impact other instances that don't even have access to said temporary. In short, programmers are freed from much dangling. Further, much the remaining dangling coalesces around returns and yields.
+The variable `s` would be usable. No variables would immediately dangle. The variable `s` could be used safely by any statements that follow its initialization. It could be used safely in nested blocks that follow be that `if`, `for` and `while` statements to name a few. By default, the variable could be used safely when anonymously passed as a argument to a function. If the function returned a reference to the argument or any part of it than there would not be further dangling unless the developer manually propagated the reference lower on the stack such as with a return. Even the benefit of anonymity when using temporaries are not lost and the longer lifetime doesn't impact other instances that don't even have access to said temporary. In short, programmers are freed from much dangling. Further, much the remaining dangling coalesces around returns and yields. This is what is proposed.
 
 #### C++ Standard
 
@@ -1659,11 +1659,11 @@ What is proposed here is increasing the interning that C++ already does, but is 
 
 ## Summary
 
-There are two principles repeated throughout this proposal.
+There are three principles repeated throughout this proposal.
 
 1. Let constants be constants / free your constants / **implicit constant initialization**
 1. **Temporaries are just anonymously named variables** / `C99` compound literals lifetime rule
-    - **general lifetime extension**: sometimes, especially in blocks / not arguments, it is better for a temporary to have automatic storage duration associated with the enclosing block of the variable to which the temporary is assigned instead of being associated with the enclosing block of the temporary expression
+    - [*optional*] **general lifetime extension**: sometimes, especially in blocks / not arguments, it is better for a temporary to have automatic storage duration associated with the enclosing block of the variable to which the temporary is assigned instead of being associated with the enclosing block of the temporary expression
 
 The advantages to `C++` with adopting this proposal is manifold.
 
@@ -1683,7 +1683,7 @@ The advantages to `C++` with adopting this proposal is manifold.
 
 ### What about locality of reference?
 
-It is true that globals can be slower than locals because they are farther in memory from the code that uses them. So let me clarify, when I say `static storage duration`, I really mean **logically** `static storage duration`. If a type has a `constexpr` copy constructor or is a `POD` than there is nothing preventing the compiler from copying the global to a local that is closer to the executing code. Rather, the compiler **must** ensure that the instance is always available; **effectively** `static storage duration`.
+It is true that globals can be slower than locals because they are farther in memory from the code that uses them. So let me clarify, when I say `static storage duration`, I really mean **logically** `static storage duration`. If a type is a `PODType`/`TrivialType` or `LiteralType` than there is nothing preventing the compiler from copying the global to a local that is closer to the executing code. Rather, the compiler **must** ensure that the instance is always available; **effectively** `static storage duration`.
 
 Consider this from an processor and assembly/machine language standpoint. A processor usually has instructions that works with memory. Whether that memory is ROM or is logically so because it is never written to by a program, then we have constants.
 
@@ -1706,7 +1706,7 @@ NO, if any. To the contrary, code that is broken is now fixed. Code that would b
 
 #### Let constants be constants / free your constants / implicit constant initialization
 
-This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken! From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
+This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration, are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken! From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
 
 <table>
 <tr>
@@ -1730,7 +1730,7 @@ It should also be noted that while this enhancement is applied implicitly, progr
 1. The programmer of the variable or function parameter must have stated that they want a `const`.
 1. The end programmer have `const-initialized` the variable or argument.
 
-Having expressed contant requirements three times, it is pretty certain that the end programmer wanted a constant even if it is anonymous.
+Having expressed contant requirements three times, it is pretty certain that the end programmer wanted a constant, even if it is anonymous.
 
 #### Temporaries are just anonymously named variables / `C99` compound literals lifetime rule
 
@@ -1781,7 +1781,7 @@ struct S {
 const S& s = S{1}; // both S and int temporaries have lifetime of s
 ```
 
-However, in reality, since all of these initial assignments are to the block then the real lifetime is to the block that contains the expression that contains the temporary. This is the same as the "Temporaries are just anonymously named variables" feature. However, when the initialization statement is passed directly as an argument of a function call than it is the current statement lifetime since the argument is the variable. In other words, no additional life was given. The "Temporaries are just anonymously named variables" feature improves the consistency by giving these argument temporaries the same block lifetime in order to eliminate immediate dangling and reduce further dangling. The "general lifetime extension" feature examines the `?:` ternary operator example and asks the question shouldn't this work for variables that are delayed initialized or reinitialized inside of the `if` and `else` clauses of `if/else` statements? Shouldn't the block of the variable declared above a `if/else` statement be used over the blocks of `if` and `else` clause where the temporary was assigned? This seems reasonable and would fix even more dangling. With all three features most if not all moderate dangling is fixed within any given function and all we are left with are the ultra complicated and rarely done dangling or the ultra easy returning reference dangling that only occurs in predictable places between functions when returning or coawaiting.
+However, in reality, since all of these initial assignments are to the block then the real lifetime is to the block that contains the expression that contains the temporary. This is the same as the "Temporaries are just anonymously named variables" feature. However, when the initialization statement is passed directly as an argument of a function call than it is the current statement lifetime since the argument is the variable. In other words, no additional life was given. The "Temporaries are just anonymously named variables" feature improves the consistency by giving these argument temporaries the same block lifetime in order to eliminate immediate dangling and reduce further dangling. The "general lifetime extension" feature examines the `?:` ternary operator example and asks the question shouldn't this work for variables that are delayed initialized or reinitialized inside of the `if` and `else` clauses of `if/else` statements? Shouldn't the block of the variable declared above a `if/else` statement be used over the blocks of `if` and `else` clause where the temporary was assigned? This seems reasonable and would fix even more dangling. With all three features, most, if not all, moderate dangling is fixed within any given function and all we are left with are the ultra complicated and rarely done dangling or the ultra easy returning reference dangling that only occurs in predictable places between functions when returning or coawaiting.
 
 ### Who would even use these features? Their isn't sufficient use to justify these changes.
 
@@ -1824,7 +1824,7 @@ The `C++` language is complex. It stands to reason that our tools would have som
 
 With `implicit constant initialization`, existing static analyzers would need to be enhanced to track the `const`ness of variables and parameters, whether or not the types of variables and parameters can be constructed at compile time and whether or not instances were constant-initialized. Until that happens, an existing dangling incident reported by static analyzer will just be a false positive. The total number of incidents remain the same and the programmer just need to recognize that it was a false positive which should be easy to do since constants are trivial and these rules are simple.
 
-What about the `temporaries are just anonymously named variables` feature! Static analyzers need to understand the lifetimes of variables with automatic storage duration regardless. Not quantifying the current life of any given instance and determining whether it even needs to be extended would result in false positives. This already requires tracking braces/blocks/scopes. As such, tracking the statement that contains a temporary is not significantly more complicated than tracking the block that contains said expression and temporary. In all likelihood, that is already being performed. Further, the proposed rules are significantly simpler than the current rules once `general lifetime extension` gets factored in. This was identified by the numerous removals in the "Proposed Wording" section.
+What about the `temporaries are just anonymously named variables` feature! Static analyzers need to understand the lifetimes of variables with automatic storage duration, regardless. Not quantifying the current life of any given instance and determining whether it even needs to be extended would result in false positives. This already requires tracking braces/blocks/scopes. As such, tracking the statement that contains a temporary is not significantly more complicated than tracking the block that contains said expression and temporary. In all likelihood, that is already being performed. Further, the proposed rules are significantly simpler than the current rules, once `general lifetime extension` gets factored in. This was identified by the numerous removals in the "Proposed Wording" section.
 
 ### Why not just allow `constinit` to be used on function arguments?
 
@@ -1832,7 +1832,7 @@ What about the `temporaries are just anonymously named variables` feature! Stati
 some_function_call(constinit "Hello World"s);
 ```
 
-I am not opposed to this as this would provide access to much of the same benefits as `implicit constant initialization`. However, there is at least one pro and couple of con(s) to be considered. The case could be made that both be supported.
+I am not opposed to this, as this would provide access to much of the same benefits as `implicit constant initialization`. However, there is at least one pro and couple of con(s) to be considered. The case could be made that both be supported.
 
 #### Pro
 
@@ -1859,7 +1859,7 @@ Again, let's look at this on a feature by feature basis.
 
 #### Temporaries are just anonymously named variables / `C99` compound literals lifetime rule
 
-`C++` is already doing this for variable and for some instances of temporaries. What is proposed is that all temporaries should consistently benefit from this feature and for even temporaries to be made consistent with variables.
+`C++` is already doing this for variable and for some instances of temporaries. What is proposed is that all temporaries should consistently benefit from this feature and even for temporaries to be made consistent with variables.
 
 #### general lifetime extension
 
@@ -1871,7 +1871,7 @@ This cost, additional or not, pails in comparison to proposals that fix dangling
 
 ### Doesn't the `implicit constant initialization` feature make it harder for programmers to identify dangling and thus harder to teach?
 
-If there was no dangling than there would be nothing to teach with respect to any dangling feature as the whole standard is not taught. So the more dangling we fix in the language, the less dangling that has to be taught to beginners. Consider the following example, does the new features make it easier or harder to identify dangling?
+If there was no dangling than there would be nothing to teach with respect to any dangling feature. Even the whole standard is not taught. So the more dangling we fix in the language, the less dangling that has to be taught to beginners. Consider the following example, does the new features make it easier or harder to identify dangling?
 
 ```cpp
 f({1,2});// implicit constant initialization
@@ -1889,7 +1889,7 @@ It is plain to see that `{1,2}` is constant-initialized as it is composed entire
 - Is the first parameter to the function `f` const?
 - Is the type of the first parameter to the function `f` a `LiteralType`?
 
-The fact is some programmer had to have known the answer to both questions in order to have writtern  `f({1,2})` in the first place. The case could be made that it would be nice to be able to use the `constinit` keyword on temporary arguments, `f(constinit {1, 2})`, as this would allow those who don't write the code, such as code reviewers, to quickly validate the code. Even the programmer would benefit, some, if the code was copied. However, `constinit` would mostly be superfluous, if the `temporaries are just anonymously named variables` feature is added and, as such, `constinit` should be optional. Consequently, the negative impact upon identifying and teaching dangling is negligible.
+The fact is some programmer had to have known the answer to both questions in order to have writtern  `f({1,2})` in the first place. The case could be made that it would be nice to be able to use the `constinit` keyword on temporary arguments, `f(constinit {1, 2})`, as this would allow those who don't write the code, such as code reviewers, to quickly validate the code. Even the programmer would benefit, some, if the code was copied. However, `constinit` would mostly be superfluous, if the `temporaries are just anonymously named variables` feature is added. As such, `constinit` should be optional. Consequently, the negative impact upon identifying and teaching dangling is negligible.
 
 Yet, the `implicit constant initialization` feature, by itself, makes it easier to identify and teach dangling.
 
@@ -1921,13 +1921,13 @@ Other than turning some of these locals into globals, this proposal does not sol
 
 Further, what is proposed is easy to teach because we already teach it and it makes `C++` even easier to teach.
 
-- We already teach that native string literals don't dangle because they have static storage duration. This proposal just extends the concept to other literals particularly constants as expected. This increases good consistency and reduces a bifurcation that is currently taught.
+- We already teach that native string literals don't dangle because they have static storage duration. This proposal just extends the concept to constants, as expected. This increases good consistency and reduces a bifurcation that is currently taught.
 - We already teach RAII and that local variables are scoped to the block that contains them. This proposal just extends the concept to temporaries. This increases good consistency and removes or reduces multiple bifurcations that are currently taught;
   - that certain temporaries gets extended when assigned to a block but not when assigned to a argument
   - that variables and temporaries are all that different
   - that named and unnamed variables are different
-- Somehow we already teach the temporary lifetime extension rules which consist of numerous paragraphs and exception examples. These get replaced or greatly reduced to a few lines of verbage derived from `C`'s rule which is only a couple of sentences.
-    
+- Somehow, we already teach the temporary lifetime extension rules which consist of numerous paragraphs and exception examples. These get replaced or greatly reduced to a few lines of verbage derived from `C`'s rule, which is only a couple of sentences.
+
 All of this can be done without adding any new keywords or any new attributes. We just use constant and variable concepts that beginners are already familiar with.
 
 `C++` programmers are trapeze artists flying over the flames of dangling. This proposal shines a spotlight on the safety net that `C++` already has via constants on one axis and variables on the opposing axis. Isn't it high time we raise the net off of the ground floor so it can help catch us when we inevitably fall.
