@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-19</td>
+<td>2022-09-20</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -375,16 +375,16 @@ int main()
   else
   {
     // delayed initialization
-    //x = ref2pointer(statement_scope x_factory(4, 2));// dangles
-    //x = ref2pointer(block_scope x_factory(4, 2));// dangles
+    //x = statement_scope ref2pointer(x_factory(4, 2));// dangles
+    //x = block_scope ref2pointer(x_factory(4, 2));// dangles
     x = variable_scope ref2pointer(x_factory(4, 2));// freed of dangle
   }
 }
 ```
 
-According to this proposal, `constinit ref2pointer({2, 4})` would undergo implicit `constant initialization` so that expression would not dangle.
+According to this proposal, `constinit ref2pointer({2, 4})` would receive static storage duration. As such that temporary would not dangle.
 
-The variable `x` would dangle if initialized with the expression `ref2pointer([statement_scope] x_factory(4, 2))` when the scope is bound to the containing statement. The variable would also dangle if initialized with the expression `ref2pointer(block_scope x_factory(4, 2))` when the scope is bound to the containing block. The variable would NOT dangle if initialized with the expression `variable_scope ref2pointer(x_factory(4, 2))` when the scope is bound to the lifetime of the variable to which the temporary is assigned, in this case `x`.
+The variable `x` would dangle if initialized with the expression `statement_scope ref2pointer(x_factory(4, 2))` when the scope is bound to the containing statement. The variable would also dangle if initialized with the expression `block_scope ref2pointer(x_factory(4, 2))` when the scope is bound to the containing block. The variable would NOT dangle if initialized with the expression `variable_scope ref2pointer(x_factory(4, 2))` when the scope is bound to the lifetime of the variable to which the temporary is assigned, in this case `x`.
 
 *It should also be noted that these temporary specifiers are propagated to inner temporaries until they are overridden again. The expression `x_factory(4, 2)` is what needed the specifier but it more convenient for the programmer to put it before the complete temporary expression. Also the specifier applies also to any automatic conversions/initializations performed.*
 
@@ -1207,7 +1207,7 @@ else
 </tr>
 </table>
 
-In the `values` example, there is no dangling. Programmers trust the compiler to allocate and deallocate instances on the stack. They have to because the programmer has little to no control over deallocation. Neither of the `pointers` or `references` examples compile without utility functions to convert from reference to pointer and immediately invoked lambda functions to do complex initialization of references since they have to be initialized and their references can't currently be reassigned no matter how useful that would be. That boiler plate exist in an earlier example in this proposal and has been removed for clarity. With the current `C++` statement scope rules or the `C99` block scope rule, both the `pointers` and `references` examples dangle. In other words, the compiler who is primarily responsible for the stack has rules that causes dangling and embarrassing worse immediate dangling. Variable scope is better because it matches value semantics and it avoids dangling throughout the body of the function whether it is anything that introduces new blocks be that `if`, `switch`, `while`, `for` and nesting of these constructs.
+In the `values` example, there is no dangling. Programmers trust the compiler to allocate and deallocate instances on the stack. They have to because the programmer has little to no control over deallocation. Neither of the `pointers` or `references` examples compile without utility functions to convert from reference to pointer and immediately invoked lambda functions to do complex initialization of references since they have to be initialized and their references can't currently be reassigned no matter how useful that would be. That boiler plate exist in an earlier example in this proposal and has been removed for clarity. With the current `C++` statement scope rules or the `C99` block scope rule, both the `pointers` and `references` examples dangle. In other words, the compilers who are primarily responsible for the stack has rules that causes dangling and embarrassing worse immediate dangling. This violates the programmer's trust in their compiler. Variable scope is better because it restores the programmer's trust in their compiler/language by causing temporaries to match the value semantics of variables. Further, it avoids dangling throughout the body of the function whether it is anything that introduces new blocks/scopes be that `if`, `switch`, `while`, `for` statements and the nesting of these constructs.
 
 ### How do these specifiers propagate?
 
@@ -1228,13 +1228,13 @@ TODO
 
 ### Doesn't this make C++ harder to teach?
 
-Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners.<!--As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.-->
+Until the day that all dangling gets fixed, any new tools to assist developer's in fixing dangling would still require programmers to be able to identify any dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners.<!--As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.-->
 
 So, what do we teach now and what bearing does these teachings, the `C++` standard and this proposal have on one another.
 
 **C++ Core Guidelines**<br/>**F.42: Return a `T*` to indicate a position (only)** [^cppcgrf42]<br/>***Note** Do not return a pointer to something that is not in the caller’s scope; see F.43.* [^cppcgrf43]
 
-Returning references to something in the caller's scope is only natural. It is a part of our reference delegating programming model. A function when given a reference does not know how the instance was created and it doesn't care as long as it is good for the life of the function call (and beyond).  Unfortunately, scoping temporary arguments to the statement instead of the containing block doesn't just create immediate dangling but it provides to functions references to instances that are near death. These instances are almost dead on arrival. Having the ability to return a reference to a caller's instance or a sub-instance thereof assumes, correctly, that reference from the caller's scope would still be alive after this function call. The fact that temporary rules shortened the life to the statement is at odds with what we teach. This proposal allows programmers to restore to temporaries the lifetime of anonymously named variables which is not only natural but also consistent with what programmers already know. It is also in line with what we teach as was codified in the C++ Core Guidelines.
+Returning references to something in the caller's scope is only natural. It is a part of our reference delegating programming model. A function when given a reference does not know how the instance was created and it doesn't care as long as it is good for the life of the function call and beyond. Unfortunately, scoping temporary arguments to the statement instead of the containing block doesn't just create immediate dangling but it provides to functions references to instances that are near death. These instances are almost dead on arrival. Having the ability to return a reference to a caller's instance or a sub-instance thereof assumes, correctly, that reference from the caller's scope would still be alive after this function call. The fact that temporary rules shortened the life to the statement is at odds with what we teach. This proposal allows programmers to restore to temporaries the lifetime of anonymously named variables which is not only natural but also consistent with what programmers already know. It is also in line with what we teach as was codified in the C++ Core Guidelines.
 
 ## References
 
