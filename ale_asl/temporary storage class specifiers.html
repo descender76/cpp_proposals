@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>
+        temporary storage class specifiers - HackMD
+    </title>
+    <link rel="icon" type="image/png" href="https://hackmd.io/favicon.png">
+    <link rel="apple-touch-icon" href="https://hackmd.io/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" integrity="sha256-3iu9jgsy9TpTwXKb7bNQzqWekRX7pPK+2OLj3R922fo=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css" integrity="sha256-QiWfLIsCT02Sdwkogf6YMiQlj4NE84MKkzEMkZnMGdg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css" integrity="sha256-vtR0hSWRc3Tb26iuN2oZHt3KRUomwTufNIf5/4oeCyg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@hackmd/emojify.js@2.1.0/dist/css/basic/emojify.min.css" integrity="sha256-UOrvMOsSDSrW6szVLe8ZDZezBxh5IoIfgTwdNDgTjiU=" crossorigin="anonymous" />
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i|Source+Code+Pro:300,400,500|Source+Sans+Pro:300,300i,400,400i,600,600i|Source+Serif+Pro&subset=latin-ext);.hljs{background:#fff;color:#333;display:block;overflow-x:auto;padding:.5em}.hljs-comment,.hljs-meta{color:#969896}.hljs-emphasis,.hljs-quote,.hljs-string,.hljs-strong,.hljs-template-variable,.hljs-variable{color:#df5000}.hljs-keyword,.hljs-selector-tag,.hljs-type{color:#a71d5d}.hljs-attribute,.hljs-bullet,.hljs-literal,.hljs-number,.hljs-symbol{color:#0086b3}.hljs-built_in,.hljs-builtin-name{color:#005cc5}.hljs-name,.hljs-section{color:#63a35c}.hljs-tag{color:#333}.hljs-attr,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-selector-pseudo,.hljs-title{color:#795da3}.hljs-addition{background-color:#eaffea;color:#55a532}.hljs-deletion{background-color:#ffecec;color:#bd2c00}.hljs-link{text-decoration:underline}.markdown-body{word-wrap:break-word;font-size:16px;line-height:1.5}.markdown-body:after,.markdown-body:before{content:"";display:table}.markdown-body:after{clear:both}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body .absent{color:#c00}.markdown-body .anchor{float:left;line-height:1;margin-left:-20px;padding-right:4px}.markdown-body .anchor:focus{outline:none}.markdown-body blockquote,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-bottom:16px;margin-top:0}.markdown-body hr{background-color:#e7e7e7;border:0;height:.25em;margin:24px 0;padding:0}.markdown-body blockquote{border-left:.25em solid #ddd;color:#777;font-size:16px;padding:0 1em}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body kbd,.popover kbd{background-color:#fcfcfc;border:1px solid;border-color:#ccc #ccc #bbb;border-radius:3px;box-shadow:inset 0 -1px 0 #bbb;color:#555;display:inline-block;font-size:11px;line-height:10px;padding:3px 5px;vertical-align:middle}.markdown-body .loweralpha{list-style-type:lower-alpha}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{font-weight:600;line-height:1.25;margin-bottom:16px;margin-top:24px}.markdown-body h1 .octicon-link,.markdown-body h2 .octicon-link,.markdown-body h3 .octicon-link,.markdown-body h4 .octicon-link,.markdown-body h5 .octicon-link,.markdown-body h6 .octicon-link{color:#000;vertical-align:middle;visibility:hidden}.markdown-body h1:hover .anchor,.markdown-body h2:hover .anchor,.markdown-body h3:hover .anchor,.markdown-body h4:hover .anchor,.markdown-body h5:hover .anchor,.markdown-body h6:hover .anchor{text-decoration:none}.markdown-body h1:hover .anchor .octicon-link,.markdown-body h2:hover .anchor .octicon-link,.markdown-body h3:hover .anchor .octicon-link,.markdown-body h4:hover .anchor .octicon-link,.markdown-body h5:hover .anchor .octicon-link,.markdown-body h6:hover .anchor .octicon-link{visibility:visible}.markdown-body h1 code,.markdown-body h1 tt,.markdown-body h2 code,.markdown-body h2 tt,.markdown-body h3 code,.markdown-body h3 tt,.markdown-body h4 code,.markdown-body h4 tt,.markdown-body h5 code,.markdown-body h5 tt,.markdown-body h6 code,.markdown-body h6 tt{font-size:inherit}.markdown-body h1{font-size:2em}.markdown-body h1,.markdown-body h2{border-bottom:1px solid #eee;padding-bottom:.3em}.markdown-body h2{font-size:1.5em}.markdown-body h3{font-size:1.25em}.markdown-body h4{font-size:1em}.markdown-body h5{font-size:.875em}.markdown-body h6{color:#777;font-size:.85em}.markdown-body ol,.markdown-body ul{padding-left:2em}.markdown-body ol.no-list,.markdown-body ul.no-list{list-style-type:none;padding:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-bottom:0;margin-top:0}.markdown-body li>p{margin-top:16px}.markdown-body li+li{padding-top:.25em}.markdown-body dl{padding:0}.markdown-body dl dt{font-size:1em;font-style:italic;font-weight:700;margin-top:16px;padding:0}.markdown-body dl dd{margin-bottom:16px;padding:0 16px}.markdown-body table{display:block;overflow:auto;width:100%;word-break:normal;word-break:keep-all}.markdown-body table th{font-weight:700}.markdown-body table td,.markdown-body table th{border:1px solid #ddd;padding:6px 13px}.markdown-body table tr{background-color:#fff;border-top:1px solid #ccc}.markdown-body table tr:nth-child(2n){background-color:#f8f8f8}.markdown-body img{background-color:#fff;box-sizing:initial;max-width:100%}.markdown-body img[align=right]{padding-left:20px}.markdown-body img[align=left]{padding-right:20px}.markdown-body .emoji{background-color:initial;max-width:none;vertical-align:text-top}.markdown-body span.frame{display:block;overflow:hidden}.markdown-body span.frame>span{border:1px solid #ddd;display:block;float:left;margin:13px 0 0;overflow:hidden;padding:7px;width:auto}.markdown-body span.frame span img{display:block;float:left}.markdown-body span.frame span span{clear:both;color:#333;display:block;padding:5px 0 0}.markdown-body span.align-center{clear:both;display:block;overflow:hidden}.markdown-body span.align-center>span{display:block;margin:13px auto 0;overflow:hidden;text-align:center}.markdown-body span.align-center span img{margin:0 auto;text-align:center}.markdown-body span.align-right{clear:both;display:block;overflow:hidden}.markdown-body span.align-right>span{display:block;margin:13px 0 0;overflow:hidden;text-align:right}.markdown-body span.align-right span img{margin:0;text-align:right}.markdown-body span.float-left{display:block;float:left;margin-right:13px;overflow:hidden}.markdown-body span.float-left span{margin:13px 0 0}.markdown-body span.float-right{display:block;float:right;margin-left:13px;overflow:hidden}.markdown-body span.float-right>span{display:block;margin:13px auto 0;overflow:hidden;text-align:right}.markdown-body code,.markdown-body tt{background-color:#0000000a;border-radius:3px;font-size:85%;margin:0;padding:.2em 0}.markdown-body code:after,.markdown-body code:before,.markdown-body tt:after,.markdown-body tt:before{content:"\00a0";letter-spacing:-.2em}.markdown-body code br,.markdown-body tt br{display:none}.markdown-body del code{text-decoration:inherit}.markdown-body pre{word-wrap:normal}.markdown-body pre>code{background:#0000;border:0;font-size:100%;margin:0;padding:0;white-space:pre;word-break:normal}.markdown-body .highlight{margin-bottom:16px}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{background-color:#f7f7f7;border-radius:3px;font-size:85%;line-height:1.45;overflow:auto;padding:16px}.markdown-body pre code,.markdown-body pre tt{word-wrap:normal;background-color:initial;border:0;display:inline;line-height:inherit;margin:0;max-width:auto;overflow:visible;padding:0}.markdown-body pre code:after,.markdown-body pre code:before,.markdown-body pre tt:after,.markdown-body pre tt:before{content:normal}.markdown-body .csv-data td,.markdown-body .csv-data th{font-size:12px;line-height:1;overflow:hidden;padding:5px;text-align:left;white-space:nowrap}.markdown-body .csv-data .blob-line-num{background:#fff;border:0;padding:10px 8px 9px;text-align:right}.markdown-body .csv-data tr{border-top:0}.markdown-body .csv-data th{background:#f8f8f8;border-top:0;font-weight:700}.news .alert .markdown-body blockquote{border:0;padding:0 0 0 40px}.activity-tab .news .alert .commits,.activity-tab .news .markdown-body blockquote{padding-left:0}.task-list-item{list-style-type:none}.task-list-item label{font-weight:400}.task-list-item.enabled label{cursor:pointer}.task-list-item+.task-list-item{margin-top:3px}.task-list-item-checkbox{cursor:default!important;float:left;margin:.31em 0 .2em -1.3em!important;vertical-align:middle}.markdown-body{max-width:758px;overflow:visible!important;padding-bottom:40px;padding-top:40px;position:relative}.markdown-body .emoji{vertical-align:top}.markdown-body pre{border:inherit!important}.markdown-body code{color:inherit!important}.markdown-body pre code .wrapper{display:-moz-inline-flex;display:-ms-inline-flex;display:-o-inline-flex;display:inline-flex}.markdown-body pre code .gutter{float:left;overflow:hidden;-webkit-user-select:none;user-select:none}.markdown-body pre code .gutter.linenumber{border-right:3px solid #6ce26c!important;box-sizing:initial;color:#afafaf!important;cursor:default;display:inline-block;min-width:20px;padding:0 8px 0 0;position:relative;text-align:right;z-index:4}.markdown-body pre code .gutter.linenumber>span:before{content:attr(data-linenumber)}.markdown-body pre code .code{float:left;margin:0 0 0 16px}.markdown-body .gist .line-numbers{border-bottom:none;border-left:none;border-top:none}.markdown-body .gist .line-data{border:none}.markdown-body .gist table{border-collapse:inherit!important;border-spacing:0}.markdown-body code[data-gist-id]{background:none;padding:0}.markdown-body code[data-gist-id]:after,.markdown-body code[data-gist-id]:before{content:""}.markdown-body code[data-gist-id] .blob-num{border:unset}.markdown-body code[data-gist-id] table{margin-bottom:unset;overflow:unset}.markdown-body code[data-gist-id] table tr{background:unset}.markdown-body[dir=rtl] pre{direction:ltr}.markdown-body[dir=rtl] code{direction:ltr;unicode-bidi:embed}.markdown-body .alert>p:last-child{margin-bottom:0}.markdown-body pre.abc,.markdown-body pre.flow-chart,.markdown-body pre.graphviz,.markdown-body pre.mermaid,.markdown-body pre.sequence-diagram,.markdown-body pre.vega{background-color:inherit;border-radius:0;overflow:visible;text-align:center;white-space:inherit}.markdown-body pre.abc>code,.markdown-body pre.flow-chart>code,.markdown-body pre.graphviz>code,.markdown-body pre.mermaid>code,.markdown-body pre.sequence-diagram>code,.markdown-body pre.vega>code{text-align:left}.markdown-body pre.abc>svg,.markdown-body pre.flow-chart>svg,.markdown-body pre.graphviz>svg,.markdown-body pre.mermaid>svg,.markdown-body pre.sequence-diagram>svg,.markdown-body pre.vega>svg{height:100%;max-width:100%}.markdown-body pre>code.wrap{word-wrap:break-word;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap}.markdown-body .alert>p:last-child,.markdown-body .alert>ul:last-child{margin-bottom:0}.markdown-body summary{display:list-item}.markdown-body summary:focus{outline:none}.markdown-body details summary{cursor:pointer}.markdown-body details:not([open])>:not(summary){display:none}.markdown-body figure{margin:1em 40px}.markdown-body .mark,.markdown-body mark{background-color:#fff1a7}.vimeo,.youtube{background-color:#000;background-position:50%;background-repeat:no-repeat;background-size:contain;cursor:pointer;display:table;overflow:hidden;text-align:center}.vimeo,.youtube{position:relative;width:100%}.youtube{padding-bottom:56.25%}.vimeo img{object-fit:contain;width:100%;z-index:0}.youtube img{object-fit:cover;z-index:0}.vimeo iframe,.youtube iframe,.youtube img{height:100%;left:0;position:absolute;top:0;width:100%}.vimeo iframe,.youtube iframe{vertical-align:middle;z-index:1}.vimeo .icon,.youtube .icon{color:#fff;height:auto;left:50%;opacity:.3;position:absolute;top:50%;transform:translate(-50%,-50%);transition:opacity .2s;width:auto;z-index:0}.vimeo:hover .icon,.youtube:hover .icon{opacity:.6;transition:opacity .2s}.slideshare .inner,.speakerdeck .inner{position:relative;width:100%}.slideshare .inner iframe,.speakerdeck .inner iframe{bottom:0;height:100%;left:0;position:absolute;right:0;top:0;width:100%}.figma{display:table;padding-bottom:56.25%;position:relative;width:100%}.figma iframe{border:1px solid #eee;bottom:0;height:100%;left:0;position:absolute;right:0;top:0;width:100%}.markmap-container{height:300px}.markmap-container>svg{height:100%;width:100%}.MJX_Assistive_MathML{display:none}#MathJax_Message{z-index:1000!important}.ui-infobar{color:#777;margin:25px auto -25px;max-width:760px;position:relative;z-index:2}.toc .invisable-node{list-style-type:none}.ui-toc{bottom:20px;position:fixed;z-index:998}.ui-toc.both-mode{margin-left:8px}.ui-toc.both-mode .ui-toc-label{border-bottom-left-radius:0;border-top-left-radius:0;height:40px;padding:10px 4px}.ui-toc-label{background-color:#e6e6e6;border:none;color:#868686;transition:opacity .2s}.ui-toc .open .ui-toc-label{color:#fff;opacity:1;transition:opacity .2s}.ui-toc-label:focus{background-color:#ccc;color:#000;opacity:.3}.ui-toc-label:hover{background-color:#ccc;opacity:1;transition:opacity .2s}.ui-toc-dropdown{margin-bottom:20px;margin-top:20px;max-height:70vh;max-width:45vw;overflow:auto;padding-left:10px;padding-right:10px;text-align:inherit;width:25vw}.ui-toc-dropdown>.toc{max-height:calc(70vh - 100px);overflow:auto}.ui-toc-dropdown[dir=rtl] .nav{letter-spacing:.0029em;padding-right:0}.ui-toc-dropdown a{overflow:hidden;text-overflow:ellipsis;white-space:pre}.ui-toc-dropdown .nav>li>a{color:#767676;display:block;font-size:13px;font-weight:500;padding:4px 20px}.ui-toc-dropdown .nav>li:first-child:last-child>ul,.ui-toc-dropdown .toc.expand ul{display:block}.ui-toc-dropdown .nav>li>a:focus,.ui-toc-dropdown .nav>li>a:hover{background-color:initial;border-left:1px solid #000;color:#000;padding-left:19px;text-decoration:none}.ui-toc-dropdown[dir=rtl] .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav>li>a:hover{border-left:none;border-right:1px solid #000;padding-right:19px}.ui-toc-dropdown .nav>.active:focus>a,.ui-toc-dropdown .nav>.active:hover>a,.ui-toc-dropdown .nav>.active>a{background-color:initial;border-left:2px solid #000;color:#000;font-weight:700;padding-left:18px}.ui-toc-dropdown[dir=rtl] .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav>.active>a{border-left:none;border-right:2px solid #000;padding-right:18px}.ui-toc-dropdown .nav .nav{display:none;padding-bottom:10px}.ui-toc-dropdown .nav>.active>ul{display:block}.ui-toc-dropdown .nav .nav>li>a{font-size:12px;font-weight:400;padding-bottom:1px;padding-left:30px;padding-top:1px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a{padding-right:30px}.ui-toc-dropdown .nav .nav>li>ul>li>a{font-size:12px;font-weight:400;padding-bottom:1px;padding-left:40px;padding-top:1px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a{padding-right:40px}.ui-toc-dropdown .nav .nav>li>a:focus,.ui-toc-dropdown .nav .nav>li>a:hover{padding-left:29px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:hover{padding-right:29px}.ui-toc-dropdown .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown .nav .nav>li>ul>li>a:hover{padding-left:39px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:hover{padding-right:39px}.ui-toc-dropdown .nav .nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>a{font-weight:500;padding-left:28px}.ui-toc-dropdown[dir=rtl] .nav .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>a{padding-right:28px}.ui-toc-dropdown .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active>a{font-weight:500;padding-left:38px}.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active>a{padding-right:38px}.markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang^=ja] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang=zh-tw] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang=zh-cn] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html .markdown-body[lang^=ja]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html .markdown-body[lang=zh-tw]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html .markdown-body[lang=zh-cn]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang^=ja] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ Ｐゴシック,sans-serif}html[lang=zh-tw] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html[lang=zh-cn] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}html .ui-toc-dropdown[lang^=ja]{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ Ｐゴシック,sans-serif}html .ui-toc-dropdown[lang=zh-tw]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html .ui-toc-dropdown[lang=zh-cn]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}.ui-affix-toc{max-height:70vh;max-width:15vw;overflow:auto;position:fixed;top:0}.back-to-top,.expand-toggle,.go-to-bottom{color:#999;display:block;font-size:12px;font-weight:500;margin-left:10px;margin-top:10px;padding:4px 10px}.back-to-top:focus,.back-to-top:hover,.expand-toggle:focus,.expand-toggle:hover,.go-to-bottom:focus,.go-to-bottom:hover{color:#563d7c;text-decoration:none}.back-to-top,.go-to-bottom{margin-top:0}.ui-user-icon{background-position:50%;background-repeat:no-repeat;background-size:cover;border-radius:50%;display:block;height:20px;margin-bottom:2px;margin-right:5px;margin-top:2px;width:20px}.ui-user-icon.small{display:inline-block;height:18px;margin:0 0 .2em;vertical-align:middle;width:18px}.ui-infobar>small>span{line-height:22px}.ui-infobar>small .dropdown{display:inline-block}.ui-infobar>small .dropdown a:focus,.ui-infobar>small .dropdown a:hover{text-decoration:none}.ui-more-info{color:#888;cursor:pointer;vertical-align:middle}.ui-more-info .fa{font-size:16px}.ui-connectedGithub,.ui-published-note{color:#888}.ui-connectedGithub{line-height:23px;white-space:nowrap}.ui-connectedGithub a.file-path{color:#888;padding-left:22px;text-decoration:none}.ui-connectedGithub a.file-path:active,.ui-connectedGithub a.file-path:hover{color:#888;text-decoration:underline}.ui-connectedGithub .fa{font-size:20px}.ui-published-note .fa{font-size:20px;vertical-align:top}.unselectable{-webkit-user-select:none;-o-user-select:none;user-select:none}.selectable{-webkit-user-select:text;-o-user-select:text;user-select:text}.inline-spoiler-section{cursor:pointer}.inline-spoiler-section .spoiler-text{background-color:#333;border-radius:2px}.inline-spoiler-section .spoiler-text>*{opacity:0}.inline-spoiler-section .spoiler-img{filter:blur(10px)}.inline-spoiler-section.raw{background-color:#333;border-radius:2px}.inline-spoiler-section.raw>*{opacity:0}.inline-spoiler-section.unveil{cursor:auto}.inline-spoiler-section.unveil .spoiler-text{background-color:#3333331a}.inline-spoiler-section.unveil .spoiler-text>*{opacity:1}.inline-spoiler-section.unveil .spoiler-img{filter:none}@media print{blockquote,div,img,pre,table{page-break-inside:avoid!important}a[href]:after{font-size:12px!important}}.markdown-body.slides{color:#222;position:relative;z-index:1}.markdown-body.slides:before{background-color:currentColor;bottom:0;box-shadow:0 0 0 50vw;content:"";display:block;left:0;position:absolute;right:0;top:0;z-index:-1}.markdown-body.slides section[data-markdown]{background-color:#fff;margin-bottom:1.5em;position:relative;text-align:center}.markdown-body.slides section[data-markdown] code{text-align:left}.markdown-body.slides section[data-markdown]:before{content:"";display:block;padding-bottom:56.23%}.markdown-body.slides section[data-markdown]>div:first-child{left:1em;max-height:100%;overflow:hidden;position:absolute;right:1em;top:50%;transform:translateY(-50%)}.markdown-body.slides section[data-markdown]>ul{display:inline-block}.markdown-body.slides>section>section+section:after{border:3px solid #777;content:"";height:1.5em;position:absolute;right:1em;top:-1.5em}.site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif}html[lang=zh-tw] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}body{font-smoothing:subpixel-antialiased!important;-webkit-font-smoothing:subpixel-antialiased!important;-moz-osx-font-smoothing:auto!important;-webkit-overflow-scrolling:touch;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;letter-spacing:.025em}html[lang^=ja] body{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif}html[lang=zh-tw] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}abbr[title]{border-bottom:none;text-decoration:underline;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}abbr[data-original-title],abbr[title]{cursor:help}body.modal-open{overflow-y:auto;padding-right:0!important}svg{text-shadow:none}
+    </style>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha256-3Jy/GbSLrg0o9y5Z5n1uw0qxZECH7C6OQpVBgNFYa0g=" crossorigin="anonymous"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js" integrity="sha256-g6iAfvZp+nDQ2TdTR/VVKJf3bGro4ub5fvWSWVRi2NE=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js" integrity="sha256-8E4Is26QH0bD52WoQpcB+R/tcWQtpzlCojrybUd7Mxo=" crossorigin="anonymous"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div id="doc" class="markdown-body container-fluid comment-enabled" data-hard-breaks="true"><style>
+ins { background-color: #CCFFCC }
+s { background-color: #FFCACA }
+blockquote { color: inherit !important }
+</style><table>
+<tbody><tr>
+<td>Document number</td>
+<td>P****R0</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2022-09-19</td>
+</tr>
+<tr>
+<td>Reply-to</td>
+<td>
+<p><span>Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;</span></p>
+</td>
+</tr>
+<tr>
+<td>Audience</td>
+<td>Evolution Working Group (EWG)</td>
+</tr>
+</tbody></table><h1 id="temporary-storage-class-specifiers" data-id="temporary-storage-class-specifiers"><a class="anchor hidden-xs" href="#temporary-storage-class-specifiers" title="temporary-storage-class-specifiers"><span class="octicon octicon-link"></span></a><span>temporary storage class specifiers</span></h1><style>
+.inline-link
+{
+    font-size: small;
+    margin-top: -2.8em;
+    margin-right: 4px;
+    text-align: right;
+    font-weight: bold;
+}
+
+code
+{
+    font-family: "Fira Code", monospace !important;
+    font-size: 0.87em;
+}
+
+.sourceCode
+{
+    font-size: 0.95em;
+}
+
+a code
+{
+    color: #0645ad;
+}
+</style><h2 id="Table-of-contents" data-id="Table-of-contents"><a class="anchor hidden-xs" href="#Table-of-contents" title="Table-of-contents"><span class="octicon octicon-link"></span></a><span>Table of contents</span></h2><ul>
+<li><a href="#temporary-storage-class-specifiers"><span>temporary storage class specifiers</span></a>
+<ul>
+<li><a href="#abstract"><span>Abstract</span></a></li>
+<li><a href="#motivating-examples"><span>Motivating examples</span></a>
+<ul>
+<li><a href="#classes-not-having-value-semantics"><span>Classes not Having Value Semantics</span></a></li>
+<li><a href="#returned-references-to-temporaries"><span>Returned References to Temporaries</span></a></li>
+</ul>
+</li>
+<li><a href="#in-depth-rationale"><span>In Depth Rationale</span></a>
+<ul>
+<li><a href="#constant-initialization"><span>Constant Initialization</span></a></li>
+<li><a href="#impact-on-current-proposals"><span>Impact on current proposals</span></a>
+<ul>
+<li><a href="#p2255r2"><span>p2255r2</span></a></li>
+<li><a href="#n3038"><span>n3038</span></a></li>
+</ul>
+</li>
+<li><a href="#present"><span>Present</span></a>
+<ul>
+<li><a href="#c-standard-compund-literals"><span>C Standard Compound Literals</span></a></li>
+<li><a href="#outstanding-issues"><span>Outstanding Issues</span></a>
+<ul>
+<li><a href="#cwg900-lifetime-of-temporaries-in-range-based-for"><span>CWG900 Lifetime of temporaries in range-based for</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#other-anonymous-things"><span>Other Anonymous Things</span></a></li>
+</ul>
+</li>
+<li><a href="#summary"><span>Summary</span></a></li>
+<li><a href="#frequently-asked-questions"><span>Frequently Asked Questions</span></a></li>
+<li><a href="#references"><span>References</span></a></li>
+</ul>
+</li>
+</ul><h2 id="Abstract" data-id="Abstract"><a class="anchor hidden-xs" href="#Abstract" title="Abstract"><span class="octicon octicon-link"></span></a><span>Abstract</span></h2><p><em><span>“Lifetime issues with references to temporaries can lead to fatal and subtle runtime errors. This applies to both:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p><ul>
+<li><em><span>“Returned references (for example, when using strings or maps) and”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:1">[1:1]</a></sup></li>
+<li><em><span>“Returned objects that do not have value semantics (for example using std::string_view).”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:2">[1:2]</a></sup></li>
+</ul><p><span>This paper proposes the standard adopt storage class specifiers for temporaries in order to provide programmers with tools to manually fix instances of dangling.</span></p><h2 id="Motivating-Examples" data-id="Motivating-Examples"><a class="anchor hidden-xs" href="#Motivating-Examples" title="Motivating-Examples"><span class="octicon octicon-link"></span></a><span>Motivating Examples</span></h2><p><em><span>“Let’s motivate the feature for both, classes not having value semantics and references”,</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:3">[1:3]</a></sup><span> by adding 4 new storage class specifiers that are only used by temporaries such as arguments to functions.</span></p><table>
+<tbody><tr>
+<td>
+<p><code>constinit</code></p>
+</td>
+<td>
+<p><span>This specifier gives the temporary static storage duration and asserts that it has static initialization. It is recommended for anything that is constant-initialized.</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>variable_scope</code></p>
+</td>
+<td>
+<p><span>The temporary has the same lifetime of the variable to which it is assigned or </span><code>block_scope</code><span>, whichever is greater. This specifier is recommended whenever </span><code>constinit</code><span> can’t be used.</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>block_scope</code></p>
+</td>
+<td>
+<p><span>The temporary is scoped to the block that contains said expression. This is the </span><code>C</code><span> user defined literal lifetime rule. </span><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup><span> </span><sup><span>6.5.2.5 Compound literals</span></sup><span> This specifier is recommended only for backwards compatibility with the </span><code>C</code><span> language.</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>statement_scope</code></p>
+</td>
+<td>
+<p><span>The temporary is scoped to the containing full expression. This is the </span><code>C++</code><span> temporary lifetime rules </span><sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup><sup><span>6.7.7 Temporary objects</span></sup><span> and is the default until one of the other specifiers are applied in which case the other becomes the default until another specifier is given. This specifier is recommended only for backwards compatibility with the </span><code>C++</code><span> language. It is recommended that programmers transition to using </span><code>constinit</code><span> and </span><code>variable_scope</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><h3 id="“Classes-not-Having-Value-Semantics”-14" data-id="“Classes-not-Having-Value-Semantics”-14"><a class="anchor hidden-xs" href="#“Classes-not-Having-Value-Semantics”-14" title="“Classes-not-Having-Value-Semantics”-14"><span class="octicon octicon-link"></span></a><em><span>“Classes not Having Value Semantics”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:4">[1:4]</a></sup></h3><p><em><span>“C++ allows the definition of classes that do not have value semantics. One famous example is </span><code>std::string_view</code><span>: The lifetime of a </span><code>string_view</code><span> object is bound to an underlying string or character sequence.”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:5">[1:5]</a></sup></p><p><em><span>“Because string has an implicit conversion to </span><code>string_view</code><span>, it is easy to accidentally program a </span><code>string_view</code><span> to a character sequence that doesn’t exist anymore.”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:6">[1:6]</a></sup></p><p><em><span>“A trivial example is this:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:7">[1:7]</a></sup></p><pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span><span class="token comment">// immediate dangling reference</span>
+</code></pre><p><span>It is clear from this </span><code>string_view</code><span> example that it dangles because </span><code>sv</code><span> is a reference and </span><code>"hello world"s</code><span> is a temporary.</span><br>
+<em><strong><span>What is being proposed is that same example doesn’t dangle just by adding the </span><code>constinit</code><span> specifier!</span></strong></em></p><pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token keyword">constinit</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span>
+</code></pre><p><span>If the evaluated constant expression </span><code>"hello world"s</code><span> had static storage duration just like the string literal </span><code>"hello world"</code><span> has static storage duration </span><sup class="footnote-ref"><a href="#fn3" id="fnref3:1">[3:1]</a></sup><span> </span><sup><em><span>(5.13.5 String literals [lex.string])</span></em></sup><span> then </span><code>sv</code><span> would be a reference to something that is global and as such would not dangle. This is reasonable based on how programmers reason about constants being immutable variables and temporaries which are known at compile time and do not change for the life of the program.</span></p><p><span>Dangling </span><em><span>“can occur more indirectly as follows:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:8">[1:8]</a></sup></p><pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>string <span class="token keyword">operator</span><span class="token operator">+</span> <span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>string_view s1<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>string_view s2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">{</span>s1<span class="token punctuation">}</span> <span class="token operator">+</span> std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">{</span>s2<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token string">"hi"</span><span class="token punctuation">;</span>
+sv <span class="token operator">=</span> sv <span class="token operator">+</span> sv<span class="token punctuation">;</span> <span class="token comment">// fatal runtime error: sv refers to deleted temporary string</span>
+</code></pre><p><strong><span>The problem here is that the lifetime of the temporary is bound to the statement in which it was created, instead of the block that contains said expression.</span></strong></p><table>
+<tbody><tr>
+<td>
+<p><code>Working Draft, Standard for Programming Language C++</code><span> </span><sup class="footnote-ref"><a href="#fn3" id="fnref3:2">[3:2]</a></sup></p>
+<p><strong><span>“</span><em><span>6.7.7 Temporary objects</span></em><span>”</span></strong></p>
+<p><span>“</span><em><strong><span>Temporary objects are destroyed as the last step in evaluating the full-expression (6.9.1) that (lexically) contains the point where they were created.</span></strong><span> This is true even if that evaluation ends in throwing an exception. The value computations and side effects of destroying a temporary object are associated only with the full-expression, not with any specific subexpression.</span></em><span>”</span></p>
+</td>
+</tr>
+</tbody></table><p><span>Had the temporary been bound to the enclosing block than it would have been alive for at least as long as the returned reference.</span></p><pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>string <span class="token keyword">operator</span><span class="token operator">+</span> <span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>string_view s1<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>string_view s2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">{</span>s1<span class="token punctuation">}</span> <span class="token operator">+</span> std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">{</span>s2<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token string">"hi"</span><span class="token punctuation">;</span>
+sv <span class="token operator">=</span> block_scope sv <span class="token operator">+</span> sv<span class="token punctuation">;</span>
+</code></pre><p><span>While this does reduce dangling, it does not eliminate it because if the reference out lives its containing block such as by returning than dangling would still occur. These remaining dangling would at least be more visible as they are usually associated with returns, so you know where to look and if we make the proposed changes than there would be far fewer dangling to look for. It should also be noted that </span><strong><span>the current lifetime rules of temporaries are like constants, contrary to programmer’s expectations</span></strong><span>. This becomes more apparent with slightly more complicated examples.</span></p><h3 id="“Returned-References-to-Temporaries”-19" data-id="“Returned-References-to-Temporaries”-19"><a class="anchor hidden-xs" href="#“Returned-References-to-Temporaries”-19" title="“Returned-References-to-Temporaries”-19"><span class="octicon octicon-link"></span></a><em><span>“Returned References to Temporaries”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:9">[1:9]</a></sup></h3><p><em><span>“Similar problems already exists with references.”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:10">[1:10]</a></sup></p><p><em><span>“A trivial example would be the following:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:11">[1:11]</a></sup></p><pre><code class="cpp hljs"><span class="token keyword">struct</span> <span class="token class-name">X</span> <span class="token punctuation">{</span> <span class="token keyword">int</span> a<span class="token punctuation">,</span> b<span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span><span class="token operator">&amp;</span> <span class="token function">f</span><span class="token punctuation">(</span>X<span class="token operator">&amp;</span> x<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> x<span class="token punctuation">.</span>a<span class="token punctuation">;</span> <span class="token punctuation">}</span> <span class="token comment">// return value lifetime bound to parameter</span>
+</code></pre><p><span>If </span><code>f</code><span> was called with a temporary than it too would dangle.</span></p><pre><code class="cpp hljs"><span class="token keyword">int</span><span class="token operator">&amp;</span> a <span class="token operator">=</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+a <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span> <span class="token comment">// fatal runtime error</span>
+</code></pre><p><span>If the lifetime of the temporary, </span><code>{4, 2}</code><span>, was bound to the lifetime of its containing block instead of its containing statement than </span><code>a</code><span> would not immediately dangle.</span></p><pre><code class="cpp hljs"><span class="token keyword">int</span><span class="token operator">&amp;</span> a <span class="token operator">=</span> <span class="token function">f</span><span class="token punctuation">(</span>block_scope <span class="token punctuation">{</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+a <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+</code></pre><p><span>Further, </span><code>{4, 2}</code><span> is constant initialized, so if function </span><code>f</code><span>’s signature was changed to be </span><code>int&amp; f(const X&amp; x)</code><span>, since it does not change x, and if </span><code>constinit</code><span> was added then this example would never dangle.</span></p><pre><code class="cpp hljs"><span class="token keyword">int</span><span class="token operator">&amp;</span> a <span class="token operator">=</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token keyword">constinit</span> <span class="token punctuation">{</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+a <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+</code></pre><p><em><span>“Class std::string provides such an interface in the current C++ runtime library. For example:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:12">[1:12]</a></sup></p><pre><code class="cpp hljs"><span class="token keyword">char</span><span class="token operator">&amp;</span> c <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">{</span><span class="token string">"hello my pretty long string"</span><span class="token punctuation">}</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+c <span class="token operator">=</span> <span class="token char">'x'</span><span class="token punctuation">;</span> <span class="token comment">// fatal runtime error</span>
+std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"c: "</span> <span class="token operator">&lt;&lt;</span> c <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span> <span class="token comment">// fatal runtime error</span>
+</code></pre><p><span>Again, if the lifetime of the temporary, </span><code>std::string{"hello my pretty long string"}</code><span>, was bound to the lifetime of its containing block instead of its containing statement than </span><code>c</code><span> would not immediately dangle.</span></p><pre><code class="cpp hljs"><span class="token keyword">char</span><span class="token operator">&amp;</span> c <span class="token operator">=</span> block_scope std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">{</span><span class="token string">"hello my pretty long string"</span><span class="token punctuation">}</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+c <span class="token operator">=</span> <span class="token char">'x'</span><span class="token punctuation">;</span>
+std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"c: "</span> <span class="token operator">&lt;&lt;</span> c <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span>
+</code></pre><p><span>Further, this more complicated compound temporary expression better illustrates why the current lifetime rules of temporaries are contrary to programmer’s expectations. First of all, let’s rewrite the example, as a programmer would, adding names to everything unnamed.</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> anonymous <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">{</span><span class="token string">"hello my pretty long string"</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">char</span><span class="token operator">&amp;</span> c <span class="token operator">=</span> anonymous<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+c <span class="token operator">=</span> <span class="token char">'x'</span><span class="token punctuation">;</span>
+std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"c: "</span> <span class="token operator">&lt;&lt;</span> c <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span>
+</code></pre><p><span>Even though, the code is the same from a programmer’s perspective, the latter does not dangle while the former do. </span><strong><span>Should just naming temporaries, thus turning them into variables, fix memory issues? Should just leaving variables unnamed as temporaries introduce memory issues?</span></strong><span> Again, contrary to programmer’s expectations. If we viewed unnecessary/superfluous/immediate dangling as overhead, then the current rules of temporary and constant initialization could be viewed as violations of the zero-overhead principle since just naming temporaries is reasonably written better by hand.</span></p><p><em><span>“There are more tricky cases like this. For example, when using the range-base for loop:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:13">[1:13]</a></sup></p><pre><code class="cpp hljs"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span> x <span class="token operator">:</span> <span class="token function">reversed</span><span class="token punctuation">(</span><span class="token function">make_vector</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre><p><em><span>“with one of the following definitions, either:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:14">[1:14]</a></sup></p><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span>Range R<span class="token operator">&gt;</span>
+reversed_range <span class="token function">reversed</span><span class="token punctuation">(</span>R<span class="token operator">&amp;&amp;</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> reversed_range<span class="token punctuation">{</span>r<span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token comment">// return value lifetime bound to parameter</span>
+<span class="token punctuation">}</span>
+</code></pre><p><em><span>“or”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:15">[1:15]</a></sup></p><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span>Range R<span class="token operator">&gt;</span>
+reversed_range <span class="token function">reversed</span><span class="token punctuation">(</span>R r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> reversed_range<span class="token punctuation">{</span>r<span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token comment">// return value lifetime bound to parameter</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>Yet again, if the lifetime of the temporary, </span><code>reversed(make_vector())</code><span>, was bound to the lifetime of its containing block instead of its containing statement than </span><code>x</code><span> would not immediately dangle. Before adding names to everything unnamed, we must expand the range based for loop.</span></p><pre><code class="cpp hljs"><span class="token punctuation">{</span><span class="token comment">// containing block</span>
+  <span class="token keyword">auto</span><span class="token operator">&amp;&amp;</span> rg <span class="token operator">=</span> <span class="token function">reversed</span><span class="token punctuation">(</span><span class="token function">make_vector</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> pos <span class="token operator">=</span> rg<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> end <span class="token operator">=</span> rg<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span> <span class="token punctuation">;</span> pos <span class="token operator">!=</span> end<span class="token punctuation">;</span> <span class="token operator">++</span>pos <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">auto</span> x <span class="token operator">=</span> <span class="token operator">*</span>pos<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>Now, let’s rewrite that expansion, as a programmer would, adding names to everything unnamed.</span></p><pre><code class="cpp hljs"><span class="token punctuation">{</span><span class="token comment">// containing block</span>
+  <span class="token keyword">auto</span> anonymous1 <span class="token operator">=</span> <span class="token function">make_vector</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> anonymous2 <span class="token operator">=</span> <span class="token function">reversed</span><span class="token punctuation">(</span>anonymous1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> pos <span class="token operator">=</span> anonymous2<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> end <span class="token operator">=</span> anonymous2<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span> <span class="token punctuation">;</span> pos <span class="token operator">!=</span> end<span class="token punctuation">;</span> <span class="token operator">++</span>pos <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">auto</span> x <span class="token operator">=</span> <span class="token operator">*</span>pos<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>Like before, the named version doesn’t dangle and as such binding the lifetime of the temporary to the containing block makes more sense to the programmer than binding the lifetime of the temporary to the containing statement. In essence, from a programmer’s perspective, </span><strong><span>temporaries are anonymously named variables</span></strong><span>.</span></p><p><span>It should be noted too that the current rules of temporaries discourages the use of temporaries because of the dangling it introduces. However, if the lifetime of temporaries was increased to a reasonable degree than programmers would use temporaries more. This would reduce dangling further because there would be fewer named variables that could be propagated outside of their containing scope. This would also improve code clarity by reducing the number of lines of code allowing any remaining dangling to be more clearly seen.</span></p><p><em><span>“Finally, such a feature would also help to … fix several bugs we see in practice:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:16">[1:16]</a></sup></p><p><em><span>“Consider we have a function returning the value of a map element or a default value if no such element exists without copying it:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:17">[1:17]</a></sup></p><pre><code class="cpp hljs"><span class="token keyword">const</span> V<span class="token operator">&amp;</span> <span class="token function">findOrDefault</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>map<span class="token operator">&lt;</span>K<span class="token punctuation">,</span>V<span class="token operator">&gt;</span><span class="token operator">&amp;</span> m<span class="token punctuation">,</span> <span class="token keyword">const</span> K<span class="token operator">&amp;</span> key<span class="token punctuation">,</span> <span class="token keyword">const</span> V<span class="token operator">&amp;</span> defvalue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><em><span>“then this results in a classical bug:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:18">[1:18]</a></sup></p><pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>map<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&gt;</span> myMap<span class="token punctuation">;</span>
+<span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s <span class="token operator">=</span> <span class="token function">findOrDefault</span><span class="token punctuation">(</span>myMap<span class="token punctuation">,</span> key<span class="token punctuation">,</span> <span class="token string">"none"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// runtime bug if key not found</span>
+</code></pre><p><span>This example could simply be fixed by adding the </span><code>constinit</code><span> specifier to the </span><code>defvalue</code><span> argument.</span></p><pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>map<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&gt;</span> myMap<span class="token punctuation">;</span>
+<span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s <span class="token operator">=</span> <span class="token function">findOrDefault</span><span class="token punctuation">(</span>myMap<span class="token punctuation">,</span> key<span class="token punctuation">,</span> <span class="token keyword">constinit</span> <span class="token string">"none"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>What if </span><code>defvalue</code><span> can’t be </span><code>constant-initialized</code><span> because it was created at runtime. If the temporary string’s lifetime was bound to the containing block instead of the containing statement than the chance of dangling is greatly reduced and also made more visible. You can say that it </span><strong><span>CAN’T</span></strong><span> immediately dangle. However, dangling still could occur if the programmer manually propagated the returned value that depends upon the temporary outside of the containing scope.</span></p><pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>map<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>string<span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&gt;</span> myMap<span class="token punctuation">;</span>
+<span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s <span class="token operator">=</span> <span class="token function">findOrDefault</span><span class="token punctuation">(</span>myMap<span class="token punctuation">,</span> key<span class="token punctuation">,</span> block_scope <span class="token function">not_constexpr</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>While using the containing’s scope instead of the statement’s scope is a vast improvement. We can actually do a little bit better. Following is an example of uninitialized and delayed initialization.</span></p><pre><code class="cpp hljs"><span class="token keyword">bool</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">X</span> <span class="token punctuation">{</span> <span class="token keyword">int</span> a<span class="token punctuation">,</span> b<span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">constexpr</span> <span class="token keyword">const</span> X<span class="token operator">*</span> <span class="token function">ref2pointer</span><span class="token punctuation">(</span><span class="token keyword">const</span> X<span class="token operator">&amp;</span> ref<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">&amp;</span>ref<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+X <span class="token function">x_factory</span><span class="token punctuation">(</span><span class="token keyword">int</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span> b<span class="token punctuation">)</span><span class="token comment">// not constexpr, runtime construction</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>a<span class="token punctuation">,</span> b<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">const</span> X<span class="token operator">*</span> x<span class="token punctuation">;</span><span class="token comment">// uninitialized</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    x <span class="token operator">=</span> <span class="token keyword">constinit</span> <span class="token function">ref2pointer</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// explicit constant initialization</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">else</span>
+  <span class="token punctuation">{</span>
+    <span class="token comment">// delayed initialization</span>
+    <span class="token comment">//x = ref2pointer(statement_scope x_factory(4, 2));// dangles</span>
+    <span class="token comment">//x = ref2pointer(block_scope x_factory(4, 2));// dangles</span>
+    x <span class="token operator">=</span> variable_scope <span class="token function">ref2pointer</span><span class="token punctuation">(</span><span class="token function">x_factory</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// freed of dangle</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>According to this proposal, </span><code>constinit ref2pointer({2, 4})</code><span> would undergo implicit </span><code>constant initialization</code><span> so that expression would not dangle.</span></p><p><span>The variable </span><code>x</code><span> would dangle if initialized with the expression </span><code>ref2pointer([statement_scope] x_factory(4, 2))</code><span> when the scope is bound to the containing statement. The variable would also dangle if initialized with the expression </span><code>ref2pointer(block_scope x_factory(4, 2))</code><span> when the scope is bound to the containing block. The variable would NOT dangle if initialized with the expression </span><code>variable_scope ref2pointer(x_factory(4, 2))</code><span> when the scope is bound to the lifetime of the variable to which the temporary is assigned, in this case </span><code>x</code><span>.</span></p><p><span>It should also be noted that these temporary specifiers are propagated to inner temporaries until they are overridden again. The expression </span><code>x_factory(4, 2)</code><span> is what needed the specifier but it more convenient for the programmer to put it before the complete temporary expression. Also the specifier applies also to any automatic conversions/initializations performed.</span></p><p><span>Extending the lifetime of the temporary to be the lifetime of the variable to which it is assigned is not unreasonable for C++. Matter of fact it is already happening but the rules are so restrictive that it limits its use by many programmers as the following examples illustrate.</span></p><p><code>Working Draft, Standard for Programming Language C++</code><span> </span><sup class="footnote-ref"><a href="#fn3" id="fnref3:3">[3:3]</a></sup></p><p><strong><span>“</span><em><span>6.7.7 Temporary objects</span></em><span>”</span></strong></p><p><span>…</span></p><p><strong><span>“</span><em><sub><span>5</span></sub><span> There are … contexts in which temporaries are destroyed at a diﬀerent point than the end of the fullexpression.</span></em><span>”</span></strong></p><p><span>…</span></p><p><strong><span>“</span><em><span>(6.8)</span></em><span>”</span></strong></p><pre><code class="cpp hljs"><span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token keyword">using</span> id <span class="token operator">=</span> T<span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span><span class="token operator">&amp;&amp;</span> a <span class="token operator">=</span> id<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token operator">&gt;</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">}</span><span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">// temporary array has same lifetime as a</span>
+<span class="token keyword">const</span> <span class="token keyword">int</span><span class="token operator">&amp;</span> b <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">const</span> <span class="token keyword">int</span><span class="token operator">&amp;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// temporary int has same lifetime as b</span>
+<span class="token keyword">int</span><span class="token operator">&amp;&amp;</span> c <span class="token operator">=</span> cond <span class="token operator">?</span> id<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token operator">&gt;</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">}</span><span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">:</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&amp;&amp;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// exactly one of the two temporaries is lifetime-extended</span>
+</code></pre><pre><code class="cpp hljs"><span class="token keyword">const</span> <span class="token keyword">int</span><span class="token operator">&amp;</span> x <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">int</span><span class="token operator">&amp;</span><span class="token punctuation">)</span><span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// temporary for value 1 has same lifetime as x</span>
+</code></pre><pre><code class="cpp hljs"><span class="token keyword">struct</span> <span class="token class-name">S</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token keyword">int</span><span class="token operator">&amp;</span> m<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> S<span class="token operator">&amp;</span> s <span class="token operator">=</span> S<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token comment">// both S and int temporaries have lifetime of s</span>
+</code></pre><p><span>The preceding sections of this proposal is identical at times in wording, in structure as well as in examples to </span><code>p0936r0</code><span>, the </span><code>Bind Returned/Initialized Objects to the Lifetime of Parameters</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:19">[1:19]</a></sup><span> proposal. This shows that similar problems can be solved with simpler solutions, that programmers are already familiar with, such as constants and naming temporaries. It must be conceded that </span><code>Bind Returned/Initialized Objects to the Lifetime of Parameters</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:20">[1:20]</a></sup><span> is a more general solution that fixes more dangling while this proposal is more easily understood by programmers of all experience levels but gives programmers tools to fix dangling manually.</span></p><p><strong><span>Why not just extend the lifetime as prescribed in </span><code>Bind Returned/Initialized Objects to the Lifetime of Parameters</code><span>?</span></strong></p><p><span>In that proposal, a question was raised.</span></p><p><em><span>“Lifetime Extension or Just a Warning?”</span></em><br>
+<em><span>“We could use the marker in two ways:”</span></em></p><ol>
+<li><em><span>“Warn only about some possible buggy behavior.”</span></em></li>
+<li><em><span>“Fix possible buggy behavior by extending the lifetime of temporaries”</span></em></li>
+</ol><p><span>In reality, there are three scenarios; warning, </span><strong><span>error</span></strong><span> or just fix it by extending the lifetime.</span></p><p><span>However, things in the real world tend to be more complicated. Depending upon the scenario, at least theoretically, some could be fixed, some could be errors and some could be warnings. Further, waiting on a more complicated solution that can fix everything may never happen or worse be so complicated that the developer, who is ultimately responsible for fixing the code, can no longer understand the lifetimes of the objects created. Shouldn’t we fix what we can, when we can; i.e. low hanging fruit. Also, fixing everything the same way would not even be desirable. Let’s consider a real scenario. Extending one’s lifetime could mean 2 different things.</span></p><ol>
+<li><span>Change automatic storage duration such that a instances’ lifetime is just moved lower on the stack as prescribed in p0936r0.</span></li>
+<li><span>Change automatic storage duration to static storage duration.</span></li>
+</ol><p><span>If only #1 was applied holistically via p0936r0, </span><code>-Wlifetime</code><span> or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can’t fix all but DOES make sense for those that it applies to. As such, this proposal and </span><code>p0936r0</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:21">[1:21]</a></sup><span> are complimentary.</span></p><p><span>Personally, </span><code>p0936r0</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:22">[1:22]</a></sup><span> or something similar should be adopted regardless because we give the compiler more information than it had before, that a return’s lifetime is dependent upon argument(s) lifetime. When we give more information, like we do with const and constexpr, the </span><code>C++</code><span> compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.</span></p><h2 id="In-Depth-Rationale" data-id="In-Depth-Rationale"><a class="anchor hidden-xs" href="#In-Depth-Rationale" title="In-Depth-Rationale"><span class="octicon octicon-link"></span></a><span>In Depth Rationale</span></h2><p><span>There is a general expectation across programming languages that constants or more specifically constant literals are “immutable values which are known at compile time and do not change for the life of the program”.  </span><sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup><span> In most programming languages or rather the most widely used programming languages, constants do not dangle. Constants are so simple, so trivial (English wise), that it is shocking to even have to be conscience of dangling. This is shocking to </span><code>C++</code><span> beginners, expert programmers from other programming languages who come over to </span><code>C++</code><span> and at times even shocking to experienced </span><code>C++</code><span> programmers.</span></p><h3 id="Constant-Initialization" data-id="Constant-Initialization"><a class="anchor hidden-xs" href="#Constant-Initialization" title="Constant-Initialization"><span class="octicon octicon-link"></span></a><span>Constant Initialization</span></h3><table>
+<tbody><tr>
+<td>
+<p><code>Working Draft, Standard for Programming Language C++</code><span> </span><sup class="footnote-ref"><a href="#fn3" id="fnref3:4">[3:4]</a></sup></p>
+<p><span>“</span><em><strong><span>6.9.3.2 Static initialization [basic.start.static]</span></strong></em><span>”</span></p>
+<p><span>“</span><em><sub><span>1</span></sub><span> Variables with static storage duration are initialized as a consequence of program initiation. Variables with thread storage duration are initialized as a consequence of thread execution. Within each of these phases of initiation, initialization occurs as follows.</span></em><span>”</span></p>
+<p><span>“</span><em><sub><span>2</span></sub><span> Constant initialization is performed if a variable or temporary object with static or thread storage duration is constant-initialized (7.7).</span></em><span>”</span></p>
+</td>
+</tr>
+</tbody></table><p><span>So, how does one perform constant initialization on a temporary with static storage duration and is constant-initialized? It should also be noted that while </span><code>static</code><span> can be applied explicitly in class data member definition and in function bodies, static isn’t even an option as a modifier to a function argument, so the user doesn’t have a choice and the current default of automatic storage duration instead of static storage duration is less intuitive when constants of constant expressions are involved. In this proposal, I am using the specifier </span><code>constinit</code><span> as a alias for </span><code>const static constinit</code><span>. The keyword </span><code>constant</code><span> would be best. Currently, </span><code>constinit</code><span> can’t be used on either arguments or local variables, so the existing keyword was just repurposed instead of creating another keyword on our ever growing constant like keyword pile.</span></p><h3 id="Impact-on-current-proposals" data-id="Impact-on-current-proposals"><a class="anchor hidden-xs" href="#Impact-on-current-proposals" title="Impact-on-current-proposals"><span class="octicon octicon-link"></span></a><span>Impact on current proposals</span></h3><h4 id="p2255r2" data-id="p2255r2"><a class="anchor hidden-xs" href="#p2255r2" title="p2255r2"><span class="octicon octicon-link"></span></a><span>p2255r2</span></h4><p><em><strong><code>A type trait to detect reference binding to temporary</code></strong></em><span> </span><sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup></p><p><span>Following is a slightly modified </span><code>constexpr</code><span> example taken from the </span><code>p2255r2</code><span> </span><sup class="footnote-ref"><a href="#fn5" id="fnref5:1">[5:1]</a></sup><span> proposal. Only the suffix </span><code>s</code><span> has been added. It is followed by a non </span><code>constexpr</code><span> example. Currently, such an example is immediately dangling. Via </span><code>p2255r2</code><span> </span><sup class="footnote-ref"><a href="#fn5" id="fnref5:2">[5:2]</a></sup><span>, both examples become ill formed. However, with this proposal the examples becomes valid.</span></p><table>
+<tbody><tr>
+<td>
+</td>
+<td>
+<p><strong><span>constant</span></strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>Examples</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>tuple<span class="token operator">&lt;</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span><span class="token operator">&gt;</span> <span class="token function">x</span><span class="token punctuation">(</span><span class="token string">"hello"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>Before</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token comment">// dangling</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>p2255r2</code><span> </span><sup class="footnote-ref"><a href="#fn5" id="fnref5:3">[5:3]</a></sup></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token comment">// ill-formed</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>this proposal only</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token comment">// correct</span>
+std<span class="token double-colon punctuation">::</span>tuple<span class="token operator">&lt;</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span><span class="token operator">&gt;</span> <span class="token function">x</span><span class="token punctuation">(</span><span class="token keyword">constinit</span> <span class="token string">"hello"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</td>
+</tr>
+</tbody></table><table>
+<tbody><tr>
+<td>
+</td>
+<td>
+<p><strong><span>runtime</span></strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>Examples</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs">std<span class="token double-colon punctuation">::</span>tuple<span class="token operator">&lt;</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span><span class="token operator">&gt;</span> <span class="token function">x</span><span class="token punctuation">(</span><span class="token function">factory_of_string_at_runtime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>Before</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token comment">// dangling</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>p2255r2</code><span> </span><sup class="footnote-ref"><a href="#fn5" id="fnref5:4">[5:4]</a></sup></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token comment">// ill-formed</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>this proposal only</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token comment">// well-formed but may dangle latter</span>
+std<span class="token double-colon punctuation">::</span>tuple<span class="token operator">&lt;</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span><span class="token operator">&gt;</span> <span class="token function">x</span><span class="token punctuation">(</span>variable_scope <span class="token function">factory_of_string_at_runtime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</td>
+</tr>
+</tbody></table><p><span>With the </span><code>constinit</code><span> and </span><code>variable_scope</code><span> specifiers the temporaries cease to be temporaries and instead are just anonymously named variable. They do not have </span><code>statement_scope</code><span> lifetime that traditional </span><code>C++</code><span> temporaries have which causes immediate dangling and lead to further dangling.</span></p><h4 id="n3038" data-id="n3038"><a class="anchor hidden-xs" href="#n3038" title="n3038"><span class="octicon octicon-link"></span></a><span>n3038</span></h4><p><em><strong><code>Introduce storage-class specifiers for compound literals</code></strong></em><span> </span><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup></p><p><span>In </span><code>C23</code><span>, the </span><code>C</code><span> community is getting the comparable feature requested in this proposal, that storage class specifiers can be used on compound literals. This proposal goes beyond by allowing better specifiers to be applied more generally to temporaries.</span></p><h3 id="Present" data-id="Present"><a class="anchor hidden-xs" href="#Present" title="Present"><span class="octicon octicon-link"></span></a><span>Present</span></h3><p><span>This proposal should also be considered in the light of the current standards. A better idea of our current rules is necessary to understanding how they may be simplified for the betterment of </span><code>C++</code><span>.</span></p><h4 id="C-Standard-Compound-Literals" data-id="C-Standard-Compound-Literals"><a class="anchor hidden-xs" href="#C-Standard-Compound-Literals" title="C-Standard-Compound-Literals"><span class="octicon octicon-link"></span></a><span>C Standard Compound Literals</span></h4><p><span>Let’s first look at how literals specifically compound literals behave in </span><code>C</code><span>. There is still a gap between </span><code>C99</code><span> and </span><code>C++</code><span> and closing or reducing that gap would not only increase our compatibility but also reduce dangling.</span></p><table>
+<tbody><tr>
+<td>
+<p><code>2021/10/18 Meneide, C Working Draft</code><span> </span><sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup></p>
+<p><em><span>“6.5.2.5 Compound literals”</span></em></p>
+<p><strong><span>paragraph 5</span></strong></p>
+<p><em><span>“The value of the compound literal is that of an unnamed object initialized by the initializer list. If the compound literal occurs outside the body of a function, the object has static storage duration; otherwise, it has </span><strong><span>automatic storage duration associated with the enclosing block</span></strong><span>.”</span></em></p>
+</td>
+</tr>
+</tbody></table><p><span>The lifetime of this “enclosing block” is longer than that of </span><code>C++</code><span>. In </span><code>C++</code><span> under </span><code>6.7.7 Temporary objects [class.temporary]</code><span> specifically </span><code>6.12</code><span> states a </span><em><span>temporary bound to a reference in a new-initializer (7.6.2.8) persists until the completion of the full-expression containing the new-initializer</span></em><span>.</span></p><p><code>GCC</code><span> </span><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup><span> describes the result of this gap.</span></p><p><em><span>“</span><strong><span>In C, a compound literal designates an unnamed object with static or automatic storage duration. In C++, a compound literal designates a temporary object that only lives until the end of its full-expression. As a result, well-defined C code that takes the address of a subobject of a compound literal can be undefined in C++</span></strong><span>, so G++ rejects the conversion of a temporary array to a pointer.”</span></em></p><p><span>Simply put </span><code>C</code><span> has fewer dangling than </span><code>C++</code><span>! What is more is that </span><code>C</code><span>’s  solution covers both const and non const temporaries! Even though it is </span><code>C</code><span>, it is more like </span><code>C++</code><span> than what people give this feature credit for because it is tied to blocks/braces, just like RAII. This adds more weight that the </span><code>C</code><span> way is more intuitive. Consequently, the remaining dangling should be easier to spot for developers not having to look at superfluous dangling.</span></p><p><span>GCC even takes this a step forward which is closer to what this proposal is advocating. The last reference also says the following.</span></p><p><em><span>“</span><strong><span>As a GNU extension, GCC allows initialization of objects with static storage duration by compound literals (which is not possible in ISO C99 because the initializer is not a constant).</span></strong><span> It is handled as if the object were initialized only with the brace-enclosed list if the types of the compound literal and the object match. </span><strong><span>The elements of the compound literal must be constant.</span></strong><span> If the object being initialized has array type of unknown size, the size is determined by the size of the compound literal.”</span></em></p><p><span>Even the </span><code>C++</code><span> standard recognized that their are other opportunities for constant initialization.</span></p><table>
+<tbody><tr>
+<td>
+<p><code>Working Draft, Standard for Programming Language C++</code><span> </span><sup class="footnote-ref"><a href="#fn3" id="fnref3:5">[3:5]</a></sup></p>
+<p><strong><span>“</span><em><span>6.9.3.2 Static initialization [basic.start.static]</span></em><span>”</span></strong></p>
+<p><span>“</span><em><span>3 An implementation is permitted to perform the initialization of a variable with static or thread storage duration as a static initialization even if such initialization is not required to be done statically, provided that</span></em><span>”</span></p>
+<p><span>“</span><em><span>(3.1) — the dynamic version of the initialization does not change the value of any other object of static or thread storage duration prior to its initialization, and</span></em><span>”</span></p>
+<p><span>“</span><em><span>(3.2) — the static version of the initialization produces the same value in the initialized variable as would be produced by the dynamic initialization if all variables not required to be initialized statically were initialized dynamically.</span></em><span>”</span></p>
+</td>
+</tr>
+</tbody></table><p><span>This proposal is one such opportunity. Besides improving constant initialization, we’ll be increasing memory safety by reducing dangling.</span></p><p><strong><span>Should </span><code>C++</code><span> just adopt </span><code>C99</code><span> literal lifetimes being scoped to the enclosing block instead of to the </span><code>C++</code><span> statement, in lieu of this proposal?</span></strong></p><p><span>NO, there is still the expectation among programmers that constants, const evaluations of const-initialized constant expressions, are of static storage duration.</span></p><p><strong><span>Should </span><code>C++</code><span> adopt </span><code>C99</code><span> literal lifetimes being scoped to the enclosing block instead of to the </span><code>C++</code><span> statement, in addition to this proposal?</span></strong></p><p><span>YES, </span><code>C99</code><span> literal lifetimes does not guarantee any reduction in dangling, it just reduces it. This proposal does guarantee but only for const evaluations of constant-initialized constant expressions. Combined their would be an even greater reduction in dangling. As such this proposal and </span><code>C99</code><span> compound literals are complimentary. The remainder can be mitigated by other measures.</span></p><p><strong><span>Should </span><code>C++</code><span> adopt </span><code>C99</code><span> literal lifetimes being scoped to the enclosing block instead of to the </span><code>C++</code><span> statement?</span></strong></p><p><span>YES, the </span><code>C++</code><span> standard is currently telling programmers that the first two examples in the following table are equivalent with respect to the lifetime of the temporary </span><code>{1, 2}</code><span> and the named variable </span><code>cz</code><span>. This is because the lifetime of the temporary </span><code>{1, 2}</code><span> is bound to the statement, which means it is destroyed before </span><code>some_code_after</code><span> is called.</span></p><p><strong><span>Given</span></strong></p><pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token function">any_function</span><span class="token punctuation">(</span><span class="token keyword">const</span> complex<span class="token operator">&amp;</span> cz<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><table>
+<tbody><tr>
+<td>
+<p><strong><span>Programmer code</span></strong></p>
+</td>
+<td>
+<p><strong><span>What </span><code>C++</code><span> is actually doing!</span></strong></p>
+</td>
+<td>
+<p><strong><span>Programmer expectation/</span><code>C99</code></strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token function">some_code_before</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">any_function</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">some_code_after</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token function">some_code_before</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> complex anonymous<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token function">any_function</span><span class="token punctuation">(</span>anonymous<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token function">some_code_after</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token function">some_code_before</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> complex anonymous<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token function">any_function</span><span class="token punctuation">(</span>anonymous<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">some_code_after</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+</tr>
+</tbody></table><p><span>This is contrary to general programmer expectations and how it behaves in </span><code>C99</code><span>. Besides the fact that a large portion of the </span><code>C++</code><span> community has their start in </span><code>C</code><span> and besides the fact that no one, in their right mind, would ever litter their code with superfluous braces for every variable that they would like to be a temporary, their is a more fundamental reason why it is contrary to general programmer expectations. It can actually be impossible to write it that way. Consider another example, now with a return value in which the type does not have a default constructor.</span></p><p><strong><span>Given</span></strong></p><pre><code class="cpp hljs">no_default_constructor <span class="token function">any_function</span><span class="token punctuation">(</span><span class="token keyword">const</span> complex<span class="token operator">&amp;</span> cz<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><table>
+<tbody><tr>
+<td>
+<p><strong><span>Programmer code</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token function">some_code_before</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  no_default_constructor ndc <span class="token operator">=</span> <span class="token function">any_function</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">some_code_after</span><span class="token punctuation">(</span>ndc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>What is </span><code>C++</code><span> doing?</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token function">some_code_before</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> complex anonymous<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    no_default_constructor ndc <span class="token operator">=</span> <span class="token function">any_function</span><span class="token punctuation">(</span>anonymous<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token function">some_code_after</span><span class="token punctuation">(</span>ndc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><span>What is </span><code>C++</code><span> doing?</span></strong></p>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token function">some_code_before</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  no_default_constructor ndc<span class="token punctuation">;</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> complex anonymous<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    ndc <span class="token operator">=</span> <span class="token function">any_function</span><span class="token punctuation">(</span>anonymous<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token function">some_code_after</span><span class="token punctuation">(</span>ndc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+</tr>
+</tbody></table><p><span>It should be noted that neither of the “</span><code>What is C++ doing?</code><span>” examples even compile. The first because the variable </span><code>ndc</code><span> is not accessible to the functional call </span><code>some_code_after</code><span>. The second because the class </span><code>no_default_constructor</code><span> doesn’t have a default constructor and as such does not have a uninitialized state. In short, the current </span><code>C++</code><span> behavior of statement scoping of temporaries instead of containing block scoping is more difficult to reason about because the equivalent code cannot be written by the programmer. As such the </span><code>C99</code><span> way is simpler, safer and more reasonable. If </span><code>C++</code><span> is unable to change the lifetimes of temporaries in general then the least it could do is allow programmer’s to set it manually with the </span><code>constinit</code><span> and </span><code>variable_scope</code><span> specifiers.</span></p><p><strong><span>The fundamental flaw</span></strong></p><p><span>Consider for a moment if the C++ rules were that all variables, named or unnamed/temporaries, </span><em><strong><span>persists until the completion of the full-expression containing the new-initializer</span></strong></em><span>. </span><sup class="footnote-ref"><a href="#fn3" id="fnref3:6">[3:6]</a></sup><span> How useful would that be?</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> s <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span><span class="token comment">// immediate dangling reference</span>
+std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span><span class="token comment">// immediate dangling reference</span>
+<span class="token keyword">auto</span> reference <span class="token operator">=</span> <span class="token function">some_function</span><span class="token punctuation">(</span><span class="token string">"hello world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">use_the_ref</span><span class="token punctuation">(</span>reference<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// dangle</span>
+</code></pre><p><span>The variable </span><code>s</code><span> would not be usable. All variables would mostly be immediately dangling. The variable </span><code>s</code><span> could not be used safely by any statements that follow its initialization. It could not be used safely in nested blocks that follow be that </span><code>if</code><span>, </span><code>for</code><span> and </span><code>while</code><span> statements to name a few. The only place the variable could be used safely if it was anonymously passed as a argument to a function. That would allow multiple statements inside the function call to make use of the instance. If the function returned a reference to the argument or any part of it than there would be further dangling even though it is not unreasonable for a function to return a reference to a portion of or a whole instance, especially when the instance is known to already be alive lower on the stack. In essence, such a rule </span><strong><span>divorces the lifetime of the instance from the variable name</span></strong><span>. The only use of this from a programmer’s perspective is the anonymity of not naming variables as a form of access control. In short, programmers could not program. Doesn’t this sound familiar, for it is our current temporary lifetime rule!</span></p><p><span>Now, consider for a moment if the C++ rules were that all variables that do not have static storage duration, has automatic storage duration associated with the enclosing block of the expression as if the compiler was naming the temporaries anonymously or associated with the enclosing block of the variable to which the initialization is assigned, whichever is greater lifetime. How useful would that be?</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> s <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span>
+std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span>
+<span class="token keyword">auto</span> reference <span class="token operator">=</span> <span class="token function">some_function</span><span class="token punctuation">(</span><span class="token string">"hello world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">use_the_ref</span><span class="token punctuation">(</span>reference<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>The variable </span><code>s</code><span> would be usable. No variables would immediately dangle. The variable </span><code>s</code><span> could be used safely by any statements that follow its initialization. It could be used safely in nested blocks that follow be that </span><code>if</code><span>, </span><code>for</code><span> and </span><code>while</code><span> statements to name a few. By default, the variable could be used safely when anonymously passed as a argument to a function. If the function returned a reference to the argument or any part of it than there would not be further dangling unless the developer manually propagated the reference lower on the stack such as with a return. Even the benefit of anonymity when using temporaries are not lost and the longer lifetime doesn’t impact other instances that don’t even have access to said temporary. In short, programmers are freed from much dangling. Further, much the remaining dangling coalesces around returns and yields.</span></p><p><span>Until the day when </span><code>C++</code><span> can change the lifetime of temporaries, it would be nice if programmer’s had the ability to change the lifetime.</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> s <span class="token operator">=</span> <span class="token keyword">constinit</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span>
+std<span class="token double-colon punctuation">::</span>string_view sv <span class="token operator">=</span> <span class="token keyword">constinit</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span>
+<span class="token keyword">auto</span> reference <span class="token operator">=</span> <span class="token function">some_function</span><span class="token punctuation">(</span>variable_scope <span class="token string">"hello world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// yes, constinit is better here</span>
+<span class="token function">use_the_ref</span><span class="token punctuation">(</span>reference<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><h4 id="Outstanding-Issue" data-id="Outstanding-Issue"><a class="anchor hidden-xs" href="#Outstanding-Issue" title="Outstanding-Issue"><span class="octicon octicon-link"></span></a><span>Outstanding Issue</span></h4><h5 id="CWG900-Lifetime-of-temporaries-in-range-based-for" data-id="CWG900-Lifetime-of-temporaries-in-range-based-for"><a class="anchor hidden-xs" href="#CWG900-Lifetime-of-temporaries-in-range-based-for" title="CWG900-Lifetime-of-temporaries-in-range-based-for"><span class="octicon octicon-link"></span></a><span>CWG900 Lifetime of temporaries in range-based for</span></h5><pre><code class="cpp hljs"><span class="token comment">// some function</span>
+
+std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// correct usage</span>
+
+<span class="token keyword">auto</span> v <span class="token operator">=</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span> <span class="token keyword">auto</span> i <span class="token operator">:</span> <span class="token function">reverse</span><span class="token punctuation">(</span>v<span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// problematic usage</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span> <span class="token keyword">auto</span> i <span class="token operator">:</span> <span class="token function">reverse</span><span class="token punctuation">(</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre><p><span>With </span><code>C99</code><span> literal enclosing block lifetime, this example would not dangle. Let’s fix this with </span><code>variable_scope</code><span>.</span></p><pre><code class="cpp hljs"><span class="token comment">// some function</span>
+
+std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// correct usage</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span> <span class="token keyword">auto</span> i <span class="token operator">:</span> variable_scope <span class="token function">reverse</span><span class="token punctuation">(</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre><p><span>In the identifying paper for this issue, </span><code>Fix the range‐based for loop, Rev1</code><span> </span><sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup><span>, says the following:</span></p><p><span>“</span><em><strong><span>The Root Cause for the problem</span></strong></em><span>”</span></p><p><span>“</span><em><span>The reason for the undefined behavior above is that according to the current specification, the range-base</span><br>
+<span>for loop internally is </span><strong><span>expanded to multiple statements</span></strong><span>:</span></em><span>”</span></p><ul>
+<li><span>“</span><em><span>First, we have some initializations using the for-range-initializer after the colon and</span></em><span>”</span></li>
+<li><span>“</span><em><span>Then, we are calling a low-level for loop</span></em><span>”</span></li>
+</ul><p><span>While certainly a factor, the problem is </span><strong><span>NOT</span></strong><span> that internally, the range-base for loop is expanded to multiple statements. It is rather that one of those statements has a scope of the statement instead of the scope of the containing block. The scoping difference between </span><code>C99</code><span> and </span><code>C++</code><span> rears it head again. From the programmers perspective, the issue in both cases is that </span><code>C++</code><span> doesn’t treat temporaries, unnamed variable as if they were named by the programmer just anonymously. The supposed </span><code>correct usage</code><span> highlights this fact.</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> v <span class="token operator">=</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span> <span class="token keyword">auto</span> i <span class="token operator">:</span> <span class="token function">reverse</span><span class="token punctuation">(</span>v<span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span> std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre><p><span>If you just name it, it works! Had </span><code>reverse(foo())</code><span> been scoped to the block that contains the range based for loop than this too would have worked.</span></p><table>
+<tbody><tr>
+<td>
+<p><strong><span>Should have worked</span></strong></p>
+</td>
+<td>
+<p><strong><code>C99</code><span> would have worked</span></strong></p>
+</td>
+<td>
+<p><strong><span>Programmer made it work</span></strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">{</span><span class="token comment">// containing block</span>
+  <span class="token keyword">for</span><span class="token punctuation">(</span> <span class="token keyword">auto</span> i <span class="token operator">:</span> <span class="token function">reverse</span><span class="token punctuation">(</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">{</span><span class="token comment">// containing block</span>
+  <span class="token keyword">auto</span><span class="token operator">&amp;&amp;</span> rg <span class="token operator">=</span> <span class="token function">reverse</span><span class="token punctuation">(</span><span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> pos <span class="token operator">=</span> rg<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> end <span class="token operator">=</span> rg<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span> <span class="token punctuation">;</span> pos <span class="token operator">!=</span> end<span class="token punctuation">;</span> <span class="token operator">++</span>pos <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token operator">*</span>pos<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">{</span><span class="token comment">// containing block</span>
+  <span class="token keyword">auto</span> anonymous1 <span class="token operator">=</span> <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">auto</span> anonymous2 <span class="token operator">=</span> <span class="token function">reverse</span><span class="token punctuation">(</span>anonymous1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span><span class="token punctuation">(</span> <span class="token keyword">auto</span> i <span class="token operator">:</span> anonymous2 <span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> i <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</td>
+</tr>
+</tbody></table><p><span>It should be no different had the programmer broken a compound statement into it’s components and named them individually.</span></p><h3 id="Other-Anonymous-Things" data-id="Other-Anonymous-Things"><a class="anchor hidden-xs" href="#Other-Anonymous-Things" title="Other-Anonymous-Things"><span class="octicon octicon-link"></span></a><span>Other Anonymous Things</span></h3><p><span>The pain of immediate dangling associated with temporaries are especially felt when working with other anonymous language features of </span><code>C++</code><span> such as lambda functions and coroutines.</span></p><h4 id="Lambda-functions" data-id="Lambda-functions"><a class="anchor hidden-xs" href="#Lambda-functions" title="Lambda-functions"><span class="octicon octicon-link"></span></a><span>Lambda functions</span></h4><p><span>Whenever a lambda function captures a reference to a temporary it immediately dangles before an opportunity is given to call it, unless it is a immediately invoked lambda/function expression.</span></p><pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token operator">&amp;</span>c1 <span class="token operator">=</span> <span class="token string">"hello"</span>s<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s<span class="token punctuation">)</span><span class="token comment">// OK</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> c1 <span class="token operator">+</span> <span class="token string">" "</span>s <span class="token operator">+</span> s<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token string">"world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// immediately invoked lambda/function expression</span>
+
+<span class="token keyword">auto</span> lambda <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>c1 <span class="token operator">=</span> <span class="token string">"hello"</span>s<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s<span class="token punctuation">)</span><span class="token comment">// immediate dangling</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> c1 <span class="token operator">+</span> <span class="token string">" "</span>s <span class="token operator">+</span> s<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// ...</span>
+<span class="token function">lambda</span><span class="token punctuation">(</span><span class="token string">"world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>This problem is resolved when the scope of temporaries is to the enclosing block instead of the containing expression.</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> lambda <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>c1 <span class="token operator">=</span> variable_scope <span class="token string">"hello"</span>s<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> c1 <span class="token operator">+</span> <span class="token string">" "</span>s <span class="token operator">+</span> s<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// ...</span>
+<span class="token function">lambda</span><span class="token punctuation">(</span><span class="token string">"world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>This is the same had the temporary been named.</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> anonymous <span class="token operator">=</span> <span class="token string">"hello"</span>s<span class="token punctuation">;</span>
+<span class="token keyword">auto</span> lambda <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>c1 <span class="token operator">=</span> anonymous<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> c1 <span class="token operator">+</span> <span class="token string">" "</span>s <span class="token operator">+</span> s<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// ...</span>
+<span class="token function">lambda</span><span class="token punctuation">(</span><span class="token string">"world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p><span>This specific immediately dangling example is also fixed by explicit constant initialization.</span></p><pre><code class="cpp hljs"><span class="token keyword">auto</span> lambda <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">&amp;</span>c1 <span class="token operator">=</span> <span class="token keyword">constinit</span> <span class="token string">"hello"</span>s<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">return</span> c1 <span class="token operator">+</span> <span class="token string">" "</span>s <span class="token operator">+</span> s<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// ...</span>
+<span class="token function">lambda</span><span class="token punctuation">(</span><span class="token string">"world"</span>s<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><h4 id="Coroutines" data-id="Coroutines"><a class="anchor hidden-xs" href="#Coroutines" title="Coroutines"><span class="octicon octicon-link"></span></a><span>Coroutines</span></h4><p><strong><span>Given</span></strong></p><pre><code class="cpp hljs">generator<span class="token operator">&lt;</span><span class="token keyword">char</span><span class="token operator">&gt;</span> <span class="token function">each_char</span><span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>string<span class="token operator">&amp;</span> s<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">char</span> ch <span class="token operator">:</span> s<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">co_yield</span> ch<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>Similarly, whenever a coroutine gets constructed with a reference to a temporary it immediately dangles before an opportunity is given for it to be </span><code>co_await</code><span>ed upon.</span></p><pre><code class="cpp hljs"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">char</span> ch <span class="token operator">:</span> <span class="token function">each_char</span><span class="token punctuation">(</span><span class="token string">"hello world"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment">// immediate dangling</span>
+        std<span class="token double-colon punctuation">::</span><span class="token function">print</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>This problem is also resolved when the scope of temporaries is to the enclosing block instead of the containing expression.</span></p><pre><code class="cpp hljs"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">char</span> ch <span class="token operator">:</span> <span class="token function">each_char</span><span class="token punctuation">(</span>variable_scope <span class="token string">"hello world"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        std<span class="token double-colon punctuation">::</span><span class="token function">print</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>This also is the same had the temporary been named.</span></p><pre><code class="cpp hljs"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">auto</span> s <span class="token operator">=</span> <span class="token string">"hello world"</span>s<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">char</span> ch <span class="token operator">:</span> <span class="token function">each_char</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        std<span class="token double-colon punctuation">::</span><span class="token function">print</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><p><span>This specific immediately dangling example also is also fixed by explicit constant initialization.</span></p><pre><code class="cpp hljs"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">char</span> ch <span class="token operator">:</span> <span class="token function">each_char</span><span class="token punctuation">(</span><span class="token keyword">constinit</span> <span class="token string">"hello world"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        std<span class="token double-colon punctuation">::</span><span class="token function">print</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><h2 id="Summary" data-id="Summary"><a class="anchor hidden-xs" href="#Summary" title="Summary"><span class="octicon octicon-link"></span></a><span>Summary</span></h2><p><span>There are a couple of principles repeated throughout this proposal.</span></p><ol>
+<li><span>Constants really should have static storage duration so that they never dangle.</span></li>
+<li><span>Temporaries are expected to be just anonymously named variables / </span><code>C99</code><span> compound literals lifetime rule</span>
+<ul>
+<li><strong><span>variable scope</span></strong><span>: sometimes, especially in blocks / not arguments, it is better for a temporary to have automatic storage duration associated with the enclosing block of the variable to which the temporary is assigned instead of being associated with the enclosing block of the temporary expression</span></li>
+</ul>
+</li>
+</ol><p><span>The advantages to </span><code>C++</code><span> with adopting this proposal is manifold.</span></p><ul>
+<li><span>Empower programmers to be able to fix most dangling simply</span></li>
+<li><span>Reduce the gap between </span><code>C++</code><span> and </span><code>C99</code><span> compound literals</span></li>
+<li><span>Reduce the gap between </span><code>C++</code><span> and </span><code>C23</code><span> storage-class specifiers</span></li>
+<li><span>Improve the potential contribution of </span><code>C++</code><span>'s new specifiers back to </span><code>C</code></li>
+<li><span>Increase and improve upon the utilization of ROM and the benefits that entails</span></li>
+</ul><h2 id="Frequently-Asked-Questions" data-id="Frequently-Asked-Questions"><a class="anchor hidden-xs" href="#Frequently-Asked-Questions" title="Frequently-Asked-Questions"><span class="octicon octicon-link"></span></a><span>Frequently Asked Questions</span></h2><h3 id="What-about-locality-of-reference" data-id="What-about-locality-of-reference"><a class="anchor hidden-xs" href="#What-about-locality-of-reference" title="What-about-locality-of-reference"><span class="octicon octicon-link"></span></a><span>What about locality of reference?</span></h3><p><span>It is true that globals can be slower than locals because they are farther in memory from the code that uses them. So let me clarify, when I say </span><code>static storage duration</code><span>, I really mean </span><strong><span>logically</span></strong><span> </span><code>static storage duration</code><span>. If a type is a </span><code>PODType</code><span>/</span><code>TrivialType</code><span> or </span><code>LiteralType</code><span> than there is nothing preventing the compiler from copying the global to a local that is closer to the executing code. Rather, the compiler </span><strong><span>must</span></strong><span> ensure that the instance is always available; </span><strong><span>effectively</span></strong><span> </span><code>static storage duration</code><span>.</span></p><p><span>Consider this from an processor and assembly/machine language standpoint. A processor usually has instructions that works with memory. Whether that memory is ROM or is logically so because it is never written to by a program, then we have constants.</span></p><pre><code class="cpp hljs">mov <span class="token operator">&lt;</span><span class="token keyword">register</span><span class="token operator">&gt;</span><span class="token punctuation">,</span><span class="token operator">&lt;</span>memory<span class="token operator">&gt;</span>
+</code></pre><p><span>A processor may also have specialized versions of common instructions where a constant value is taken as part of the instruction itself. This too is a constant. However, this constant is guaranteed closer to the code because it is physically a part of it.</span></p><pre><code class="cpp hljs">mov <span class="token operator">&lt;</span><span class="token keyword">register</span><span class="token operator">&gt;</span><span class="token punctuation">,</span><span class="token operator">&lt;</span>constant<span class="token operator">&gt;</span>
+mov <span class="token operator">&lt;</span>memory<span class="token operator">&gt;</span><span class="token punctuation">,</span><span class="token operator">&lt;</span>constant<span class="token operator">&gt;</span>
+</code></pre><p><span>What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unnamed/unaddressable version physically can’t dangle.</span></p><h3 id="Is-variable_scope-easy-to-teach" data-id="Is-variable_scope-easy-to-teach"><a class="anchor hidden-xs" href="#Is-variable_scope-easy-to-teach" title="Is-variable_scope-easy-to-teach"><span class="octicon octicon-link"></span></a><span>Is </span><code>variable_scope</code><span> easy to teach?</span></h3><table>
+<tbody><tr>
+<td>
+<p><strong><span>values</span></strong></p>
+</td>
+<td>
+<p><strong><span>pointers with </span><code>C99</code><span> &amp;</span></strong></p>
+</td>
+<td>
+<p><strong><span>references with non existent reference reassignment operator preferably completely new and unique operator since the variable’s type may have a custom </span><code>&amp;=</code><span> operator defined</span></strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>whatever<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  i <span class="token operator">=</span> <span class="token number">7</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+  i <span class="token operator">=</span> <span class="token number">9</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// use i</span>
+</code></pre>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">int</span><span class="token operator">*</span> i <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token number">5</span><span class="token punctuation">;</span><span class="token comment">// or uninitialized</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>whatever<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  i <span class="token operator">=</span> variable_scope <span class="token operator">&amp;</span><span class="token number">7</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+  i <span class="token operator">=</span> variable_scope <span class="token operator">&amp;</span><span class="token number">9</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// use i</span>
+</code></pre>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token keyword">int</span><span class="token operator">&amp;</span> i <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>whatever<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  i <span class="token operator">&amp;=</span> variable_scope <span class="token number">7</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+  i <span class="token operator">&amp;=</span> variable_scope <span class="token number">9</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// use i</span>
+</code></pre>
+</td>
+</tr>
+</tbody></table><p><span>In the </span><code>values</code><span> example, there is no dangling. Programmers trust the compiler to allocate and deallocate instances on the stack. They have to because the programmer has little to no control over deallocation. Neither of the </span><code>pointers</code><span> or </span><code>references</code><span> examples compile without utility functions to convert from reference to pointer and immediately invoked lambda functions to do complex initialization of references since they have to be initialized and their references can’t currently be reassigned no matter how useful that would be. That boiler plate exist in an earlier example in this proposal and has been removed for clarity. With the current </span><code>C++</code><span> statement scope rules or the </span><code>C99</code><span> block scope rule, both the </span><code>pointers</code><span> and </span><code>references</code><span> examples dangle. In other words, the compiler who is primarily responsible for the stack has rules that causes dangling and embarrassing worse immediate dangling. Variable scope is better because it matches value semantics and it avoids dangling throughout the body of the function whether it is anything that introduces new blocks be that </span><code>if</code><span>, </span><code>switch</code><span>, </span><code>while</code><span>, </span><code>for</code><span> and nesting of these constructs.</span></p><h3 id="Doesn’t-this-make-C-harder-to-teach" data-id="Doesn’t-this-make-C-harder-to-teach"><a class="anchor hidden-xs" href="#Doesn’t-this-make-C-harder-to-teach" title="Doesn’t-this-make-C-harder-to-teach"><span class="octicon octicon-link"></span></a><span>Doesn’t this make C++ harder to teach?</span></h3><p><span>Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners.</span><!--As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.--></p><p><span>So, what do we teach now and what bearing does these teachings, the </span><code>C++</code><span> standard and this proposal have on one another.</span></p><p><strong><span>C++ Core Guidelines</span></strong><br><strong><span>F.42: Return a </span><code>T*</code><span> to indicate a position (only)</span></strong><span> </span><sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup><br><em><strong><span>Note</span></strong><span> Do not return a pointer to something that is not in the caller’s scope; see F.43.</span></em><span> </span><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup></p><p><span>Returning references to something in the caller’s scope is only natural. It is a part of our reference delegating programming model. A function when given a reference does not know how the instance was created and it doesn’t care as long as it is good for the life of the function call (and beyond).  Unfortunately, scoping temporary arguments to the statement instead of the containing block doesn’t just create immediate dangling but it provides to functions references to instances that are near death. These instances are almost dead on arrival. Having the ability to return a reference to a caller’s instance or a sub-instance thereof assumes, correctly, that reference from the caller’s scope would still be alive after this function call. The fact that temporary rules shortened the life to the statement is at odds with what we teach. This proposal allows programmers to restore to temporaries the lifetime of anonymously named variables which is not only natural but also consistent with what programmers already know. It is also in line with what we teach as was codified in the C++ Core Guidelines.</span></p><h2 id="References" data-id="References"><a class="anchor hidden-xs" href="#References" title="References"><span class="octicon octicon-link"></span></a><span>References</span></h2><hr class="footnotes-sep"><section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf" target="_blank" rel="noopener"><span>http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf</span></a> <a href="#fnref1" class="footnote-backref">↩︎</a> <a href="#fnref1:1" class="footnote-backref">↩︎</a> <a href="#fnref1:2" class="footnote-backref">↩︎</a> <a href="#fnref1:3" class="footnote-backref">↩︎</a> <a href="#fnref1:4" class="footnote-backref">↩︎</a> <a href="#fnref1:5" class="footnote-backref">↩︎</a> <a href="#fnref1:6" class="footnote-backref">↩︎</a> <a href="#fnref1:7" class="footnote-backref">↩︎</a> <a href="#fnref1:8" class="footnote-backref">↩︎</a> <a href="#fnref1:9" class="footnote-backref">↩︎</a> <a href="#fnref1:10" class="footnote-backref">↩︎</a> <a href="#fnref1:11" class="footnote-backref">↩︎</a> <a href="#fnref1:12" class="footnote-backref">↩︎</a> <a href="#fnref1:13" class="footnote-backref">↩︎</a> <a href="#fnref1:14" class="footnote-backref">↩︎</a> <a href="#fnref1:15" class="footnote-backref">↩︎</a> <a href="#fnref1:16" class="footnote-backref">↩︎</a> <a href="#fnref1:17" class="footnote-backref">↩︎</a> <a href="#fnref1:18" class="footnote-backref">↩︎</a> <a href="#fnref1:19" class="footnote-backref">↩︎</a> <a href="#fnref1:20" class="footnote-backref">↩︎</a> <a href="#fnref1:21" class="footnote-backref">↩︎</a> <a href="#fnref1:22" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2731.pdf</span></a> <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/n4910.pdf</span></a> <a href="#fnref3" class="footnote-backref">↩︎</a> <a href="#fnref3:1" class="footnote-backref">↩︎</a> <a href="#fnref3:2" class="footnote-backref">↩︎</a> <a href="#fnref3:3" class="footnote-backref">↩︎</a> <a href="#fnref3:4" class="footnote-backref">↩︎</a> <a href="#fnref3:5" class="footnote-backref">↩︎</a> <a href="#fnref3:6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants" target="_blank" rel="noopener"><span>https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants</span></a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2255r2.html</span></a> <a href="#fnref5" class="footnote-backref">↩︎</a> <a href="#fnref5:1" class="footnote-backref">↩︎</a> <a href="#fnref5:2" class="footnote-backref">↩︎</a> <a href="#fnref5:3" class="footnote-backref">↩︎</a> <a href="#fnref5:4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3038.htm" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3038.htm</span></a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p><a href="https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html" target="_blank" rel="noopener"><span>https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html</span></a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf</span></a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only</span></a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object</span></a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section></div>
+    <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
+        <div class="pull-right dropdown">
+            <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
+                <i class="fa fa-bars"></i>
+            </a>
+            <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
+                <div class="toc"><ul class="nav">
+<li class=""><a href="#temporary-storage-class-specifiers" title="temporary storage class specifiers">temporary storage class specifiers</a><ul class="nav">
+<li class=""><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Examples" title="Motivating Examples">Motivating Examples</a><ul class="nav">
+<li><a href="#“Classes-not-Having-Value-Semantics”-14" title="“Classes not Having Value Semantics” [1:4]">“Classes not Having Value Semantics” [1:4]</a></li>
+<li><a href="#“Returned-References-to-Temporaries”-19" title="“Returned References to Temporaries” [1:9]">“Returned References to Temporaries” [1:9]</a></li>
+</ul>
+</li>
+<li><a href="#In-Depth-Rationale" title="In Depth Rationale">In Depth Rationale</a><ul class="nav">
+<li><a href="#Constant-Initialization" title="Constant Initialization">Constant Initialization</a></li>
+<li><a href="#Impact-on-current-proposals" title="Impact on current proposals">Impact on current proposals</a></li>
+<li><a href="#Present" title="Present">Present</a></li>
+<li><a href="#Other-Anonymous-Things" title="Other Anonymous Things">Other Anonymous Things</a></li>
+</ul>
+</li>
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#Frequently-Asked-Questions" title="Frequently Asked Questions">Frequently Asked Questions</a><ul class="nav">
+<li><a href="#What-about-locality-of-reference" title="What about locality of reference?">What about locality of reference?</a></li>
+<li><a href="#Is-variable_scope-easy-to-teach" title="Is variable_scope easy to teach?">Is variable_scope easy to teach?</a></li>
+<li><a href="#Doesn’t-this-make-C-harder-to-teach" title="Doesn’t this make C++ harder to teach?">Doesn’t this make C++ harder to teach?</a></li>
+</ul>
+</li>
+<li><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+            </ul>
+        </div>
+    </div>
+    <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;" null null>
+        <div class="toc"><ul class="nav">
+<li class=""><a href="#temporary-storage-class-specifiers" title="temporary storage class specifiers">temporary storage class specifiers</a><ul class="nav">
+<li class=""><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Examples" title="Motivating Examples">Motivating Examples</a><ul class="nav">
+<li><a href="#“Classes-not-Having-Value-Semantics”-14" title="“Classes not Having Value Semantics” [1:4]">“Classes not Having Value Semantics” [1:4]</a></li>
+<li><a href="#“Returned-References-to-Temporaries”-19" title="“Returned References to Temporaries” [1:9]">“Returned References to Temporaries” [1:9]</a></li>
+</ul>
+</li>
+<li><a href="#In-Depth-Rationale" title="In Depth Rationale">In Depth Rationale</a><ul class="nav">
+<li><a href="#Constant-Initialization" title="Constant Initialization">Constant Initialization</a></li>
+<li><a href="#Impact-on-current-proposals" title="Impact on current proposals">Impact on current proposals</a></li>
+<li><a href="#Present" title="Present">Present</a></li>
+<li><a href="#Other-Anonymous-Things" title="Other Anonymous Things">Other Anonymous Things</a></li>
+</ul>
+</li>
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#Frequently-Asked-Questions" title="Frequently Asked Questions">Frequently Asked Questions</a><ul class="nav">
+<li><a href="#What-about-locality-of-reference" title="What about locality of reference?">What about locality of reference?</a></li>
+<li><a href="#Is-variable_scope-easy-to-teach" title="Is variable_scope easy to teach?">Is variable_scope easy to teach?</a></li>
+<li><a href="#Doesn’t-this-make-C-harder-to-teach" title="Doesn’t this make C++ harder to teach?">Doesn’t this make C++ harder to teach?</a></li>
+</ul>
+</li>
+<li><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gist-embed/2.6.0/gist-embed.min.js" integrity="sha256-KyF2D6xPIJUW5sUDSs93vWyZm+1RzIpKCexxElmxl8g=" crossorigin="anonymous" defer></script>
+    <script>
+        var markdown = $(".markdown-body");
+        //smooth all hash trigger scrolling
+        function smoothHashScroll() {
+            var hashElements = $("a[href^='#']").toArray();
+            for (var i = 0; i < hashElements.length; i++) {
+                var element = hashElements[i];
+                var $element = $(element);
+                var hash = element.hash;
+                if (hash) {
+                    $element.on('click', function (e) {
+                        // store hash
+                        var hash = this.hash;
+                        if ($(hash).length <= 0) return;
+                        // prevent default anchor click behavior
+                        e.preventDefault();
+                        // animate
+                        $('body, html').stop(true, true).animate({
+                            scrollTop: $(hash).offset().top
+                        }, 100, "linear", function () {
+                            // when done, add hash to url
+                            // (default click behaviour)
+                            window.location.hash = hash;
+                        });
+                    });
+                }
+            }
+        }
+
+        smoothHashScroll();
+        var toc = $('.ui-toc');
+        var tocAffix = $('.ui-affix-toc');
+        var tocDropdown = $('.ui-toc-dropdown');
+        //toc
+        tocDropdown.click(function (e) {
+            e.stopPropagation();
+        });
+
+        var enoughForAffixToc = true;
+
+        function generateScrollspy() {
+            $(document.body).scrollspy({
+                target: ''
+            });
+            $(document.body).scrollspy('refresh');
+            if (enoughForAffixToc) {
+                toc.hide();
+                tocAffix.show();
+            } else {
+                tocAffix.hide();
+                toc.show();
+            }
+            $(document.body).scroll();
+        }
+
+        function windowResize() {
+            //toc right
+            var paddingRight = parseFloat(markdown.css('padding-right'));
+            var right = ($(window).width() - (markdown.offset().left + markdown.outerWidth() - paddingRight));
+            toc.css('right', right + 'px');
+            //affix toc left
+            var newbool;
+            var rightMargin = (markdown.parent().outerWidth() - markdown.outerWidth()) / 2;
+            //for ipad or wider device
+            if (rightMargin >= 133) {
+                newbool = true;
+                var affixLeftMargin = (tocAffix.outerWidth() - tocAffix.width()) / 2;
+                var left = markdown.offset().left + markdown.outerWidth() - affixLeftMargin;
+                tocAffix.css('left', left + 'px');
+            } else {
+                newbool = false;
+            }
+            if (newbool != enoughForAffixToc) {
+                enoughForAffixToc = newbool;
+                generateScrollspy();
+            }
+        }
+        $(window).resize(function () {
+            windowResize();
+        });
+        $(document).ready(function () {
+            windowResize();
+            generateScrollspy();
+        });
+
+        //remove hash
+        function removeHash() {
+            window.location.hash = '';
+        }
+
+        var backtotop = $('.back-to-top');
+        var gotobottom = $('.go-to-bottom');
+
+        backtotop.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToTop)
+                scrollToTop();
+            removeHash();
+        });
+        gotobottom.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToBottom)
+                scrollToBottom();
+            removeHash();
+        });
+
+        var toggle = $('.expand-toggle');
+        var tocExpand = false;
+
+        checkExpandToggle();
+        toggle.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tocExpand = !tocExpand;
+            checkExpandToggle();
+        })
+
+        function checkExpandToggle () {
+            var toc = $('.ui-toc-dropdown .toc');
+            var toggle = $('.expand-toggle');
+            if (!tocExpand) {
+                toc.removeClass('expand');
+                toggle.text('Expand all');
+            } else {
+                toc.addClass('expand');
+                toggle.text('Collapse all');
+            }
+        }
+
+        function scrollToTop() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: 0
+            }, 100, "linear");
+        }
+
+        function scrollToBottom() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: $(document.body)[0].scrollHeight
+            }, 100, "linear");
+        }
+    </script>
+</body>
+
+</html>
