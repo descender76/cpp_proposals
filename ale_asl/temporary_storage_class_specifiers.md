@@ -63,6 +63,7 @@ a code
   - [Motivating examples](#motivating-examples)
     - [Classes not Having Value Semantics](#classes-not-having-value-semantics)
     - [Returned References to Temporaries](#returned-references-to-temporaries)
+    - [The work load](#the-work-load)
   - [In Depth Rationale](#in-depth-rationale)
     - [Constant Initialization](#constant-initialization)
     - [Impact on current proposals](#impact-on-current-proposals)
@@ -445,6 +446,51 @@ However, things in the real world tend to be more complicated. Depending upon th
 If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but DOES make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
 Personally, `p0936r0` [^bindp] or something similar should be adopted regardless because we give the compiler more information than it had before, that a return's lifetime is dependent upon argument(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
+
+### The work load
+
+The fact is changing every argument of every call of every function is a lot of work and very verbose. In reality, programmers just want to be able to change the default temporary scoping strategy module wide. The following table lists 3 module only attributes which allows the module authors to decide.
+
+<table>
+<tr>
+<td>
+
+`[[default_temporary_scope(variable)]]`
+
+</td>
+<td>
+
+All temporaries in the module has the same lifetime of the variable to which it is assigned or `block_scope`, whichever is greater. This specifier is the recommended default.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`[[default_temporary_scope(block)]]`
+
+</td>
+<td>
+
+All temporaries in the module are scoped to the block that contains said expression. This is the `C` user defined literal lifetime rule. [^n2731] <sup>6.5.2.5 Compound literals</sup> This specifier is recommended only for backwards compatibility with the `C` language.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`[[default_temporary_scope(statement)]]`
+
+</td>
+<td>
+
+All temporaries in the module are scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default for now for compatibility reasons. This specifier is recommended only for backwards compatibility with the `C++` language. It is recommended that programmers transition to using `[[default_temporary_scope(variable)]]`.
+
+</td>
+</tr>
+</table>
+
+Please note that there was no attribute for `constinit` as this would not be usable. With these module level attributes, all of the specifiers except `constinit` could be removed. The `constinit` specifier would still be added to allow the programmer to change an argument in full or in part to constant static storage duration. Besides being less work and less verbose, module level attribute has the added advantage that this will automatically fix immediate dangling and also greatly reduce any remaining dangling.
 
 ## In Depth Rationale
 
@@ -1208,7 +1254,7 @@ else
 </table>
 
 In the `values` example, there is no dangling. Programmers trust the compiler to allocate and deallocate instances on the stack. They have to because the programmer has little to no control over deallocation. Neither of the `pointers` or `references` examples compile without utility functions to convert from reference to pointer and immediately invoked lambda functions to do complex initialization of references since they have to be initialized and their references can't currently be reassigned no matter how useful that would be. That boiler plate exist in an earlier example in this proposal and has been removed for clarity. With the current `C++` statement scope rules or the `C99` block scope rule, both the `pointers` and `references` examples dangle. In other words, the compilers who are primarily responsible for the stack has rules that causes dangling and embarrassing worse immediate dangling. This violates the programmer's trust in their compiler. Variable scope is better because it restores the programmer's trust in their compiler/language by causing temporaries to match the value semantics of variables. Further, it avoids dangling throughout the body of the function whether it is anything that introduces new blocks/scopes be that `if`, `switch`, `while`, `for` statements and the nesting of these constructs.
-
+<!--
 ### How do these specifiers propagate?
 
 Consider these examples:
@@ -1225,7 +1271,7 @@ f(statement_scope {1, statement_scope { statement_scope {statement_scope 2, stat
 ```
 
 TODO
-
+-->
 ### Doesn't this make C++ harder to teach?
 
 Until the day that all dangling gets fixed, any new tools to assist developer's in fixing dangling would still require programmers to be able to identify any dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners.<!--As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.-->
