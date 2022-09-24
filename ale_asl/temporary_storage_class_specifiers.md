@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-20</td>
+<td>2022-09-24</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -89,7 +89,7 @@ This paper proposes the standard adopt storage class specifiers for temporaries 
 
 ## Motivating Examples
 
-*"Let’s motivate the feature for both, classes not having value semantics and references",* [^bindp] by adding 4 new storage class specifiers that are only used by temporaries such as arguments to functions.
+*"Let’s motivate the feature for both, classes not having value semantics and references",* [^bindp] by adding 4 new storage class specifiers that are only used by temporaries, such as arguments to functions.
 
 <table>
 <tr>
@@ -136,7 +136,7 @@ The temporary is scoped to the block that contains said expression. This is the 
 </td>
 <td>
 
-The temporary is scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default until one of the other specifiers are applied in which case the other becomes the default until another specifier is given. This specifier is recommended only for backwards compatibility with the `C++` language. It is recommended that programmers transition to using `constinit` and `variable_scope`.
+The temporary is scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default until one of the other specifiers are applied in which case the other becomes the default until another specifier is given. This specifier is recommended only for backwards compatibility with versions of the `C++` language. It is recommended that programmers transition to using `variable_scope` and `constinit`.
 
 </td>
 </tr>
@@ -460,7 +460,7 @@ The fact is changing every argument of every call of every function is a lot of 
 </td>
 <td>
 
-All temporaries in the module has the same lifetime of the variable to which it is assigned or `block_scope`, whichever is greater. This specifier is the recommended default.
+Unless overridden, all temporaries in the module has the same lifetime of the variable to which it is assigned or `block_scope`, whichever is greater. This specifier is the recommended default.
 
 </td>
 </tr>
@@ -472,7 +472,7 @@ All temporaries in the module has the same lifetime of the variable to which it 
 </td>
 <td>
 
-All temporaries in the module are scoped to the block that contains said expression. This is the `C` user defined literal lifetime rule. [^n2731] <sup>6.5.2.5 Compound literals</sup> This specifier is recommended only for backwards compatibility with the `C` language.
+Unless overridden, all temporaries in the module are scoped to the block that contains said expression. This is the `C` user defined literal lifetime rule. [^n2731] <sup>6.5.2.5 Compound literals</sup> This specifier is recommended only for backwards compatibility with the `C` language.
 
 </td>
 </tr>
@@ -484,7 +484,7 @@ All temporaries in the module are scoped to the block that contains said express
 </td>
 <td>
 
-All temporaries in the module are scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default for now for compatibility reasons. This specifier is recommended only for backwards compatibility with the `C++` language. It is recommended that programmers transition to using `[[default_temporary_scope(variable)]]`.
+Unless overridden, all temporaries in the module are scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default for now for compatibility reasons. This specifier is recommended only for backwards compatibility with the `C++` language. It is recommended that programmers transition to using `[[default_temporary_scope(variable)]]`.
 
 </td>
 </tr>
@@ -1254,24 +1254,27 @@ else
 </table>
 
 In the `values` example, there is no dangling. Programmers trust the compiler to allocate and deallocate instances on the stack. They have to because the programmer has little to no control over deallocation. Neither of the `pointers` or `references` examples compile without utility functions to convert from reference to pointer and immediately invoked lambda functions to do complex initialization of references since they have to be initialized and their references can't currently be reassigned no matter how useful that would be. That boiler plate exist in an earlier example in this proposal and has been removed for clarity. With the current `C++` statement scope rules or the `C99` block scope rule, both the `pointers` and `references` examples dangle. In other words, the compilers who are primarily responsible for the stack has rules that causes dangling and embarrassing worse immediate dangling. This violates the programmer's trust in their compiler. Variable scope is better because it restores the programmer's trust in their compiler/language by causing temporaries to match the value semantics of variables. Further, it avoids dangling throughout the body of the function whether it is anything that introduces new blocks/scopes be that `if`, `switch`, `while`, `for` statements and the nesting of these constructs.
-<!--
+
 ### How do these specifiers propagate?
 
-Consider these examples:
+These specifiers apply to the temporary immediately to the right of said specifier and to any child temporaries. It does not impact any parent or sibling temporaries. Consider these examples:
 
 ```cpp
-
-// The current default scope is statement_scope until
-// C++ and tooling can transition it to variable_scope
-// the following four examples are the same
+// all of the temporaries has the default temporary scope as
+// specified by the module attribute otherwise statement scope
 f({1, { {2, 3}, 4}, {5, 6} });
-f(statement_scope {1, { {2, 3}, 4}, {5, 6} });
-f(statement_scope {1, statement_scope { statement_scope {2, 3}, 4}, statement_scope {5, 6} });
-f(statement_scope {1, statement_scope { statement_scope {statement_scope 2, statement_scope 3}, statement_scope 4}, statement_scope {statement_scope 5, statement_scope 6} });
+// only 4 has constinit scope
+f({1, { {2, 3}, constinit 4}, {5, 6} });
+// only {2, 3}, 2, 3 has constinit scope
+f({1, { constinit {2, 3}, 4}, {5, 6} });
+// only { {2, 3}, 4}, {2, 3}, 2, 3, 4 has constinit scope
+f({1, constinit { {2, 3}, 4}, {5, 6} });
+// all of the arguments have has constinit scope
+f(constinit {1, { {2, 3}, 4}, {5, 6} });
+// only 5 has constinit scope
+f({1, { {2, 3}, 4}, {constinit 5, 6} });
 ```
 
-TODO
--->
 ### Doesn't this make C++ harder to teach?
 
 Until the day that all dangling gets fixed, any new tools to assist developer's in fixing dangling would still require programmers to be able to identify any dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners.<!--As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.-->
