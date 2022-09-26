@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-20</td>
+<td>2022-09-24</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -63,6 +63,7 @@ a code
   - [Motivating examples](#motivating-examples)
     - [Classes not Having Value Semantics](#classes-not-having-value-semantics)
     - [Returned References to Temporaries](#returned-references-to-temporaries)
+    - [The work load](#the-work-load)
   - [In Depth Rationale](#in-depth-rationale)
     - [Constant Initialization](#constant-initialization)
     - [Impact on current proposals](#impact-on-current-proposals)
@@ -88,7 +89,7 @@ This paper proposes the standard adopt storage class specifiers for temporaries 
 
 ## Motivating Examples
 
-*"Let’s motivate the feature for both, classes not having value semantics and references",* [^bindp] by adding 4 new storage class specifiers that are only used by temporaries such as arguments to functions.
+*"Let’s motivate the feature for both, classes not having value semantics and references",* [^bindp] by adding 4 new storage class specifiers that are only used by temporaries, such as arguments to functions.
 
 <table>
 <tr>
@@ -135,7 +136,7 @@ The temporary is scoped to the block that contains said expression. This is the 
 </td>
 <td>
 
-The temporary is scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default until one of the other specifiers are applied in which case the other becomes the default until another specifier is given. This specifier is recommended only for backwards compatibility with the `C++` language. It is recommended that programmers transition to using `constinit` and `variable_scope`.
+The temporary is scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default until one of the other specifiers are applied in which case the other becomes the default until another specifier is given. This specifier is recommended only for backwards compatibility with versions of the `C++` language. It is recommended that programmers transition to using `variable_scope` and `constinit`.
 
 </td>
 </tr>
@@ -445,6 +446,51 @@ However, things in the real world tend to be more complicated. Depending upon th
 If only #1 was applied holistically via p0936r0, `-Wlifetime` or some such, then that would not be appropriate or reasonable for those that really should be fixed by #2. Likewise #2 can't fix all but DOES make sense for those that it applies to. As such, this proposal and `p0936r0` [^bindp] are complimentary.
 
 Personally, `p0936r0` [^bindp] or something similar should be adopted regardless because we give the compiler more information than it had before, that a return's lifetime is dependent upon argument(s) lifetime. When we give more information, like we do with const and constexpr, the `C++` compiler can do amazing things. Any reduction in undefined behavior, dangling references/pointers and delayed/unitialized errors should be welcomed, at least as long it can be explained simply and rationally.
+
+### The work load
+
+The fact is changing every argument of every call of every function is a lot of work and very verbose. In reality, programmers just want to be able to change the default temporary scoping strategy module wide. The following table lists 3 module only attributes which allows the module authors to decide.
+
+<table>
+<tr>
+<td>
+
+`[[default_temporary_scope(variable)]]`
+
+</td>
+<td>
+
+Unless overridden, all temporaries in the module has the same lifetime of the variable to which it is assigned or `block_scope`, whichever is greater. This specifier is the recommended default.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`[[default_temporary_scope(block)]]`
+
+</td>
+<td>
+
+Unless overridden, all temporaries in the module are scoped to the block that contains said expression. This is the `C` user defined literal lifetime rule. [^n2731] <sup>6.5.2.5 Compound literals</sup> This specifier is recommended only for backwards compatibility with the `C` language.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`[[default_temporary_scope(statement)]]`
+
+</td>
+<td>
+
+Unless overridden, all temporaries in the module are scoped to the containing full expression. This is the `C++` temporary lifetime rules [^n4910]<sup>6.7.7 Temporary objects</sup> and is the default for now for compatibility reasons. This specifier is recommended only for backwards compatibility with the `C++` language. It is recommended that programmers transition to using `[[default_temporary_scope(variable)]]`.
+
+</td>
+</tr>
+</table>
+
+Please note that there was no attribute for `constinit` as this would not be usable. With these module level attributes, all of the specifiers except `constinit` could be removed. The `constinit` specifier would still be added to allow the programmer to change an argument in full or in part to constant static storage duration. Besides being less work and less verbose, module level attribute has the added advantage that this will automatically fix immediate dangling and also greatly reduce any remaining dangling.
 
 ## In Depth Rationale
 
@@ -1211,20 +1257,23 @@ In the `values` example, there is no dangling. Programmers trust the compiler to
 
 ### How do these specifiers propagate?
 
-Consider these examples:
+These specifiers apply to the temporary immediately to the right of said specifier and to any child temporaries. It does not impact any parent or sibling temporaries. Consider these examples:
 
 ```cpp
-
-// The current default scope is statement_scope until
-// C++ and tooling can transition it to variable_scope
-// the following four examples are the same
+// all of the temporaries has the default temporary scope as
+// specified by the module attribute otherwise statement scope
 f({1, { {2, 3}, 4}, {5, 6} });
-f(statement_scope {1, { {2, 3}, 4}, {5, 6} });
-f(statement_scope {1, statement_scope { statement_scope {2, 3}, 4}, statement_scope {5, 6} });
-f(statement_scope {1, statement_scope { statement_scope {statement_scope 2, statement_scope 3}, statement_scope 4}, statement_scope {statement_scope 5, statement_scope 6} });
+// only 4 has constinit scope
+f({1, { {2, 3}, constinit 4}, {5, 6} });
+// only {2, 3}, 2, 3 has constinit scope
+f({1, { constinit {2, 3}, 4}, {5, 6} });
+// only { {2, 3}, 4}, {2, 3}, 2, 3, 4 has constinit scope
+f({1, constinit { {2, 3}, 4}, {5, 6} });
+// all of the arguments have has constinit scope
+f(constinit {1, { {2, 3}, 4}, {5, 6} });
+// only 5 has constinit scope
+f({1, { {2, 3}, 4}, {constinit 5, 6} });
 ```
-
-TODO
 
 ### Doesn't this make C++ harder to teach?
 
