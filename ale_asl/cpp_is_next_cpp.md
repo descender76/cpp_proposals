@@ -82,6 +82,7 @@ module some_module_name [[static_analysis("")]];// module implementation unit
 - It would be ideal if the name member of the `static_analysis` attribute could be passed as either an environment variable and/or command line argument to compilers so it could be used by pipelines to assert the degree of conformance to the defined static analyzer without actually changing the source.
 - It would be ideal if compilers could standardize the environment variable name or command line argument name in order to ease tooling.
 - It would be ideal if compilers could produce a machine readable report in JSON, YAML or something else so that pipelines could more easily consume the results.
+- It would be ideal if compilers could standardize the machine readable report.
 
 The name of the static analyzer are dotted. Unscoped or names that start with `std.`, `c++.`, `cpp.`, `cxx.` or `c.` are reserved for standardization.
 
@@ -146,17 +147,124 @@ These overarching static analyzers are composed of multiple static analyzers whi
 - Any declaration of a pointer is an error.
 - Calling any function that has parameters that take a pointer is an error.
 - Only function pointers can be used.
+- Lvalue references, &, can still be used.
+- All modules can be used even if they don't use `static_analysis` attribute as this allows limited gradual adoption.
+<!--
+Using the keyword `nullptr` is an error because there are no pointers. What about function pointers = nullptr
+-->
+<!--
+How do you initialize strings without [const] char*
+-->
 
-Can use modules that doesn't use these static analyzers.
-replaced by
-&
-standard containers
-smart pointers
-(*). vs. -> (2 character difference)
-past main proposals
-shim
-`A Modern C++ Signature for main` [^modernmain]
-`Desert Sessions: Improving hostile environment interactions` [^hostileenv]
+**WHY?**
+Pointers have largely been replaced with the following:
+
+<table>
+<tr>
+<td>
+
+lvalue references
+
+</td>
+<td>
+
+1985: Cfront 1.0 [^history]
+
+</td>
+</tr>
+<tr>
+<td>
+
+STL
+
+</td>
+<td>
+
+1992 [^history]
+
+</td>
+</tr>
+<tr>
+<td>
+
+`std::unique_ptr`, `std::shared_ptr`, `std::weak_ptr`, `std::reference_wrapper`, `std::make_shared`
+
+</td>
+<td>
+
+C++11
+
+</td>
+</tr>
+<tr>
+<td>
+
+`std::make_unique`
+
+</td>
+<td>
+
+C++14
+
+</td>
+</tr>
+<tr>
+<td>
+
+`std::string_view`, `std::optional`, `std::any`, `std::variant`
+
+</td>
+<td>
+
+C++17
+
+</td>
+</tr>
+<tr>
+<td>
+
+`std::make_shared` support arrays, `std::span`
+
+</td>
+<td>
+
+C++20
+
+</td>
+</tr>
+</table>
+
+
+**Gotchas**
+
+**Usage of smart pointers**
+
+<table>
+<tr>
+<td>
+
+```cpp
+smart_pointer->some_function();
+```
+
+</td>
+<td>
+
+```cpp
+(*smart_pointer).some_function();// 2 extra characters needed
+```
+
+</td>
+</tr>
+</table>
+
+**the main function and environment variables**
+
+A shim module is needed in order to transform main and env functions into a more C++ friendly functions. These have been asked for years.
+1. `A Modern C++ Signature for main` [^modernmain]
+1. `Desert Sessions: Improving hostile environment interactions` [^hostileenv]
+
+---
 
 #### No unsafe casts
 
@@ -183,6 +291,8 @@ shim
 
 Why? These were replaced by `static_cast` and `dynamic_cast`.
 
+---
+
 #### No unions
 
 <table>
@@ -203,6 +313,8 @@ Why? These were replaced by `static_cast` and `dynamic_cast`.
 </table>
 
 Replaced by `std::variant`.
+
+---
 
 #### No mutable
 
@@ -225,6 +337,8 @@ Replaced by `std::variant`.
 
 Using the `mutable` keyword produces an error. The programmer shall not lie to oneself. The `mutable` keyword violates the safety of const and is rarely used.
 
+---
+
 #### No new or delete
 
 <table>
@@ -245,6 +359,8 @@ Using the `mutable` keyword produces an error. The programmer shall not lie to o
 </table>
 
 Replaced with containers and smart pointers.
+
+---
 
 #### No deprecated
 
@@ -290,6 +406,8 @@ Using anything that has the deprecated attribute on it produces an error.
 
 Replaced by import.
 Don't add until #embed is added.
+
+---
 
 #### No goto
 
@@ -399,3 +517,5 @@ Programmers never upgrade their code unless they are forced to. New programmers 
 [^modernmain]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0781r0.html>
 <!--Desert Sessions: Improving hostile environment interactions-->
 [^hostileenv]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1275r0.html>
+<!--History of C++-->
+[^history]: <https://en.cppreference.com/w/cpp/language/history>
