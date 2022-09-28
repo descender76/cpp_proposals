@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-25</td>
+<td>2022-09-27</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -71,7 +71,7 @@ Programmer's, Businesses and Government(s) want C++ to be safer and simpler. Thi
 
 ## Motivating Examples
 
-Following is a wishlist. Most are optional. While, they all would be of benefit. It all starts with a new repeatable module level attribute that would preferably be applied once in the `primary module interface unit` and would automatically apply to it and all `module implementation unit`(s). It could also be applied to a `module implementation unit` but that would generally be less useful.
+Following is a wishlist. Most are optional. While, they all would be of benefit. It all starts with a new repeatable module level attribute that would preferably be applied once in the `primary module interface unit` and would automatically apply to it and all `module implementation unit`(s). It could also be applied to a `module implementation unit` but that would generally be less useful. However, it might aid in gradual migration.
 
 ```cpp
 export module some_module_name [[static_analysis("")]];// primary module interface unit
@@ -113,51 +113,55 @@ The `safer` analyzer is for safety, primarily memory related. It is for those bu
 </td>
 <td>
 
-The `safer` analyzer is a subset of `modern` analyzer. The `modern` analyzer goes beyond just memory and safety concerns. It can be thought of as bleeding edge. It is for those businesses and programmers who commit to modern code.
+The `safer` analyzer is a subset of `modern` analyzer. The `modern` analyzer goes beyond just memory and safety concerns. It can be thought of as bleeding edge. It is for those businesses and programmers who commit to safety and higher quality modern code.
 
 </td>
 </tr>
 </table>
 
-Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. They both represent +infinity. These are meant for programmers, businesses and governments in which safety takes precedence. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by both the `C++` teaching group and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
+Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. They both represent +&infin;. These are meant for programmers, businesses and governments in which safety takes precedence. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by both the `C++` teaching group, the authors of the `C++ Core Guidelines` [^cppcg] and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
+
+All modules can be used even if they don't use the `static_analysis` attribute as this allows gradual adoption.
 
 ### What are the `safer` and `modern` analyzers composed of?
 
-These overarching static analyzers are composed of multiple static analyzers which can be used individually to allow a limited gradual adoption.
+These overarching static analyzers are composed of multiple static analyzers which can be used individually to allow a degree of gradual adoption.
 
-#### No pointers except function pointers
+#### Use lvalue references
 
 <table>
 <tr>
 <td>
 
 ```cpp
-[[static_analysis("no_pointers_except_function_pointers")]]
+[[static_analysis("use_lvalue_references")]]
 ```
 
 </td>
 <td>
 
-`no_pointers_except_function_pointers` is a subset of `safer`.
+`use_lvalue_references` is a subset of `safer`.
 
 </td>
 </tr>
 </table>
 
 - Any declaration of a pointer is an error.
-- Calling any function that has parameters that take a pointer is an error.
-- Only function pointers can be used.
+- Calling any function that has parameters that take a pointer is an error unless the pointer type are "pointer to `const` character type" or "`const` pointer to `const` character type" and their arguments were string literals.
+  - string literals are always safe having static storage duration
+  - `std::string` and `std::string_view` must be creatable at compile time
+- Function pointers and member function pointers can still be used.
 - Lvalue references, &, can still be used.
-- All modules can be used even if they don't use `static_analysis` attribute as this allows limited gradual adoption.
 <!--
 Using the keyword `nullptr` is an error because there are no pointers. What about function pointers = nullptr
 -->
-<!--
-How do you initialize strings without [const] char*
--->
 
 **WHY?**
-Pointers have largely been replaced with the following:
+
+- A large portion of the C++ community have been programming without pointers for years. Some can go their whole career this way. This proposal just standardise existing practice.
+- Modern `C++` has been advocated to programmers in other programming languages who complain about memory issues. This allows us to show them what we have been saying for decades.
+- Over half of our memory related issues gets hashed away.
+- Pointers have largely been replaced with the following:
 
 <table>
 <tr>
@@ -234,10 +238,65 @@ C++20
 </tr>
 </table>
 
+The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to mitigate.
+
+- `P.4: Ideally, a program should be statically type safe` [^cppcgp4]
+- `P.6: What cannot be checked at compile time should be checkable at run time` [^cppcgp6]
+- `P.7: Catch run-time errors early` [^cppcgp7]
+- `P.8: Don’t leak any resources` [^cppcgp8]
+- `P.11: Encapsulate messy constructs, rather than spreading through the code` [^cppcgp11]
+- `P.12: Use supporting tools as appropriate` [^cppcgp12]
+- `P.13: Use support libraries as appropriate` [^cppcgp13]
+- `I.4: Make interfaces precisely and strongly typed` [^cppcgi4]
+- `I.11: Never transfer ownership by a raw pointer (T*) or reference (T&)` [^cppcgi11]
+- `I.12: Declare a pointer that must not be null as not_null` [^cppcgi12]
+- `I.13: Do not pass an array as a single pointer` [^cppcgi13]
+- `I.23: Keep the number of function arguments low` [^cppcgi23]
+- `F.7: For general use, take T* or T& arguments rather than smart pointers` [^cppcgf7]
+- `F.15: Prefer simple and conventional ways of passing information` [^cppcgf15]
+- `F.22: Use T* or owner<T*> to designate a single object` [^cppcgf22]
+- `F.23: Use a not_null<T> to indicate that “null” is not a valid value` [^cppcgf23]
+- `F.25: Use a zstring or a not_null<zstring> to designate a C-style string` [^cppcgf25]
+- `F.26: Use a unique_ptr<T> to transfer ownership where a pointer is needed` [^cppcgf26]
+- `F.27: Use a shared_ptr<T> to share ownership` [^cppcgf27]
+- `F.42: Return a T* to indicate a position (only)` [^cppcgf42]
+- `F.43: Never (directly or indirectly) return a pointer or a reference to a local object` [^cppcgf43]
+- `F.55: Don’t use va_arg arguments` [^cppcgf55]
+- `C.31: All resources acquired by a class must be released by the class’s destructor` [^cppcgc31]
+- `C.32: If a class has a raw pointer (T*) or reference (T&), consider whether it might be owning` [^cppcgc32]
+- `C.33: If a class has an owning pointer member, define a destructor` [^cppcgc33]
+- `C.149: Use unique_ptr or shared_ptr to avoid forgetting to delete objects created using new` [^cppcgc149]
+- `C.150: Use make_unique() to construct objects owned by unique_ptrs` [^cppcgc150]
+- `C.151: Use make_shared() to construct objects owned by shared_ptrs` [^cppcgc151]
+- `R.1: Manage resources automatically using resource handles and RAII (Resource Acquisition Is Initialization)` [^cppcgr1]
+- `R.2: In interfaces, use raw pointers to denote individual objects (only)` [^cppcgr2]
+- `R.3: A raw pointer (a T*) is non-owning` [^cppcgr3]
+- `R.5: Prefer scoped objects, don’t heap-allocate unnecessarily` [^cppcgr5]
+- `R.10: Avoid malloc() and free()` [^cppcgr10]
+- `R.11: Avoid calling new and delete explicitly` [^cppcgr11]
+- `R.12: Immediately give the result of an explicit resource allocation to a manager object` [^cppcgr12]
+- `R.13: Perform at most one explicit resource allocation in a single expression statement` [^cppcgr13]
+- `R.14: Avoid [] parameters, prefer span` [^cppcgr14]
+- `R.15: Always overload matched allocation/deallocation pairs` [^cppcgr15]
+- `R.20: Use unique_ptr or shared_ptr to represent ownership` [^cppcgr20]
+- `R.22: Use make_shared() to make shared_ptrs` [^cppcgr22]
+- `R.23: Use make_unique() to make unique_ptrs` [^cppcgr23]
+- `ES.20: Always initialize an object` [^cppcges20]
+- `ES.24: Use a unique_ptr<T> to hold pointers` [^cppcges24]
+- `ES.34: Don’t define a (C-style) variadic function` [^cppcges34]
+- `ES.42: Keep use of pointers simple and straightforward` [^cppcges42]
+- `ES.47: Use nullptr rather than 0 or NULL` [^cppcges47]
+- `ES.60: Avoid new and delete outside resource management functions` [^cppcges60]
+- `ES.61: Delete arrays using delete[] and non-arrays using delete` [^cppcges61]
+- `ES.65: Don’t dereference an invalid pointer` [^cppcges65]
+- `E.13: Never throw while being the direct owner of an object` [^cppcge13]
+- `CPL.1: Prefer C++ to C` [^cppcgcpl1]
 
 **Gotchas**
 
 **Usage of smart pointers**
+
+This static analyzer causes programmers to use 2 extra characters when using smart pointers: `->` vs `(*).`.
 
 <table>
 <tr>
@@ -251,7 +310,7 @@ smart_pointer->some_function();
 <td>
 
 ```cpp
-(*smart_pointer).some_function();// 2 extra characters needed
+(*smart_pointer).some_function();
 ```
 
 </td>
@@ -285,11 +344,21 @@ A shim module is needed in order to transform main and env functions into a more
 </tr>
 </table>
 
-- Using `reinterpret_cast` produces an error.
 - Using `C`/core cast produces an error.
+- Using `reinterpret_cast` produces an error.
 - Using `const_cast` produces an error.
 
-Why? These were replaced by `static_cast` and `dynamic_cast`.
+Why?
+
+- `C`/core cast was replaced by `static_cast` and `dynamic_cast`.
+- The `reinterpret_cast` is needed more for library authors than their users. For library users it usually just causes problems and questions. It is rarely used in daily `C++` when coding at a higher level.
+- The `const_cast` is needed more for library authors than their users. It is a means for the programmer to lie to oneself. For library users it usually just causes problems and questions. It is rarely used in daily `C++` when coding at a higher level.
+
+See the following:
+- `C.146: Use dynamic_cast where class hierarchy navigation is unavoidable` [^cppcgc146]
+- `ES.48: Avoid casts` [^cppcges48]
+- `ES.49: If you must use a cast, use a named cast` [^cppcges49]
+- `ES.50: Don’t cast away const` [^cppcges50]
 
 ---
 
@@ -312,7 +381,10 @@ Why? These were replaced by `static_cast` and `dynamic_cast`.
 </tr>
 </table>
 
-Replaced by `std::variant`.
+Using the `union` keyword produces an error. It was replaced by `std::variant`, which is safer.
+
+See the following:
+- `C.181: Avoid “naked” unions` [^cppcgc181]
 
 ---
 
@@ -335,7 +407,7 @@ Replaced by `std::variant`.
 </tr>
 </table>
 
-Using the `mutable` keyword produces an error. The programmer shall not lie to oneself. The `mutable` keyword violates the safety of const and is rarely used.
+Using the `mutable` keyword produces an error. The programmer shall not lie to oneself. The `mutable` keyword violates the safety of `const` and is rarely used.
 
 ---
 
@@ -358,7 +430,20 @@ Using the `mutable` keyword produces an error. The programmer shall not lie to o
 </tr>
 </table>
 
-Replaced with containers and smart pointers.
+Using the `new` and `delete` keywords to allocate and deallocate memory produces an error. It was replaced by `std::make_unique` and `std::make_shared`, which are safer.
+
+See the following:
+- `F.26: Use a unique_ptr<T> to transfer ownership where a pointer is needed` [^cppcgf26]
+- `F.27: Use a shared_ptr<T> to share ownership` [^cppcgf27]
+- `C.149: Use unique_ptr or shared_ptr to avoid forgetting to delete objects created using new` [^cppcgc149]
+- `C.150: Use make_unique() to construct objects owned by unique_ptrs` [^cppcgc150]
+- `C.151: Use make_shared() to construct objects owned by shared_ptrs` [^cppcgc151]
+- `R.11: Avoid calling new and delete explicitly` [^cppcgr11]
+- `R.20: Use unique_ptr or shared_ptr to represent ownership` [^cppcgr20]
+- `R.22: Use make_shared() to make shared_ptrs` [^cppcgr22]
+- `R.23: Use make_unique() to make unique_ptrs` [^cppcgr23]
+- `ES.60: Avoid new and delete outside resource management functions` [^cppcges60]
+- `ES.61: Delete arrays using delete[] and non-arrays using delete` [^cppcges61]
 
 ---
 
@@ -404,8 +489,8 @@ Using anything that has the deprecated attribute on it produces an error.
 </tr>
 </table>
 
-Replaced by import.
-Don't add until #embed is added.
+The preprocessor directive `#include` has been replaced with `import`.
+Don't add the static analyzer until `#embed` is added.
 
 ---
 
@@ -428,22 +513,46 @@ Don't add until #embed is added.
 </tr>
 </table>
 
-Using goto produces an error.
-Don't add until break and continue to a label is added. Also a finite state machine.
+Using the `goto` keyword produces an error.
+Don't add until `break` and `continue` to a label is added. Also a finite state machine library may be needed.
+
+See the following:
+- `ES.76: Avoid goto` [^cppcges76]
 
 ## Summary
 
-By adding static analysis to the `C++` language we can make the language safer and easier to teach.
+By adding static analysis to the `C++` language we can make the language safer and easier to teach because we can restrict how much of the language we use. Human readable errors and references turns the compiler into a teacher freeing human teachers to focus on what the compiler doesn't handle.
 
 ## Frequently Asked Questions
 
 ### Shouldn't these be warnings instead of errors?
 
-NO, otherwise we'll be stuck with what we just have. `C++` compilers produces plenty of warnings. `C++` static analyzers produces plenty of warnings. However, when some one talks about creating a new language, then old language syntax becomes invalid i.e. errors. This is for programmers. Programmers never upgrade their code unless they are forced to. Businesses and Government(s) want errors as well in order to ensure code quality and the assurance that bad code doesn't exist anywhere in the module. This is also important from a language standpoint because we are essentially pruning; somewhat. Keep in mind though that all of these pruned features still have use now and in the future as more constructs will be built upon them which is why they need to be part of the language just not a part of everyday usage of the language.
+NO, otherwise we'll be stuck with what we just have. `C++` compilers produces plenty of warnings. `C++` static analyzers produces plenty of warnings. However, when some one talks about creating a new language, then old language syntax becomes invalid i.e. errors. This is for programmers. Programmers and businesses rarely upgrade their code unless they are forced to. Businesses and Government(s) want errors as well in order to ensure code quality and the assurance that bad code doesn't exist anywhere in the module. This is also important from a language standpoint because we are essentially pruning; somewhat. Keep in mind though that all of these pruned features still have use now and in the future as more constructs will be built upon them which is why they need to be part of the language just not a part of everyday usage of the language.
 
 ### Why at the module level? Why not safe and unsafe blocks?
 
-Programmers never upgrade their code unless they are forced to. New programmers need training wheels and some of us older programmers like them too. Due to the proliferation of government regulations and oversight, businesses have acquired `software composition analysis` services and tools. These services map security errors to specific versions of modules; specifically programming artifacts such as executables and libraries. As such, businesses want to know is a module reasonably safe.
+Programmers and businesses rarely upgrade their code unless they are forced to. New programmers need training wheels and some of us older programmers like them too. Due to the proliferation of government regulations and oversight, businesses have acquired `software composition analysis` services and tools. These services map security errors to specific versions of modules; specifically programming artifacts such as executables and libraries. As such, businesses want to know is a module reasonably safe.
+
+### You must really hate pointers?
+
+Actually, I love `C`, `C++` and pointers.
+
+- I recognize that most of the time, when I code, that I don't need them.
+- I recognize that **past** fundamental `C++` libraries use pointers but the users of those libraries don't need them.
+- I recognize that **present** fundamental libraries such `function_ref` uses `void*` for type erasure but the users of `function_ref`, most of the time, won't need it.
+- I recognize that **future** fundamental libraries such as dynamic polymorphic traits also need pointers for type erasure but they don't expect their users to fidget with raw pointers.
+- I also recognize that 1 programmer writes a library but hundreds use the library without needing the same parts of C++ used in its creation.
+- Pointers are simple and easy for memory mapped hardware but many C++ programmers don't operate at this level.
+- A few will create an OS [driver] but thousands will use it.
+
+The fact is pointers, unsafe casts, `union`, `mutable` and `goto` are the engine of C++ change. As such it would be foolish to remove them but it is also unrealistic for users/drivers of a vehicle to have to drive with nothing between them and the engine without listening to them clamor for interior finishing.
+
+### C++ can't standardize specific static analyzers
+
+- Can't `C++` provide the `static_analysis` attribute so that static analyzers can be called?
+- Can't `C++` reserve unscoped or names that start with `std.`, `c++.`, `cpp.`, `cxx.` or `c.` are for future standardization?
+- Can't `C++` reserve the names of static analyzers in the reserved `C++` static analyzer namespace?
+- Can't `C++` **recommend** these reserved static analyzers and leave it to the compiler writers to appease their users that clamor for them?
 
 ## References
 
@@ -508,11 +617,125 @@ Programmers never upgrade their code unless they are forced to. New programmers 
 <!--Fix the range‐based for loop, Rev1-->
 [^p2012r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r1.pdf>
 <!--C++ Core Guidelines-->
-[^cppcgrfin]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rf-in>
-<!--C++ Core Guidelines - F.42: Return a T* to indicate a position (only) -->
-[^cppcgrf42]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only>
+[^cppcg]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines>
+
+
+<!--C++ Core Guidelines - P.4: Ideally, a program should be statically type safe-->
+[^cppcgp4]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p4-ideally-a-program-should-be-statically-type-safe>
+<!--C++ Core Guidelines - P.6: What cannot be checked at compile time should be checkable at run time-->
+[^cppcgp6]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p6-what-cannot-be-checked-at-compile-time-should-be-checkable-at-run-time>
+<!--C++ Core Guidelines - P.7: Catch run-time errors early-->
+[^cppcgp7]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p7-catch-run-time-errors-early>
+<!--C++ Core Guidelines - P.8: Don’t leak any resources-->
+[^cppcgp8]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p8-dont-leak-any-resources>
+<!--C++ Core Guidelines - P.11: Encapsulate messy constructs, rather than spreading through the code-->
+[^cppcgp11]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p11-encapsulate-messy-constructs-rather-than-spreading-through-the-code>
+<!--C++ Core Guidelines - P.12: Use supporting tools as appropriate-->
+[^cppcgp12]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p12-use-supporting-tools-as-appropriate>
+<!--C++ Core Guidelines - P.13: Use support libraries as appropriate-->
+[^cppcgp13]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p13-use-support-libraries-as-appropriate>
+<!--C++ Core Guidelines - I.4: Make interfaces precisely and strongly typed-->
+[^cppcgi4]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i4-make-interfaces-precisely-and-strongly-typed>
+<!--C++ Core Guidelines - I.11: Never transfer ownership by a raw pointer (T*) or reference (T&)-->
+[^cppcgi11]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i11-never-transfer-ownership-by-a-raw-pointer-t-or-reference-t>
+<!--C++ Core Guidelines - I.12: Declare a pointer that must not be null as not_null-->
+[^cppcgi12]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i12-declare-a-pointer-that-must-not-be-null-as-not_null>
+<!--C++ Core Guidelines - I.13: Do not pass an array as a single pointer-->
+[^cppcgi13]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i13-do-not-pass-an-array-as-a-single-pointer>
+<!--C++ Core Guidelines - I.23: Keep the number of function arguments low-->
+[^cppcgi23]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i23-keep-the-number-of-function-arguments-low>
+<!--C++ Core Guidelines - F.7: For general use, take T* or T& arguments rather than smart pointers-->
+[^cppcgf7]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f7-for-general-use-take-t-or-t-arguments-rather-than-smart-pointers>
+<!--C++ Core Guidelines - F.15: Prefer simple and conventional ways of passing information-->
+[^cppcgf15]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f15-prefer-simple-and-conventional-ways-of-passing-information>
+<!--C++ Core Guidelines - F.22: Use T* or owner<T*> to designate a single object-->
+[^cppcgf22]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f22-use-t-or-ownert-to-designate-a-single-object>
+<!--C++ Core Guidelines - F.23: Use a not_null<T> to indicate that “null” is not a valid value-->
+[^cppcgf23]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f23-use-a-not_nullt-to-indicate-that-null-is-not-a-valid-value>
+<!--C++ Core Guidelines - F.25: Use a zstring or a not_null<zstring> to designate a C-style string-->
+[^cppcgf25]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f25-use-a-zstring-or-a-not_nullzstring-to-designate-a-c-style-string>
+<!--C++ Core Guidelines - F.26: Use a unique_ptr<T> to transfer ownership where a pointer is needed-->
+[^cppcgf26]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f26-use-a-unique_ptrt-to-transfer-ownership-where-a-pointer-is-needed>
+<!--C++ Core Guidelines - F.27: Use a shared_ptr<T> to share ownership-->
+[^cppcgf27]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f27-use-a-shared_ptrt-to-share-ownership>
+<!--C++ Core Guidelines - F.42: Return a T* to indicate a position (only)-->
+[^cppcgf42]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only>
 <!--C++ Core Guidelines - F.43: Never (directly or indirectly) return a pointer or a reference to a local object-->
-[^cppcgrf43]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object>
+[^cppcgf43]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object>
+<!--C++ Core Guidelines - F.55: Don’t use va_arg arguments-->
+[^cppcgf55]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f55-dont-use-va_arg-arguments>
+<!--C++ Core Guidelines - C.31: All resources acquired by a class must be released by the class’s destructor-->
+[^cppcgc31]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c31-all-resources-acquired-by-a-class-must-be-released-by-the-classs-destructor>
+<!--C++ Core Guidelines - C.32: If a class has a raw pointer (T*) or reference (T&), consider whether it might be owning-->
+[^cppcgc32]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c32-if-a-class-has-a-raw-pointer-t-or-reference-t-consider-whether-it-might-be-owning>
+<!--C++ Core Guidelines - C.33: If a class has an owning pointer member, define a destructor-->
+[^cppcgc33]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c33-if-a-class-has-an-owning-pointer-member-define-a-destructor>
+<!--C++ Core Guidelines - C.146: Use dynamic_cast where class hierarchy navigation is unavoidable-->
+[^cppcgc146]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c146-use-dynamic_cast-where-class-hierarchy-navigation-is-unavoidable>
+<!--C++ Core Guidelines - C.149: Use unique_ptr or shared_ptr to avoid forgetting to delete objects created using new-->
+[^cppcgc149]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c149-use-unique_ptr-or-shared_ptr-to-avoid-forgetting-to-delete-objects-created-using-new>
+<!--C++ Core Guidelines - C.150: Use make_unique() to construct objects owned by unique_ptrs-->
+[^cppcgc150]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c150-use-make_unique-to-construct-objects-owned-by-unique_ptrs>
+<!--C++ Core Guidelines - C.151: Use make_shared() to construct objects owned by shared_ptrs-->
+[^cppcgc151]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c151-use-make_shared-to-construct-objects-owned-by-shared_ptrs>
+<!--C++ Core Guidelines - C.181: Avoid “naked” unions-->
+[^cppcgc181]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c181-avoid-naked-unions>
+<!--C++ Core Guidelines - R.1: Manage resources automatically using resource handles and RAII (Resource Acquisition Is Initialization)-->
+[^cppcgr1]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r1-manage-resources-automatically-using-resource-handles-and-raii-resource-acquisition-is-initialization>
+<!--C++ Core Guidelines - R.2: In interfaces, use raw pointers to denote individual objects (only)-->
+[^cppcgr2]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r2-in-interfaces-use-raw-pointers-to-denote-individual-objects-only>
+<!--C++ Core Guidelines - R.3: A raw pointer (a T*) is non-owning-->
+[^cppcgr3]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r3-a-raw-pointer-a-t-is-non-owning>
+<!--C++ Core Guidelines - R.5: Prefer scoped objects, don’t heap-allocate unnecessarily-->
+[^cppcgr5]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r5-prefer-scoped-objects-dont-heap-allocate-unnecessarily>
+<!--C++ Core Guidelines - R.10: Avoid malloc() and free()-->
+[^cppcgr10]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r10-avoid-malloc-and-free>
+<!--C++ Core Guidelines - R.11: Avoid calling new and delete explicitly-->
+[^cppcgr11]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r11-avoid-calling-new-and-delete-explicitly>
+<!--C++ Core Guidelines - R.12: Immediately give the result of an explicit resource allocation to a manager object-->
+[^cppcgr12]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r12-immediately-give-the-result-of-an-explicit-resource-allocation-to-a-manager-object>
+<!--C++ Core Guidelines - R.13: Perform at most one explicit resource allocation in a single expression statement-->
+[^cppcgr13]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r13-perform-at-most-one-explicit-resource-allocation-in-a-single-expression-statement>
+<!--C++ Core Guidelines - R.14: Avoid [] parameters, prefer span-->
+[^cppcgr14]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r14-avoid--parameters-prefer-span>
+<!--C++ Core Guidelines - R.15: Always overload matched allocation/deallocation pairs-->
+[^cppcgr15]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r15-always-overload-matched-allocationdeallocation-pairs>
+<!--C++ Core Guidelines - R.20: Use unique_ptr or shared_ptr to represent ownership-->
+[^cppcgr20]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r20-use-unique_ptr-or-shared_ptr-to-represent-ownership>
+<!--C++ Core Guidelines - R.22: Use make_shared() to make shared_ptrs-->
+[^cppcgr22]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r22-use-make_shared-to-make-shared_ptrs>
+<!--C++ Core Guidelines - R.23: Use make_unique() to make unique_ptrs-->
+[^cppcgr23]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r23-use-make_unique-to-make-unique_ptrs>
+<!--C++ Core Guidelines - ES.20: Always initialize an object-->
+[^cppcges20]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es20-always-initialize-an-object>
+<!--C++ Core Guidelines - ES.24: Use a unique_ptr<T> to hold pointers-->
+[^cppcges24]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es24-use-a-unique_ptrt-to-hold-pointers>
+<!--C++ Core Guidelines - ES.34: Don’t define a (C-style) variadic function-->
+[^cppcges34]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#-es34-dont-define-a-c-style-variadic-function>
+<!--C++ Core Guidelines - ES.42: Keep use of pointers simple and straightforward-->
+[^cppcges42]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es42-keep-use-of-pointers-simple-and-straightforward>
+<!--C++ Core Guidelines - ES.47: Use nullptr rather than 0 or NULL-->
+[^cppcges47]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es47-use-nullptr-rather-than-0-or-null>
+<!--C++ Core Guidelines - ES.48: Avoid casts-->
+[^cppcges48]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es48-avoid-casts>
+<!--C++ Core Guidelines - ES.49: If you must use a cast, use a named cast-->
+[^cppcges49]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es49-if-you-must-use-a-cast-use-a-named-cast>
+<!--C++ Core Guidelines - ES.50: Don’t cast away const-->
+[^cppcges50]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es50-dont-cast-away-const>
+<!--C++ Core Guidelines - ES.60: Avoid new and delete outside resource management functions-->
+[^cppcges60]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es60-avoid-new-and-delete-outside-resource-management-functions>
+<!--C++ Core Guidelines - ES.61: Delete arrays using delete[] and non-arrays using delete-->
+[^cppcges61]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es61-delete-arrays-using-delete-and-non-arrays-using-delete>
+<!--C++ Core Guidelines - ES.65: Don’t dereference an invalid pointer-->
+[^cppcges65]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es65-dont-dereference-an-invalid-pointer>
+<!--C++ Core Guidelines - ES.76: Avoid goto-->
+[^cppcges76]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto>
+<!--C++ Core Guidelines - ES.84: Don’t try to declare a local variable with no name-->
+[^cppcges84]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es84-dont-try-to-declare-a-local-variable-with-no-name>
+<!--C++ Core Guidelines - E.13: Never throw while being the direct owner of an object-->
+[^cppcge13]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#e13-never-throw-while-being-the-direct-owner-of-an-object>
+<!--C++ Core Guidelines - CPL.1: Prefer C++ to C-->
+[^cppcgcpl1]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cpl1-prefer-c-to-c>
 <!--A Modern C++ Signature for main-->
 [^modernmain]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0781r0.html>
 <!--Desert Sessions: Improving hostile environment interactions-->
