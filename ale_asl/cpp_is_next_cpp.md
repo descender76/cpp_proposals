@@ -294,21 +294,21 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 
 **Usage of smart pointers**
 
-This static analyzer causes programmers to use 2 extra characters when using smart pointers: `->` vs `(*).`.
+This static analyzer causes programmers to use 2 extra characters when using smart pointers, `->` vs `(*).`, since the overloaded `->` operator returns a pointer.
 
 <table>
 <tr>
 <td>
 
 ```cpp
-smart_pointer->some_function();
+smart_pointer->some_function();// bad
 ```
 
 </td>
 <td>
 
 ```cpp
-(*smart_pointer).some_function();
+(*smart_pointer).some_function();// good
 ```
 
 </td>
@@ -405,7 +405,7 @@ See the following:
 </tr>
 </table>
 
-Using the `mutable` keyword produces an error. The programmer shall not lie to oneself. The `mutable` keyword violates the safety of `const` and is rarely used.
+Using the `mutable` keyword produces an error. The programmer shall not lie to oneself. The `mutable` keyword violates the safety of `const` and is rarely used at a high level.
 
 ---
 
@@ -428,7 +428,9 @@ Using the `mutable` keyword produces an error. The programmer shall not lie to o
 </tr>
 </table>
 
-Using the `new` and `delete` keywords to allocate and deallocate memory produces an error. It was replaced by `std::make_unique` and `std::make_shared`, which are safer.
+- Using the `new` and `delete` keywords to allocate and deallocate memory produces an error.
+
+It was replaced by `std::make_unique` and `std::make_shared`, which are safer.
 
 See the following:
 - `F.26: Use a unique_ptr<T> to transfer ownership where a pointer is needed` [^cppcgf26]
@@ -443,6 +445,8 @@ See the following:
 - `ES.60: Avoid new and delete outside resource management functions` [^cppcges60]
 - `ES.61: Delete arrays using delete[] and non-arrays using delete` [^cppcges61]
 
+---
+
 #### No volatile
 
 <table>
@@ -456,13 +460,14 @@ See the following:
 </td>
 <td>
 
-`no_volatile` is a subset of `modern`.
+`no_volatile` is a subset of `safer`.
 
 </td>
 </tr>
 </table>
 
-Using the `volatile` keyword produces an error.
+- Using the `volatile` keyword produces an error.
+
 The `volatile` keyword has nothing to do with concurrency. Use `std::atomic` or `std::mutex` instead.
 
 See the following:
@@ -470,20 +475,20 @@ See the following:
 
 ---
 
-#### No variadic functions
+#### No `C` style variadic functions
 
 <table>
 <tr>
 <td>
 
 ```cpp
-[[static_analysis("no_variadic_functions")]]
+[[static_analysis("no_c_style_variadic_functions")]]
 ```
 
 </td>
 <td>
 
-`no_variadic_functions` is a subset of `modern`.
+`no_c_style_variadic_functions` is a subset of `safer`.
 
 </td>
 </tr>
@@ -520,7 +525,11 @@ See the following:
 </tr>
 </table>
 
-Using anything that has the deprecated attribute on it produces an error.
+- Using anything that has the deprecated attribute on it produces an error.
+
+Deprecated functionality is not modern.
+
+---
 
 ### What may `safer` and `modern` analyzers be composed of in the future?
 
@@ -546,6 +555,8 @@ Using anything that has the deprecated attribute on it produces an error.
 The preprocessor directive `#include` has been replaced with `import`.
 Don't add the static analyzer until `#embed` is added.
 
+NOTE: This may be impossible to implement as preprocessing occurs before compilation.
+
 ---
 
 #### No goto
@@ -567,8 +578,9 @@ Don't add the static analyzer until `#embed` is added.
 </tr>
 </table>
 
-Using the `goto` keyword produces an error.
-Don't add until `break` and `continue` to a label is added. Also a finite state machine library may be needed.
+- Using the `goto` keyword produces an error.
+
+Don't add until `break` and `continue` to a label is added. Also a really easy to use finite state machine library may be needed.
 
 See the following:
 - `ES.76: Avoid goto` [^cppcges76]
@@ -609,6 +621,56 @@ The fact is pointers, unsafe casts, `union`, `mutable` and `goto` are the engine
 - Can't `C++` reserve unscoped or names that start with `std.`, `c++.`, `cpp.`, `cxx.` or `c.` are for future standardization?
 - Can't `C++` reserve the names of static analyzers in the reserved `C++` static analyzer namespace?
 - Can't `C++` **recommend** these reserved static analyzers and leave it to the compiler writers to appease their users that clamor for them?
+
+### Do you fear that this could create a "subset of C++" that "could split the user community and cause acrimony"? [^bsfaqsubset]
+
+First of all, let's consider the quotes of Bjarne Stroustrup that this question are based upon.
+
+<table>
+<tr>
+<td>
+
+*"being defined by an 'industry consortium.' I am not in favor of language subsets or dialects. I am especially not fond of subsets that cannot support the standard library so that the users of that subset must invent their own incompatible foundation libraries. I fear that a defined subset of C++ could split the user community and cause acrimony"* [^bsfaqsubset]
+
+</td>
+</tr>
+</table>
+
+Does this paper create a subset? YES. Like it or not `C++` already have a couple of subsets; some positive, some quasi. `Freestanding` is a subset for low level programming. This proposal primarily focus on high level programming but there is nothing preventing the creation of `[[static_analysis("freestanding")]]` which enforces `freestanding`. The `C++` value categories has to some degree fractured the community into a clergy class that thoroughly understand its intracacies and a leity class that gleefully uses it.
+
+Does this paper split the user community? YES and NO. It splits code into safer vs. less safe, high level vs. low level. However, this is performed at the module level, allowing the same programmer to decide what falls on either side of the fence. This would not be performed by an industry consortium but rather the standard. Safer modules can be used by less safe modules. Less safe modules can partly be used by safer modules, such as the standard module. This latter impact is already minimalized because the standard frequently write their library code in `C++` fashion instead of a `C` fashion.
+
+---
+
+<table>
+<tr>
+<td>
+
+***"Are there any features you'd like to remove from C++?"*** [^bsfaqremovefeature]
+
+*Not really. People who ask this kind of question usually think of one of the major features such as multiple inheritance, exceptions, templates, or run-time type identification. C++ would be incomplete without those. I have reviewed their design over the years, and together with the standards committee I have improved some of their details, but none could be removed without doing damage.* [^bsfaqremovefeature]
+
+*Most of the features I dislike from a language-design perspective (e.g., the declarator syntax and array decay) are part of the C subset of C++ and couldn't be removed without doing harm to programmers working under real-world conditions. C++'s C compatibility was a key language design decision rather than a marketing gimmick. Compatibility has been difficult to achieve and maintain, but real benefits to real programmers resulted, and still result today. By now, C++ has features that allow a programmer to refrain from using the most troublesome C features. For example, standard library containers such as vector, list, map, and string can be used to avoid most tricky low-level pointer manipulation.* [^bsfaqremovefeature]
+
+</td>
+</tr>
+</table>
+
+The beauty of this proposal is does not and it does remove features from C++. Like the standard library, it allows programmers to refrain from using the most troublesome `C` and `C++` features.
+
+---
+
+<table>
+<tr>
+<td>
+
+"Within C++, there is a much smaller and cleaner language struggling to get out" [^bsq]
+
+</td>
+</tr>
+</table>
+
+Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but frequently features have to be added back in when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, making things simpler. As a programmer matures, features can be gradually added to their repertoire.
 
 ## References
 
@@ -800,3 +862,13 @@ The fact is pointers, unsafe casts, `union`, `mutable` and `goto` are the engine
 [^hostileenv]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1275r0.html>
 <!--History of C++-->
 [^history]: <https://en.cppreference.com/w/cpp/language/history>
+<!--Bjarne Stroustrup's FAQ-->
+[^bsfaq]: <https://www.stroustrup.com/bs_faq.html>
+<!--Bjarne Stroustrup's FAQ-Are there any features you'd like to remove from C++?-->
+[^bsfaqremovefeature]: <https://www.stroustrup.com/bs_faq.html#remove-from-C++>
+<!--Bjarne Stroustrup's FAQ-What do you think of EC++?-->
+[^bsfaqsubset]: <https://www.stroustrup.com/bs_faq.html#EC++>
+<!--Bjarne Stroustrup Quotes-->
+[^bsq]: <https://www.stroustrup.com/quotes.html>
+<!--Leaving no room for a lower-level language: A C++ Subset-->
+[^freestanding]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1105r1.html>
