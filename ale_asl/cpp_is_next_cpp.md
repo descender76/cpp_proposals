@@ -261,7 +261,6 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 - `F.27: Use a shared_ptr<T> to share ownership` [^cppcgf27]
 - `F.42: Return a T* to indicate a position (only)` [^cppcgf42]
 - `F.43: Never (directly or indirectly) return a pointer or a reference to a local object` [^cppcgf43]
-- `F.55: Don’t use va_arg arguments` [^cppcgf55]
 - `C.31: All resources acquired by a class must be released by the class’s destructor` [^cppcgc31]
 - `C.32: If a class has a raw pointer (T*) or reference (T&), consider whether it might be owning` [^cppcgc32]
 - `C.33: If a class has an owning pointer member, define a destructor` [^cppcgc33]
@@ -283,7 +282,6 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 - `R.23: Use make_unique() to make unique_ptrs` [^cppcgr23]
 - `ES.20: Always initialize an object` [^cppcges20]
 - `ES.24: Use a unique_ptr<T> to hold pointers` [^cppcges24]
-- `ES.34: Don’t define a (C-style) variadic function` [^cppcges34]
 - `ES.42: Keep use of pointers simple and straightforward` [^cppcges42]
 - `ES.47: Use nullptr rather than 0 or NULL` [^cppcges47]
 - `ES.60: Avoid new and delete outside resource management functions` [^cppcges60]
@@ -445,6 +443,62 @@ See the following:
 - `ES.60: Avoid new and delete outside resource management functions` [^cppcges60]
 - `ES.61: Delete arrays using delete[] and non-arrays using delete` [^cppcges61]
 
+#### No volatile
+
+<table>
+<tr>
+<td>
+
+```cpp
+[[static_analysis("no_volatile")]]
+```
+
+</td>
+<td>
+
+`no_volatile` is a subset of `modern`.
+
+</td>
+</tr>
+</table>
+
+Using the `volatile` keyword produces an error.
+The `volatile` keyword has nothing to do with concurrency. Use `std::atomic` or `std::mutex` instead.
+
+See the following:
+- `CP.8: Don’t try to use volatile for synchronization` [^cppcgcp8]
+
+---
+
+#### No variadic functions
+
+<table>
+<tr>
+<td>
+
+```cpp
+[[static_analysis("no_variadic_functions")]]
+```
+
+</td>
+<td>
+
+`no_variadic_functions` is a subset of `modern`.
+
+</td>
+</tr>
+</table>
+
+- Declaring a variadic function produces an error.
+- Calling a variadic function produces an error.
+- Using the `va_start`, `va_arg`, `va_copy`, `va_end` or `va_list` functions produces errors.
+
+`C` style variadic functions has been replaced by overloading, templates and variadic template functions.
+
+See the following:
+- `F.55: Don’t use va_arg arguments` [^cppcgf55]
+- `ES.34: Don’t define a (C-style) variadic function` [^cppcges34]
+
 ---
 
 #### No deprecated
@@ -518,6 +572,8 @@ Don't add until `break` and `continue` to a label is added. Also a finite state 
 
 See the following:
 - `ES.76: Avoid goto` [^cppcges76]
+
+---
 
 ## Summary
 
@@ -732,6 +788,8 @@ The fact is pointers, unsafe casts, `union`, `mutable` and `goto` are the engine
 [^cppcges76]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto>
 <!--C++ Core Guidelines - ES.84: Don’t try to declare a local variable with no name-->
 [^cppcges84]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es84-dont-try-to-declare-a-local-variable-with-no-name>
+<!--C++ Core Guidelines - CP.8: Don’t try to use volatile for synchronization-->
+[^cppcgcp8]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cp8-dont-try-to-use-volatile-for-synchronization>
 <!--C++ Core Guidelines - E.13: Never throw while being the direct owner of an object-->
 [^cppcge13]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#e13-never-throw-while-being-the-direct-owner-of-an-object>
 <!--C++ Core Guidelines - CPL.1: Prefer C++ to C-->
