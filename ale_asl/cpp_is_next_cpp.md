@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P****R0</td>
+<td>P2657R0</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-27</td>
+<td>2022-10-03</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -67,7 +67,7 @@ a code
 
 ## Abstract
 
-Programmer's, Businesses and Government(s) want C++ to be safer and simpler. This has led some `C++` programmers to create new programming languages or preprocessors which again is a new language. This paper discusses using static analysis to make the `C++` language itself safer and simpler.
+Programmer's, Businesses and Government(s) want C++ to be safer and simpler. This has led some `C++` programmers to create new programming languages or preprocessors, which again is a new language. This paper discusses using static analysis to make the `C++` language itself safer and simpler.
 
 ## Motivating Examples
 
@@ -119,7 +119,7 @@ The `safer` analyzer is a subset of `modern` analyzer. The `modern` analyzer goe
 </tr>
 </table>
 
-Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. They both represent +&infin;. These are meant for programmers, businesses and governments in which safety takes precedence. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by both the `C++` teaching group, the authors of the `C++ Core Guidelines` [^cppcg] and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
+Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. These are meant for programmers, businesses and governments in which safety takes precedence. They both represent +&infin;. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by both the `C++` teaching group, the authors of the `C++ Core Guidelines` [^cppcg] and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
 
 All modules can be used even if they don't use the `static_analysis` attribute as this allows gradual adoption.
 
@@ -151,6 +151,7 @@ These overarching static analyzers are composed of multiple static analyzers whi
   - string literals are always safe having static storage duration
   - `std::string` and `std::string_view` must be creatable at compile time
 - Function pointers and member function pointers can still be used.
+  - Function pointers and member function pointers that declare pointers to non [member] function pointers produces an error.
 - Lvalue references, &, can still be used.
 <!--
 Using the keyword `nullptr` is an error because there are no pointers. What about function pointers = nullptr
@@ -352,7 +353,7 @@ Why?
 - The `reinterpret_cast` is needed more for library authors than their users. For library users it usually just causes problems and questions. It is rarely used in daily `C++` when coding at a higher level.
 - The `const_cast` is needed more for library authors than their users. It is a means for the programmer to lie to oneself. For library users it usually just causes problems and questions. It is rarely used in daily `C++` when coding at a higher level.
 
-See the following:
+The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to mitigate.
 - `C.146: Use dynamic_cast where class hierarchy navigation is unavoidable` [^cppcgc146]
 - `ES.48: Avoid casts` [^cppcges48]
 - `ES.49: If you must use a cast, use a named cast` [^cppcges49]
@@ -379,9 +380,11 @@ See the following:
 </tr>
 </table>
 
-Using the `union` keyword produces an error. It was replaced by `std::variant`, which is safer.
+- Using the `union` keyword produces an error.
 
-See the following:
+It was replaced by `std::variant`, which is safer.
+
+The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to mitigate.
 - `C.181: Avoid “naked” unions` [^cppcgc181]
 
 ---
@@ -405,7 +408,9 @@ See the following:
 </tr>
 </table>
 
-Using the `mutable` keyword produces an error. The programmer shall not lie to oneself. The `mutable` keyword violates the safety of `const` and is rarely used at a high level.
+- Using the `mutable` keyword produces an error.
+
+The programmer shall not lie to oneself. The `mutable` keyword violates the safety of `const` and is rarely used at a high level.
 
 ---
 
@@ -432,7 +437,7 @@ Using the `mutable` keyword produces an error. The programmer shall not lie to o
 
 It was replaced by `std::make_unique` and `std::make_shared`, which are safer.
 
-See the following:
+The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to mitigate.
 - `F.26: Use a unique_ptr<T> to transfer ownership where a pointer is needed` [^cppcgf26]
 - `F.27: Use a shared_ptr<T> to share ownership` [^cppcgf27]
 - `C.149: Use unique_ptr or shared_ptr to avoid forgetting to delete objects created using new` [^cppcgc149]
@@ -470,7 +475,7 @@ See the following:
 
 The `volatile` keyword has nothing to do with concurrency. Use `std::atomic` or `std::mutex` instead.
 
-See the following:
+The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to mitigate.
 - `CP.8: Don’t try to use volatile for synchronization` [^cppcgcp8]
 
 ---
@@ -494,13 +499,13 @@ See the following:
 </tr>
 </table>
 
-- Declaring a variadic function produces an error.
-- Calling a variadic function produces an error.
+- Declaring a `C` style variadic function produces an error.
+- Calling a `C` style variadic function produces an error.
 - Using the `va_start`, `va_arg`, `va_copy`, `va_end` or `va_list` functions produces errors.
 
 `C` style variadic functions has been replaced by overloading, templates and variadic template functions.
 
-See the following:
+The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to mitigate.
 - `F.55: Don’t use va_arg arguments` [^cppcgf55]
 - `ES.34: Don’t define a (C-style) variadic function` [^cppcges34]
 
@@ -531,6 +536,32 @@ Deprecated functionality is not modern.
 
 ---
 
+#### Use `std::array`
+
+<table>
+<tr>
+<td>
+
+```cpp
+[[static_analysis("use_std_array")]]
+```
+
+</td>
+<td>
+
+`use_std_array` is a subset of `modern`.
+
+</td>
+</tr>
+</table>
+
+- Declaring a `C` style/core `C++` array variable, whether locally or in a class, produces an error.
+- It is okay to use array literals when initializing `std::array` and other collections.
+
+Use `std::array` instead of `C` style/core `C++` array.
+
+---
+
 ### What may `safer` and `modern` analyzers be composed of in the future?
 
 #### No include
@@ -555,7 +586,7 @@ Deprecated functionality is not modern.
 The preprocessor directive `#include` has been replaced with `import`.
 Don't add the static analyzer until `#embed` is added.
 
-NOTE: This may be impossible to implement as preprocessing occurs before compilation.
+<span style="color:red">**NOTE**: This may be impossible to implement as preprocessing occurs before compilation.</span>
 
 ---
 
@@ -582,8 +613,38 @@ NOTE: This may be impossible to implement as preprocessing occurs before compila
 
 Don't add until `break` and `continue` to a label is added. Also a really easy to use finite state machine library may be needed.
 
-See the following:
+The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to mitigate.
 - `ES.76: Avoid goto` [^cppcges76]
+
+---
+
+#### Use `std::function_ref`
+
+<table>
+<tr>
+<td>
+
+```cpp
+[[static_analysis("use_function_ref")]]
+```
+
+</td>
+<td>
+
+`use_function_ref` is a subset of `modern`.
+
+</td>
+</tr>
+</table>
+
+- Declaring a `C` style/core `C++` function pointer, whether locally or in a class, produces an error.
+- Declaring a `C` style/core `C++` member function pointer, whether locally or in a class, produces an error.
+- It is okay to use [member] function pointer literals when initializing `std::function_ref` and others.
+
+Use `std::function_ref` instead of `C` style/core `C++` [member] function pointers. `std::function_ref` can bind to stateful and stateless, free and member functions. It saves programmers from having to include a `void*` state parameter in their function pointer types and it also saves from having to include `void*` state parameter along side the function pointer type in each function where the function pointer type is used in function declarations. Neither of which could be performed with the `"use_lvalue_references"` static analyzer.
+
+**NOTE:**
+- This can't be performed until `nontype_t` [^morefunctional] `std::function_ref` [^functionref] gets standardized.
 
 ---
 
@@ -872,3 +933,7 @@ Both making things smaller and cleaner requires removing something. When creatin
 [^bsq]: <https://www.stroustrup.com/quotes.html>
 <!--Leaving no room for a lower-level language: A C++ Subset-->
 [^freestanding]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1105r1.html>
+<!--function_ref: a type-erased callable reference-->
+[^functionref]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r11.html>
+<!--make function_ref more functional-->
+[^morefunctional]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html>
