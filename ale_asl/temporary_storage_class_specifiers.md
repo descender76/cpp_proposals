@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P****R0</td>
+<td>P2658R0</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-09-24</td>
+<td>2022-10-03</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -490,7 +490,7 @@ Unless overridden, all temporaries in the module are scoped to the containing fu
 </tr>
 </table>
 
-Please note that there was no attribute for `constinit` as this would not be usable. With these module level attributes, all of the specifiers except `constinit` could be removed. The `constinit` specifier would still be added to allow the programmer to change an argument in full or in part to constant static storage duration. Besides being less work and less verbose, module level attribute has the added advantage that this will automatically fix immediate dangling and also greatly reduce any remaining dangling.
+Please note that there was no attribute for `constinit` as this would not be usable. With these module level attributes, all of the specifiers, except `constinit`, could be removed. The `constinit` specifier would still be added to allow the programmer to change an argument in full or in part to constant static storage duration. Besides being less work and less verbose, module level attribute has the added advantage that this will automatically fix immediate dangling and also greatly reduce any remaining dangling.
 
 ## In Depth Rationale
 
@@ -1150,7 +1150,7 @@ There are a couple of principles repeated throughout this proposal.
 
 1. Constants really should have static storage duration so that they never dangle.
 1. Temporaries are expected to be just anonymously named variables / `C99` compound literals lifetime rule
-    - **variable scope**: sometimes, especially in blocks / not arguments, it is better for a temporary to have automatic storage duration associated with the enclosing block of the variable to which the temporary is assigned instead of being associated with the enclosing block of the temporary expression
+    - **variable scope**: is better than block scope for fixing dangling throughout the body of a function
 
 The advantages to `C++` with adopting this proposal is manifold.
 
