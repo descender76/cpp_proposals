@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>
+        C++ is the next C++ - HackMD
+    </title>
+    <link rel="icon" type="image/png" href="https://hackmd.io/favicon.png">
+    <link rel="apple-touch-icon" href="https://hackmd.io/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" integrity="sha256-3iu9jgsy9TpTwXKb7bNQzqWekRX7pPK+2OLj3R922fo=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css" integrity="sha256-QiWfLIsCT02Sdwkogf6YMiQlj4NE84MKkzEMkZnMGdg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css" integrity="sha256-vtR0hSWRc3Tb26iuN2oZHt3KRUomwTufNIf5/4oeCyg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@hackmd/emojify.js@2.1.0/dist/css/basic/emojify.min.css" integrity="sha256-UOrvMOsSDSrW6szVLe8ZDZezBxh5IoIfgTwdNDgTjiU=" crossorigin="anonymous" />
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i|Source+Code+Pro:300,400,500|Source+Sans+Pro:300,300i,400,400i,600,600i|Source+Serif+Pro&subset=latin-ext);.hljs{background:#fff;color:#333;display:block;overflow-x:auto;padding:.5em}.hljs-comment,.hljs-meta{color:#969896}.hljs-emphasis,.hljs-quote,.hljs-string,.hljs-strong,.hljs-template-variable,.hljs-variable{color:#df5000}.hljs-keyword,.hljs-selector-tag,.hljs-type{color:#a71d5d}.hljs-attribute,.hljs-bullet,.hljs-literal,.hljs-number,.hljs-symbol{color:#0086b3}.hljs-built_in,.hljs-builtin-name{color:#005cc5}.hljs-name,.hljs-section{color:#63a35c}.hljs-tag{color:#333}.hljs-attr,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-selector-pseudo,.hljs-title{color:#795da3}.hljs-addition{background-color:#eaffea;color:#55a532}.hljs-deletion{background-color:#ffecec;color:#bd2c00}.hljs-link{text-decoration:underline}.markdown-body{word-wrap:break-word;font-size:16px;line-height:1.5}.markdown-body:after,.markdown-body:before{content:"";display:table}.markdown-body:after{clear:both}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body .absent{color:#c00}.markdown-body .anchor{float:left;line-height:1;margin-left:-20px;padding-right:4px}.markdown-body .anchor:focus{outline:none}.markdown-body blockquote,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-bottom:16px;margin-top:0}.markdown-body hr{background-color:#e7e7e7;border:0;height:.25em;margin:24px 0;padding:0}.markdown-body blockquote{border-left:.25em solid #ddd;color:#777;font-size:16px;padding:0 1em}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body kbd,.popover kbd{background-color:#fcfcfc;border:1px solid;border-color:#ccc #ccc #bbb;border-radius:3px;box-shadow:inset 0 -1px 0 #bbb;color:#555;display:inline-block;font-size:11px;line-height:10px;padding:3px 5px;vertical-align:middle}.markdown-body .loweralpha{list-style-type:lower-alpha}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{font-weight:600;line-height:1.25;margin-bottom:16px;margin-top:24px}.markdown-body h1 .octicon-link,.markdown-body h2 .octicon-link,.markdown-body h3 .octicon-link,.markdown-body h4 .octicon-link,.markdown-body h5 .octicon-link,.markdown-body h6 .octicon-link{color:#000;vertical-align:middle;visibility:hidden}.markdown-body h1:hover .anchor,.markdown-body h2:hover .anchor,.markdown-body h3:hover .anchor,.markdown-body h4:hover .anchor,.markdown-body h5:hover .anchor,.markdown-body h6:hover .anchor{text-decoration:none}.markdown-body h1:hover .anchor .octicon-link,.markdown-body h2:hover .anchor .octicon-link,.markdown-body h3:hover .anchor .octicon-link,.markdown-body h4:hover .anchor .octicon-link,.markdown-body h5:hover .anchor .octicon-link,.markdown-body h6:hover .anchor .octicon-link{visibility:visible}.markdown-body h1 code,.markdown-body h1 tt,.markdown-body h2 code,.markdown-body h2 tt,.markdown-body h3 code,.markdown-body h3 tt,.markdown-body h4 code,.markdown-body h4 tt,.markdown-body h5 code,.markdown-body h5 tt,.markdown-body h6 code,.markdown-body h6 tt{font-size:inherit}.markdown-body h1{font-size:2em}.markdown-body h1,.markdown-body h2{border-bottom:1px solid #eee;padding-bottom:.3em}.markdown-body h2{font-size:1.5em}.markdown-body h3{font-size:1.25em}.markdown-body h4{font-size:1em}.markdown-body h5{font-size:.875em}.markdown-body h6{color:#777;font-size:.85em}.markdown-body ol,.markdown-body ul{padding-left:2em}.markdown-body ol.no-list,.markdown-body ul.no-list{list-style-type:none;padding:0}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-bottom:0;margin-top:0}.markdown-body li>p{margin-top:16px}.markdown-body li+li{padding-top:.25em}.markdown-body dl{padding:0}.markdown-body dl dt{font-size:1em;font-style:italic;font-weight:700;margin-top:16px;padding:0}.markdown-body dl dd{margin-bottom:16px;padding:0 16px}.markdown-body table{display:block;overflow:auto;width:100%;word-break:normal;word-break:keep-all}.markdown-body table th{font-weight:700}.markdown-body table td,.markdown-body table th{border:1px solid #ddd;padding:6px 13px}.markdown-body table tr{background-color:#fff;border-top:1px solid #ccc}.markdown-body table tr:nth-child(2n){background-color:#f8f8f8}.markdown-body img{background-color:#fff;box-sizing:initial;max-width:100%}.markdown-body img[align=right]{padding-left:20px}.markdown-body img[align=left]{padding-right:20px}.markdown-body .emoji{background-color:initial;max-width:none;vertical-align:text-top}.markdown-body span.frame{display:block;overflow:hidden}.markdown-body span.frame>span{border:1px solid #ddd;display:block;float:left;margin:13px 0 0;overflow:hidden;padding:7px;width:auto}.markdown-body span.frame span img{display:block;float:left}.markdown-body span.frame span span{clear:both;color:#333;display:block;padding:5px 0 0}.markdown-body span.align-center{clear:both;display:block;overflow:hidden}.markdown-body span.align-center>span{display:block;margin:13px auto 0;overflow:hidden;text-align:center}.markdown-body span.align-center span img{margin:0 auto;text-align:center}.markdown-body span.align-right{clear:both;display:block;overflow:hidden}.markdown-body span.align-right>span{display:block;margin:13px 0 0;overflow:hidden;text-align:right}.markdown-body span.align-right span img{margin:0;text-align:right}.markdown-body span.float-left{display:block;float:left;margin-right:13px;overflow:hidden}.markdown-body span.float-left span{margin:13px 0 0}.markdown-body span.float-right{display:block;float:right;margin-left:13px;overflow:hidden}.markdown-body span.float-right>span{display:block;margin:13px auto 0;overflow:hidden;text-align:right}.markdown-body code,.markdown-body tt{background-color:#0000000a;border-radius:3px;font-size:85%;margin:0;padding:.2em 0}.markdown-body code:after,.markdown-body code:before,.markdown-body tt:after,.markdown-body tt:before{content:"\00a0";letter-spacing:-.2em}.markdown-body code br,.markdown-body tt br{display:none}.markdown-body del code{text-decoration:inherit}.markdown-body pre{word-wrap:normal}.markdown-body pre>code{background:#0000;border:0;font-size:100%;margin:0;padding:0;white-space:pre;word-break:normal}.markdown-body .highlight{margin-bottom:16px}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{background-color:#f7f7f7;border-radius:3px;font-size:85%;line-height:1.45;overflow:auto;padding:16px}.markdown-body pre code,.markdown-body pre tt{word-wrap:normal;background-color:initial;border:0;display:inline;line-height:inherit;margin:0;max-width:auto;overflow:visible;padding:0}.markdown-body pre code:after,.markdown-body pre code:before,.markdown-body pre tt:after,.markdown-body pre tt:before{content:normal}.markdown-body .csv-data td,.markdown-body .csv-data th{font-size:12px;line-height:1;overflow:hidden;padding:5px;text-align:left;white-space:nowrap}.markdown-body .csv-data .blob-line-num{background:#fff;border:0;padding:10px 8px 9px;text-align:right}.markdown-body .csv-data tr{border-top:0}.markdown-body .csv-data th{background:#f8f8f8;border-top:0;font-weight:700}.news .alert .markdown-body blockquote{border:0;padding:0 0 0 40px}.activity-tab .news .alert .commits,.activity-tab .news .markdown-body blockquote{padding-left:0}.task-list-item{list-style-type:none}.task-list-item label{font-weight:400}.task-list-item.enabled label{cursor:pointer}.task-list-item+.task-list-item{margin-top:3px}.task-list-item-checkbox{cursor:default!important;float:left;margin:.31em 0 .2em -1.3em!important;vertical-align:middle}.markdown-body{max-width:758px;overflow:visible!important;padding-bottom:40px;padding-top:40px;position:relative}.markdown-body .emoji{vertical-align:top}.markdown-body pre{border:inherit!important}.markdown-body code{color:inherit!important}.markdown-body pre code .wrapper{display:-moz-inline-flex;display:-ms-inline-flex;display:-o-inline-flex;display:inline-flex}.markdown-body pre code .gutter{float:left;overflow:hidden;-webkit-user-select:none;user-select:none}.markdown-body pre code .gutter.linenumber{border-right:3px solid #6ce26c!important;box-sizing:initial;color:#afafaf!important;cursor:default;display:inline-block;min-width:20px;padding:0 8px 0 0;position:relative;text-align:right;z-index:4}.markdown-body pre code .gutter.linenumber>span:before{content:attr(data-linenumber)}.markdown-body pre code .code{float:left;margin:0 0 0 16px}.markdown-body .gist .line-numbers{border-bottom:none;border-left:none;border-top:none}.markdown-body .gist .line-data{border:none}.markdown-body .gist table{border-collapse:inherit!important;border-spacing:0}.markdown-body code[data-gist-id]{background:none;padding:0}.markdown-body code[data-gist-id]:after,.markdown-body code[data-gist-id]:before{content:""}.markdown-body code[data-gist-id] .blob-num{border:unset}.markdown-body code[data-gist-id] table{margin-bottom:unset;overflow:unset}.markdown-body code[data-gist-id] table tr{background:unset}.markdown-body[dir=rtl] pre{direction:ltr}.markdown-body[dir=rtl] code{direction:ltr;unicode-bidi:embed}.markdown-body .alert>p:last-child{margin-bottom:0}.markdown-body pre.abc,.markdown-body pre.flow-chart,.markdown-body pre.graphviz,.markdown-body pre.mermaid,.markdown-body pre.sequence-diagram,.markdown-body pre.vega{background-color:inherit;border-radius:0;overflow:visible;text-align:center;white-space:inherit}.markdown-body pre.abc>code,.markdown-body pre.flow-chart>code,.markdown-body pre.graphviz>code,.markdown-body pre.mermaid>code,.markdown-body pre.sequence-diagram>code,.markdown-body pre.vega>code{text-align:left}.markdown-body pre.abc>svg,.markdown-body pre.flow-chart>svg,.markdown-body pre.graphviz>svg,.markdown-body pre.mermaid>svg,.markdown-body pre.sequence-diagram>svg,.markdown-body pre.vega>svg{height:100%;max-width:100%}.markdown-body pre>code.wrap{word-wrap:break-word;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap}.markdown-body .alert>p:last-child,.markdown-body .alert>ul:last-child{margin-bottom:0}.markdown-body summary{display:list-item}.markdown-body summary:focus{outline:none}.markdown-body details summary{cursor:pointer}.markdown-body details:not([open])>:not(summary){display:none}.markdown-body figure{margin:1em 40px}.markdown-body .mark,.markdown-body mark{background-color:#fff1a7}.vimeo,.youtube{background-color:#000;background-position:50%;background-repeat:no-repeat;background-size:contain;cursor:pointer;display:table;overflow:hidden;text-align:center}.vimeo,.youtube{position:relative;width:100%}.youtube{padding-bottom:56.25%}.vimeo img{object-fit:contain;width:100%;z-index:0}.youtube img{object-fit:cover;z-index:0}.vimeo iframe,.youtube iframe,.youtube img{height:100%;left:0;position:absolute;top:0;width:100%}.vimeo iframe,.youtube iframe{vertical-align:middle;z-index:1}.vimeo .icon,.youtube .icon{color:#fff;height:auto;left:50%;opacity:.3;position:absolute;top:50%;transform:translate(-50%,-50%);transition:opacity .2s;width:auto;z-index:0}.vimeo:hover .icon,.youtube:hover .icon{opacity:.6;transition:opacity .2s}.slideshare .inner,.speakerdeck .inner{position:relative;width:100%}.slideshare .inner iframe,.speakerdeck .inner iframe{bottom:0;height:100%;left:0;position:absolute;right:0;top:0;width:100%}.figma{display:table;padding-bottom:56.25%;position:relative;width:100%}.figma iframe{border:1px solid #eee;bottom:0;height:100%;left:0;position:absolute;right:0;top:0;width:100%}.markmap-container{height:300px}.markmap-container>svg{height:100%;width:100%}.MJX_Assistive_MathML{display:none}#MathJax_Message{z-index:1000!important}.ui-infobar{color:#777;margin:25px auto -25px;max-width:760px;position:relative;z-index:2}.toc .invisable-node{list-style-type:none}.ui-toc{bottom:20px;position:fixed;z-index:998}.ui-toc.both-mode{margin-left:8px}.ui-toc.both-mode .ui-toc-label{border-bottom-left-radius:0;border-top-left-radius:0;height:40px;padding:10px 4px}.ui-toc-label{background-color:#e6e6e6;border:none;color:#868686;transition:opacity .2s}.ui-toc .open .ui-toc-label{color:#fff;opacity:1;transition:opacity .2s}.ui-toc-label:focus{background-color:#ccc;color:#000;opacity:.3}.ui-toc-label:hover{background-color:#ccc;opacity:1;transition:opacity .2s}.ui-toc-dropdown{margin-bottom:20px;margin-top:20px;max-height:70vh;max-width:45vw;overflow:auto;padding-left:10px;padding-right:10px;text-align:inherit;width:25vw}.ui-toc-dropdown>.toc{max-height:calc(70vh - 100px);overflow:auto}.ui-toc-dropdown[dir=rtl] .nav{letter-spacing:.0029em;padding-right:0}.ui-toc-dropdown a{overflow:hidden;text-overflow:ellipsis;white-space:pre}.ui-toc-dropdown .nav>li>a{color:#767676;display:block;font-size:13px;font-weight:500;padding:4px 20px}.ui-toc-dropdown .nav>li:first-child:last-child>ul,.ui-toc-dropdown .toc.expand ul{display:block}.ui-toc-dropdown .nav>li>a:focus,.ui-toc-dropdown .nav>li>a:hover{background-color:initial;border-left:1px solid #000;color:#000;padding-left:19px;text-decoration:none}.ui-toc-dropdown[dir=rtl] .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav>li>a:hover{border-left:none;border-right:1px solid #000;padding-right:19px}.ui-toc-dropdown .nav>.active:focus>a,.ui-toc-dropdown .nav>.active:hover>a,.ui-toc-dropdown .nav>.active>a{background-color:initial;border-left:2px solid #000;color:#000;font-weight:700;padding-left:18px}.ui-toc-dropdown[dir=rtl] .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav>.active>a{border-left:none;border-right:2px solid #000;padding-right:18px}.ui-toc-dropdown .nav .nav{display:none;padding-bottom:10px}.ui-toc-dropdown .nav>.active>ul{display:block}.ui-toc-dropdown .nav .nav>li>a{font-size:12px;font-weight:400;padding-bottom:1px;padding-left:30px;padding-top:1px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a{padding-right:30px}.ui-toc-dropdown .nav .nav>li>ul>li>a{font-size:12px;font-weight:400;padding-bottom:1px;padding-left:40px;padding-top:1px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a{padding-right:40px}.ui-toc-dropdown .nav .nav>li>a:focus,.ui-toc-dropdown .nav .nav>li>a:hover{padding-left:29px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:hover{padding-right:29px}.ui-toc-dropdown .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown .nav .nav>li>ul>li>a:hover{padding-left:39px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:hover{padding-right:39px}.ui-toc-dropdown .nav .nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>a{font-weight:500;padding-left:28px}.ui-toc-dropdown[dir=rtl] .nav .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>a{padding-right:28px}.ui-toc-dropdown .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active>a{font-weight:500;padding-left:38px}.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active>a{padding-right:38px}.markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang^=ja] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang=zh-tw] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang=zh-cn] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html .markdown-body[lang^=ja]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html .markdown-body[lang=zh-tw]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html .markdown-body[lang=zh-cn]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol}html[lang^=ja] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ Ｐゴシック,sans-serif}html[lang=zh-tw] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html[lang=zh-cn] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}html .ui-toc-dropdown[lang^=ja]{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ Ｐゴシック,sans-serif}html .ui-toc-dropdown[lang=zh-tw]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html .ui-toc-dropdown[lang=zh-cn]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}.ui-affix-toc{max-height:70vh;max-width:15vw;overflow:auto;position:fixed;top:0}.back-to-top,.expand-toggle,.go-to-bottom{color:#999;display:block;font-size:12px;font-weight:500;margin-left:10px;margin-top:10px;padding:4px 10px}.back-to-top:focus,.back-to-top:hover,.expand-toggle:focus,.expand-toggle:hover,.go-to-bottom:focus,.go-to-bottom:hover{color:#563d7c;text-decoration:none}.back-to-top,.go-to-bottom{margin-top:0}.ui-user-icon{background-position:50%;background-repeat:no-repeat;background-size:cover;border-radius:50%;display:block;height:20px;margin-bottom:2px;margin-right:5px;margin-top:2px;width:20px}.ui-user-icon.small{display:inline-block;height:18px;margin:0 0 .2em;vertical-align:middle;width:18px}.ui-infobar>small>span{line-height:22px}.ui-infobar>small .dropdown{display:inline-block}.ui-infobar>small .dropdown a:focus,.ui-infobar>small .dropdown a:hover{text-decoration:none}.ui-more-info{color:#888;cursor:pointer;vertical-align:middle}.ui-more-info .fa{font-size:16px}.ui-connectedGithub,.ui-published-note{color:#888}.ui-connectedGithub{line-height:23px;white-space:nowrap}.ui-connectedGithub a.file-path{color:#888;padding-left:22px;text-decoration:none}.ui-connectedGithub a.file-path:active,.ui-connectedGithub a.file-path:hover{color:#888;text-decoration:underline}.ui-connectedGithub .fa{font-size:20px}.ui-published-note .fa{font-size:20px;vertical-align:top}.unselectable{-webkit-user-select:none;-o-user-select:none;user-select:none}.selectable{-webkit-user-select:text;-o-user-select:text;user-select:text}.inline-spoiler-section{cursor:pointer}.inline-spoiler-section .spoiler-text{background-color:#333;border-radius:2px}.inline-spoiler-section .spoiler-text>*{opacity:0}.inline-spoiler-section .spoiler-img{filter:blur(10px)}.inline-spoiler-section.raw{background-color:#333;border-radius:2px}.inline-spoiler-section.raw>*{opacity:0}.inline-spoiler-section.unveil{cursor:auto}.inline-spoiler-section.unveil .spoiler-text{background-color:#3333331a}.inline-spoiler-section.unveil .spoiler-text>*{opacity:1}.inline-spoiler-section.unveil .spoiler-img{filter:none}@media print{blockquote,div,img,pre,table{page-break-inside:avoid!important}a[href]:after{font-size:12px!important}}.markdown-body.slides{color:#222;position:relative;z-index:1}.markdown-body.slides:before{background-color:currentColor;bottom:0;box-shadow:0 0 0 50vw;content:"";display:block;left:0;position:absolute;right:0;top:0;z-index:-1}.markdown-body.slides section[data-markdown]{background-color:#fff;margin-bottom:1.5em;position:relative;text-align:center}.markdown-body.slides section[data-markdown] code{text-align:left}.markdown-body.slides section[data-markdown]:before{content:"";display:block;padding-bottom:56.23%}.markdown-body.slides section[data-markdown]>div:first-child{left:1em;max-height:100%;overflow:hidden;position:absolute;right:1em;top:50%;transform:translateY(-50%)}.markdown-body.slides section[data-markdown]>ul{display:inline-block}.markdown-body.slides>section>section+section:after{border:3px solid #777;content:"";height:1.5em;position:absolute;right:1em;top:-1.5em}.site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif}html[lang=zh-tw] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}body{font-smoothing:subpixel-antialiased!important;-webkit-font-smoothing:subpixel-antialiased!important;-moz-osx-font-smoothing:auto!important;-webkit-overflow-scrolling:touch;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;letter-spacing:.025em}html[lang^=ja] body{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ ゴシック,sans-serif}html[lang=zh-tw] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}abbr[title]{border-bottom:none;text-decoration:underline;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}abbr[data-original-title],abbr[title]{cursor:help}body.modal-open{overflow-y:auto;padding-right:0!important}svg{text-shadow:none}
+    </style>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha256-3Jy/GbSLrg0o9y5Z5n1uw0qxZECH7C6OQpVBgNFYa0g=" crossorigin="anonymous"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js" integrity="sha256-g6iAfvZp+nDQ2TdTR/VVKJf3bGro4ub5fvWSWVRi2NE=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js" integrity="sha256-8E4Is26QH0bD52WoQpcB+R/tcWQtpzlCojrybUd7Mxo=" crossorigin="anonymous"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div id="doc" class="markdown-body container-fluid comment-enabled" data-hard-breaks="true"><style>
+ins { background-color: #CCFFCC }
+s { background-color: #FFCACA }
+blockquote { color: inherit !important }
+</style><table>
+<tbody><tr>
+<td>Document number</td>
+<td>P2657R0</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2022-10-03</td>
+</tr>
+<tr>
+<td>Reply-to</td>
+<td>
+<p><span>Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;</span></p>
+</td>
+</tr>
+<tr>
+<td>Audience</td>
+<td>Evolution Working Group (EWG)</td>
+</tr>
+</tbody></table><h1 id="C-is-the-next-C" data-id="C-is-the-next-C"><a class="anchor hidden-xs" href="#C-is-the-next-C" title="C-is-the-next-C"><span class="octicon octicon-link"></span></a><span>C++ is the next C++</span></h1><style>
+.inline-link
+{
+    font-size: small;
+    margin-top: -2.8em;
+    margin-right: 4px;
+    text-align: right;
+    font-weight: bold;
+}
+
+code
+{
+    font-family: "Fira Code", monospace !important;
+    font-size: 0.87em;
+}
+
+.sourceCode
+{
+    font-size: 0.95em;
+}
+
+a code
+{
+    color: #0645ad;
+}
+</style><h2 id="Table-of-contents" data-id="Table-of-contents"><a class="anchor hidden-xs" href="#Table-of-contents" title="Table-of-contents"><span class="octicon octicon-link"></span></a><span>Table of contents</span></h2><ul>
+<li><a href="#c-is-the-next-c"><span>C++ is the next C++</span></a>
+<ul>
+<li><a href="#abstract"><span>Abstract</span></a></li>
+<li><a href="#motivating-examples"><span>Motivating examples</span></a></li>
+<li><a href="#summary"><span>Summary</span></a></li>
+<li><a href="#frequently-asked-questions"><span>Frequently Asked Questions</span></a></li>
+<li><a href="#references"><span>References</span></a></li>
+</ul>
+</li>
+</ul><h2 id="Abstract" data-id="Abstract"><a class="anchor hidden-xs" href="#Abstract" title="Abstract"><span class="octicon octicon-link"></span></a><span>Abstract</span></h2><p><span>Programmer’s, Businesses and Government(s) want C++ to be safer and simpler. This has led some </span><code>C++</code><span> programmers to create new programming languages or preprocessors, which again is a new language. This paper discusses using static analysis to make the </span><code>C++</code><span> language itself safer and simpler.</span></p><h2 id="Motivating-Examples" data-id="Motivating-Examples"><a class="anchor hidden-xs" href="#Motivating-Examples" title="Motivating-Examples"><span class="octicon octicon-link"></span></a><span>Motivating Examples</span></h2><p><span>Following is a wishlist. Most are optional. While, they all would be of benefit. It all starts with a new repeatable module level attribute that would preferably be applied once in the </span><code>primary module interface unit</code><span> and would automatically apply to it and all </span><code>module implementation unit</code><span>(s). It could also be applied to a </span><code>module implementation unit</code><span> but that would generally be less useful. However, it might aid in gradual migration.</span></p><pre><code class="cpp hljs"><span class="token keyword">export</span> <span class="token keyword">module</span> <span class="token module">some_module_name</span> <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment">// primary module interface unit</span>
+<span class="token comment">// or</span>
+<span class="token keyword">module</span> <span class="token module">some_module_name</span> <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token comment">// module implementation unit</span>
+</code></pre><ul>
+<li><span>It would be ideal if the name member of the </span><code>static_analysis</code><span> attribute could be passed as either an environment variable and/or command line argument to compilers so it could be used by pipelines to assert the degree of conformance to the defined static analyzer without actually changing the source.</span></li>
+<li><span>It would be ideal if compilers could standardize the environment variable name or command line argument name in order to ease tooling.</span></li>
+<li><span>It would be ideal if compilers could produce a machine readable report in JSON, YAML or something else so that pipelines could more easily consume the results.</span></li>
+<li><span>It would be ideal if compilers could standardize the machine readable report.</span></li>
+</ul><p><span>The name of the static analyzer are dotted. Unscoped or names that start with </span><code>std.</code><span>, </span><code>c++.</code><span>, </span><code>cpp.</code><span>, </span><code>cxx.</code><span> or </span><code>c.</code><span> are reserved for standardization.</span></p><p><span>This proposal wants to stardardize two overarching static analyzer names; </span><code>safer</code><span> and </span><code>modern</code><span>.</span></p><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"safer"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><span>The </span><code>safer</code><span> analyzer is for safety, primarily memory related. It is for those businesses and programmers who must conform to safety standards.</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"modern"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><span>The </span><code>safer</code><span> analyzer is a subset of </span><code>modern</code><span> analyzer. The </span><code>modern</code><span> analyzer goes beyond just memory and safety concerns. It can be thought of as bleeding edge. It is for those businesses and programmers who commit to safety and higher quality modern code.</span></p>
+</td>
+</tr>
+</tbody></table><p><span>Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. These are meant for programmers, businesses and governments in which safety takes precedence. They both represent +∞. When a new version of the standard is released and adds new sub static analyzers than everyone’s code is broken until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by both the </span><code>C++</code><span> teaching group, the authors of the </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><span> and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the </span><code>C++</code><span> standard would also be helpful.</span></p><p><span>All modules can be used even if they don’t use the </span><code>static_analysis</code><span> attribute as this allows gradual adoption.</span></p><h3 id="What-are-the-safer-and-modern-analyzers-composed-of" data-id="What-are-the-safer-and-modern-analyzers-composed-of"><a class="anchor hidden-xs" href="#What-are-the-safer-and-modern-analyzers-composed-of" title="What-are-the-safer-and-modern-analyzers-composed-of"><span class="octicon octicon-link"></span></a><span>What are the </span><code>safer</code><span> and </span><code>modern</code><span> analyzers composed of?</span></h3><p><span>These overarching static analyzers are composed of multiple static analyzers which can be used individually to allow a degree of gradual adoption.</span></p><h4 id="Use-lvalue-references" data-id="Use-lvalue-references"><a class="anchor hidden-xs" href="#Use-lvalue-references" title="Use-lvalue-references"><span class="octicon octicon-link"></span></a><span>Use lvalue references</span></h4><table>
+<tbody><tr>
+<td>
+<pre data-original-title="" title=""><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"use_lvalue_references"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>use_lvalue_references</code><span> is a subset of </span><code>safer</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Any declaration of a pointer is an error.</span></li>
+<li><span>Calling any function that has parameters that take a pointer is an error unless the pointer type are “pointer to </span><code>const</code><span> character type” or “</span><code>const</code><span> pointer to </span><code>const</code><span> character type” and their arguments were string literals.</span>
+<ul>
+<li><span>string literals are always safe having static storage duration</span></li>
+<li><code>std::string</code><span> and </span><code>std::string_view</code><span> must be creatable at compile time</span></li>
+</ul>
+</li>
+<li><span>Function pointers and member function pointers can still be used.</span>
+<ul>
+<li><span>Function pointers and member function pointers that declare pointers to non [member] function pointers produces an error.</span></li>
+</ul>
+</li>
+<li><span>Lvalue references, &amp;, can still be used.</span></li>
+</ul><p><strong><span>WHY?</span></strong></p><ul>
+<li><span>A large portion of the C++ community have been programming without pointers for years. Some can go their whole career this way. This proposal just standardise existing practice.</span></li>
+<li><span>Modern </span><code>C++</code><span> has been advocated to programmers in other programming languages who complain about memory issues. This allows us to show them what we have been saying for decades.</span></li>
+<li><span>Over half of our memory related issues gets hashed away.</span></li>
+<li><span>Pointers have largely been replaced with the following:</span></li>
+</ul><table>
+<tbody><tr>
+<td>
+<p><span>lvalue references</span></p>
+</td>
+<td>
+<p><span>1985: Cfront 1.0 </span><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><span>STL</span></p>
+</td>
+<td>
+<p><span>1992 </span><sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>std::unique_ptr</code><span>, </span><code>std::shared_ptr</code><span>, </span><code>std::weak_ptr</code><span>, </span><code>std::reference_wrapper</code><span>, </span><code>std::make_shared</code></p>
+</td>
+<td>
+<p><span>C++11</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>std::make_unique</code></p>
+</td>
+<td>
+<p><span>C++14</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>std::string_view</code><span>, </span><code>std::optional</code><span>, </span><code>std::any</code><span>, </span><code>std::variant</code></p>
+</td>
+<td>
+<p><span>C++17</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><code>std::make_shared</code><span> support arrays, </span><code>std::span</code></p>
+</td>
+<td>
+<p><span>C++20</span></p>
+</td>
+</tr>
+</tbody></table><p><span>The </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:1">[1:1]</a></sup><span> identifies issues that this feature helps to mitigate.</span></p><ul>
+<li><code>P.4: Ideally, a program should be statically type safe</code><span> </span><sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup></li>
+<li><code>P.6: What cannot be checked at compile time should be checkable at run time</code><span> </span><sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup></li>
+<li><code>P.7: Catch run-time errors early</code><span> </span><sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup></li>
+<li><code>P.8: Don’t leak any resources</code><span> </span><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup></li>
+<li><code>P.11: Encapsulate messy constructs, rather than spreading through the code</code><span> </span><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup></li>
+<li><code>P.12: Use supporting tools as appropriate</code><span> </span><sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup></li>
+<li><code>P.13: Use support libraries as appropriate</code><span> </span><sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup></li>
+<li><code>I.4: Make interfaces precisely and strongly typed</code><span> </span><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup></li>
+<li><code>I.11: Never transfer ownership by a raw pointer (T*) or reference (T&amp;)</code><span> </span><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup></li>
+<li><code>I.12: Declare a pointer that must not be null as not_null</code><span> </span><sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup></li>
+<li><code>I.13: Do not pass an array as a single pointer</code><span> </span><sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup></li>
+<li><code>I.23: Keep the number of function arguments low</code><span> </span><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup></li>
+<li><code>F.7: For general use, take T* or T&amp; arguments rather than smart pointers</code><span> </span><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup></li>
+<li><code>F.15: Prefer simple and conventional ways of passing information</code><span> </span><sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup></li>
+<li><code>F.22: Use T* or owner&lt;T*&gt; to designate a single object</code><span> </span><sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup></li>
+<li><code>F.23: Use a not_null&lt;T&gt; to indicate that “null” is not a valid value</code><span> </span><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup></li>
+<li><code>F.25: Use a zstring or a not_null&lt;zstring&gt; to designate a C-style string</code><span> </span><sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup></li>
+<li><code>F.26: Use a unique_ptr&lt;T&gt; to transfer ownership where a pointer is needed</code><span> </span><sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup></li>
+<li><code>F.27: Use a shared_ptr&lt;T&gt; to share ownership</code><span> </span><sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup></li>
+<li><code>F.42: Return a T* to indicate a position (only)</code><span> </span><sup class="footnote-ref"><a href="#fn22" id="fnref22">[22]</a></sup></li>
+<li><code>F.43: Never (directly or indirectly) return a pointer or a reference to a local object</code><span> </span><sup class="footnote-ref"><a href="#fn23" id="fnref23">[23]</a></sup></li>
+<li><code>C.31: All resources acquired by a class must be released by the class’s destructor</code><span> </span><sup class="footnote-ref"><a href="#fn24" id="fnref24">[24]</a></sup></li>
+<li><code>C.32: If a class has a raw pointer (T*) or reference (T&amp;), consider whether it might be owning</code><span> </span><sup class="footnote-ref"><a href="#fn25" id="fnref25">[25]</a></sup></li>
+<li><code>C.33: If a class has an owning pointer member, define a destructor</code><span> </span><sup class="footnote-ref"><a href="#fn26" id="fnref26">[26]</a></sup></li>
+<li><code>C.149: Use unique_ptr or shared_ptr to avoid forgetting to delete objects created using new</code><span> </span><sup class="footnote-ref"><a href="#fn27" id="fnref27">[27]</a></sup></li>
+<li><code>C.150: Use make_unique() to construct objects owned by unique_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn28" id="fnref28">[28]</a></sup></li>
+<li><code>C.151: Use make_shared() to construct objects owned by shared_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn29" id="fnref29">[29]</a></sup></li>
+<li><code>R.1: Manage resources automatically using resource handles and RAII (Resource Acquisition Is Initialization)</code><span> </span><sup class="footnote-ref"><a href="#fn30" id="fnref30">[30]</a></sup></li>
+<li><code>R.2: In interfaces, use raw pointers to denote individual objects (only)</code><span> </span><sup class="footnote-ref"><a href="#fn31" id="fnref31">[31]</a></sup></li>
+<li><code>R.3: A raw pointer (a T*) is non-owning</code><span> </span><sup class="footnote-ref"><a href="#fn32" id="fnref32">[32]</a></sup></li>
+<li><code>R.5: Prefer scoped objects, don’t heap-allocate unnecessarily</code><span> </span><sup class="footnote-ref"><a href="#fn33" id="fnref33">[33]</a></sup></li>
+<li><code>R.10: Avoid malloc() and free()</code><span> </span><sup class="footnote-ref"><a href="#fn34" id="fnref34">[34]</a></sup></li>
+<li><code>R.11: Avoid calling new and delete explicitly</code><span> </span><sup class="footnote-ref"><a href="#fn35" id="fnref35">[35]</a></sup></li>
+<li><code>R.12: Immediately give the result of an explicit resource allocation to a manager object</code><span> </span><sup class="footnote-ref"><a href="#fn36" id="fnref36">[36]</a></sup></li>
+<li><code>R.13: Perform at most one explicit resource allocation in a single expression statement</code><span> </span><sup class="footnote-ref"><a href="#fn37" id="fnref37">[37]</a></sup></li>
+<li><code>R.14: Avoid [] parameters, prefer span</code><span> </span><sup class="footnote-ref"><a href="#fn38" id="fnref38">[38]</a></sup></li>
+<li><code>R.15: Always overload matched allocation/deallocation pairs</code><span> </span><sup class="footnote-ref"><a href="#fn39" id="fnref39">[39]</a></sup></li>
+<li><code>R.20: Use unique_ptr or shared_ptr to represent ownership</code><span> </span><sup class="footnote-ref"><a href="#fn40" id="fnref40">[40]</a></sup></li>
+<li><code>R.22: Use make_shared() to make shared_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn41" id="fnref41">[41]</a></sup></li>
+<li><code>R.23: Use make_unique() to make unique_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn42" id="fnref42">[42]</a></sup></li>
+<li><code>ES.20: Always initialize an object</code><span> </span><sup class="footnote-ref"><a href="#fn43" id="fnref43">[43]</a></sup></li>
+<li><code>ES.24: Use a unique_ptr&lt;T&gt; to hold pointers</code><span> </span><sup class="footnote-ref"><a href="#fn44" id="fnref44">[44]</a></sup></li>
+<li><code>ES.42: Keep use of pointers simple and straightforward</code><span> </span><sup class="footnote-ref"><a href="#fn45" id="fnref45">[45]</a></sup></li>
+<li><code>ES.47: Use nullptr rather than 0 or NULL</code><span> </span><sup class="footnote-ref"><a href="#fn46" id="fnref46">[46]</a></sup></li>
+<li><code>ES.60: Avoid new and delete outside resource management functions</code><span> </span><sup class="footnote-ref"><a href="#fn47" id="fnref47">[47]</a></sup></li>
+<li><code>ES.61: Delete arrays using delete[] and non-arrays using delete</code><span> </span><sup class="footnote-ref"><a href="#fn48" id="fnref48">[48]</a></sup></li>
+<li><code>ES.65: Don’t dereference an invalid pointer</code><span> </span><sup class="footnote-ref"><a href="#fn49" id="fnref49">[49]</a></sup></li>
+<li><code>E.13: Never throw while being the direct owner of an object</code><span> </span><sup class="footnote-ref"><a href="#fn50" id="fnref50">[50]</a></sup></li>
+<li><code>CPL.1: Prefer C++ to C</code><span> </span><sup class="footnote-ref"><a href="#fn51" id="fnref51">[51]</a></sup></li>
+</ul><p><strong><span>Gotchas</span></strong></p><p><strong><span>Usage of smart pointers</span></strong></p><p><span>This static analyzer causes programmers to use 2 extra characters when using smart pointers, </span><code>-&gt;</code><span> vs </span><code>(*).</code><span>, since the overloaded </span><code>-&gt;</code><span> operator returns a pointer.</span></p><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs">smart_pointer<span class="token operator">-&gt;</span><span class="token function">some_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// bad</span>
+</code></pre>
+</td>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">(</span><span class="token operator">*</span>smart_pointer<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">some_function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">// good</span>
+</code></pre>
+</td>
+</tr>
+</tbody></table><p><strong><span>the main function and environment variables</span></strong></p><p><span>A shim module is needed in order to transform main and env functions into a more C++ friendly functions. These have been asked for years.</span></p><ol>
+<li><code>A Modern C++ Signature for main</code><span> </span><sup class="footnote-ref"><a href="#fn52" id="fnref52">[52]</a></sup></li>
+<li><code>Desert Sessions: Improving hostile environment interactions</code><span> </span><sup class="footnote-ref"><a href="#fn53" id="fnref53">[53]</a></sup></li>
+</ol><hr><h4 id="No-unsafe-casts" data-id="No-unsafe-casts"><a class="anchor hidden-xs" href="#No-unsafe-casts" title="No-unsafe-casts"><span class="octicon octicon-link"></span></a><span>No unsafe casts</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_unsafe_casts"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_unsafe_casts</code><span> is a subset of </span><code>safer</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Using </span><code>C</code><span>/core cast produces an error.</span></li>
+<li><span>Using </span><code>reinterpret_cast</code><span> produces an error.</span></li>
+<li><span>Using </span><code>const_cast</code><span> produces an error.</span></li>
+</ul><p><span>Why?</span></p><ul>
+<li><code>C</code><span>/core cast was replaced by </span><code>static_cast</code><span> and </span><code>dynamic_cast</code><span>.</span></li>
+<li><span>The </span><code>reinterpret_cast</code><span> is needed more for library authors than their users. For library users it usually just causes problems and questions. It is rarely used in daily </span><code>C++</code><span> when coding at a higher level.</span></li>
+<li><span>The </span><code>const_cast</code><span> is needed more for library authors than their users. It is a means for the programmer to lie to oneself. For library users it usually just causes problems and questions. It is rarely used in daily </span><code>C++</code><span> when coding at a higher level.</span></li>
+</ul><p><span>The </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:2">[1:2]</a></sup><span> identifies issues that this feature helps to mitigate.</span></p><ul>
+<li><code>C.146: Use dynamic_cast where class hierarchy navigation is unavoidable</code><span> </span><sup class="footnote-ref"><a href="#fn54" id="fnref54">[54]</a></sup></li>
+<li><code>ES.48: Avoid casts</code><span> </span><sup class="footnote-ref"><a href="#fn55" id="fnref55">[55]</a></sup></li>
+<li><code>ES.49: If you must use a cast, use a named cast</code><span> </span><sup class="footnote-ref"><a href="#fn56" id="fnref56">[56]</a></sup></li>
+<li><code>ES.50: Don’t cast away const</code><span> </span><sup class="footnote-ref"><a href="#fn57" id="fnref57">[57]</a></sup></li>
+</ul><hr><h4 id="No-unions" data-id="No-unions"><a class="anchor hidden-xs" href="#No-unions" title="No-unions"><span class="octicon octicon-link"></span></a><span>No unions</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_union"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_union</code><span> is a subset of </span><code>safer</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Using the </span><code>union</code><span> keyword produces an error.</span></li>
+</ul><p><span>It was replaced by </span><code>std::variant</code><span>, which is safer.</span></p><p><span>The </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:3">[1:3]</a></sup><span> identifies issues that this feature helps to mitigate.</span></p><ul>
+<li><code>C.181: Avoid “naked” unions</code><span> </span><sup class="footnote-ref"><a href="#fn58" id="fnref58">[58]</a></sup></li>
+</ul><hr><h4 id="No-mutable" data-id="No-mutable"><a class="anchor hidden-xs" href="#No-mutable" title="No-mutable"><span class="octicon octicon-link"></span></a><span>No mutable</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_mutable"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_mutable</code><span> is a subset of </span><code>safer</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Using the </span><code>mutable</code><span> keyword produces an error.</span></li>
+</ul><p><span>The programmer shall not lie to oneself. The </span><code>mutable</code><span> keyword violates the safety of </span><code>const</code><span> and is rarely used at a high level.</span></p><hr><h4 id="No-new-or-delete" data-id="No-new-or-delete"><a class="anchor hidden-xs" href="#No-new-or-delete" title="No-new-or-delete"><span class="octicon octicon-link"></span></a><span>No new or delete</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_new_delete"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_new_delete</code><span> is a subset of </span><code>safer</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Using the </span><code>new</code><span> and </span><code>delete</code><span> keywords to allocate and deallocate memory produces an error.</span></li>
+</ul><p><span>It was replaced by </span><code>std::make_unique</code><span> and </span><code>std::make_shared</code><span>, which are safer.</span></p><p><span>The </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:4">[1:4]</a></sup><span> identifies issues that this feature helps to mitigate.</span></p><ul>
+<li><code>F.26: Use a unique_ptr&lt;T&gt; to transfer ownership where a pointer is needed</code><span> </span><sup class="footnote-ref"><a href="#fn20" id="fnref20:1">[20:1]</a></sup></li>
+<li><code>F.27: Use a shared_ptr&lt;T&gt; to share ownership</code><span> </span><sup class="footnote-ref"><a href="#fn21" id="fnref21:1">[21:1]</a></sup></li>
+<li><code>C.149: Use unique_ptr or shared_ptr to avoid forgetting to delete objects created using new</code><span> </span><sup class="footnote-ref"><a href="#fn27" id="fnref27:1">[27:1]</a></sup></li>
+<li><code>C.150: Use make_unique() to construct objects owned by unique_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn28" id="fnref28:1">[28:1]</a></sup></li>
+<li><code>C.151: Use make_shared() to construct objects owned by shared_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn29" id="fnref29:1">[29:1]</a></sup></li>
+<li><code>R.11: Avoid calling new and delete explicitly</code><span> </span><sup class="footnote-ref"><a href="#fn35" id="fnref35:1">[35:1]</a></sup></li>
+<li><code>R.20: Use unique_ptr or shared_ptr to represent ownership</code><span> </span><sup class="footnote-ref"><a href="#fn40" id="fnref40:1">[40:1]</a></sup></li>
+<li><code>R.22: Use make_shared() to make shared_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn41" id="fnref41:1">[41:1]</a></sup></li>
+<li><code>R.23: Use make_unique() to make unique_ptrs</code><span> </span><sup class="footnote-ref"><a href="#fn42" id="fnref42:1">[42:1]</a></sup></li>
+<li><code>ES.60: Avoid new and delete outside resource management functions</code><span> </span><sup class="footnote-ref"><a href="#fn47" id="fnref47:1">[47:1]</a></sup></li>
+<li><code>ES.61: Delete arrays using delete[] and non-arrays using delete</code><span> </span><sup class="footnote-ref"><a href="#fn48" id="fnref48:1">[48:1]</a></sup></li>
+</ul><hr><h4 id="No-volatile" data-id="No-volatile"><a class="anchor hidden-xs" href="#No-volatile" title="No-volatile"><span class="octicon octicon-link"></span></a><span>No volatile</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_volatile"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_volatile</code><span> is a subset of </span><code>safer</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Using the </span><code>volatile</code><span> keyword produces an error.</span></li>
+</ul><p><span>The </span><code>volatile</code><span> keyword has nothing to do with concurrency. Use </span><code>std::atomic</code><span> or </span><code>std::mutex</code><span> instead.</span></p><p><span>The </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:5">[1:5]</a></sup><span> identifies issues that this feature helps to mitigate.</span></p><ul>
+<li><code>CP.8: Don’t try to use volatile for synchronization</code><span> </span><sup class="footnote-ref"><a href="#fn59" id="fnref59">[59]</a></sup></li>
+</ul><hr><h4 id="No-C-style-variadic-functions" data-id="No-C-style-variadic-functions"><a class="anchor hidden-xs" href="#No-C-style-variadic-functions" title="No-C-style-variadic-functions"><span class="octicon octicon-link"></span></a><span>No </span><code>C</code><span> style variadic functions</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_c_style_variadic_functions"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_c_style_variadic_functions</code><span> is a subset of </span><code>safer</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Declaring a </span><code>C</code><span> style variadic function produces an error.</span></li>
+<li><span>Calling a </span><code>C</code><span> style variadic function produces an error.</span></li>
+<li><span>Using the </span><code>va_start</code><span>, </span><code>va_arg</code><span>, </span><code>va_copy</code><span>, </span><code>va_end</code><span> or </span><code>va_list</code><span> functions produces errors.</span></li>
+</ul><p><code>C</code><span> style variadic functions has been replaced by overloading, templates and variadic template functions.</span></p><p><span>The </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:6">[1:6]</a></sup><span> identifies issues that this feature helps to mitigate.</span></p><ul>
+<li><code>F.55: Don’t use va_arg arguments</code><span> </span><sup class="footnote-ref"><a href="#fn60" id="fnref60">[60]</a></sup></li>
+<li><code>ES.34: Don’t define a (C-style) variadic function</code><span> </span><sup class="footnote-ref"><a href="#fn61" id="fnref61">[61]</a></sup></li>
+</ul><hr><h4 id="No-deprecated" data-id="No-deprecated"><a class="anchor hidden-xs" href="#No-deprecated" title="No-deprecated"><span class="octicon octicon-link"></span></a><span>No deprecated</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_deprecated"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_deprecated</code><span> is a subset of </span><code>modern</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Using anything that has the deprecated attribute on it produces an error.</span></li>
+</ul><p><span>Deprecated functionality is not modern.</span></p><hr><h4 id="Use-stdarray" data-id="Use-stdarray"><a class="anchor hidden-xs" href="#Use-stdarray" title="Use-stdarray"><span class="octicon octicon-link"></span></a><span>Use </span><code>std::array</code></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"use_std_array"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>use_std_array</code><span> is a subset of </span><code>modern</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Declaring a </span><code>C</code><span> style/core </span><code>C++</code><span> array variable, whether locally or in a class, produces an error.</span></li>
+<li><span>It is okay to use array literals when initializing </span><code>std::array</code><span> and other collections.</span></li>
+</ul><p><span>Use </span><code>std::array</code><span> instead of </span><code>C</code><span> style/core </span><code>C++</code><span> array.</span></p><hr><h3 id="What-may-safer-and-modern-analyzers-be-composed-of-in-the-future" data-id="What-may-safer-and-modern-analyzers-be-composed-of-in-the-future"><a class="anchor hidden-xs" href="#What-may-safer-and-modern-analyzers-be-composed-of-in-the-future" title="What-may-safer-and-modern-analyzers-be-composed-of-in-the-future"><span class="octicon octicon-link"></span></a><span>What may </span><code>safer</code><span> and </span><code>modern</code><span> analyzers be composed of in the future?</span></h3><h4 id="No-include" data-id="No-include"><a class="anchor hidden-xs" href="#No-include" title="No-include"><span class="octicon octicon-link"></span></a><span>No include</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_include"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_include</code><span> is a subset of </span><code>modern</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><p><span>The preprocessor directive </span><code>#include</code><span> has been replaced with </span><code>import</code><span>.</span><br>
+<span>Don’t add the static analyzer until </span><code>#embed</code><span> is added.</span></p><p><span style="color:red"><strong><span>NOTE</span></strong><span>: This may be impossible to implement as preprocessing occurs before compilation.</span></span></p><hr><h4 id="No-goto" data-id="No-goto"><a class="anchor hidden-xs" href="#No-goto" title="No-goto"><span class="octicon octicon-link"></span></a><span>No goto</span></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"no_goto"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>no_goto</code><span> is a subset of </span><code>modern</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Using the </span><code>goto</code><span> keyword produces an error.</span></li>
+</ul><p><span>Don’t add until </span><code>break</code><span> and </span><code>continue</code><span> to a label is added. Also a really easy to use finite state machine library may be needed.</span></p><p><span>The </span><code>C++ Core Guidelines</code><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:7">[1:7]</a></sup><span> identifies issues that this feature helps to mitigate.</span></p><ul>
+<li><code>ES.76: Avoid goto</code><span> </span><sup class="footnote-ref"><a href="#fn62" id="fnref62">[62]</a></sup></li>
+</ul><hr><h4 id="Use-stdfunction_ref" data-id="Use-stdfunction_ref"><a class="anchor hidden-xs" href="#Use-stdfunction_ref" title="Use-stdfunction_ref"><span class="octicon octicon-link"></span></a><span>Use </span><code>std::function_ref</code></h4><table>
+<tbody><tr>
+<td>
+<pre><code class="cpp hljs"><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token function">static_analysis</span><span class="token punctuation">(</span><span class="token string">"use_function_ref"</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+</code></pre>
+</td>
+<td>
+<p><code>use_function_ref</code><span> is a subset of </span><code>modern</code><span>.</span></p>
+</td>
+</tr>
+</tbody></table><ul>
+<li><span>Declaring a </span><code>C</code><span> style/core </span><code>C++</code><span> function pointer, whether locally or in a class, produces an error.</span></li>
+<li><span>Declaring a </span><code>C</code><span> style/core </span><code>C++</code><span> member function pointer, whether locally or in a class, produces an error.</span></li>
+<li><span>It is okay to use [member] function pointer literals when initializing </span><code>std::function_ref</code><span> and others.</span></li>
+</ul><p><span>Use </span><code>std::function_ref</code><span> instead of </span><code>C</code><span> style/core </span><code>C++</code><span> [member] function pointers. </span><code>std::function_ref</code><span> can bind to stateful and stateless, free and member functions. It saves programmers from having to include a </span><code>void*</code><span> state parameter in their function pointer types and it also saves from having to include </span><code>void*</code><span> state parameter along side the function pointer type in each function where the function pointer type is used in function declarations. Neither of which could be performed with the </span><code>"use_lvalue_references"</code><span> static analyzer.</span></p><p><strong><span>NOTE:</span></strong></p><ul>
+<li><span>This can’t be performed until </span><code>nontype_t</code><span> </span><sup class="footnote-ref"><a href="#fn63" id="fnref63">[63]</a></sup><span> </span><code>std::function_ref</code><span> </span><sup class="footnote-ref"><a href="#fn64" id="fnref64">[64]</a></sup><span> gets standardized.</span></li>
+</ul><hr><h2 id="Summary" data-id="Summary"><a class="anchor hidden-xs" href="#Summary" title="Summary"><span class="octicon octicon-link"></span></a><span>Summary</span></h2><p><span>By adding static analysis to the </span><code>C++</code><span> language we can make the language safer and easier to teach because we can restrict how much of the language we use. Human readable errors and references turns the compiler into a teacher freeing human teachers to focus on what the compiler doesn’t handle.</span></p><h2 id="Frequently-Asked-Questions" data-id="Frequently-Asked-Questions"><a class="anchor hidden-xs" href="#Frequently-Asked-Questions" title="Frequently-Asked-Questions"><span class="octicon octicon-link"></span></a><span>Frequently Asked Questions</span></h2><h3 id="Shouldn’t-these-be-warnings-instead-of-errors" data-id="Shouldn’t-these-be-warnings-instead-of-errors"><a class="anchor hidden-xs" href="#Shouldn’t-these-be-warnings-instead-of-errors" title="Shouldn’t-these-be-warnings-instead-of-errors"><span class="octicon octicon-link"></span></a><span>Shouldn’t these be warnings instead of errors?</span></h3><p><span>NO, otherwise we’ll be stuck with what we just have. </span><code>C++</code><span> compilers produces plenty of warnings. </span><code>C++</code><span> static analyzers produces plenty of warnings. However, when some one talks about creating a new language, then old language syntax becomes invalid i.e. errors. This is for programmers. Programmers and businesses rarely upgrade their code unless they are forced to. Businesses and Government(s) want errors as well in order to ensure code quality and the assurance that bad code doesn’t exist anywhere in the module. This is also important from a language standpoint because we are essentially pruning; somewhat. Keep in mind though that all of these pruned features still have use now and in the future as more constructs will be built upon them which is why they need to be part of the language just not a part of everyday usage of the language.</span></p><h3 id="Why-at-the-module-level-Why-not-safe-and-unsafe-blocks" data-id="Why-at-the-module-level-Why-not-safe-and-unsafe-blocks"><a class="anchor hidden-xs" href="#Why-at-the-module-level-Why-not-safe-and-unsafe-blocks" title="Why-at-the-module-level-Why-not-safe-and-unsafe-blocks"><span class="octicon octicon-link"></span></a><span>Why at the module level? Why not safe and unsafe blocks?</span></h3><p><span>Programmers and businesses rarely upgrade their code unless they are forced to. New programmers need training wheels and some of us older programmers like them too. Due to the proliferation of government regulations and oversight, businesses have acquired </span><code>software composition analysis</code><span> services and tools. These services map security errors to specific versions of modules; specifically programming artifacts such as executables and libraries. As such, businesses want to know is a module reasonably safe.</span></p><h3 id="You-must-really-hate-pointers" data-id="You-must-really-hate-pointers"><a class="anchor hidden-xs" href="#You-must-really-hate-pointers" title="You-must-really-hate-pointers"><span class="octicon octicon-link"></span></a><span>You must really hate pointers?</span></h3><p><span>Actually, I love </span><code>C</code><span>, </span><code>C++</code><span> and pointers.</span></p><ul>
+<li><span>I recognize that most of the time, when I code, that I don’t need them.</span></li>
+<li><span>I recognize that </span><strong><span>past</span></strong><span> fundamental </span><code>C++</code><span> libraries use pointers but the users of those libraries don’t need them.</span></li>
+<li><span>I recognize that </span><strong><span>present</span></strong><span> fundamental libraries such </span><code>function_ref</code><span> uses </span><code>void*</code><span> for type erasure but the users of </span><code>function_ref</code><span>, most of the time, won’t need it.</span></li>
+<li><span>I recognize that </span><strong><span>future</span></strong><span> fundamental libraries such as dynamic polymorphic traits also need pointers for type erasure but they don’t expect their users to fidget with raw pointers.</span></li>
+<li><span>I also recognize that 1 programmer writes a library but hundreds use the library without needing the same parts of C++ used in its creation.</span></li>
+<li><span>Pointers are simple and easy for memory mapped hardware but many C++ programmers don’t operate at this level.</span></li>
+<li><span>A few will create an OS [driver] but thousands will use it.</span></li>
+</ul><p><span>The fact is pointers, unsafe casts, </span><code>union</code><span>, </span><code>mutable</code><span> and </span><code>goto</code><span> are the engine of C++ change. As such it would be foolish to remove them but it is also unrealistic for users/drivers of a vehicle to have to drive with nothing between them and the engine without listening to them clamor for interior finishing.</span></p><h3 id="C-can’t-standardize-specific-static-analyzers" data-id="C-can’t-standardize-specific-static-analyzers"><a class="anchor hidden-xs" href="#C-can’t-standardize-specific-static-analyzers" title="C-can’t-standardize-specific-static-analyzers"><span class="octicon octicon-link"></span></a><span>C++ can’t standardize specific static analyzers</span></h3><ul>
+<li><span>Can’t </span><code>C++</code><span> provide the </span><code>static_analysis</code><span> attribute so that static analyzers can be called?</span></li>
+<li><span>Can’t </span><code>C++</code><span> reserve unscoped or names that start with </span><code>std.</code><span>, </span><code>c++.</code><span>, </span><code>cpp.</code><span>, </span><code>cxx.</code><span> or </span><code>c.</code><span> are for future standardization?</span></li>
+<li><span>Can’t </span><code>C++</code><span> reserve the names of static analyzers in the reserved </span><code>C++</code><span> static analyzer namespace?</span></li>
+<li><span>Can’t </span><code>C++</code><span> </span><strong><span>recommend</span></strong><span> these reserved static analyzers and leave it to the compiler writers to appease their users that clamor for them?</span></li>
+</ul><h3 id="Do-you-fear-that-this-could-create-a-“subset-of-C”-that-“could-split-the-user-community-and-cause-acrimony”-65" data-id="Do-you-fear-that-this-could-create-a-“subset-of-C”-that-“could-split-the-user-community-and-cause-acrimony”-65"><a class="anchor hidden-xs" href="#Do-you-fear-that-this-could-create-a-“subset-of-C”-that-“could-split-the-user-community-and-cause-acrimony”-65" title="Do-you-fear-that-this-could-create-a-“subset-of-C”-that-“could-split-the-user-community-and-cause-acrimony”-65"><span class="octicon octicon-link"></span></a><span>Do you fear that this could create a “subset of C++” that “could split the user community and cause acrimony”? </span><sup class="footnote-ref"><a href="#fn65" id="fnref65">[65]</a></sup></h3><p><span>First of all, let’s consider the quotes of Bjarne Stroustrup that this question are based upon.</span></p><table>
+<tbody><tr>
+<td>
+<p><em><span>“being defined by an ‘industry consortium.’ I am not in favor of language subsets or dialects. I am especially not fond of subsets that cannot support the standard library so that the users of that subset must invent their own incompatible foundation libraries. I fear that a defined subset of C++ could split the user community and cause acrimony”</span></em><span> </span><sup class="footnote-ref"><a href="#fn65" id="fnref65:1">[65:1]</a></sup></p>
+</td>
+</tr>
+</tbody></table><p><span>Does this paper create a subset? YES. Like it or not </span><code>C++</code><span> already have a couple of subsets; some positive, some quasi. </span><code>Freestanding</code><span> is a subset for low level programming. This proposal primarily focus on high level programming but there is nothing preventing the creation of </span><code>[[static_analysis("freestanding")]]</code><span> which enforces </span><code>freestanding</code><span>. The </span><code>C++</code><span> value categories has to some degree fractured the community into a clergy class that thoroughly understand its intracacies and a leity class that gleefully uses it.</span></p><p><span>Does this paper split the user community? YES and NO. It splits code into safer vs. less safe, high level vs. low level. However, this is performed at the module level, allowing the same programmer to decide what falls on either side of the fence. This would not be performed by an industry consortium but rather the standard. Safer modules can be used by less safe modules. Less safe modules can partly be used by safer modules, such as the standard module. This latter impact is already minimalized because the standard frequently write their library code in </span><code>C++</code><span> fashion instead of a </span><code>C</code><span> fashion.</span></p><hr><table>
+<tbody><tr>
+<td>
+<p><em><strong><span>“Are there any features you’d like to remove from C++?”</span></strong></em><span> </span><sup class="footnote-ref"><a href="#fn66" id="fnref66">[66]</a></sup></p>
+<p><em><span>Not really. People who ask this kind of question usually think of one of the major features such as multiple inheritance, exceptions, templates, or run-time type identification. C++ would be incomplete without those. I have reviewed their design over the years, and together with the standards committee I have improved some of their details, but none could be removed without doing damage.</span></em><span> </span><sup class="footnote-ref"><a href="#fn66" id="fnref66:1">[66:1]</a></sup></p>
+<p><em><span>Most of the features I dislike from a language-design perspective (e.g., the declarator syntax and array decay) are part of the C subset of C++ and couldn’t be removed without doing harm to programmers working under real-world conditions. C++'s C compatibility was a key language design decision rather than a marketing gimmick. Compatibility has been difficult to achieve and maintain, but real benefits to real programmers resulted, and still result today. By now, C++ has features that allow a programmer to refrain from using the most troublesome C features. For example, standard library containers such as vector, list, map, and string can be used to avoid most tricky low-level pointer manipulation.</span></em><span> </span><sup class="footnote-ref"><a href="#fn66" id="fnref66:2">[66:2]</a></sup></p>
+</td>
+</tr>
+</tbody></table><p><span>The beauty of this proposal is does not and it does remove features from C++. Like the standard library, it allows programmers to refrain from using the most troublesome </span><code>C</code><span> and </span><code>C++</code><span> features.</span></p><hr><table>
+<tbody><tr>
+<td>
+<p><span>“Within C++, there is a much smaller and cleaner language struggling to get out” </span><sup class="footnote-ref"><a href="#fn67" id="fnref67">[67]</a></sup></p>
+</td>
+</tr>
+</tbody></table><p><span>Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but frequently features have to be added back in when programmers clamor for them. This paper cleans up a programmers use of the </span><code>C++</code><span> language, meaning less </span><code>C++</code><span> has to be taught immediately, making things simpler. As a programmer matures, features can be gradually added to their repertoire.</span></p><h2 id="References" data-id="References"><a class="anchor hidden-xs" href="#References" title="References"><span class="octicon octicon-link"></span></a><span>References</span></h2><hr class="footnotes-sep"><section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines</span></a> <a href="#fnref1" class="footnote-backref">↩︎</a> <a href="#fnref1:1" class="footnote-backref">↩︎</a> <a href="#fnref1:2" class="footnote-backref">↩︎</a> <a href="#fnref1:3" class="footnote-backref">↩︎</a> <a href="#fnref1:4" class="footnote-backref">↩︎</a> <a href="#fnref1:5" class="footnote-backref">↩︎</a> <a href="#fnref1:6" class="footnote-backref">↩︎</a> <a href="#fnref1:7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://en.cppreference.com/w/cpp/language/history" target="_blank" rel="noopener"><span>https://en.cppreference.com/w/cpp/language/history</span></a> <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p4-ideally-a-program-should-be-statically-type-safe" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p4-ideally-a-program-should-be-statically-type-safe</span></a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p6-what-cannot-be-checked-at-compile-time-should-be-checkable-at-run-time" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p6-what-cannot-be-checked-at-compile-time-should-be-checkable-at-run-time</span></a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p7-catch-run-time-errors-early" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p7-catch-run-time-errors-early</span></a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p8-dont-leak-any-resources" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p8-dont-leak-any-resources</span></a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p11-encapsulate-messy-constructs-rather-than-spreading-through-the-code" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p11-encapsulate-messy-constructs-rather-than-spreading-through-the-code</span></a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p12-use-supporting-tools-as-appropriate" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p12-use-supporting-tools-as-appropriate</span></a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p13-use-support-libraries-as-appropriate" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#p13-use-support-libraries-as-appropriate</span></a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i4-make-interfaces-precisely-and-strongly-typed" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i4-make-interfaces-precisely-and-strongly-typed</span></a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i11-never-transfer-ownership-by-a-raw-pointer-t-or-reference-t" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i11-never-transfer-ownership-by-a-raw-pointer-t-or-reference-t</span></a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i12-declare-a-pointer-that-must-not-be-null-as-not_null" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i12-declare-a-pointer-that-must-not-be-null-as-not_null</span></a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i13-do-not-pass-an-array-as-a-single-pointer" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i13-do-not-pass-an-array-as-a-single-pointer</span></a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn14" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i23-keep-the-number-of-function-arguments-low" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i23-keep-the-number-of-function-arguments-low</span></a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn15" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f7-for-general-use-take-t-or-t-arguments-rather-than-smart-pointers" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f7-for-general-use-take-t-or-t-arguments-rather-than-smart-pointers</span></a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn16" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f15-prefer-simple-and-conventional-ways-of-passing-information" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f15-prefer-simple-and-conventional-ways-of-passing-information</span></a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn17" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f22-use-t-or-ownert-to-designate-a-single-object" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f22-use-t-or-ownert-to-designate-a-single-object</span></a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn18" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f23-use-a-not_nullt-to-indicate-that-null-is-not-a-valid-value" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f23-use-a-not_nullt-to-indicate-that-null-is-not-a-valid-value</span></a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn19" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f25-use-a-zstring-or-a-not_nullzstring-to-designate-a-c-style-string" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f25-use-a-zstring-or-a-not_nullzstring-to-designate-a-c-style-string</span></a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn20" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f26-use-a-unique_ptrt-to-transfer-ownership-where-a-pointer-is-needed" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f26-use-a-unique_ptrt-to-transfer-ownership-where-a-pointer-is-needed</span></a> <a href="#fnref20" class="footnote-backref">↩︎</a> <a href="#fnref20:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn21" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f27-use-a-shared_ptrt-to-share-ownership" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f27-use-a-shared_ptrt-to-share-ownership</span></a> <a href="#fnref21" class="footnote-backref">↩︎</a> <a href="#fnref21:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn22" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only</span></a> <a href="#fnref22" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn23" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object</span></a> <a href="#fnref23" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn24" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c31-all-resources-acquired-by-a-class-must-be-released-by-the-classs-destructor" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c31-all-resources-acquired-by-a-class-must-be-released-by-the-classs-destructor</span></a> <a href="#fnref24" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn25" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c32-if-a-class-has-a-raw-pointer-t-or-reference-t-consider-whether-it-might-be-owning" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c32-if-a-class-has-a-raw-pointer-t-or-reference-t-consider-whether-it-might-be-owning</span></a> <a href="#fnref25" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn26" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c33-if-a-class-has-an-owning-pointer-member-define-a-destructor" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c33-if-a-class-has-an-owning-pointer-member-define-a-destructor</span></a> <a href="#fnref26" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn27" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c149-use-unique_ptr-or-shared_ptr-to-avoid-forgetting-to-delete-objects-created-using-new" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c149-use-unique_ptr-or-shared_ptr-to-avoid-forgetting-to-delete-objects-created-using-new</span></a> <a href="#fnref27" class="footnote-backref">↩︎</a> <a href="#fnref27:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn28" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c150-use-make_unique-to-construct-objects-owned-by-unique_ptrs" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c150-use-make_unique-to-construct-objects-owned-by-unique_ptrs</span></a> <a href="#fnref28" class="footnote-backref">↩︎</a> <a href="#fnref28:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn29" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c151-use-make_shared-to-construct-objects-owned-by-shared_ptrs" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c151-use-make_shared-to-construct-objects-owned-by-shared_ptrs</span></a> <a href="#fnref29" class="footnote-backref">↩︎</a> <a href="#fnref29:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn30" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r1-manage-resources-automatically-using-resource-handles-and-raii-resource-acquisition-is-initialization" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r1-manage-resources-automatically-using-resource-handles-and-raii-resource-acquisition-is-initialization</span></a> <a href="#fnref30" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn31" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r2-in-interfaces-use-raw-pointers-to-denote-individual-objects-only" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r2-in-interfaces-use-raw-pointers-to-denote-individual-objects-only</span></a> <a href="#fnref31" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn32" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r3-a-raw-pointer-a-t-is-non-owning" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r3-a-raw-pointer-a-t-is-non-owning</span></a> <a href="#fnref32" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn33" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r5-prefer-scoped-objects-dont-heap-allocate-unnecessarily" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r5-prefer-scoped-objects-dont-heap-allocate-unnecessarily</span></a> <a href="#fnref33" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn34" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r10-avoid-malloc-and-free" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r10-avoid-malloc-and-free</span></a> <a href="#fnref34" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn35" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r11-avoid-calling-new-and-delete-explicitly" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r11-avoid-calling-new-and-delete-explicitly</span></a> <a href="#fnref35" class="footnote-backref">↩︎</a> <a href="#fnref35:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn36" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r12-immediately-give-the-result-of-an-explicit-resource-allocation-to-a-manager-object" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r12-immediately-give-the-result-of-an-explicit-resource-allocation-to-a-manager-object</span></a> <a href="#fnref36" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn37" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r13-perform-at-most-one-explicit-resource-allocation-in-a-single-expression-statement" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r13-perform-at-most-one-explicit-resource-allocation-in-a-single-expression-statement</span></a> <a href="#fnref37" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn38" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r14-avoid--parameters-prefer-span" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r14-avoid--parameters-prefer-span</span></a> <a href="#fnref38" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn39" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r15-always-overload-matched-allocationdeallocation-pairs" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r15-always-overload-matched-allocationdeallocation-pairs</span></a> <a href="#fnref39" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn40" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r20-use-unique_ptr-or-shared_ptr-to-represent-ownership" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r20-use-unique_ptr-or-shared_ptr-to-represent-ownership</span></a> <a href="#fnref40" class="footnote-backref">↩︎</a> <a href="#fnref40:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn41" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r22-use-make_shared-to-make-shared_ptrs" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r22-use-make_shared-to-make-shared_ptrs</span></a> <a href="#fnref41" class="footnote-backref">↩︎</a> <a href="#fnref41:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn42" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r23-use-make_unique-to-make-unique_ptrs" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r23-use-make_unique-to-make-unique_ptrs</span></a> <a href="#fnref42" class="footnote-backref">↩︎</a> <a href="#fnref42:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn43" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es20-always-initialize-an-object" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es20-always-initialize-an-object</span></a> <a href="#fnref43" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn44" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es24-use-a-unique_ptrt-to-hold-pointers" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es24-use-a-unique_ptrt-to-hold-pointers</span></a> <a href="#fnref44" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn45" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es42-keep-use-of-pointers-simple-and-straightforward" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es42-keep-use-of-pointers-simple-and-straightforward</span></a> <a href="#fnref45" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn46" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es47-use-nullptr-rather-than-0-or-null" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es47-use-nullptr-rather-than-0-or-null</span></a> <a href="#fnref46" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn47" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es60-avoid-new-and-delete-outside-resource-management-functions" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es60-avoid-new-and-delete-outside-resource-management-functions</span></a> <a href="#fnref47" class="footnote-backref">↩︎</a> <a href="#fnref47:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn48" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es61-delete-arrays-using-delete-and-non-arrays-using-delete" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es61-delete-arrays-using-delete-and-non-arrays-using-delete</span></a> <a href="#fnref48" class="footnote-backref">↩︎</a> <a href="#fnref48:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn49" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es65-dont-dereference-an-invalid-pointer" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es65-dont-dereference-an-invalid-pointer</span></a> <a href="#fnref49" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn50" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#e13-never-throw-while-being-the-direct-owner-of-an-object" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#e13-never-throw-while-being-the-direct-owner-of-an-object</span></a> <a href="#fnref50" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn51" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cpl1-prefer-c-to-c" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cpl1-prefer-c-to-c</span></a> <a href="#fnref51" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn52" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0781r0.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0781r0.html</span></a> <a href="#fnref52" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn53" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1275r0.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1275r0.html</span></a> <a href="#fnref53" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn54" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c146-use-dynamic_cast-where-class-hierarchy-navigation-is-unavoidable" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c146-use-dynamic_cast-where-class-hierarchy-navigation-is-unavoidable</span></a> <a href="#fnref54" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn55" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es48-avoid-casts" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es48-avoid-casts</span></a> <a href="#fnref55" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn56" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es49-if-you-must-use-a-cast-use-a-named-cast" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es49-if-you-must-use-a-cast-use-a-named-cast</span></a> <a href="#fnref56" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn57" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es50-dont-cast-away-const" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es50-dont-cast-away-const</span></a> <a href="#fnref57" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn58" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c181-avoid-naked-unions" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c181-avoid-naked-unions</span></a> <a href="#fnref58" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn59" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cp8-dont-try-to-use-volatile-for-synchronization" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cp8-dont-try-to-use-volatile-for-synchronization</span></a> <a href="#fnref59" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn60" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f55-dont-use-va_arg-arguments" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f55-dont-use-va_arg-arguments</span></a> <a href="#fnref60" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn61" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#-es34-dont-define-a-c-style-variadic-function" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#-es34-dont-define-a-c-style-variadic-function</span></a> <a href="#fnref61" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn62" class="footnote-item"><p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto" target="_blank" rel="noopener"><span>https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es76-avoid-goto</span></a> <a href="#fnref62" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn63" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html</span></a> <a href="#fnref63" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn64" class="footnote-item"><p><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r11.html" target="_blank" rel="noopener"><span>https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r11.html</span></a> <a href="#fnref64" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn65" class="footnote-item"><p><a href="https://www.stroustrup.com/bs_faq.html#EC++" target="_blank" rel="noopener"><span>https://www.stroustrup.com/bs_faq.html#EC++</span></a> <a href="#fnref65" class="footnote-backref">↩︎</a> <a href="#fnref65:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn66" class="footnote-item"><p><a href="https://www.stroustrup.com/bs_faq.html#remove-from-C++" target="_blank" rel="noopener"><span>https://www.stroustrup.com/bs_faq.html#remove-from-C++</span></a> <a href="#fnref66" class="footnote-backref">↩︎</a> <a href="#fnref66:1" class="footnote-backref">↩︎</a> <a href="#fnref66:2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn67" class="footnote-item"><p><a href="https://www.stroustrup.com/quotes.html" target="_blank" rel="noopener"><span>https://www.stroustrup.com/quotes.html</span></a> <a href="#fnref67" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section></div>
+    <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
+        <div class="pull-right dropdown">
+            <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
+                <i class="fa fa-bars"></i>
+            </a>
+            <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
+                <div class="toc"><ul class="nav">
+<li><a href="#C-is-the-next-C" title="C++ is the next C++">C++ is the next C++</a><ul class="nav">
+<li><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Examples" title="Motivating Examples">Motivating Examples</a><ul class="nav">
+<li><a href="#What-are-the-safer-and-modern-analyzers-composed-of" title="What are the safer and modern analyzers composed of?">What are the safer and modern analyzers composed of?</a></li>
+<li><a href="#What-may-safer-and-modern-analyzers-be-composed-of-in-the-future" title="What may safer and modern analyzers be composed of in the future?">What may safer and modern analyzers be composed of in the future?</a></li>
+</ul>
+</li>
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#Frequently-Asked-Questions" title="Frequently Asked Questions">Frequently Asked Questions</a><ul class="nav">
+<li><a href="#Shouldn’t-these-be-warnings-instead-of-errors" title="Shouldn’t these be warnings instead of errors?">Shouldn’t these be warnings instead of errors?</a></li>
+<li><a href="#Why-at-the-module-level-Why-not-safe-and-unsafe-blocks" title="Why at the module level? Why not safe and unsafe blocks?">Why at the module level? Why not safe and unsafe blocks?</a></li>
+<li><a href="#You-must-really-hate-pointers" title="You must really hate pointers?">You must really hate pointers?</a></li>
+<li><a href="#C-can’t-standardize-specific-static-analyzers" title="C++ can’t standardize specific static analyzers">C++ can’t standardize specific static analyzers</a></li>
+<li><a href="#Do-you-fear-that-this-could-create-a-“subset-of-C”-that-“could-split-the-user-community-and-cause-acrimony”-65" title="Do you fear that this could create a “subset of C++” that “could split the user community and cause acrimony”? [65]">Do you fear that this could create a “subset of C++” that “could split the user community and cause acrimony”? [65]</a></li>
+</ul>
+</li>
+<li><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+            </ul>
+        </div>
+    </div>
+    <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;" null null>
+        <div class="toc"><ul class="nav">
+<li><a href="#C-is-the-next-C" title="C++ is the next C++">C++ is the next C++</a><ul class="nav">
+<li><a href="#Table-of-contents" title="Table of contents">Table of contents</a></li>
+<li><a href="#Abstract" title="Abstract">Abstract</a></li>
+<li><a href="#Motivating-Examples" title="Motivating Examples">Motivating Examples</a><ul class="nav">
+<li><a href="#What-are-the-safer-and-modern-analyzers-composed-of" title="What are the safer and modern analyzers composed of?">What are the safer and modern analyzers composed of?</a></li>
+<li><a href="#What-may-safer-and-modern-analyzers-be-composed-of-in-the-future" title="What may safer and modern analyzers be composed of in the future?">What may safer and modern analyzers be composed of in the future?</a></li>
+</ul>
+</li>
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#Frequently-Asked-Questions" title="Frequently Asked Questions">Frequently Asked Questions</a><ul class="nav">
+<li><a href="#Shouldn’t-these-be-warnings-instead-of-errors" title="Shouldn’t these be warnings instead of errors?">Shouldn’t these be warnings instead of errors?</a></li>
+<li><a href="#Why-at-the-module-level-Why-not-safe-and-unsafe-blocks" title="Why at the module level? Why not safe and unsafe blocks?">Why at the module level? Why not safe and unsafe blocks?</a></li>
+<li><a href="#You-must-really-hate-pointers" title="You must really hate pointers?">You must really hate pointers?</a></li>
+<li><a href="#C-can’t-standardize-specific-static-analyzers" title="C++ can’t standardize specific static analyzers">C++ can’t standardize specific static analyzers</a></li>
+<li><a href="#Do-you-fear-that-this-could-create-a-“subset-of-C”-that-“could-split-the-user-community-and-cause-acrimony”-65" title="Do you fear that this could create a “subset of C++” that “could split the user community and cause acrimony”? [65]">Do you fear that this could create a “subset of C++” that “could split the user community and cause acrimony”? [65]</a></li>
+</ul>
+</li>
+<li><a href="#References" title="References">References</a></li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gist-embed/2.6.0/gist-embed.min.js" integrity="sha256-KyF2D6xPIJUW5sUDSs93vWyZm+1RzIpKCexxElmxl8g=" crossorigin="anonymous" defer></script>
+    <script>
+        var markdown = $(".markdown-body");
+        //smooth all hash trigger scrolling
+        function smoothHashScroll() {
+            var hashElements = $("a[href^='#']").toArray();
+            for (var i = 0; i < hashElements.length; i++) {
+                var element = hashElements[i];
+                var $element = $(element);
+                var hash = element.hash;
+                if (hash) {
+                    $element.on('click', function (e) {
+                        // store hash
+                        var hash = this.hash;
+                        if ($(hash).length <= 0) return;
+                        // prevent default anchor click behavior
+                        e.preventDefault();
+                        // animate
+                        $('body, html').stop(true, true).animate({
+                            scrollTop: $(hash).offset().top
+                        }, 100, "linear", function () {
+                            // when done, add hash to url
+                            // (default click behaviour)
+                            window.location.hash = hash;
+                        });
+                    });
+                }
+            }
+        }
+
+        smoothHashScroll();
+        var toc = $('.ui-toc');
+        var tocAffix = $('.ui-affix-toc');
+        var tocDropdown = $('.ui-toc-dropdown');
+        //toc
+        tocDropdown.click(function (e) {
+            e.stopPropagation();
+        });
+
+        var enoughForAffixToc = true;
+
+        function generateScrollspy() {
+            $(document.body).scrollspy({
+                target: ''
+            });
+            $(document.body).scrollspy('refresh');
+            if (enoughForAffixToc) {
+                toc.hide();
+                tocAffix.show();
+            } else {
+                tocAffix.hide();
+                toc.show();
+            }
+            $(document.body).scroll();
+        }
+
+        function windowResize() {
+            //toc right
+            var paddingRight = parseFloat(markdown.css('padding-right'));
+            var right = ($(window).width() - (markdown.offset().left + markdown.outerWidth() - paddingRight));
+            toc.css('right', right + 'px');
+            //affix toc left
+            var newbool;
+            var rightMargin = (markdown.parent().outerWidth() - markdown.outerWidth()) / 2;
+            //for ipad or wider device
+            if (rightMargin >= 133) {
+                newbool = true;
+                var affixLeftMargin = (tocAffix.outerWidth() - tocAffix.width()) / 2;
+                var left = markdown.offset().left + markdown.outerWidth() - affixLeftMargin;
+                tocAffix.css('left', left + 'px');
+            } else {
+                newbool = false;
+            }
+            if (newbool != enoughForAffixToc) {
+                enoughForAffixToc = newbool;
+                generateScrollspy();
+            }
+        }
+        $(window).resize(function () {
+            windowResize();
+        });
+        $(document).ready(function () {
+            windowResize();
+            generateScrollspy();
+        });
+
+        //remove hash
+        function removeHash() {
+            window.location.hash = '';
+        }
+
+        var backtotop = $('.back-to-top');
+        var gotobottom = $('.go-to-bottom');
+
+        backtotop.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToTop)
+                scrollToTop();
+            removeHash();
+        });
+        gotobottom.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToBottom)
+                scrollToBottom();
+            removeHash();
+        });
+
+        var toggle = $('.expand-toggle');
+        var tocExpand = false;
+
+        checkExpandToggle();
+        toggle.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tocExpand = !tocExpand;
+            checkExpandToggle();
+        })
+
+        function checkExpandToggle () {
+            var toc = $('.ui-toc-dropdown .toc');
+            var toggle = $('.expand-toggle');
+            if (!tocExpand) {
+                toc.removeClass('expand');
+                toggle.text('Expand all');
+            } else {
+                toc.addClass('expand');
+                toggle.text('Collapse all');
+            }
+        }
+
+        function scrollToTop() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: 0
+            }, 100, "linear");
+        }
+
+        function scrollToBottom() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: $(document.body)[0].scrollHeight
+            }, 100, "linear");
+        }
+    </script>
+</body>
+
+</html>
