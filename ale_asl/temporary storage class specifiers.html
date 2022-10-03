@@ -115,6 +115,7 @@ a code
 <li><a href="#other-anonymous-things"><span>Other Anonymous Things</span></a></li>
 </ul>
 </li>
+<li><a href="#tooling-opportunities"><span>Tooling Opportunities</span></a></li>
 <li><a href="#summary"><span>Summary</span></a></li>
 <li><a href="#frequently-asked-questions"><span>Frequently Asked Questions</span></a></li>
 <li><a href="#references"><span>References</span></a></li>
@@ -123,7 +124,7 @@ a code
 </ul><h2 id="Abstract" data-id="Abstract"><a class="anchor hidden-xs" href="#Abstract" title="Abstract"><span class="octicon octicon-link"></span></a><span>Abstract</span></h2><p><em><span>“Lifetime issues with references to temporaries can lead to fatal and subtle runtime errors. This applies to both:”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p><ul>
 <li><em><span>“Returned references (for example, when using strings or maps) and”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:1">[1:1]</a></sup></li>
 <li><em><span>“Returned objects that do not have value semantics (for example using std::string_view).”</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:2">[1:2]</a></sup></li>
-</ul><p data-original-title="" title=""><span>This paper proposes the standard adopt storage class specifiers for temporaries in order to provide programmers with tools to manually fix instances of dangling.</span></p><h2 id="Motivating-Examples" data-id="Motivating-Examples"><a class="anchor hidden-xs" href="#Motivating-Examples" title="Motivating-Examples"><span class="octicon octicon-link"></span></a><span>Motivating Examples</span></h2><p><em><span>“Let’s motivate the feature for both, classes not having value semantics and references”,</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:3">[1:3]</a></sup><span> by adding 4 new storage class specifiers that are only used by temporaries, such as arguments to functions.</span></p><table>
+</ul><p><span>This paper proposes the standard adopt storage class specifiers for temporaries in order to provide programmers with tools to manually fix instances of dangling.</span></p><h2 id="Motivating-Examples" data-id="Motivating-Examples"><a class="anchor hidden-xs" href="#Motivating-Examples" title="Motivating-Examples"><span class="octicon octicon-link"></span></a><span>Motivating Examples</span></h2><p><em><span>“Let’s motivate the feature for both, classes not having value semantics and references”,</span></em><span> </span><sup class="footnote-ref"><a href="#fn1" id="fnref1:3">[1:3]</a></sup><span> by adding 4 new storage class specifiers that are only used by temporaries, such as arguments to functions.</span></p><table>
 <tbody><tr>
 <td>
 <p><code>constinit</code></p>
@@ -659,7 +660,10 @@ std<span class="token double-colon punctuation">::</span>vector<span class="toke
         std<span class="token double-colon punctuation">::</span><span class="token function">print</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-</code></pre><h2 id="Summary" data-id="Summary"><a class="anchor hidden-xs" href="#Summary" title="Summary"><span class="octicon octicon-link"></span></a><span>Summary</span></h2><p><span>There are a couple of principles repeated throughout this proposal.</span></p><ol>
+</code></pre><h2 id="Tooling-Opportunities" data-id="Tooling-Opportunities"><a class="anchor hidden-xs" href="#Tooling-Opportunities" title="Tooling-Opportunities"><span class="octicon octicon-link"></span></a><span>Tooling Opportunities</span></h2><p><span>There area a couple tooling opportunities especially with respect to the </span><code>constinit</code><span> specifier.</span></p><ul>
+<li><span>A command line and/or IDE tool could analyze the code for </span><code>const</code><span>, </span><code>constexpr</code><span>/</span><code>LiteralType</code><span> and constant-initialized and if the conditions matches automatically add the </span><code>constinit</code><span> specifier for code reviewers.</span></li>
+<li><span>Another command line and/or IDE tool could strip </span><code>constinit</code><span> specifier from any temporaries for programmers.</span></li>
+</ul><p><span>Combined they would form a </span><code>constinit</code><span> toggle which wouldn’t be all that much different from whitespace and special character toggles already found in many IDE(s).</span></p><h2 id="Summary" data-id="Summary"><a class="anchor hidden-xs" href="#Summary" title="Summary"><span class="octicon octicon-link"></span></a><span>Summary</span></h2><p><span>There are a couple of principles repeated throughout this proposal.</span></p><ol>
 <li><span>Constants really should have static storage duration so that they never dangle.</span></li>
 <li><span>Temporaries are expected to be just anonymously named variables / </span><code>C99</code><span> compound literals lifetime rule</span>
 <ul>
@@ -788,6 +792,7 @@ mov <span class="token operator">&lt;</span>memory<span class="token operator">&
 <li><a href="#Other-Anonymous-Things" title="Other Anonymous Things">Other Anonymous Things</a></li>
 </ul>
 </li>
+<li><a href="#Tooling-Opportunities" title="Tooling Opportunities">Tooling Opportunities</a></li>
 <li><a href="#Summary" title="Summary">Summary</a></li>
 <li><a href="#Frequently-Asked-Questions" title="Frequently Asked Questions">Frequently Asked Questions</a><ul class="nav">
 <li><a href="#What-about-locality-of-reference" title="What about locality of reference?">What about locality of reference?</a></li>
@@ -822,6 +827,7 @@ mov <span class="token operator">&lt;</span>memory<span class="token operator">&
 <li><a href="#Other-Anonymous-Things" title="Other Anonymous Things">Other Anonymous Things</a></li>
 </ul>
 </li>
+<li><a href="#Tooling-Opportunities" title="Tooling Opportunities">Tooling Opportunities</a></li>
 <li><a href="#Summary" title="Summary">Summary</a></li>
 <li><a href="#Frequently-Asked-Questions" title="Frequently Asked Questions">Frequently Asked Questions</a><ul class="nav">
 <li><a href="#What-about-locality-of-reference" title="What about locality of reference?">What about locality of reference?</a></li>
