@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-10-03</td>
+<td>2022-10-11</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -74,6 +74,7 @@ a code
       - [Outstanding Issues](#outstanding-issues)
         - [CWG900 Lifetime of temporaries in range-based for](#cwg900-lifetime-of-temporaries-in-range-based-for)
     - [Other Anonymous Things](#other-anonymous-things)
+  - [Tooling Opportunities](#tooling-opportunities)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
@@ -100,7 +101,13 @@ This paper proposes the standard adopt storage class specifiers for temporaries 
 </td>
 <td>
 
-This specifier gives the temporary static storage duration and asserts that it has static initialization. It is recommended for anything that is constant-initialized. The `constinit` specifier is a alias for explicit constant initialization i.e. `const static constinit`. The word `constant` may be a better choice.
+This specifier gives the temporary static storage duration and asserts the following.
+
+1. The parameter is const.
+1. The parameter type is a `LiteralType` or a reference to a `LiteralType`.
+1. The argument is `constant-initialized`. [^n4910]
+
+It is recommended for anything that is `constant-initialized`. [^n4910] The `constinit` specifier is a alias for explicit constant initialization i.e. `const static constinit`. The word `constant` may be a better choice.
 
 </td>
 </tr>
@@ -1144,6 +1151,15 @@ int main() {
 }
 ```
 
+## Tooling Opportunities
+
+There area a couple tooling opportunities especially with respect to the `constinit` specifier.
+
+- A command line and/or IDE tool could analyze the code for `const`, `constexpr`/`LiteralType` and constant-initialized and if the conditions matches automatically add the `constinit` specifier for code reviewers.
+- Another command line and/or IDE tool could strip `constinit` specifier from any temporaries for programmers.
+
+Combined they would form a `constinit` toggle which wouldn't be all that much different from whitespace and special character toggles already found in many IDE(s).
+
 ## Summary
 
 There are a couple of principles repeated throughout this proposal.
@@ -1154,11 +1170,43 @@ There are a couple of principles repeated throughout this proposal.
 
 The advantages to `C++` with adopting this proposal is manifold.
 
-- Empower programmers to be able to fix most dangling simply
+<table>
+<tr>
+<th style="vertical-align:top;width:50%">
+
+`constinit`, `variable_scope`, `block_scope` and `statement_scope` specifiers
+
+</th>
+<th style="vertical-align:top;width:50%">
+
+`constinit` specifier and `[[default_temporary_scope(variable)]]`
+
+</th>
+</tr>
+<tr>
+<td style="vertical-align:top">
+
 - Reduce the gap between `C++` and `C99` compound literals
 - Reduce the gap between `C++` and `C23` storage-class specifiers
 - Improve the potential contribution of `C++`'s new specifiers back to `C`
 - Increase and improve upon the utilization of ROM and the benefits that entails
+- **Empower programmers to be able to fix most dangling simply**
+
+</td>
+<td style="vertical-align:top">
+
+- Reduce the gap between `C++` and `C99` compound literals
+- Reduce the gap between `C++` and `C23` storage-class specifiers
+- Improve the potential contribution of `C++`'s new specifier back to `C`
+- Increase and improve upon the utilization of ROM and the benefits that entails
+- **Empower programmers to be able to fix most dangling simply with a whole lot less verbosity**
+- **Automatically eliminate immediate dangling**
+- **Automatically reduce all remaining dangling**
+- **Automatically reduce unitialized and delayed initialization errors**
+
+</td>
+</tr>
+</table>
 
 ## Frequently Asked Questions
 
@@ -1197,7 +1245,7 @@ What is more interesting is these two examples of constants have different value
 </td>
 <td>
 
-**references with non existent reference reassignment operator preferably completely new and unique operator since the variable's type may have a custom `&=` operator defined**
+**references with `C++`**
 
 </td>
 </tr>
@@ -1237,14 +1285,14 @@ else
 <td>
 
 ```cpp
-int& i = 5;
+std::reference_wrapper<int> i{5};
 if(whatever)
 {
-  i &= variable_scope 7;
+  i = std::ref(variable_scope 7);
 }
 else
 {
-  i &= variable_scope 9;
+  i = std::ref(variable_scope 9);
 }
 // use i
 ```
@@ -1253,7 +1301,7 @@ else
 </tr>
 </table>
 
-In the `values` example, there is no dangling. Programmers trust the compiler to allocate and deallocate instances on the stack. They have to because the programmer has little to no control over deallocation. Neither of the `pointers` or `references` examples compile without utility functions to convert from reference to pointer and immediately invoked lambda functions to do complex initialization of references since they have to be initialized and their references can't currently be reassigned no matter how useful that would be. That boiler plate exist in an earlier example in this proposal and has been removed for clarity. With the current `C++` statement scope rules or the `C99` block scope rule, both the `pointers` and `references` examples dangle. In other words, the compilers who are primarily responsible for the stack has rules that causes dangling and embarrassing worse immediate dangling. This violates the programmer's trust in their compiler. Variable scope is better because it restores the programmer's trust in their compiler/language by causing temporaries to match the value semantics of variables. Further, it avoids dangling throughout the body of the function whether it is anything that introduces new blocks/scopes be that `if`, `switch`, `while`, `for` statements and the nesting of these constructs.
+In the `values` example, there is no dangling. Programmers trust the compiler to allocate and deallocate instances on the stack. They have to because the programmer has little to no control over deallocation. <!--Neither of the `pointers` or `references` examples compile without utility functions to convert from reference to pointer and immediately invoked lambda functions to do complex initialization of references since they have to be initialized and their references can't currently be reassigned no matter how useful that would be. That boiler plate exist in an earlier example in this proposal and has been removed for clarity.--> With the current `C++` statement scope rules or the `C99` block scope rule, both the `pointers` and `references` examples dangle. In other words, the compilers who are primarily responsible for the stack has rules that needlessly causes dangling and embarrassing worse immediate dangling. This violates the programmer's trust in their compiler. Variable scope is better because it restores the programmer's trust in their compiler/language by causing temporaries to match the value semantics of variables. Further, it avoids dangling throughout the body of the function whether it is anything that introduces new blocks/scopes be that `if`, `switch`, `while`, `for` statements and the nesting of these constructs.
 
 ### How do these specifiers propagate?
 
