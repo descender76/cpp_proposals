@@ -71,7 +71,7 @@ Programmer's, Businesses and Government(s) want C++ to be safer and simpler. Thi
 
 ## Motivating Examples
 
-Following is a wishlist. Most are optional. While, they all would be of benefit. It all starts with a new repeatable module level attribute that would preferably be applied once in the `primary module interface unit` and would automatically apply to it and all `module implementation unit`(s). It could also be applied to a `module implementation unit` but that would generally be less useful. However, it might aid in gradual migration.
+Following is a wishlist. Most are optional. While, they all would be of benefit. It all starts with a new repeatable module level attribute that would preferably be applied once in the `primary module interface unit` and would automatically apply to it and all `module implementation unit`(s). It could also be applied to a `module implementation unit` but that would generally be less useful. However, it might aid in *gradual migration*.
 
 ```cpp
 export module some_module_name [[static_analysis("")]];// primary module interface unit
@@ -119,13 +119,13 @@ The `safer` analyzer is a subset of `modern` analyzer. The `modern` analyzer goe
 </tr>
 </table>
 
-Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. These are meant for programmers, businesses and governments in which safety takes precedence. They both represent +&infin;. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by both the `C++` teaching group, the authors of the `C++ Core Guidelines` [^cppcg] and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
+Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. These are meant for programmers, businesses and governments in which safety takes precedence. They both represent +&infin;. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken, until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by the `C++` teaching group, the authors of the `C++ Core Guidelines` [^cppcg] and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
 
-All modules can be used even if they don't use the `static_analysis` attribute as this allows gradual adoption.
+All modules can be used even if they don't use the `static_analysis` attribute as this allows *gradual adoption*.
 
 ### What are the `safer` and `modern` analyzers composed of?
 
-These overarching static analyzers are composed of multiple static analyzers which can be used individually to allow a degree of gradual adoption.
+These overarching static analyzers are composed of multiple static analyzers which can be used individually to allow a degree of *gradual adoption*.
 
 #### Use lvalue references
 
@@ -656,11 +656,11 @@ By adding static analysis to the `C++` language we can make the language safer a
 
 ### Shouldn't these be warnings instead of errors?
 
-NO, otherwise we'll be stuck with what we just have. `C++` compilers produces plenty of warnings. `C++` static analyzers produces plenty of warnings. However, when some one talks about creating a new language, then old language syntax becomes invalid i.e. errors. This is for programmers. Programmers and businesses rarely upgrade their code unless they are forced to. Businesses and Government(s) want errors as well in order to ensure code quality and the assurance that bad code doesn't exist anywhere in the module. This is also important from a language standpoint because we are essentially pruning; somewhat. Keep in mind though that all of these pruned features still have use now and in the future as more constructs will be built upon them which is why they need to be part of the language just not a part of everyday usage of the language.
+NO, otherwise we'll be stuck with what we just have. `C++` compilers produces plenty of warnings. `C++` static analyzers produces plenty of warnings. However, when some one talks about creating a new language, then old language syntax becomes invalid i.e. errors. This is for programmers. Programmers and businesses rarely upgrade their code unless they are forced to. Businesses and Government(s) want errors, as well, in order to ensure code quality and the assurance that bad code doesn't exist anywhere in the module. This is also important from a language standpoint because we are essentially pruning; somewhat. Keep in mind that all of these pruned features still have use now. In the future, as more constructs are built upon these pruned features, which is why they need to be part of the language, just not a part of everyday usage of the language.
 
 ### Why at the module level? Why not safe and unsafe blocks?
 
-Programmers and businesses rarely upgrade their code unless they are forced to. New programmers need training wheels and some of us older programmers like them too. Due to the proliferation of government regulations and oversight, businesses have acquired `software composition analysis` services and tools. These services map security errors to specific versions of modules; specifically programming artifacts such as executables and libraries. As such, businesses want to know is a module reasonably safe.
+Programmers and businesses rarely upgrade their code unless they are forced to. New programmers need training wheels and some of us older programmers like them too. Due to the proliferation of government regulations and oversight, businesses have acquired `software composition analysis` services and tools. These services map security errors to specific versions of modules; specifically programming artifacts such as executables and libraries. As such, businesses want to know if a module is reasonably safe.
 
 ### How do we configure future analyzers?
 
@@ -709,7 +709,7 @@ First of all, let's consider the quotes of Bjarne Stroustrup that this question 
 
 Does this paper create a subset? YES. Like it or not `C++` already have a couple of subsets; some positive, some quasi. `Freestanding` is a subset for low level programming. This proposal primarily focus on high level programming but there is nothing preventing the creation of `[[static_analysis("freestanding")]]` which enforces `freestanding`. The `C++` value categories has to some degree fractured the community into a clergy class that thoroughly understand its intracacies and a leity class that gleefully uses it.
 
-Does this paper split the user community? YES and NO. It splits code into safer vs. less safe, high level vs. low level. However, this is performed at the module level, allowing the same programmer to decide what falls on either side of the fence. This would not be performed by an industry consortium but rather the standard. Safer modules can be used by less safe modules. Less safe modules can partly be used by safer modules, such as the standard module. This latter impact is already minimalized because the standard frequently write their library code in `C++` fashion instead of a `C` fashion.
+Does this paper split the user community? YES and NO. It splits code into safer vs. less safe, high level vs. low level. However, this is performed at the module level, allowing the same programmer to decide what falls on either side of the fence. This would not be performed by an industry consortium but rather the standard. Safer modules can be used by less safe modules. Less safe modules can partly be used by safer modules, such as with the standard module. This latter impact is already minimalized because the standard frequently write their library code in `C++` fashion instead of a `C` fashion.
 
 ---
 
@@ -741,7 +741,7 @@ The beauty of this proposal is does not and it does remove features from C++. Li
 </tr>
 </table>
 
-Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but frequently features have to be added back in when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, making things simpler. As a programmer matures, features can be gradually added to their repertoire.
+Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but, frequently, features have to be added back in, when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, thus making things simpler. As a programmer matures, features can be gradually added to their repertoire.
 
 ## References
 
