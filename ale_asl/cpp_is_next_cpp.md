@@ -727,7 +727,7 @@ Does this paper split the user community? YES and NO. It splits code into safer 
 </tr>
 </table>
 
-The beauty of this proposal is does not and it does remove features from C++. Like the standard library, it allows programmers to refrain from using the most troublesome `C` and `C++` features.
+The beauty of this proposal is it does not and it does remove features from C++. Like the standard library, it allows programmers to refrain from using the most troublesome `C` and `C++` features.
 
 ---
 
@@ -741,7 +741,7 @@ The beauty of this proposal is does not and it does remove features from C++. Li
 </tr>
 </table>
 
-Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but, frequently, features have to be added back in, when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, thus making things simpler. As a programmer matures, features can be gradually added to their repertoire.
+Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but, frequently, features have to be added back in, when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, thus making things simpler. As a programmer matures, features can be gradually added to their repertoire. After all, isn't `C++` larger now than when we started programming in `C++`.
 
 ## References
 
