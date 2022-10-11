@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-10-03</td>
+<td>2022-10-11</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -662,6 +662,16 @@ NO, otherwise we'll be stuck with what we just have. `C++` compilers produces pl
 
 Programmers and businesses rarely upgrade their code unless they are forced to. New programmers need training wheels and some of us older programmers like them too. Due to the proliferation of government regulations and oversight, businesses have acquired `software composition analysis` services and tools. These services map security errors to specific versions of modules; specifically programming artifacts such as executables and libraries. As such, businesses want to know is a module reasonably safe.
 
+### How do we configure future analyzers?
+
+Any arguments provided after the name of the analyzer can be forwarded onto the analyzer.
+
+```cpp
+[[static_analysis("some_future_analyzer", 1, true, 0.5, "Hello World")]]
+```
+
+In this case, `1, true, 0.5, "Hello World"` would all be forwarded to the static analyzer "some_future_analyzer". None of the current analyzers use this functionality so this just illustrates distant future work where we can define these analyzers in a standard fashion but that can't happen until we have a code DOM. As such, how these arguments are forwarded are currently compiler specific.
+
 ### You must really hate pointers?
 
 Actually, I love `C`, `C++` and pointers.
@@ -674,7 +684,7 @@ Actually, I love `C`, `C++` and pointers.
 - Pointers are simple and easy for memory mapped hardware but many C++ programmers don't operate at this level.
 - A few will create an OS [driver] but thousands will use it.
 
-The fact is pointers, unsafe casts, `union`, `mutable` and `goto` are the engine of C++ change. As such it would be foolish to remove them but it is also unrealistic for users/drivers of a vehicle to have to drive with nothing between them and the engine without listening to them clamor for interior finishing.
+The fact is pointers, unsafe casts, `union`, `mutable` and `goto` are the engine of C++ change. As such it would be foolish to remove them but it is also unrealistic for users/drivers of a vehicle to have to drive with nothing between them and the engine, without listening to them clamor for interior finishing.
 
 ### C++ can't standardize specific static analyzers
 
