@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2658R0</td>
+<td>P2658R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-10-11</td>
+<td>2022-10-27</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -59,6 +59,7 @@ a code
 ## Table of contents
 
 - [temporary storage class specifiers](#temporary-storage-class-specifiers)
+  - [Changelog](#changelog)
   - [Abstract](#abstract)
   - [Motivating examples](#motivating-examples)
     - [Classes not Having Value Semantics](#classes-not-having-value-semantics)
@@ -74,10 +75,19 @@ a code
       - [Outstanding Issues](#outstanding-issues)
         - [CWG900 Lifetime of temporaries in range-based for](#cwg900-lifetime-of-temporaries-in-range-based-for)
     - [Other Anonymous Things](#other-anonymous-things)
+  - [Value Categories](#value-categories)
   - [Tooling Opportunities](#tooling-opportunities)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
+
+## Changelog
+
+### R1
+
+- added an additional [tooling opportunity](#addvartool)
+- added a [Value Categories](#Value-Categories) section
+- added a [Automatic or Configurable Default or Exception to the Rule](#Automatic-or-Configurable-Default-or-Exception-to-the-Rule) section
 
 ## Abstract
 
@@ -1151,6 +1161,72 @@ int main() {
 }
 ```
 
+## Value Categories
+
+If temporaries can be changed to have block scope, variable scope or global scope than how does it affect their value categories? Currently if the literal is a string than it is a `lvalue` and it has global scope. For all the other literals they tend to be a `prvalue` and have statement scope.
+
+<table>
+<tr>
+<td></td>
+<td>
+
+**movable**
+
+</td>
+<td>
+
+**unmovable**
+
+</td>
+</tr>
+<tr>
+<td>
+
+**named**
+
+</td>
+<td>xvalue</td>
+<td>lvalue</td>
+</tr>
+<tr>
+<td>
+
+**unnamed**
+
+</td>
+<td>prvalue</td>
+<td>?</td>
+</tr>
+</table>
+
+Throughout this paper, I have shown that it makes sense for temporaries [references and pointers], unless they can be made global scope, should be variable scope. From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments they have life beyond the life of the function that it is given to. As such the expression is not movable. As such the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is this is simple whether it is worded as a `lvalue` or an unambiguous new value category. Regardless of which, there are some advantages that must be pointed out.
+
+### Avoids superfluous moves
+
+The proposed avoids superfluous moves. Copying pointers and lvalue references are cheaper than performing a move which is cheaper than performing a value copy.
+
+### Avoids forced naming
+
+The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can not be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling. Further, according to the `C++ Core Guidelines`, it is developers practice to do the following:
+
+- *ES.5: Keep scopes small* [^cppcges5]
+- *ES.6: Declare names in for-statement initializers and conditions to limit scope* [^cppcges6]
+
+Since the variable is likely to be created by default at block scope manually instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a lvalue temporary avoids these common dangling possibilities along with simplifying the code.
+
+### Allows more anonymous variables
+
+The `C++ Core Guidelines` [^cppcgcp44] excourages programmers "to name your lock_guards and unique_locks" because "a temporary" "immediately goes out of scope".
+
+- *CP.44: Remember to name your lock_guards and unique_locks* [^cppcgcp44]
+
+With this proposal these instances do not immediately go out of scope. As such we get the locking benefits without having to make up a name. Again, not having a name means their is less to return and consequently dangle.
+
+## Automatic or Configurable Default or Exception to the Rule
+
+Among other things, the `implicit constant initialization` [^p2623r2] paper recommends that we change temporaries from statement scope to variable scope. Among other things, this paper recommends allowing programmers to change the default statement scope of temporaries to variable scope. It also provides the vehicle in which `C++` standard can change its default over time. This alternative was given to address any concerns over the lifetimes of non memory resources such as concurrency primitives even though these should be minimal to nonexistant for most existing code bases. The fact is the only temporaries that absolutely needs variable scope are those assigned or reassigned to references, pointers and "classes not having value semantics" [^bindp]. In the case of temporary arguments of functions, variable or block scope is only needed when the function in question returns a reference, pointer or "class not having value semantics" [^bindp]. If this feature was applied selectively, though inconsistent, it would minimize the risk of applying automatically as in the case of `implicit constant initialization` [^p2623r2]. Further, this would work better with the `Last use optimization` [^p2623r2] paper. While "last use" works with named instances rather than temporaries, its goal is the opposite of changing the scope of temporaires from statement to variable. While "last use" reduces the lifetime momentarily to allow it be moved in order to extend the life, the "temporary" papers increases the life of the original instance. The "temporary" papers can't be applied selectively until "classes not having value semantics" [^bindp] gets adopted for the purpose of creating errors instead of warning or extending lifetime in order to handle the indirect references, while the "temporary" papers handle the "direct" references. Consequently, it would be advantageous if the "temporary" papers, the "last use" paper, the original `Bind Returned/Initialized Objects to the Lifetime of Parameters`
+[^bindp] paper was considered together along with the `[[clang::annotate_type("lifetime", "")]]` attribute from `[RFC] Lifetime annotations for C++` [^clanglta].
+
 ## Tooling Opportunities
 
 There area a couple tooling opportunities especially with respect to the `constinit` specifier.
@@ -1159,6 +1235,8 @@ There area a couple tooling opportunities especially with respect to the `consti
 - Another command line and/or IDE tool could strip `constinit` specifier from any temporaries for programmers.
 
 Combined they would form a `constinit` toggle which wouldn't be all that much different from whitespace and special character toggles already found in many IDE(s).
+
+<a id="addvartool">An additional opportunity for tooling would be for a command line program that recursively iterates through a directory adding the `[[default_temporary_scope(statement)]]` annotation to every `primary module interface unit`. If the `C++` standard decides that variable scoping is a saner default going forward and was going to give programmers some multiple of a 3 year release cycle to add this annotation than this program would make migrating easier. Existing code bases could quickly add the current default and then migrate at their leisure. Prior to the default changeover, programmers could switch `statement` to `variable`. After the default changeover, programmers could remove the `[[default_temporary_scope(statement)]]` annotation altogether.</a>
 
 ## Summary
 
@@ -1401,3 +1479,15 @@ Returning references to something in the caller's scope is only natural. It is a
 [^cppcgrf42]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only>
 <!--C++ Core Guidelines - F.43: Never (directly or indirectly) return a pointer or a reference to a local object-->
 [^cppcgrf43]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object>
+<!--C++ Core Guidelines - CP.44: Remember to name your lock_guards and unique_locks-->
+[^cppcgcp44]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cp44-remember-to-name-your-lock_guards-and-unique_locks>
+<!--C++ Core Guidelines - ES.5: Keep scopes small-->
+[^cppcges5]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es5-keep-scopes-small>
+<!--C++ Core Guidelines - ES.6: Declare names in for-statement initializers and conditions to limit scope-->
+[^cppcges6]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es6-declare-names-in-for-statement-initializers-and-conditions-to-limit-scope>
+<!--implicit constant initialization-->
+[^p2623r2]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2623r2.html>
+<!--Last use optimization-->
+[^p2623r2]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2666r0.pdf>
+<!--[RFC] Lifetime annotations for C++-->
+[^clanglta]: <https://discourse.llvm.org/t/rfc-lifetime-annotations-for-c/61377>
