@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-10-27</td>
+<td>2022-10-29</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -76,6 +76,7 @@ a code
         - [CWG900 Lifetime of temporaries in range-based for](#cwg900-lifetime-of-temporaries-in-range-based-for)
     - [Other Anonymous Things](#other-anonymous-things)
   - [Value Categories](#value-categories)
+  - [Automatic or Configurable Default or Exceptional Rules](#Automatic-or-Configurable-Default-or-Exceptional-Rules)
   - [Tooling Opportunities](#tooling-opportunities)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
@@ -85,9 +86,9 @@ a code
 
 ### R1
 
-- added an additional [tooling opportunity](#addvartool)
 - added a [Value Categories](#Value-Categories) section
-- added a [Automatic or Configurable Default or Exception to the Rule](#Automatic-or-Configurable-Default-or-Exception-to-the-Rule) section
+- added a [Automatic or Configurable Default or Exceptional Rules](#Automatic-or-Configurable-Default-or-Exceptional-Rules) section
+- added an additional [tooling opportunity](#addvartool)
 
 ## Abstract
 
@@ -1203,14 +1204,36 @@ Throughout this paper, I have shown that it makes sense for temporaries [referen
 
 ### Avoids superfluous moves
 
-The proposed avoids superfluous moves. Copying pointers and lvalue references are cheaper than performing a move which is cheaper than performing a value copy.
+The proposed avoids superfluous moves. Copying pointers and lvalue references are cheaper than performing a move which is cheaper than performing any non trivial value copy.
 
-### Avoids forced naming
+### Undo forced naming
 
 The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can not be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling. Further, according to the `C++ Core Guidelines`, it is developers practice to do the following:
 
 - *ES.5: Keep scopes small* [^cppcges5]
 - *ES.6: Declare names in for-statement initializers and conditions to limit scope* [^cppcges6]
+
+```cpp
+// currently not permitted; works as proposed
+std::reference_wrapper<int> rwi1(5);
+// current forced usage
+int value1 = 5;
+std::reference_wrapper<int> rwi2(value1);
+if(randomBool())
+{
+    int value2 = 7;// ES.5, ES.6
+    rwi2 = ref(value2);// dangles with block scope
+    rwi2 = ref(7);// ok, safe and easy with variable scope proposal
+    rwi2 = 7;// might make sense to add back direct assignment operator
+}
+else
+{
+    int value3 = 9;// ES.5, ES.6
+    rwi2 = ref(value3);// dangles with block scope
+    rwi2 = ref(9);// ok, safe and easy with variable scope proposal
+    rwi2 = 7;// might make sense to add back direct assignment operator
+}
+```
 
 Since the variable is likely to be created by default at block scope manually instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a lvalue temporary avoids these common dangling possibilities along with simplifying the code.
 
@@ -1220,9 +1243,23 @@ The `C++ Core Guidelines` [^cppcgcp44] excourages programmers "to name your lock
 
 - *CP.44: Remember to name your lock_guards and unique_locks* [^cppcgcp44]
 
-With this proposal these instances do not immediately go out of scope. As such we get the locking benefits without having to make up a name. Again, not having a name means their is less to return and consequently dangle.
+```cpp
+// useless when statement scoped
+unique_lock<mutex>(m1);
+lock_guard<mutex> {m2};
+// current recommended usage
+unique_lock<mutex> ul(m1);
+lock_guard<mutex>  lg{m2};
+// even more useful when variable or block scoped
+// this behaves the same had it been named
+// one less name to return or worry about
+unique_lock<mutex>(m1);
+lock_guard<mutex> {m2};
+```
 
-## Automatic or Configurable Default or Exception to the Rule
+With this proposal these instances do not immediately go out of scope. As such we get the locking benefits without having to make up a name. Again, not having a name means their is less to return and potentially dangle.
+
+## Automatic or Configurable Default or Exceptional Rules
 
 Among other things, the `implicit constant initialization` [^p2623r2] paper recommends that we change temporaries from statement scope to variable scope. Among other things, this paper recommends allowing programmers to change the default statement scope of temporaries to variable scope. It also provides the vehicle in which `C++` standard can change its default over time. This alternative was given to address any concerns over the lifetimes of non memory resources such as concurrency primitives even though these should be minimal to nonexistant for most existing code bases. The fact is the only temporaries that absolutely needs variable scope are those assigned or reassigned to references, pointers and "classes not having value semantics" [^bindp]. In the case of temporary arguments of functions, variable or block scope is only needed when the function in question returns a reference, pointer or "class not having value semantics" [^bindp]. If this feature was applied selectively, though inconsistent, it would minimize the risk of applying automatically as in the case of `implicit constant initialization` [^p2623r2]. Further, this would work better with the `Last use optimization` [^p2623r2] paper. While "last use" works with named instances rather than temporaries, its goal is the opposite of changing the scope of temporaires from statement to variable. While "last use" reduces the lifetime momentarily to allow it be moved in order to extend the life, the "temporary" papers increases the life of the original instance. The "temporary" papers can't be applied selectively until "classes not having value semantics" [^bindp] gets adopted for the purpose of creating errors instead of warning or extending lifetime in order to handle the indirect references, while the "temporary" papers handle the "direct" references. Consequently, it would be advantageous if the "temporary" papers, the "last use" paper, the original `Bind Returned/Initialized Objects to the Lifetime of Parameters`
 [^bindp] paper was considered together along with the `[[clang::annotate_type("lifetime", "")]]` attribute from `[RFC] Lifetime annotations for C++` [^clanglta].
