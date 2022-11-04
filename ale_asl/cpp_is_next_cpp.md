@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2657R0</td>
+<td>P2657R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-10-11</td>
+<td>2022-11-03</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -59,11 +59,19 @@ a code
 ## Table of contents
 
 - [C++ is the next C++](#c-is-the-next-c)
+  - [Changelog](#changelog)
   - [Abstract](#abstract)
   - [Motivating examples](#motivating-examples)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
+
+## Changelog
+
+### R1
+
+- added `std::const_pointer_cast` and `std::reinterpret_pointer_cast` to the [No unsafe casts](#No-unsafe-casts) section
+- [use_function_ref](#Use-stdfunction_ref) is a subset of `safer` instead of `modern` because it reduces void* usage
 
 ## Abstract
 
@@ -346,6 +354,8 @@ A shim module is needed in order to transform main and env functions into a more
 - Using `C`/core cast produces an error.
 - Using `reinterpret_cast` produces an error.
 - Using `const_cast` produces an error.
+- Using `std::reinterpret_pointer_cast` produces an error.
+- Using `std::const_pointer_cast` produces an error.
 
 Why?
 
@@ -562,6 +572,130 @@ Use `std::array` instead of `C` style/core `C++` array.
 
 ---
 
+#### Use ranges
+
+<table>
+<tr>
+<td>
+
+```cpp
+[[static_analysis("use_ranges")]]
+```
+
+</td>
+<td>
+
+`use_ranges` is a subset of `modern`.
+
+</td>
+</tr>
+</table>
+
+- Using `std::all_of` produces an error.
+- Using `std::any_of` produces an error.
+- Using `std::none_of` produces an error.
+- Using `std::for_each` produces an error.
+- Using `std::for_each_n` produces an error.
+- Using `std::count` produces an error.
+- Using `std::count_if` produces an error.
+- Using `std::mismatch` produces an error.
+- Using `std::find` produces an error.
+- Using `std::find_if` produces an error.
+- Using `std::find_if_not` produces an error.
+- Using `std::find_end` produces an error.
+- Using `std::find_first_of` produces an error.
+- Using `std::adjacent_find` produces an error.
+- Using `std::search` produces an error.
+- Using `std::search_n` produces an error.
+- Using `std::copy` produces an error.
+- Using `std::copy_if` produces an error.
+- Using `std::copy_n` produces an error.
+- Using `std::copy_backward` produces an error.
+- Using `std::move` produces an error.
+- Using `std::move_backward` produces an error.
+- Using `std::fill` produces an error.
+- Using `std::fill_n` produces an error.
+- Using `std::transform` produces an error.
+- Using `std::generate` produces an error.
+- Using `std::generate_n` produces an error.
+- Using `std::remove` produces an error.
+- Using `std::remove_if` produces an error.
+- Using `std::remove_copy` produces an error.
+- Using `std::remove_copy_if` produces an error.
+- Using `std::replace` produces an error.
+- Using `std::replace_if` produces an error.
+- Using `std::replace_copy` produces an error.
+- Using `std::replace_copy_if` produces an error.
+- Using `std::swap_ranges` produces an error.
+- Using `std::reverse` produces an error.
+- Using `std::reverse_copy` produces an error.
+- Using `std::rotate` produces an error.
+- Using `std::rotate_copy` produces an error.
+- Using `std::shift_left` produces an error.
+- Using `std::shift_right` produces an error.
+- Using `std::shuffle` produces an error.
+- Using `std::unique` produces an error.
+- Using `std::unique_copy` produces an error.
+- Using `std::is_partitioned` produces an error.
+- Using `std::partition` produces an error.
+- Using `std::partition_copy` produces an error.
+- Using `std::stable_partition` produces an error.
+- Using `std::partition_point` produces an error.
+- Using `std::is_sorted` produces an error.
+- Using `std::is_sorted_until` produces an error.
+- Using `std::sort` produces an error.
+- Using `std::partial_sort` produces an error.
+- Using `std::partial_sort_copy` produces an error.
+- Using `std::stable_sort` produces an error.
+- Using `std::nth_element` produces an error.
+- Using `std::lower_bound` produces an error.
+- Using `std::upper_bound` produces an error.
+- Using `std::binary_search` produces an error.
+- Using `std::equal_range` produces an error.
+- Using `std::merge` produces an error.
+- Using `std::includes` produces an error.
+- Using `std::set_difference` produces an error.
+- Using `std::set_intersection` produces an error.
+- Using `std::set_symmetri_difference` produces an error.
+- Using `std::set_union` produces an error.
+- Using `std::is_heap` produces an error.
+- Using `std::is_heap_until` produces an error.
+- Using `std::make_heap` produces an error.
+- Using `std::push_heap` produces an error.
+- Using `std::pop_heap` produces an error.
+- Using `std::sort_heap` produces an error.
+- Using `std::max` produces an error.
+- Using `std::max_element` produces an error.
+- Using `std::min` produces an error.
+- Using `std::min_element` produces an error.
+- Using `std::minmax` produces an error.
+- Using `std::minmax_element` produces an error.
+- Using `std::clamp` produces an error.
+- Using `std::equal` produces an error.
+- Using `std::lexicographical_compare` produces an error.
+- Using `std::is_permutation` produces an error.
+- Using `std::next_permutation` produces an error.
+- Using `std::prev_permutation` produces an error.
+- Using `std::iota` produces an error.
+- Using `std::uninitialized_copy` produces an error.
+- Using `std::uninitialized_copy_n` produces an error.
+- Using `std::uninitialized_fill` produces an error.
+- Using `std::uninitialized_fill_n` produces an error.
+- Using `std::uninitialized_move` produces an error.
+- Using `std::uninitialized_move_n` produces an error.
+- Using `std::uninitialized_default_construct` produces an error.
+- Using `std::uninitialized_default_construct_n` produces an error.
+- Using `std::uninitialized_value_construct` produces an error.
+- Using `std::uninitialized_value_construct_n` produces an error.
+- Using `std::destroy` produces an error.
+- Using `std::destroy_n` produces an error.
+- Using `std::destroy_at` produces an error.
+- Using `std::construct_at` produces an error.
+
+WHY?
+
+The iterator based algorithms have been replaced by the range based algorithms.
+
 ### What may `safer` and `modern` analyzers be composed of in the future?
 
 #### No include
@@ -631,7 +765,7 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 </td>
 <td>
 
-`use_function_ref` is a subset of `modern`.
+`use_function_ref` is a subset of `safer`.
 
 </td>
 </tr>
@@ -741,7 +875,7 @@ The beauty of this proposal is it does not and it does remove features from C++.
 </tr>
 </table>
 
-Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but, frequently, features have to be added back in, when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, thus making things simpler. As a programmer matures, features can be gradually added to their repertoire. After all, isn't `C++` larger now than when we started programming in `C++`.
+Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but, frequently, features have to be added back in, when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, thus making things simpler. As a programmer matures, features can be gradually added to their repertoire, just as it was added to ours. After all, isn't `C++` larger now, than when we started programming in `C++`.
 
 ## References
 
