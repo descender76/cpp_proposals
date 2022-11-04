@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-03</td>
+<td>2022-11-04</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -62,6 +62,8 @@ a code
   - [Changelog](#changelog)
   - [Abstract](#abstract)
   - [Motivating examples](#motivating-examples)
+  - [Tooling Opportunities](#tooling-opportunities)
+  - [Reserved Behavior](#reserved-behavior)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
@@ -70,8 +72,14 @@ a code
 
 ### R1
 
+- aggregate multiple instances of the `static_analysis` attribute into the `inclusions` and `exclusions` members of the attribute
 - added `std::const_pointer_cast` and `std::reinterpret_pointer_cast` to the [No unsafe casts](#No-unsafe-casts) section
+- added the [Use ranges](#Use-ranges) section
 - [use_function_ref](#Use-stdfunction_ref) is a subset of `safer` instead of `modern` because it reduces void* usage
+- added the [Tooling Opportunities](#Tooling-Opportunities) section
+- added the [Reserved Behavior](#Reserved-Behavior) section
+- removed the `How do we configure future analyzers`<!--[](#How-do-we-configure-future-analyzers)--> section from the [Frequently Asked Questions](#Frequently-Asked-Questions) as it is impossible to configure individually on the aggregate/grouped analyzers `safer` and `modern`, also consolidating using the attribute multiple times into one attribute
+- added the [How does this relate to p2687r0: Design Alternatives for Type-and-Resource Safe C++?](#How-does-this-relate-to-p2687r0-Design-Alternatives-for-Type-and-Resource-Safe-C) section to the [Frequently Asked Questions](#Frequently-Asked-Questions) section
 
 ## Abstract
 
@@ -79,12 +87,12 @@ Programmer's, Businesses and Government(s) want C++ to be safer and simpler. Thi
 
 ## Motivating Examples
 
-Following is a wishlist. Most are optional. While, they all would be of benefit. It all starts with a new repeatable module level attribute that would preferably be applied once in the `primary module interface unit` and would automatically apply to it and all `module implementation unit`(s). It could also be applied to a `module implementation unit` but that would generally be less useful. However, it might aid in *gradual migration*.
+Following is a wishlist. Most are optional. While, they all would be of benefit. It all starts with a new <!--repeatable--> module level attribute that would preferably be applied once in the `primary module interface unit` and would automatically apply to it and all `module implementation unit`(s). It could also be applied to a `module implementation unit` but that would generally be less useful. However, it might aid in *gradual migration*.
 
 ```cpp
-export module some_module_name [[static_analysis("")]];// primary module interface unit
+export module some_module_name [[static_analysis(inclusions{"", "", ""}, exclusions{"", "", ""})]];// primary module interface unit
 // or
-module some_module_name [[static_analysis("")]];// module implementation unit
+module some_module_name [[static_analysis(inclusions{"", "", ""}, exclusions{"", "", ""})]];// module implementation unit
 ```
 
 - It would be ideal if the name member of the `static_analysis` attribute could be passed as either an environment variable and/or command line argument to compilers so it could be used by pipelines to assert the degree of conformance to the defined static analyzer without actually changing the source.
@@ -101,7 +109,7 @@ This proposal wants to stardardize two overarching static analyzer names; `safer
 <td>
 
 ```cpp
-[[static_analysis("safer")]]
+[[static_analysis(inclusions{"safer"})]]
 ```
 
 </td>
@@ -115,7 +123,7 @@ The `safer` analyzer is for safety, primarily memory related. It is for those bu
 <td>
 
 ```cpp
-[[static_analysis("modern")]]
+[[static_analysis(inclusions{"modern"})]]
 ```
 
 </td>
@@ -127,9 +135,19 @@ The `safer` analyzer is a subset of `modern` analyzer. The `modern` analyzer goe
 </tr>
 </table>
 
-Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. These are meant for programmers, businesses and governments in which safety takes precedence. They both represent +&infin;. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken, until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by the `C++` teaching group, the authors of the `C++ Core Guidelines` [^cppcg] and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
+Neither is concerned about formatting or nitpicking. Both static analyzers only produce errors. These are meant for programmers, businesses and governments in which safety takes precedence. They both represent +&infin;; an ever increasing commitment. When a new version of the standard is released and adds new sub static analyzers than everyone's code is broken, until their code is fixed. These sub static analyzers usually consist of features that have been mostly replaced with some other feature. It would be ideal if the errors produced not only say that the code is wrong but also provide a link to html page(s) maintained by the `C++` teaching group, the authors of the `C++ Core Guidelines` [^cppcg] and compiler specific errors. These pages should provide example(s) of what is being replaced and by what was it replaced. Mentioning the version of the `C++` standard would also be helpful.
 
 All modules can be used even if they don't use the `static_analysis` attribute as this allows *gradual adoption*.
+
+The resolved list of static analyzers that will run is derived by first taking the union of all of the included analyzers including their component analyzers and removing from that union the union of all the excluded ananlyzers and their component analyzers.
+
+*resolved = (inclusion &cup; inclusion &cup; inclusion) - (exclusion &cup; exclusion &cup; exclusion)*
+
+This allows the programmer to exclude a few analyzers from a larger grouping instead of having to list out almost all the ever growing number of smaller analyzers that comprise the larger ones.
+
+```cpp
+[[static_analysis(inclusions{"modern"}, exclusions{"use_ranges"})]];
+```
 
 ### What are the `safer` and `modern` analyzers composed of?
 
@@ -142,7 +160,7 @@ These overarching static analyzers are composed of multiple static analyzers whi
 <td>
 
 ```cpp
-[[static_analysis("use_lvalue_references")]]
+[[static_analysis(inclusions{"use_lvalue_references"})]]
 ```
 
 </td>
@@ -339,7 +357,7 @@ A shim module is needed in order to transform main and env functions into a more
 <td>
 
 ```cpp
-[[static_analysis("no_unsafe_casts")]]
+[[static_analysis(inclusions{"no_unsafe_casts"})]]
 ```
 
 </td>
@@ -378,7 +396,7 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 <td>
 
 ```cpp
-[[static_analysis("no_union")]]
+[[static_analysis(inclusions{"no_union"})]]
 ```
 
 </td>
@@ -406,7 +424,7 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 <td>
 
 ```cpp
-[[static_analysis("no_mutable")]]
+[[static_analysis(inclusions{"no_mutable"})]]
 ```
 
 </td>
@@ -431,7 +449,7 @@ The programmer shall not lie to oneself. The `mutable` keyword violates the safe
 <td>
 
 ```cpp
-[[static_analysis("no_new_delete")]]
+[[static_analysis(inclusions{"no_new_delete"})]]
 ```
 
 </td>
@@ -469,7 +487,7 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 <td>
 
 ```cpp
-[[static_analysis("no_volatile")]]
+[[static_analysis(inclusions{"no_volatile"})]]
 ```
 
 </td>
@@ -497,7 +515,7 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 <td>
 
 ```cpp
-[[static_analysis("no_c_style_variadic_functions")]]
+[[static_analysis(inclusions{"no_c_style_variadic_functions"})]]
 ```
 
 </td>
@@ -528,7 +546,7 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 <td>
 
 ```cpp
-[[static_analysis("no_deprecated")]]
+[[static_analysis(inclusions{"no_deprecated"})]]
 ```
 
 </td>
@@ -553,7 +571,7 @@ Deprecated functionality is not modern.
 <td>
 
 ```cpp
-[[static_analysis("use_std_array")]]
+[[static_analysis(inclusions{"use_std_array"})]]
 ```
 
 </td>
@@ -579,7 +597,7 @@ Use `std::array` instead of `C` style/core `C++` array.
 <td>
 
 ```cpp
-[[static_analysis("use_ranges")]]
+[[static_analysis(inclusions{"use_ranges"})]]
 ```
 
 </td>
@@ -590,6 +608,8 @@ Use `std::array` instead of `C` style/core `C++` array.
 </td>
 </tr>
 </table>
+
+Using any iterator based algorithm that has been replaced with a range based algorithm produces an error informing the programmer to use the range based algorithm instead.
 
 - Using `std::all_of` produces an error.
 - Using `std::any_of` produces an error.
@@ -691,11 +711,11 @@ Use `std::array` instead of `C` style/core `C++` array.
 - Using `std::destroy_n` produces an error.
 - Using `std::destroy_at` produces an error.
 - Using `std::construct_at` produces an error.
-
+<!--
 WHY?
 
 The iterator based algorithms have been replaced by the range based algorithms.
-
+-->
 ### What may `safer` and `modern` analyzers be composed of in the future?
 
 #### No include
@@ -705,7 +725,7 @@ The iterator based algorithms have been replaced by the range based algorithms.
 <td>
 
 ```cpp
-[[static_analysis("no_include")]]
+[[static_analysis(inclusions{"no_include"})]]
 ```
 
 </td>
@@ -731,7 +751,7 @@ Don't add the static analyzer until `#embed` is added.
 <td>
 
 ```cpp
-[[static_analysis("no_goto")]]
+[[static_analysis(inclusions{"no_goto"})]]
 ```
 
 </td>
@@ -759,7 +779,7 @@ The `C++ Core Guidelines` [^cppcg] identifies issues that this feature helps to 
 <td>
 
 ```cpp
-[[static_analysis("use_function_ref")]]
+[[static_analysis(inclusions{"use_function_ref"})]]
 ```
 
 </td>
@@ -782,6 +802,25 @@ Use `std::function_ref` instead of `C` style/core `C++` [member] function pointe
 
 ---
 
+## Tooling Opportunities
+
+### Automated Code Reviews
+
+In the [Motivating Examples](#Motivating-Examples) section there were two specific wishlist items.
+
+- *It would be ideal if compilers could produce a machine readable report in JSON, YAML or something else so that pipelines could more easily consume the results.*
+- *It would be ideal if compilers could standardize the machine readable report.*
+
+With these capabilities, a report could be created during a distributed version control system's pull/merge request. The report could be compared to the report of the destination of the request. If the changed code is not better than the existing code than the request can be automatically rejected. This would result in an adaptation of the boy scout rule.
+
+*Leave the code cleaner than you found it.*
+
+Consequently, this results in the creation of a programmer incline. With each checkin, the code gets better. The incline can even be adjusted by requiring how much better one must leave the code.
+
+## Reserved Behavior
+
+The `static_analysis` attribute can only, for now, be used on either `primary module interface unit` or `module implementation unit` but not both at the same time. Enabling it in both would require a discussion of how these analyzers should combine. Which one would take precedence? It would need to be part of a larger discussion of whether the `static_analysis` attribute could be applied at the namespace, class, function or control block levels. This proposal is focused on the module level as current static analyzers on the market is more focused on the translation unit level rather than on a per line basis. As such, this proposal could be adopted faster, yet, leaving room for improvements, once static analyzers improve in their precision.
+
 ## Summary
 
 By adding static analysis to the `C++` language we can make the language safer and easier to teach because we can restrict how much of the language we use. Human readable errors and references turns the compiler into a teacher freeing human teachers to focus on what the compiler doesn't handle.
@@ -795,7 +834,7 @@ NO, otherwise we'll be stuck with what we just have. `C++` compilers produces pl
 ### Why at the module level? Why not safe and unsafe blocks?
 
 Programmers and businesses rarely upgrade their code unless they are forced to. New programmers need training wheels and some of us older programmers like them too. Due to the proliferation of government regulations and oversight, businesses have acquired `software composition analysis` services and tools. These services map security errors to specific versions of modules; specifically programming artifacts such as executables and libraries. As such, businesses want to know if a module is reasonably safe.
-
+<!--
 ### How do we configure future analyzers?
 
 Any arguments provided after the name of the analyzer can be forwarded onto the analyzer.
@@ -805,7 +844,7 @@ Any arguments provided after the name of the analyzer can be forwarded onto the 
 ```
 
 In this case, `1, true, 0.5, "Hello World"` would all be forwarded to the static analyzer "some_future_analyzer". None of the current analyzers use this functionality so this just illustrates distant future work where we can define these analyzers in a standard fashion but that can't happen until we have a code DOM. As such, how these arguments are forwarded are currently compiler specific.
-
+-->
 ### You must really hate pointers?
 
 Actually, I love `C`, `C++` and pointers.
@@ -876,6 +915,40 @@ The beauty of this proposal is it does not and it does remove features from C++.
 </table>
 
 Both making things smaller and cleaner requires removing something. When creating a new language, removing things happens extensively at the beginning but, frequently, features have to be added back in, when programmers clamor for them. This paper cleans up a programmers use of the `C++` language, meaning less `C++` has to be taught immediately, thus making things simpler. As a programmer matures, features can be gradually added to their repertoire, just as it was added to ours. After all, isn't `C++` larger now, than when we started programming in `C++`.
+
+### How does this relate to p2687r0: Design Alternatives for Type-and-Resource Safe C++?
+
+This proposal and the "Design Alternatives for Type-and-Resource Safe C++" [^p2687r0] proposal both recommend that static analysis be used and brought into the language instead of inventing a whole new language. Both tackles problems in its own way. Either proposal could be enhanced to do what the other proposal does. The question is what are these differences and should these be given some attention.
+
+#### Different audiences
+
+This proposal might appeal more to non voting, newer programmers working on newer code bases. The `p2687r0` proposal appeals more to voting, older programmers working on older code bases.
+There are also differences in the sizes of these two audiences. This proposal would have the larger audience as it appeals to those who want a subset of language and library features. There are also differences in the level of coding. This proposal favors high level, abstraction heavy coding. The `p2687r0` proposal appeals more to lower level, closer to hardware coding. Again both proposals fixes safety issues and either audience just wants more safety, sooner rather than later.
+
+Are there any elements of this proposal that would still appeal to lower level coders? New code does get developed in older code bases. The question is do you want programmers to keep writing their code the old way for the sake of a foolish consistency! So this proposal is of use to lower level programmers. With the `p2687r0` proposal, a lot of time is spent analyzing and documenting with attributes the intention of pointers at each point of use in the code. No rewrite is being performed and more information is being provided to resolve ambiguity for the benefit of the static analyzer. The cost of this programmer analysis and attributing can be most of the cost of a rewrite, so why not just rewrite it incrementally in `safer` `modern` `C++`! This proposal helps even with this. From my experience with lower level code, I tend to have a few files of the majority that does the work with memory mapped files or that call `C` API's but once I have my wrappers, the remainer of my code is very high level and abstract. So in this regard, this proposal is of benefit. `C++20` modules are still `new` even to existing code bases especially since tool chains are still being developed and their are still many unanswered questions. Since there will need to be incremental refactoring to use modules in older code bases, why not take advantage of this proposal's module level attribute to take advantage of more refactoring.
+
+#### Different scopes
+
+This proposal has fewer features than `p2687r0`. For instance, it currently only works at the module level. This is similar to where many static analyzers run, at the translation unit level. While this proposal has far fewer features, it is smaller, simpler and easier to implement. This could mean the difference in getting some subset of safety in the `C++26/C++29` timeframe instead of the `C++29/C++32` timeframe. The additional features could be added incrementally.
+
+#### Different solutions
+
+The `p2687r0` proposal tackles problems head on. Bravo! This proposal is about avoiding problems all together by using existing language and library features that we have had for years if not decades but just needed the option of enforcement. Both, I know, have merit. Some problems are left by this proposal deliberately to other proposals.
+
+For instance, on the subject of dangling, it is best to fix more of this in the language instead of the analyzer. With the following two proposals, the dangling mountain could be shrunk to a mole-hill or ant-hill.
+
+- `implicit constant initialization` [^p2623r2]
+- `temporary storage class specifiers` [^p2658r0]
+
+Further adding the paper that those two were based on would further shrink dangling to a few grains of sand on a sea shore of code. 
+
+- `Bind Returned/Initialized Objects to Lifetime of Parameters` [^p0936r0]
+- `[RFC] Lifetime annotations for C++` [^clangla]
+
+On the subject of type safety, this paper agrees with the `p2687r0` proposal on the usage of SELL, Semantically Enhanced Language
+Libraries. Currently, there is work ongoing in the standardization process to provide a standard units library which would go a long ways for type safety. Currently, there is work ongoing in the standardization process to provide a standard graph library which would go a long ways for the more extreme memory safety. Still unproposed but still needed are strongly typed alias library or language features for safer `int`(s). Enhancements to existing fundamental types in `C++` could include validation and tag classes in order to make those types safer.
+
+In short, this proposal is, in some ways, a subset of the `p2687r0` proposal. Combined with other proposals, they beat the most notorious safety problems into an acceptable level of safety to many.
 
 ## References
 
@@ -1081,3 +1154,13 @@ Both making things smaller and cleaner requires removing something. When creatin
 [^functionref]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0792r11.html>
 <!--make function_ref more functional-->
 [^morefunctional]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2472r3.html>
+<!--Design Alternatives for Type-and-Resource Safe C++-->
+[^p2687r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2687r0.pdf>
+<!--temporary storage class specifiers-->
+[^p2658r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2658r0.html>
+<!--implicit constant initialization-->
+[^p2623r2]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2623r2.html>
+<!--Bind Returned/Initialized Objects to Lifetime of Parameters-->
+[^p0936r0]: <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0936r0.pdf>
+<!--[RFC] Lifetime annotations for C++-->
+[^clangla]: <https://discourse.llvm.org/t/rfc-lifetime-annotations-for-c/61377>
