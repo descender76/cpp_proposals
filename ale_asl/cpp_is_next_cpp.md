@@ -66,6 +66,7 @@ a code
   - [Reserved Behavior](#reserved-behavior)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
+  - [Acknowledgments](#acknowledgments)
   - [References](#references)
 
 ## Changelog
@@ -80,6 +81,7 @@ a code
 - added the [Reserved Behavior](#Reserved-Behavior) section
 - removed the `How do we configure future analyzers`<!--[](#How-do-we-configure-future-analyzers)--> section from the [Frequently Asked Questions](#Frequently-Asked-Questions) as it is impossible to configure individually on the aggregate/grouped analyzers `safer` and `modern`, also consolidating using the attribute multiple times into one attribute
 - added the [How does this relate to p2687r0: Design Alternatives for Type-and-Resource Safe C++?](#How-does-this-relate-to-p2687r0-Design-Alternatives-for-Type-and-Resource-Safe-C) section to the [Frequently Asked Questions](#Frequently-Asked-Questions) section
+- added the [Acknowledgments](#Acknowledgments) section
 
 ## Abstract
 
@@ -949,6 +951,10 @@ On the subject of type safety, this paper agrees with the `p2687r0` proposal on 
 Libraries. Currently, there is work ongoing in the standardization process to provide a standard units library which would go a long ways for type safety. Currently, there is work ongoing in the standardization process to provide a standard graph library which would go a long ways for the more extreme memory safety. Still unproposed but still needed are strongly typed alias library or language features for safer `int`(s). Enhancements to existing fundamental types in `C++` could include validation and tag classes in order to make those types safer.
 
 In short, this proposal is, in some ways, a subset of the `p2687r0` proposal. Combined with other proposals, they beat the most notorious safety problems into an acceptable level of safety to many.
+
+## Acknowledgments
+
+Thanks to Vladimir Smirnov<!--mapron1@gmail.com--> for providing very valuable feedback on this proposal.
 
 ## References
 
