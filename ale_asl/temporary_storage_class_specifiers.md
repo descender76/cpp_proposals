@@ -77,7 +77,7 @@ a code
     - [Other Anonymous Things](#other-anonymous-things)
   - [Value Categories](#value-categories)
   - [Automatic or Configurable Default or Exceptional Rules](#Automatic-or-Configurable-Default-or-Exceptional-Rules)
-  - [Tooling Opportunities](#tooling-opportunities)
+  - [Tooling Opportunities](#Tooling-Opportunities)
   - [Summary](#summary)
   - [Frequently Asked Questions](#frequently-asked-questions)
   - [References](#references)
@@ -1164,7 +1164,7 @@ int main() {
 
 ## Value Categories
 
-If temporaries can be changed to have block scope, variable scope or global scope than how does it affect their value categories? Currently if the literal is a string than it is a `lvalue` and it has global scope. For all the other literals they tend to be a `prvalue` and have statement scope.
+If temporaries can be changed to have block scope, variable scope or global scope than how does it affect their value categories? Currently, if the literal is a string than it is a `lvalue` and it has global scope. For all the other literals, they tend to be a `prvalue` and have statement scope.
 
 <table>
 <tr>
@@ -1200,7 +1200,7 @@ If temporaries can be changed to have block scope, variable scope or global scop
 </tr>
 </table>
 
-Throughout this paper, I have shown that it makes sense for temporaries [references and pointers], unless they can be made global scope, should be variable scope. From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments they have life beyond the life of the function that it is given to. As such the expression is not movable. As such the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is this is simple whether it is worded as a `lvalue` or an unambiguous new value category. Regardless of which, there are some advantages that must be pointed out.
+Throughout this paper, I have shown that it makes sense for temporaries [references and pointers] should be variable scope, unless they can be made global scope. From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is, this is simple whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
 
 ### Avoids superfluous moves
 
@@ -1235,7 +1235,96 @@ else
 }
 ```
 
-Since the variable is likely to be created by default at block scope manually instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a lvalue temporary avoids these common dangling possibilities along with simplifying the code.
+Since the variable `value2` and `value3` is likely to be created manually at block scope instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a `lvalue` temporary avoids these common dangling possibilities along with simplifying the code.
+
+Consider too another example of forced naming.
+
+```cpp
+int do_something_with_ref(int& i)
+{
+    return i;
+}
+
+int main()
+{
+    // clang
+    // error: no matching function for call to 'do_something_with_ref'
+    // note: candidate function not viable: expects an lvalue for 1st argument
+    // msvc
+    // error C2664: 'int do_something_with_ref(int &)': cannot convert argument 1 from 'int' to 'int &'
+    // gcc
+    // error: cannot bind non-const lvalue reference of type 'int&' to an rvalue of type 'int
+    return do_something_with_ref(0);
+}
+```
+
+The previous code fails because the `do_something_with_ref` function is expecting a `lvalue`. However, the literal `0` is an `rvalue` when the temporary is scoped to the statement. This requires one of two possibilities, either the library writer has to overload the function such that `i` is `int&&` or library user has to name the variable.
+
+**library writer overloads method**
+```cpp
+int do_something_with_ref(int& i)
+{
+    return i;
+}
+
+int do_something_with_ref(int&& i)
+{
+    return i;
+}
+
+int main()
+{
+    return do_something_with_ref(0);
+}
+```
+
+or
+
+**library user names the temporary**
+```cpp
+int do_something_with_ref(int& i)
+{
+    return i;
+}
+
+int main()
+{
+    int result = 0;
+    return do_something_with_ref(result);
+}
+```
+
+Templating the `do_something_with_ref` function with a universal reference would save the library writer from having to write the function twice but even that is an added complication.
+
+**library writer templatize method with universal reference**
+```cpp
+template<typename T>
+T do_something_with_ref(T&& i)
+{
+    return i;
+}
+
+int main()
+{
+    return do_something_with_ref(0);
+}
+```
+
+However, if the temporary `0` was scoped to the block and anonymously named than it would no longer be a `rvalue` and instead would be a `lvalue`.
+
+```cpp
+int do_something_with_ref(int& i)
+{
+    return i;
+}
+
+int main()
+{
+    return do_something_with_ref(0);
+}
+```
+
+No templating needed. No duplicate functions. No superfluous naming. Just more anonymous and concise, easy to understand code.
 
 ### Allows more anonymous variables
 
@@ -1528,3 +1617,5 @@ Returning references to something in the caller's scope is only natural. It is a
 [^p2623r2]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2666r0.pdf>
 <!--[RFC] Lifetime annotations for C++-->
 [^clanglta]: <https://discourse.llvm.org/t/rfc-lifetime-annotations-for-c/61377>
+<!--Deducing this-->
+[^deducingthis]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p0847r7.html>
