@@ -97,12 +97,12 @@ export module some_module_name [[static_analysis(inclusions{"", "", ""}, exclusi
 module some_module_name [[static_analysis(inclusions{"", "", ""}, exclusions{"", "", ""})]];// module implementation unit
 ```
 
-- It would be ideal if the name member of the `static_analysis` attribute could be passed as either an environment variable and/or command line argument to compilers so it could be used by pipelines to assert the degree of conformance to the defined static analyzer without actually changing the source.
+- It would be ideal if the `inclusions` and `exclusions` members of the `static_analysis` attribute could be passed as either an environment variable and/or command line argument to compilers so it could be used by pipelines to assert the degree of conformance to the defined static analyzer without actually changing the source.
 - It would be ideal if compilers could standardize the environment variable name or command line argument name in order to ease tooling.
 - It would be ideal if compilers could produce a machine readable report in JSON, YAML or something else so that pipelines could more easily consume the results.
 - It would be ideal if compilers could standardize the machine readable report.
 
-The name of the static analyzer are dotted. Unscoped or names that start with `std.`, `c++.`, `cpp.`, `cxx.` or `c.` are reserved for standardization.
+The names of the `inclusions` and `exclusions` are dotted. Unscoped or names that start with `std.`, `c++.`, `cpp.`, `cxx.` or `c.` are reserved for standardization.
 
 This proposal wants to stardardize two overarching static analyzer names; `safer` and `modern`.
 
@@ -117,7 +117,7 @@ This proposal wants to stardardize two overarching static analyzer names; `safer
 </td>
 <td>
 
-The `safer` analyzer is for safety, primarily memory related. It is for those businesses and programmers who must conform to safety standards.
+The `safer` analyzer is for safety, primarily memory related. It is for those businesses and programmers who must conform to safety standards. The `safer` analyzer is a subset of `modern` analyzer.
 
 </td>
 </tr>
@@ -131,7 +131,7 @@ The `safer` analyzer is for safety, primarily memory related. It is for those bu
 </td>
 <td>
 
-The `safer` analyzer is a subset of `modern` analyzer. The `modern` analyzer goes beyond just memory and safety concerns. It can be thought of as bleeding edge. It is for those businesses and programmers who commit to safety and higher quality modern code.
+The `modern` analyzer goes beyond just memory and safety concerns. It can be thought of as bleeding edge. It is for those businesses and programmers who commit to safety and higher quality modern code. That is those who want to enjoy the full benefits that C++ has to offer.
 
 </td>
 </tr>
@@ -831,7 +831,7 @@ By adding static analysis to the `C++` language we can make the language safer a
 
 ### Shouldn't these be warnings instead of errors?
 
-NO, otherwise we'll be stuck with what we just have. `C++` compilers produces plenty of warnings. `C++` static analyzers produces plenty of warnings. However, when some one talks about creating a new language, then old language syntax becomes invalid i.e. errors. This is for programmers. Programmers and businesses rarely upgrade their code unless they are forced to. Businesses and Government(s) want errors, as well, in order to ensure code quality and the assurance that bad code doesn't exist anywhere in the module. This is also important from a language standpoint because we are essentially pruning; somewhat. Keep in mind that all of these pruned features still have use now. In the future, as more constructs are built upon these pruned features, which is why they need to be part of the language, just not a part of everyday usage of the language.
+NO, otherwise we'll be stuck with what we just have. `C++` compilers produces plenty of warnings. `C++` static analyzers produces plenty of warnings. However, when some one talks about creating a new language, then old language syntax becomes invalid i.e. errors. This is for programmers. Programmers and businesses rarely upgrade their code unless they are forced to. Businesses and Government(s) want errors, as well, in order to ensure code quality and the assurance that bad code doesn't exist anywhere in the module. This is also important from a language standpoint because we are essentially pruning; somewhat. Keep in mind that all of these pruned features still have use now. In the future, more constructs will be built upon these pruned features. This is why they need to be part of the language, just not a part of everyday usage of the language.
 
 ### Why at the module level? Why not safe and unsafe blocks?
 
@@ -882,7 +882,7 @@ First of all, let's consider the quotes of Bjarne Stroustrup that this question 
 </tr>
 </table>
 
-Does this paper create a subset? YES. Like it or not `C++` already have a couple of subsets; some positive, some quasi. `Freestanding` is a subset for low level programming. This proposal primarily focus on high level programming but there is nothing preventing the creation of `[[static_analysis("freestanding")]]` which enforces `freestanding`. The `C++` value categories has to some degree fractured the community into a clergy class that thoroughly understand its intracacies and a leity class that gleefully uses it.
+Does this paper create a subset? YES. Like it or not `C++` already have a couple of subsets; some positive, some quasi. `Freestanding` is a subset for low level programming. This proposal primarily focus on high level programming but there is nothing preventing the creation of `[[static_analysis(inclusions{"freestanding"})]]` which enforces `freestanding`. The `C++` value categories has to some degree fractured the community into a clergy class that thoroughly understand its intracacies and a leity class that gleefully uses it.
 
 Does this paper split the user community? YES and NO. It splits code into safer vs. less safe, high level vs. low level. However, this is performed at the module level, allowing the same programmer to decide what falls on either side of the fence. This would not be performed by an industry consortium but rather the standard. Safer modules can be used by less safe modules. Less safe modules can partly be used by safer modules, such as with the standard module. This latter impact is already minimalized because the standard frequently write their library code in `C++` fashion instead of a `C` fashion.
 
@@ -924,8 +924,8 @@ This proposal and the "Design Alternatives for Type-and-Resource Safe C++" [^p26
 
 #### Different audiences
 
-This proposal might appeal more to non voting, newer programmers working on newer code bases. The `p2687r0` proposal appeals more to voting, older programmers working on older code bases.
-There are also differences in the sizes of these two audiences. This proposal would have the larger audience as it appeals to those who want a subset of language and library features. There are also differences in the level of coding. This proposal favors high level, abstraction heavy coding. The `p2687r0` proposal appeals more to lower level, closer to hardware coding. Again both proposals fixes safety issues and either audience just wants more safety, sooner rather than later.
+This proposal might appeal more to non voting, newer programmers working on smaller, newer code bases. The `p2687r0` proposal appeals more to voting, older programmers working on larger, older code bases.
+There are also differences in the sizes of these two audiences. This proposal would have the larger audience as it appeals to those who want a subset of language and library features. There are also differences in the level of coding. This proposal favors high level, abstraction heavy coding. The `p2687r0` proposal appeals more to lower level, closer to hardware coding. Again both proposals fixes safety issues and either audience just wants more safety, **sooner, rather than later**.
 
 Are there any elements of this proposal that would still appeal to lower level coders? New code does get developed in older code bases. The question is do you want programmers to keep writing their code the old way for the sake of a foolish consistency! So this proposal is of use to lower level programmers. With the `p2687r0` proposal, a lot of time is spent analyzing and documenting with attributes the intention of pointers at each point of use in the code. No rewrite is being performed and more information is being provided to resolve ambiguity for the benefit of the static analyzer. The cost of this programmer analysis and attributing can be most of the cost of a rewrite, so why not just rewrite it incrementally in `safer` `modern` `C++`! This proposal helps even with this. From my experience with lower level code, I tend to have a few files of the majority that does the work with memory mapped files or that call `C` API's but once I have my wrappers, the remainer of my code is very high level and abstract. So in this regard, this proposal is of benefit. `C++20` modules are still `new` even to existing code bases especially since tool chains are still being developed and their are still many unanswered questions. Since there will need to be incremental refactoring to use modules in older code bases, why not take advantage of this proposal's module level attribute to take advantage of more refactoring.
 
@@ -935,7 +935,7 @@ This proposal has fewer features than `p2687r0`. For instance, it currently only
 
 #### Different solutions
 
-The `p2687r0` proposal tackles problems head on. Bravo! This proposal is about avoiding problems all together by using existing language and library features that we have had for years if not decades but just needed the option of enforcement. Both, I know, have merit. Some problems are left by this proposal deliberately to other proposals.
+The `p2687r0` proposal tackles problems head on. Bravo! This proposal is about avoiding problems, all together, by using existing language and library features, that we have had for years, if not decades, but just needed the option of enforcement. Both, I know, have merit. Some problems are left by this proposal deliberately to other proposals.
 
 For instance, on the subject of dangling, it is best to fix more of this in the language instead of the analyzer. With the following two proposals, the dangling mountain could be shrunk to a mole-hill or ant-hill.
 
