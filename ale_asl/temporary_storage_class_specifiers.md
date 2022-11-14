@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-10-29</td>
+<td>2022-11-14</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -1231,11 +1231,11 @@ else
     int value3 = 9;// ES.5, ES.6
     rwi2 = ref(value3);// dangles with block scope
     rwi2 = ref(9);// ok, safe and easy with variable scope proposal
-    rwi2 = 7;// might make sense to add back direct assignment operator
+    rwi2 = 9;// might make sense to add back direct assignment operator
 }
 ```
 
-Since the variable `value2` and `value3` is likely to be created manually at block scope instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a `lvalue` temporary avoids these common dangling possibilities along with simplifying the code.
+Since the variable `value2` and `value3` is likely to be created manually at block scope instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a `variable scoped` `lvalue` temporary avoids these common dangling possibilities along with simplifying the code.
 
 Consider too another example of forced naming.
 
