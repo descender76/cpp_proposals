@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>PTODOR0</td>
+<td>P2724R0</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-15</td>
+<td>2022-11-17</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -277,7 +277,7 @@ There is already significant interest in this type of feature from programmers. 
 </tr>
 </table>
 
-I also did not choose `constexpr`, though that may be better for greater `C` compatibility, since I wrote my paper before my seeing the `C` paper. Also `constinit` better matches that which these features is mentioned in the context of existing `C++` terminology of constant initialization. Further, there are differences in what `constexpr` means to `C++` and `C`, at present.
+I also did not choose `constexpr`, though that may be better for greater `C` compatibility, since I wrote my proposals before my seeing the `C` paper. Also `constinit` better matches that which these features is mentioned in the context of existing `C++` terminology of constant initialization. Further, there are differences in what `constexpr` means to `C++` and `C`, at present.
 
 It should also be noted that these concepts are already in the standard just not fully exposed in the language. For instance, strings literals already have static storage duration and attempting to modify one is undefined.
 
@@ -359,7 +359,7 @@ If some temporaries can be changed to have global scope than how does it affect 
 </tr>
 </table>
 
-From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is, this is simple whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
+From the programmers perspective, global temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is, this is simple whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
 
 ### Avoids superfluous moves
 
@@ -502,12 +502,14 @@ The advantages to `C++` with adopting this proposal is manifold.
 - Reduce immediate dangling when the instance is a constant
 - Reduce returning direct reference dangling when the instance is a constant
 - Reduce returning indirect reference dangling when the instance is a constant and was provided as an argument
+- Reduce indirect dangling that can occur in the body of a function
 - Make constexpr literals less surprising for new and old developers alike
 - Reduce the gap between `C++` and `C99` compound literals
 - Improve the potential contribution of `C++`'s dangling resolutions back to `C`
 - Make string literals and `C++` literals more consistent with one another
 - Reduce unitialized and delayed initialization errors
 - Taking a step closer to reducing undefined behavior in string literals
+- Reduce unnecessary heap allocations
 - Increase and improve upon the utilization of ROM and the benefits that entails
 - Simplify the language to match existing practice
 - Consequently, a “cleanup”, i.e. adoption of simpler, more general rules/guidelines
@@ -649,7 +651,7 @@ So, what do we teach now and what bearing does these teachings, the `C++` standa
 
 **C++ Core Guidelines**<br/>**F.42: Return a `T*` to indicate a position (only)** [^cppcgrf42]<br/>***Note** Do not return a pointer to something that is not in the caller’s scope; see F.43.* [^cppcgrf43]
 
-Returning references to something in the caller's scope is only natural. It is a part of our reference delegating programming model. A function when given a reference does not know how the instance was created and it doesn't care as long as it is good for the life of the function call (and beyond).  Unfortunately, scoping temporary arguments to the statement instead of the containing block doesn't just create immediate dangling but it provides to functions references to instances that are near death. These instances are almost dead on arrival. Having the ability to return a reference to a caller's instance or a sub-instance thereof assumes, correctly, that reference from the caller's scope would still be alive after this function call. The fact that temporary rules shortened the life to the statement is at odds with what we teach. This proposal restores to temporaries the lifetime of anonymously named constants which is not only natural but also consistent with what programmers already know. It is also in line with what we teach as was codified in the C++ Core Guidelines. One such is as follows:
+Returning references to something in the caller's scope is only natural. It is a part of our reference delegating programming model. A function when given a reference does not know how the instance was created and it doesn't care as long as it is good for the life of the function call (and beyond).  Unfortunately, scoping temporary arguments to the statement instead of the containing block doesn't just create immediate dangling but it provides to functions references to instances that are near death. These instances are almost dead on arrival. Having the ability to return a reference to a caller's instance or a sub-instance thereof assumes, correctly, that reference from the caller's scope would still be alive after this function call. The fact that temporary rules shortened the life to the statement is at odds with what we teach. This proposal restores to some temporaries the lifetime of anonymously named constants which is not only natural but also consistent with what programmers already know. It is also in line with what we teach as was codified in the C++ Core Guidelines. One such is as follows:
 
 **C++ Core Guidelines**<br/>**F.43: Never (directly or indirectly) return a pointer or a reference to a local object** [^cppcgrf43]
 
