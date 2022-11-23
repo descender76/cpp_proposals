@@ -796,6 +796,10 @@ S obj2;
 
 ~~— end example]~~
 
+...
+
+<span style="color:red">**NOTE: Wording still need to capture that these temporaries are no longer temporaries and that their value category is `lvalue`.**</span>
+
 ## Details
 
 ### Other Anonymous Things
