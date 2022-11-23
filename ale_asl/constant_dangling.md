@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-17</td>
+<td>2022-11-22</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -91,16 +91,16 @@ There are multiple resolutions to dangling in the `C++` language.
     - `Fix the range-based for loop, Rev2` [^p2012r2]
     - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
 1. Fix by making the instance global
-    - `This proposal` [^p2266r3]
+    - `This proposal`
 
 All are valid resolutions and individually are better than the others, given the scenario. This proposal is focused on the third option, which is to fix by making the instance global.
 
-While dangling the stack is shocking because is violates our trust in our compilers and language which are primarily responsible for the stack, there are three types of dangling that are even more shocking than the rest.
+Dangling the stack is shocking because is violates our trust in our compilers and language, since they are primarily responsible for the stack. However, there are three types of dangling that are even more shocking than the rest.
 
 1. Returning a **direct** reference to a local
     - partially resolved by `Simpler implicit move` [^p2266r3]
 1. Immediate dangling
-1. Dangling Constants
+1. **Dangling Constants**
 
 Making an instance global is a legitimate fix to dangling.
 
@@ -120,7 +120,7 @@ Making an instance global is a legitimate fix to dangling.
 </tr>
 </table>
 
-While making an instance global doesn't fix all dangling in the language, it is the only resolution that can fix all three most shocking types of dangling provided the instance in question is a constant.
+While making an instance global doesn't fix all dangling in the language, it is the only resolution that can fix all three most shocking types of dangling provided the instance in question is a constant. It is also the best fix for these instances.
 
 Since `constexpr` was added to the language in `C++11` there has been an increase in the candidates of temporary instances that could be turned into a global constant. ROMability was in part the motivation for `constexpr` but the requirement was never made. Even if a `C++` architecture doesn't support ROM, it is still required by language to support `static storage duration` and `const`. Matter of fact, due to the immutable nature of constant-initialized constant expressions, these expressions/instances are constant for the entire program even though they, at present, don't have `static storage duration`, even if just <a href="#What-about-locality-of-reference" title="What-about-locality-of-reference">logically</a>. There is a greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time.
 
@@ -498,22 +498,25 @@ Combined they would form a `constinit` toggle which wouldn't be all that much di
 
 The advantages to `C++` with adopting this proposal is manifold.
 
-- Eliminate dangling of what should be constants
-- Reduce immediate dangling when the instance is a constant
-- Reduce returning direct reference dangling when the instance is a constant
-- Reduce returning indirect reference dangling when the instance is a constant and was provided as an argument
-- Reduce indirect dangling that can occur in the body of a function
-- Make constexpr literals less surprising for new and old developers alike
-- Reduce the gap between `C++` and `C99` compound literals
-- Improve the potential contribution of `C++`'s dangling resolutions back to `C`
-- Make string literals and `C++` literals more consistent with one another
-- Reduce unitialized and delayed initialization errors
-- Taking a step closer to reducing undefined behavior in string literals
-- Reduce unnecessary heap allocations
-- Increase and improve upon the utilization of ROM and the benefits that entails
-- Simplify the language to match existing practice
-- Consequently, a “cleanup”, i.e. adoption of simpler, more general rules/guidelines
-- Increases safety by avoiding data races.
+- Safer
+  - Eliminate dangling of what should be constants
+  - Reduce immediate dangling when the instance is a constant
+  - Reduce returning direct reference dangling when the instance is a constant
+  - Reduce returning indirect reference dangling when the instance is a constant and was provided as an argument
+  - Reduce indirect dangling that can occur in the body of a function
+  - Reduce unitialized and delayed initialization errors
+  - Increases safety by avoiding data races.
+- Simpler
+  - Make constexpr literals less surprising for new and old developers alike
+  - Reduce the gap between `C++` and `C99` compound literals
+  - Improve the potential contribution of `C++`'s dangling resolutions back to `C`
+  - Make string literals and `C++` literals more consistent with one another
+  - Taking a step closer to reducing undefined behavior in string literals
+  - Simplify the language to match existing practice
+  - Consequently, a “cleanup”, i.e. adoption of simpler, more general rules/guidelines
+- Faster & More Memory Efficient
+  - Reduce unnecessary heap allocations
+  - Increase and improve upon the utilization of ROM and the benefits that entails
 
 ## Frequently Asked Questions
 
