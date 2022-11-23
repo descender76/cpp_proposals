@@ -7,7 +7,7 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>PTODOR0</td>
+<td>P2730R0</td>
 </tr>
 <tr>
 <td>Date</td>
@@ -182,7 +182,7 @@ What is `C++` doing when calling a function such as `f` in the previous example?
 </tr>
 </table>
 
-When dangling occurs, what programmers usually do is name the instance in order to fix it. Programmers don't do this initially because this increases both superfluous names and lines of code which only increases the complexity of the program. A programmer expects the compiler to write code better than a programmer would, not worse. Dangling is way worse. In this case, the compiler is adding undersirable braces. `C++` is not LIS~~P~~B. When has a `C` or `C++` developer ever polluted every function call in their program with superfluous braces. This is just unnatural. Unfortunately, things get worse. What does `C++` do when that same function returns?
+When dangling occurs, what programmers usually do is name the instance in order to fix it. Programmers don't do this initially because this increases both superfluous names and lines of code which only increases the complexity of the program. A programmer expects the compiler to write code better than a programmer would, not worse. Dangling is way worse. In this case, the compiler is adding undersirable braces. <!--`C++` is not LIS~~P~~B.--> When has a `C` or `C++` developer ever polluted every function call in their program with superfluous braces. This is just unnatural. Unfortunately, things get worse. What does `C++` do when that same function returns?
 
 <table>
 <tr>
@@ -638,20 +638,20 @@ In the wording of these proposals, it says that the temporaries persist until th
 }
 ```
 
-This is nothing more than `block scope` where the block in question is the additional block added via the revisions to the range based for loop. Notice too that each temporary was promoted to being an anonymously named variable. In short, this proposals simplified verbiage covers all existing lifetime extensions.
+This is nothing more than `block scope` where the block in question is the additional block added via the revisions to the range based for loop. Notice too that each temporary was promoted to being an anonymously named variable. In short, this proposal's simplified verbiage covers all existing lifetime extensions.
 
 The only real concern is what would this proposal break. Instances still get destroyed in a deterministic RAII fashion, however, temporary instances will live longer in order to fix dangling. The biggest category of types impacted by this would be by lock objects. However, this only occurs when used as a temporary instead of recommended usage of a named instance. This was the same problem for the `range based for loop fix` and was set aside for the greater good of fixing dangling defects in the `C++` language. The rationale is recorded in the following sections in that paper.
-    
-`Is there code that might be broken with the fix?` [^p2012r2]
-`So, how much code is broken in practice?` [^p2012r2]
-`What are the drawbacks of such a fix?` [^p2012r2]
+
+- `Is there code that might be broken with the fix?` [^p2012r2]
+- `So, how much code is broken in practice?` [^p2012r2]
+- `What are the drawbacks of such a fix?` [^p2012r2]
 
 That paper also answers these questions.
 
-`Is there a performance penalty?` [^p2012r2]
-`But don’t we break the zero‐overhead principle?` [^p2012r2]
-`But don’t we have tools to detect such lifetime problems?` [^p2012r2]
-`Shouldn’t we fix lifetime extension for references in general?` [^p2012r2]
+- `Is there a performance penalty?` [^p2012r2]
+- `But don’t we break the zero‐overhead principle?` [^p2012r2]
+- `But don’t we have tools to detect such lifetime problems?` [^p2012r2]
+- `Shouldn’t we fix lifetime extension for references in general?` [^p2012r2]
 
 Even if it is decided not to fix dangling by changing the default automatically, the paper `temporary storage class specifiers` [^p2658r0] does propose allowing programmers to opt in to this change via a module level attribute. This would allow the vast majority of code bases to do away with most dangling and allow those who need more time to adjust to have the `statement scope` default. It would also serve as a vehicle to allow the standard to change over time. Granted this paper is all about fixing dangling as it is the best option and is inline with past decisions made for the `range based for loop fix`.
 
@@ -872,7 +872,7 @@ If temporaries can be changed to have block scope, variable scope or global scop
 </tr>
 </table>
 
-Throughout this paper, I have shown that it makes sense for temporaries [references and pointers] should be variable scope, unless they can be made global scope. From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is, this is simple whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
+Throughout this paper, I have shown that it makes sense for temporaries [references and pointers] should have variable scope, unless they can be made global scope. From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is, this is simple whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
 
 ### Avoids superfluous moves
 
