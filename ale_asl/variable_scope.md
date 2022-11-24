@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-22</td>
+<td>2022-11-23</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -1092,11 +1092,11 @@ else
 int* i = &5;// or uninitialized
 if(whatever)
 {
-  i = variable_scope &7;
+  i = &7;
 }
 else
 {
-  i = variable_scope &9;
+  i = &9;
 }
 // use i
 ```
@@ -1108,11 +1108,11 @@ else
 std::reference_wrapper<int> i{5};
 if(whatever)
 {
-  i = std::ref(variable_scope 7);
+  i = std::ref(7);
 }
 else
 {
-  i = std::ref(variable_scope 9);
+  i = std::ref(9);
 }
 // use i
 ```
