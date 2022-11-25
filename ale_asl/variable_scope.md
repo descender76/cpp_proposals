@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-23</td>
+<td>2022-11-25</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -89,7 +89,7 @@ There are multiple resolutions to dangling in the `C++` language.
 1. Fix with block/variable scoping
     - `Fix the range-based for loop, Rev2` [^p2012r2]
     - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
-    - `This proposal`
+    - **`This proposal`**
 1. Fix by making the instance global
 
 All are valid resolutions and individually are better than the others, given the scenario. This proposal is focused on the second option, which is to fix by changing the scope of the temporary instance from statement scope to block/variable scope.
@@ -432,7 +432,7 @@ Here, `variable scope` fixes all 5 dangling references. It works regardless of t
 
 ### towards a less complicated standard
 
-Changing the lifetime of temporaries from `statement scope` to `block scope` and `variable scope` would also vastly simplify the standard, making dangling even easier to teach. Notice the levels of complexity when comparing `C` and as proposed verbiage with the current standard.
+Changing the lifetime of temporaries from `statement scope` to `block scope` and `variable scope` would also vastly simplify the standard, making dangling even easier to teach. Notice the levels of complexity when comparing `C` and the as proposed verbiage with the current standard.
 
 #### C verbiage
 
@@ -597,9 +597,9 @@ The expression S(16) + S(23) creates three temporaries: a frst temporary T1 to h
 </tr>
 </table>
 
-Why the complexity? `statement scope` itself is simple weighing in as just the first paragraph. However, all the other verbiage is for all of the consistently the same exceptions to the rule. This list is growing. This makes teaching `C++` more difficult. This makes teaching dangling and dangling resolution more difficult because one must know whether dangling was even an issue or not due to whether the temporary was lifetime extended or not.
+Why the complexity? `statement scope` itself is simple, weighing in as just the first cited paragraph. However, all the other verbiage is for all of the, consistently the same, exceptions to the rule. This list is growing. This makes teaching `C++` more difficult. This makes teaching dangling and dangling resolution more difficult because one must know whether dangling was even an issue or not due to whether the temporary was lifetime extended or not.
 
-The question is can the proposed wording cover the use cases covered in these numerous exceptions to the statement scoping rule. I have previous covered that they all while saying were scoped to the variable were actually `blocked scope`. However, let's consider a recent addition in greater detail. That is the range based for loop dangling fix.
+The question is can the proposed wording cover the use cases covered in these numerous exceptions to the statement scoping rule. I have previous covered that the current standard says that all of these exceptions were scoped to the variable, while in fact were actually `blocked scope`. However, let's consider a recent addition in greater detail. That is the range based for loop dangling fix.
 
 - `Fix the range-based for loop, Rev2` [^p2012r2]
 - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
@@ -640,7 +640,7 @@ In the wording of these proposals, it says that the temporaries persist until th
 
 This is nothing more than `block scope` where the block in question is the additional block added via the revisions to the range based for loop. Notice too that each temporary was promoted to being an anonymously named variable. In short, this proposal's simplified verbiage covers all existing lifetime extensions.
 
-The only real concern is what would this proposal break. Instances still get destroyed in a deterministic RAII fashion, however, temporary instances will live longer in order to fix dangling. The biggest category of types impacted by this would be by lock objects. However, this only occurs when used as a temporary instead of recommended usage of a named instance. This was the same problem for the `range based for loop fix` and was set aside for the greater good of fixing dangling defects in the `C++` language. The rationale is recorded in the following sections in that paper.
+The only real concern is what would this proposal break. Instances still get destroyed in a deterministic RAII fashion, however, temporary instances will live longer in order to fix dangling. The biggest category of types impacted by this would be by lock objects. However, this only occurs when locks are used as a temporary instead of recommended usage of a named instance. This was the same problem for the `range based for loop fix` and was set aside for the greater good of fixing dangling defects in the `C++` language. The rationale is recorded in the following sections in that paper.
 
 - `Is there code that might be broken with the fix?` [^p2012r2]
 - `So, how much code is broken in practice?` [^p2012r2]
@@ -1153,7 +1153,7 @@ The proposed lifetimes matches or exceeds those of the current temporary lifetim
 
 Everyone ... Quite a bit, actually
 
-Consider all the examples littered throughout our history, these are what gets fixed
+Consider all the examples littered throughout our history, these are what gets fixed.
 
 - dangling reported on normal use of the `STL`
 - dangling examples reported in the `C++` standard
@@ -1181,7 +1181,7 @@ This cost, additional or not, pails in comparison to proposals that fix dangling
 
 ### Doesn't this make C++ harder to teach?
 
-Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners. As this proposal fixes a lot of dangling, it makes teaching `C++` easier because it makes `C++` easier.
+Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce, <!--than--> dangling resolution still have to be taught, even to beginners. As this proposal fixes a lot of dangling, it makes teaching `C++` easier because it makes `C++` easier.
 
 So, what do we teach now and what bearing does these teachings, the `C++` standard and this proposal have on one another.
 
@@ -1195,7 +1195,7 @@ Other types of dangling can still occur. One simple type is directly called out 
 
 ***Reason** To avoid the crashes and data corruption that can result from the use of such a dangling pointer.* [^cppcgrf43]
 
-This proposal does not solve nor contradict this teaching. If anything, by cleaning up the other dangling it makes the remaining more visible. Also by hollowing out the majority and most common dangling in the middle, programmers are left with only indirect variants of the ultra trivial, such as F.43 [^cppcgrf43], or the ultra rare and ultimately more complex dangling, which is naturally avoided by keeping one's code simple.
+This proposal does not solve nor contradict this teaching. If anything, by cleaning up the other dangling it makes the remaining more visible. Also by hollowing out the majority and most common dangling in the middle, programmers are left with only indirect variants of the ultra trivial, such as indirect F.43 [^cppcgrf43], or the ultra rare and ultimately more complex dangling, which is naturally avoided by keeping one's code simple.
 
 Further, what is proposed is easy to teach because we already teach it and it makes `C++` even easier to teach.
 
