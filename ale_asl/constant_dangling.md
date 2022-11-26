@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-22</td>
+<td>2022-11-25</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -66,6 +66,7 @@ a code
   - [Proposed Wording](#Proposed-Wording)
   - [In Depth Rationale](#In-Depth-Rationale)
   - [Value Categories](#Value-Categories)
+  - [Performance Considerations](#Performance-Considerations)
   - [Tooling Opportunities](#Tooling-Opportunities)
   - [Summary](#Summary)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
@@ -91,7 +92,7 @@ There are multiple resolutions to dangling in the `C++` language.
     - `Fix the range-based for loop, Rev2` [^p2012r2]
     - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
 1. Fix by making the instance global
-    - `This proposal`
+    - **`This proposal`**
 
 All are valid resolutions and individually are better than the others, given the scenario. This proposal is focused on the third option, which is to fix by making the instance global.
 
@@ -170,7 +171,7 @@ const int& get_a(const X& x)
 }
 
 const int& a = get_a({4, 2});
-a; // currently may not be 4, will be 4 with this proposal
+a; // currently dangling, will be 4 with this proposal
 ```
 
 *"Such a feature would also help to ... fix several bugs we see in practice:"* [^bindp]
@@ -277,7 +278,7 @@ There is already significant interest in this type of feature from programmers. 
 </tr>
 </table>
 
-I also did not choose `constexpr`, though that may be better for greater `C` compatibility, since I wrote my proposals before my seeing the `C` paper. Also `constinit` better matches that which these features is mentioned in the context of existing `C++` terminology of constant initialization. Further, there are differences in what `constexpr` means to `C++` and `C`, at present.
+I also did not choose `constexpr`, though that may be better for greater `C` compatibility, since I wrote my proposals before my seeing the `C` paper. Also `constinit` better matches that which these features are doing in the context of existing `C++` terminology of constant initialization. Further, there are differences in what `constexpr` means to `C++` and `C`, at present.
 
 It should also be noted that these concepts are already in the standard just not fully exposed in the language. For instance, strings literals already have static storage duration and attempting to modify one is undefined.
 
@@ -396,6 +397,270 @@ else
 
 Since the variable `value2` and `value3` is likely to be created manually at block scope instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a `global scoped` `lvalue` temporary avoids these common dangling possibilities along with simplifying the code.
 
+## Performance Considerations
+
+<!-- x86-64 clang (trunk) -std=c++20 -O3 -->
+<!-- x86-64 gcc   (trunk) -std=c++20 -O3 -->
+
+There are at least three ways to provide a non dangling globalish constant.
+
+- ROM i.e. hardware
+- `const` and `static` i.e. `C++` language
+- assembly opcode with inline constant i.e. machine code level
+
+While the first two are addressable, the last one isn't.
+
+In the next three examples, the same assembly is produced regardless of whether the literal `5` was provided via a native literal, a `constexpr` or a `const` global. The following results were produced in [Compiler Explorer](https://godbolt.org/) using both "`x86-64 clang (trunk) -std=c++20 -O3`" and "`x86-64 gcc (trunk) -std=c++20 -O3`".
+
+### values that are [logically] global constants
+
+#### local constant but logically a global constant
+
+```cpp
+int main()
+{
+    return 5;
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+#### constant expression i.e. logically a global constant
+
+```cpp
+constexpr int return5()
+{
+    return 5;
+}
+
+int main()
+{
+    return return5();
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+#### an actual global
+
+<!--
+```cpp
+int GLOBAL = 5;
+
+int main()
+{
+    return GLOBAL;
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, dword ptr [rip + GLOBAL]
+        ret
+GLOBAL:
+        .long   5                               # 0x5
+```
+-->
+```cpp
+const int GLOBAL = 5;
+
+int main()
+{
+    return GLOBAL;
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+The point is all three are logically non dangling, constant global. Now let's look at reference examples.
+
+### immediate dangling
+
+Not only do all three following examples produce the exact same assembly, they also provide the exact same assembly as the previous three examples. They are all essentially global constants from the assembly and programmer standpoint but the current standard says two of the three dangle, unnecessarily.
+
+#### local constant but logically a global constant
+
+```cpp
+int main()
+{
+    const int& reflocal = 5;// immediate dangling
+    return reflocal;
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+```cpp
+int main()
+{
+    const int local = 5;
+    const int& reflocal = local;
+    return reflocal;
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+#### constant expression i.e. logically a global constant
+
+```cpp
+constexpr int return5()
+{
+    return 5;
+}
+
+int main()
+{
+    const int& reflocal = return5();// immediate dangling
+    return reflocal;
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+#### an actual global
+
+```cpp
+const int GLOBAL = 5;
+
+int main()
+{
+    const int& reflocal = GLOBAL;
+    return reflocal;
+}
+```
+
+```assembly
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+### indirect dangling of caller's local
+
+Similarly to, the next three examples produce the same assembly in the 3 `clang` cases and 2 of the `gcc` cases. `GCC` would have produced the same result in its 2nd case had it had treated the `const` expected evaluation of a constant expression as a global constant as its third case did. 
+
+#### local constant but logically a global constant
+
+```cpp
+const int& potential_dangler(const int& passthrough)
+{
+    return passthrough;
+}
+
+int main()
+{
+    const int local = 5;
+    const int& reflocal = potential_dangler(local);
+    return reflocal;
+}
+```
+
+```assembly
+potential_dangler(int const&):               # @potential_dangler(int const&)
+        mov     rax, rdi
+        ret
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+#### constant expression i.e. logically a global constant
+
+```cpp
+constexpr int return5()
+{
+    return 5;
+}
+
+const int& potential_dangler(const int& passthrough)
+{
+    return passthrough;
+}
+
+int main()
+{
+    const int& reflocal = potential_dangler(return5());
+    return reflocal;
+}
+```
+
+##### x86-64 clang (trunk) -std=c++20 -O3
+
+```assembly
+potential_dangler(int const&):               # @potential_dangler(int const&)
+        mov     rax, rdi
+        ret
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+##### x86-64 gcc (trunk) -std=c++20 -O3
+
+<span style="color:red">**NOTE: Can't really say what GCC is doing with the `xor`. However, if GCC had treated the resolved constant expression which is const required as a const global as in the next example than the results would have been the same.**</span>
+
+```assembly
+potential_dangler(int const&):
+        mov     rax, rdi
+        ret
+main:
+        xor     eax, eax
+        ret
+```
+
+#### an actual global
+
+```cpp
+const int GLOBAL = 5;
+
+const int& potential_dangler(const int& passthrough)
+{
+    return passthrough;
+}
+
+int main()
+{
+    const int& reflocal = potential_dangler(GLOBAL);
+    return reflocal;
+}
+```
+
+```assembly
+potential_dangler(int const&):               # @potential_dangler(int const&)
+        mov     rax, rdi
+        ret
+main:                                   # @main
+        mov     eax, 5
+        ret
+```
+
+In all these logically constant global cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So the worst case performance of this proposal is what would be a local that is constantly being created and destroyed, potentially multiple times concurrently in different threads, would be a single upfront load time cost. Even this cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a constant global.
+
 ## Tooling Opportunities
 
 There area a couple tooling opportunities especially with respect to the `constinit` specifier.
@@ -486,7 +751,7 @@ Having expressed contant requirements three times, it is pretty certain that the
 
 Everyone ... Quite a bit, actually
 
-Consider all the examples littered throughout this paper, these are what gets fixed
+Consider all the examples littered throughout our history, these are what gets fixed.
 
 - dangling reported on normal use of the `STL`
 - dangling examples reported in the `C++` standard
@@ -559,7 +824,7 @@ Instances that have static storage duration can't dangle. Currently in `C++`, in
 
 ### Doesn't this make C++ harder to teach?
 
-Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce than dangling resolution still have to be taught, even to beginners. As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.
+Until the day that all dangling gets fixed, any incremental fixes to dangling still would require programmers to be able to identify any remaining dangling and know how to fix it specific to the given scenario, as there are multiple solutions. Since dangling occurs even for things as simple as constants and immediate dangling is so naturally easy to produce, <!--than--> dangling resolution still have to be taught, even to beginners. As this proposal fixes these types of dangling, it makes teaching `C++` easier because it makes `C++` easier.
 
 So, what do we teach now and what bearing does these teachings, the `C++` standard and this proposal have on one another.
 
