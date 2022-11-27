@@ -113,7 +113,7 @@ const std::string& value = f("Hello World"s);// immediate dangling
 // using `value` is bad
 ```
 
-The function `f` does not know whether `defaultValue` was created locally, globally or dynamically, nor does it care. The function `f` does expect that whatever instance is passed to it is alive after `f` is called. This makes senses because globals live to the end of the program, dynamically allocated instances provided would need to be deleted afterward and locals provided are lower on the stack since they were created in the caller's scope and live to the end of the block they were allocated in. This is reaffirmed in a note in the `C++ Core Guidelines`.
+The function `f` does not know whether `defaultValue` was created locally, globally or dynamically, nor does it care. The function `f` does expect that whatever instance is passed to it is alive after `f` is called. This makes sense because globals live to the end of the program, dynamically allocated instances provided would need to be deleted afterward and locals provided are lower on the stack since they were created in the caller's scope and live to the end of the block they were allocated in. This is reaffirmed in a note in the `C++ Core Guidelines`.
 
 <table>
 <tr>
@@ -346,9 +346,9 @@ While `block scope` would fix the `"initial value"s` temporary, it would not fix
 
 Let me summarize, statement scoping of a temporary is unnatural because ...
 
-- It prevents/discourages functions from return references/pointers to instances that do exist lower on the stack.
+- It prevents/discourages functions from returning references/pointers to instances that do exist lower on the stack.
 - It introduces superfluous scopes that the programmer would never code.
-- It introduces code that the programmer could never write making things harder to understand.
+- It introduces code that the programmer could never write thus making things harder to understand.
 - The lifetime of the temporary is divorced from the lifetime of the local variable that it is being assigned to.
 - It creates all of the more complex direct dangling associated with parameters/arguments as well as what exists in the body of the function.
 
@@ -599,7 +599,7 @@ The expression S(16) + S(23) creates three temporaries: a frst temporary T1 to h
 
 Why the complexity? `statement scope` itself is simple, weighing in as just the first cited paragraph. However, all the other verbiage is for all of the, consistently the same, exceptions to the rule. This list is growing. This makes teaching `C++` more difficult. This makes teaching dangling and dangling resolution more difficult because one must know whether dangling was even an issue or not due to whether the temporary was lifetime extended or not.
 
-The question is can the proposed wording cover the use cases covered in these numerous exceptions to the statement scoping rule. I have previous covered that the current standard says that all of these exceptions were scoped to the variable, while in fact were actually `blocked scope`. However, let's consider a recent addition in greater detail. That is the range based for loop dangling fix.
+The question is, can the proposed wording cover the use cases in those numerous exceptions to the statement scoping rule. I have previous covered that the current standard says that all of these exceptions were scoped to the variable, while in fact were actually `blocked scope`. However, let's consider a recent addition in greater detail. That is the range based for loop dangling fix.
 
 - `Fix the range-based for loop, Rev2` [^p2012r2]
 - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
@@ -640,7 +640,7 @@ In the wording of these proposals, it says that the temporaries persist until th
 
 This is nothing more than `block scope` where the block in question is the additional block added via the revisions to the range based for loop. Notice too that each temporary was promoted to being an anonymously named variable. In short, this proposal's simplified verbiage covers all existing lifetime extensions.
 
-The only real concern is what would this proposal break. Instances still get destroyed in a deterministic RAII fashion, however, temporary instances will live longer in order to fix dangling. The biggest category of types impacted by this would be by lock objects. However, this only occurs when locks are used as a temporary instead of recommended usage of a named instance. This was the same problem for the `range based for loop fix` and was set aside for the greater good of fixing dangling defects in the `C++` language. The rationale is recorded in the following sections in that paper.
+The only real concern is what would this proposal break. Instances still get destroyed in a deterministic RAII fashion, however, temporary instances will live longer in order to fix dangling. The biggest category of types impacted by this would be by **lock** objects. However, this only occurs when locks are used as a temporary instead of recommended usage of a named instance. This was the same problem for the `range based for loop fix` and was set aside for the greater good of fixing dangling defects in the `C++` language. The rationale is recorded in the following sections in that paper.
 
 - `Is there code that might be broken with the fix?` [^p2012r2]
 - `So, how much code is broken in practice?` [^p2012r2]
@@ -1065,7 +1065,7 @@ The advantages to `C++` with adopting this proposal is manifold.
 </td>
 <td>
 
-**references with `C++`**
+**proposed `C++`**
 
 </td>
 </tr>
