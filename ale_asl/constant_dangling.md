@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-25</td>
+<td>2022-11-27</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -121,9 +121,9 @@ Making an instance global is a legitimate fix to dangling.
 </tr>
 </table>
 
-While making an instance global doesn't fix all dangling in the language, it is the only resolution that can fix all three most shocking types of dangling provided the instance in question is a constant. It is also the best fix for these instances.
+While making an instance global doesn't fix all dangling in the language, it is the only resolution that can fix all three most shocking types of dangling provided the instance in question is a constant. It is also the **best** fix for these instances.
 
-Since `constexpr` was added to the language in `C++11` there has been an increase in the candidates of temporary instances that could be turned into a global constant. ROMability was in part the motivation for `constexpr` but the requirement was never made. Even if a `C++` architecture doesn't support ROM, it is still required by language to support `static storage duration` and `const`. Matter of fact, due to the immutable nature of constant-initialized constant expressions, these expressions/instances are constant for the entire program even though they, at present, don't have `static storage duration`, even if just <a href="#What-about-locality-of-reference" title="What-about-locality-of-reference">logically</a>. There is a greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time.
+Since `constexpr` was added to the language in `C++11` there has been an increase in the candidates of temporary instances that could be turned into global constants. ROMability was in part the motivation for `constexpr` but the requirement was never made. Even if a `C++` architecture doesn't support ROM, it is still required by language to support `static storage duration` and `const`. Matter of fact, due to the immutable nature of constant-initialized constant expressions, these expressions/instances are constant for the entire program even though they, at present, don't have `static storage duration`, even if just <a href="#What-about-locality-of-reference" title="What-about-locality-of-reference">logically</a>. There is a greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time.
 
 ## Motivating Examples
 
@@ -140,7 +140,7 @@ As such it has `static storage duration` and can't dangle.
 
 **explicit constant initialization**
 
-The `constinit` specifier can be applied to temporaries. Applying it asserts that the temporary was `const-initialized`, that the argument type is a `LiteralType` and its parameter type is `const`. This explicitly gives the temporary `static storage duration`.
+The `constinit` specifier can be applied to temporaries. Applying it asserts that the temporary was `const-initialized`, that the argument type is a `LiteralType` and its parameter/local/member type is `const` and not `mutable`. This explicitly gives the temporary `static storage duration`.
 
 While `implicit constant initialization` automatically fixes dangle, `constinit` allows the programmers to manually and explicitly fix some dangling. The former is better for programmers and the language, while the later favors code reviewers or programmers who copy an example and want to have the compiler, momentarily, verify whether it is correct.
 
@@ -368,7 +368,7 @@ The proposed avoids superfluous moves. Copying pointers and lvalue references ar
 
 ### Undo forced naming
 
-The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can not be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling. Further, according to the `C++ Core Guidelines`, it is developers practice to do the following:
+The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can't be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling. Further, according to the `C++ Core Guidelines`, it is developers practice to do the following:
 
 - *ES.5: Keep scopes small* [^cppcges5]
 - *ES.6: Declare names in for-statement initializers and conditions to limit scope* [^cppcges6]
@@ -659,7 +659,7 @@ main:                                   # @main
         ret
 ```
 
-In all these logically constant global cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So, the worst case performance of this proposal would be a single upfront load time cost. Contrast that with the current potential local constant cost of constantly creating and destroying instances, even multiple times concurrently in different threads. Even the proposed cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a constant global.
+In all these logically global constant cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So, the worst case performance of this proposal would be a single upfront load time cost. Contrast that with the current potential local constant cost of constantly creating and destroying instances, even multiple times concurrently in different threads. Even the proposed cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a global constant.
 
 ## Tooling Opportunities
 
@@ -683,6 +683,12 @@ The advantages to `C++` with adopting this proposal is manifold.
   - Reduce unitialized and delayed initialization errors
   - Increases safety by avoiding data races.
 - Simpler
+  - Encourages the use of temporaries
+    - Reduce lines of code
+    - Reduce naming; fewer names to return dangle
+  - Increases anonymously named `lvalues` and decreases `rvalues` in the code.
+    - Reduce lines of code
+    - Reduce naming; fewer names to return dangle
   - Make constexpr literals less surprising for new and old developers alike
   - Reduce the gap between `C++` and `C99` compound literals
   - Improve the potential contribution of `C++`'s dangling resolutions back to `C`
@@ -718,8 +724,6 @@ What is more interesting is these two examples of constants have different value
 ### Won't this break a lot of existing code?
 
 NO, if any. To the contrary, code that is broken is now fixed. Code that would be invalid is now valid, makes sense and can be rationally explained. Let me summarize:
-
-#### Let constants be constants / free your constants / implicit constant initialization
 
 This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration, are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken! From the earlier section "Present", subsection "C Standard Compound Literals". Even the `C++` standard recognized that their are other opportunities for constant initialization.
 
