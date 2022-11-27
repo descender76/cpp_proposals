@@ -659,7 +659,7 @@ main:                                   # @main
         ret
 ```
 
-In all these logically constant global cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So the worst case performance of this proposal is what would be a local that is constantly being created and destroyed, potentially multiple times concurrently in different threads, would be a single upfront load time cost. Even this cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a constant global.
+In all these logically constant global cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So, the worst case performance of this proposal would be a single upfront load time cost. Contrast that with the current potential local constant cost of constantly creating and destroying instances, even multiple times concurrently in different threads. Even the proposed cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a constant global.
 
 ## Tooling Opportunities
 
