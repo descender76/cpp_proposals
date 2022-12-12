@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-27</td>
+<td>2022-12-11</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -659,7 +659,385 @@ main:                                   # @main
         ret
 ```
 
-In all these logically global constant cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So, the worst case performance of this proposal would be a single upfront load time cost. Contrast that with the current potential local constant cost of constantly creating and destroying instances, even multiple times concurrently in different threads. Even the proposed cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a global constant.
+In all these logically global constant cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So, the worst case performance of this proposal would be a single upfront load time cost. Contrast that with the current potential local constant cost of constantly creating and destroying instances, even multiple times concurrently in different threads. Even the proposed cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`.
+
+### Microsoft's compiler and existing dangling detection
+
+Things really get interesting when we factor Microsoft's compiler into the equation and contrast its dangling detection between optimized configurations.
+
+**x64 msvc v19.latest**
+
+#### indirect dangling of caller's local
+
+<table>
+<tr>
+<td colspan="2">
+
+**temporary constant but logically a global constant**
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+
+```cpp
+const int& potential_dangler(const int& passthrough)
+{
+    return passthrough;
+}
+
+int main()
+{
+    const int& reftemp = potential_dangler(5);
+    return reftemp;
+}
+```
+
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+
+**/Ox optimizations (favor speed)**
+
+</td>
+</tr>
+<tr>
+<td>
+
+```assembly
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     QWORD PTR [rsp+8], rcx
+        mov     rax, QWORD PTR passthrough$[rsp]
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+$T1 = 32
+reftemp$ = 40
+main    PROC
+$LN3:
+        sub     rsp, 56; 00000038H
+        mov     DWORD PTR $T1[rsp], 5
+        lea     rcx, QWORD PTR $T1[rsp]
+        ; potential_dangler
+        call    int const & potential_dangler(int const &)
+        mov     QWORD PTR reftemp$[rsp], rax
+        mov     rax, QWORD PTR reftemp$[rsp]
+        mov     eax, DWORD PTR [rax]
+        add     rsp, 56; 00000038H
+        ret     0
+main    ENDP
+```
+
+
+</td>
+<td>
+
+```assembly
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     rax, rcx
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+main    PROC
+        mov     eax, 5
+        ret     0
+main    ENDP
+```
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td colspan="2">
+
+**local constant but logically a global constant**
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+
+```cpp
+const int& potential_dangler(const int& passthrough)
+{
+    return passthrough;
+}
+
+int main()
+{
+    const int local = 5;
+    const int& reflocal = potential_dangler(local);
+    return reflocal;
+}
+```
+
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+
+**/Ox optimizations (favor speed)**
+
+</td>
+</tr>
+<tr>
+<td>
+
+```assembly
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     QWORD PTR [rsp+8], rcx
+        mov     rax, QWORD PTR passthrough$[rsp]
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+local$ = 32
+reflocal$ = 40
+main    PROC
+$LN3:
+        sub     rsp, 56; 00000038H
+        mov     DWORD PTR local$[rsp], 5
+        lea     rcx, QWORD PTR local$[rsp]
+        ; potential_dangler
+        call    int const & potential_dangler(int const &)
+        mov     QWORD PTR reflocal$[rsp], rax
+        mov     rax, QWORD PTR reflocal$[rsp]
+        mov     eax, DWORD PTR [rax]
+        add     rsp, 56; 00000038H
+        ret     0
+main    ENDP
+```
+
+
+</td>
+<td>
+
+```assembly
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     rax, rcx
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+main    PROC
+        mov     eax, 5
+        ret     0
+main    ENDP
+```
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td colspan="2">
+
+**constant expression i.e. logically a global constant**
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+
+```cpp
+constexpr int return5()
+{
+    return 5;
+}
+
+const int& potential_dangler(const int& passthrough)
+{
+    return passthrough;
+}
+
+int main()
+{
+    const int& reflocal = potential_dangler(return5());
+    return reflocal;
+}
+```
+
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+
+**/Ox optimizations (favor speed)**
+
+</td>
+</tr>
+<tr>
+<td>
+
+```assembly
+int return5(void) PROC; return5, COMDAT
+        mov     eax, 5
+        ret     0
+int return5(void) ENDP; return5
+
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     QWORD PTR [rsp+8], rcx
+        mov     rax, QWORD PTR passthrough$[rsp]
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+$T1 = 32
+reflocal$ = 40
+main    PROC
+$LN3:
+        sub     rsp, 56; 00000038H
+        call    int return5(void); return5
+        mov     DWORD PTR $T1[rsp], eax
+        lea     rcx, QWORD PTR $T1[rsp]
+        ; potential_dangler
+        call    int const & potential_dangler(int const &)
+        mov     QWORD PTR reflocal$[rsp], rax
+        mov     rax, QWORD PTR reflocal$[rsp]
+        mov     eax, DWORD PTR [rax]
+        add     rsp, 56; 00000038H
+        ret     0
+main    ENDP
+```
+
+
+</td>
+<td>
+
+```assembly
+int return5(void) PROC; return5, COMDAT
+        mov     eax, 5
+        ret     0
+int return5(void) ENDP; return5
+
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     rax, rcx
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+main    PROC
+        mov     eax, 5
+        ret     0
+main    ENDP
+```
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td colspan="2">
+
+**an actual global**
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+
+```cpp
+const int GLOBAL = 5;
+
+const int& potential_dangler(const int& passthrough)
+{
+    return passthrough;
+}
+
+int main()
+{
+    const int& reflocal = potential_dangler(GLOBAL);
+    return reflocal;
+}
+```
+
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+
+**/Ox optimizations (favor speed)**
+
+</td>
+</tr>
+<tr>
+<td>
+
+```assembly
+int const GLOBAL DD 05H; GLOBAL
+
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     QWORD PTR [rsp+8], rcx
+        mov     rax, QWORD PTR passthrough$[rsp]
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+reflocal$ = 32
+main    PROC
+$LN3:
+        sub     rsp, 56; 00000038H
+        lea     rcx, OFFSET FLAT:int const GLOBAL
+        ; potential_dangler
+        call    int const & potential_dangler(int const &)
+        mov     QWORD PTR reflocal$[rsp], rax
+        mov     rax, QWORD PTR reflocal$[rsp]
+        mov     eax, DWORD PTR [rax]
+        add     rsp, 56; 00000038H
+        ret     0
+main    ENDP
+```
+
+</td>
+<td>
+
+```assembly
+passthrough$ = 8
+; potential_dangler
+int const & potential_dangler(int const &) PROC
+        mov     rax, rcx
+        ret     0
+; potential_dangler
+int const & potential_dangler(int const &) ENDP
+
+main    PROC
+        mov     eax, 5
+        ret     0
+main    ENDP
+```
+
+</td>
+</tr>
+</table>
+
+In all four cases, when optimizations (favor speed) is turned on, the Microsoft compiler produced the same **non dangling** code regardless of whether it was an actual global, a local constant, a temporary constant or a constant expression evaluation. This is also the same that `GCC` and `Clang` was generating. To the `msvc` compiler's credit, it not only detect functions that can potentially dangle but also executions that could as well. In all cases, it was a warning instead of an error. While the temporary constant and the constant expression evaluation is truly dangling when not optimized, it was not a compiler error. Further, the global example was incorrectly flagged as potentially dangling even though it new it was a global. Regardless the optimized compilation, fixed the dangling and removed the potentially dangling flag.
+
+This proposal advocates standardizing an optimization that compiler's are already doing and have been doing before `C++` got `constexpr` in the language. Fixing this type of dangling in this fashion is the best possible way because potentially invalid code becomes valid with no programmer intervention, it produces no errors, it is faster, uses less memory and produces smaller executable sizes. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a global constant. Adopting this proposal ensures programmers do not have to fix something that was never dangling in the first place even though the current language makes it look like it is, needlessly.
 
 ## Tooling Opportunities
 
