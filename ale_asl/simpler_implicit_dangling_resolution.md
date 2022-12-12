@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-12-11</td>
+<td>2022-12-12</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -68,7 +68,7 @@ a code
 
 ## Abstract
 
-The `Simpler implicit move` proposal [^p2266r3] provided some dangling relief to the `C++` language. However, this relief was a consequence of fixing `implicit move`. Consequently, it did not clearly address similarly related types of dangling. This paper asks that similar fixes apply to related scenarios in order to ease more dangling in the language. This by no means fixes all dangling in general but it does compliment other proposals that address other contributing factors.
+The `Simpler implicit move` proposal [^p2266r3] provided some dangling relief to the `C++` language. However, this relief was a consequence of fixing `implicit move`. Consequently, it did not clearly address similarly related types of dangling. This paper asks that similar fixes apply to related scenarios in order to ease more dangling in the language. This by no means fixes all dangling in general but it does compliment like minded proposals that address other contributing factors.
 
 ## Motivation
 
@@ -142,7 +142,7 @@ int* h(bool b, int i) {
   if (b) {
     return &s;  // OK
   } else {
-    return &i;  // error: instance `i` dies before pointer `p`
+    return &i;  // error: instance `i` dies before the returned pointer
   }
 }
 ```
@@ -159,6 +159,7 @@ void h(bool b, int i) {
     int i = 0; 
     p = &i;  // error: instance `i` dies before pointer `p`
   }
+  // ...
 }
 ```
 
@@ -168,7 +169,7 @@ In order to address these types of dangling, in the language, we need to add a r
 
 At worse, this is dangling. At best, this is a logic error.
 
-I am not asking in this proposal for a resolution for a `std::optional<std::reference_wrapper<int>>` version of the last example. While that does need to be fixed that would get into two additional levels of indirection. I am limiting this proposal just to one level as the `Simpler implicit move` [^p2266r3] proposal did. Any more levels of indirection would require compilers, at greater compilation cost, to process the instance dependency graph and then do more when programmers can contribute to the dependency information via an attribute that documents whether returns and parameters are dependent upon one another.
+I am not asking in this proposal for a resolution for a `std::optional<std::reference_wrapper<int>>` version of the last example. While that does need to be fixed, that would get into two additional levels of indirection. I am limiting this proposal just to one level of additional indirection, as the `Simpler implicit move` [^p2266r3] proposal did. Any more levels of indirection would require compilers, at greater compilation cost, to process the instance dependency graph and then do more when programmers can contribute to the dependency information via an attribute that documents whether returns and parameters are dependent upon one another.
 
 The next set of examples are related to the **second example** that has just one additional level of **indirect**ion. Just like `std::reference_wrapper`, lambda functions and coroutines that have pointers or references to locals should not be able to be returned from a function.
 
@@ -196,11 +197,11 @@ Consequently, another rule needs to be added.
 
 <span style="color:red">**RULE: You can not return a lambda or coroutine that captures a pointer or reference to a local.**</span>
 
-While a combination of these two rules would mean `std::optional` of a lambda or coroutine that captures a pointer or reference to a local should also be invalid, this proposal does not ask for that to be fixed since it would get into two additional levels of indirection. I am limiting this proposal just to one additional level of indirection as the `Simpler implicit move` [^p2266r3] proposal did. Any more levels of indirection would require compilers, at greater compilation cost, to process the instance dependency graph and then do more when programmers can contribute to the dependency information via an attribute that documents whether returns and parameters are dependent upon one another.
+While a combination of these two rules would mean `std::optional` of a lambda or coroutine that captures a pointer or reference to a local should also be invalid, this proposal does not ask for that to be fixed, since it would get into two additional levels of indirection. I am limiting this proposal just to one additional level of indirection as the `Simpler implicit move` [^p2266r3] proposal did. Any more levels of indirection would require compilers, at greater compilation cost, to process the instance dependency graph and then do more when programmers can contribute to the dependency information via an attribute that documents whether returns and parameters are dependent upon one another.
 
 ## Summary
 
-`C++` can fix more dangling simply in the language without the need for any additional non standard static analyzers. The cost is minimal but like all dangling these defects are big. Enforcing these rules will improve the safety of `C++`. Further, the pointer versions of these safety checks could be contributed back to `C` thus making it safer and improving our ecosystem as a whole.
+`C++` can fix more dangling simply in the language without the need for any additional non standard static analyzers. The cost is minimal but like all dangling, these defects are big. Enforcing these rules will improve the safety of `C++`. Further, the pointer versions of these safety checks could be contributed back to `C` thus making it safer and improving our ecosystem as a whole.
 
 ## Frequently Asked Questions
 
@@ -208,11 +209,11 @@ While a combination of these two rules would mean `std::optional` of a lambda or
 
 Compilers and the standard should. Forget the increased compile time, compilers should create and analyze the instance dependency graph to produce as many errors as possible to make `C++` much safer. Library authors should be able to contribute to this graph for more of the indirect cases. This can be done in three phases.
 
-- direct dangling and low indirection level count dangling as exemplified by the `Simpler implicit move` [^p2266r3]
+- direct dangling and low indirection level count dangling as exemplified by the `Simpler implicit move` [^p2266r3] and this proposal
 - maximum indirect dangling detection without library author contributions
 - maximum indirect dangling detection with library author contributions
 
-As the first phase is cheaper and easier to do than we should get this and similar proposals into the language as quickly as possible as a triage measure. Later, the other phases can be addressed in turn whether in the same or succeeding releases.
+As the first phase is cheaper and easier to do than we should get this and similar proposals into the language as quickly as possible, as a triage measure. Later, the other phases can be addressed in turn whether in the same or succeeding releases.
 
 ## References
 
