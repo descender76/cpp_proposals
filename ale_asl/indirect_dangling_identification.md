@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2742R0</td>
+<td>P2742R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-12-11</td>
+<td>2023-1-15</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -59,10 +59,19 @@ a code
 ## Table of contents
 
 - [indirect dangling identification](#indirect-dangling-identification)
+  - [Changelog](#Changelog)
   - [Abstract](#Abstract)
   - [Motivation](#Motivation)
+  - [Tooling Opportunities](#Tooling-Opportunities)
   - [Summary](#Summary)
   - [References](#References)
+
+## Changelog
+
+### R1
+
+- minor verbiage clarifications
+- added the [Tooling Opportunities](#Tooling-Opportunities) section
 
 ## Abstract
 
@@ -130,15 +139,15 @@ This paper still has a viral attribution effort. So, why should we add this attr
 
 ### Documentation
 
-Programmers need this to document their libraries and to convey this knowledge in a standard fashion to library users even if creator and user is the same person. Without something like this, each programmer will continue to use verbiage that is different from other programmers. Currently, this type of documentation, if it even exists, may not even be in the header but in some other documentation. It is not uncommon for programmer's to have to  take apart someone else's code in order to figure out how to use it safely.
+Programmers could use the `parameter_dependency` attribute to document their libraries and to convey parameter dependency knowledge in a standard fashion to library users, even if creator and user is the same person. Without something like this, each programmer will continue to use verbiage that is different from other programmers. Currently, this type of documentation, if it even exists, may not even be in the header but in some other documentation. It is not uncommon for programmer's to have to  take apart someone else's code in order to figure out how to use it safely.
 
 ### Specification
 
-The rationale is much the same as documentation except now it is means to standardize how we document our proposals.
+The rationale is much the same as documentation except now it is means to standardize how we specify our proposals.
 
 ### A Viral Attribution Effort
 
-It should be noted that all functions do not need this attribute. Only those that return references, reference types or pointers are desperately in need of this. Even if static analyzers such as that which is provided with `Microsoft Visual Studio` can do this analysis for warnings, this attribute or other similar one would still be needed at the public API boundary level of compiled libraries so that users of said libraries know how to use them.
+It should be noted that all functions do not need this attribute. Those that return references, reference types or pointers are desperately in need of this. Even if static analyzers such as that which is provided with `Microsoft Visual Studio` can do this analysis for warnings, this attribute or other similar one would still be needed at the public API boundary level of compiled libraries so that users of said libraries know how to use them.
 
 ### Fixing indirect dangling by producing errors
 
@@ -180,7 +189,15 @@ const Wheel& f()
 }
 ```
 
-The fact is, there is no way of knowing with a compiled library without looking at the code and breaking `abstraction`. Even though the `Car` instance was local, it could be returning a global instance. However, the `parameter_dependency` attribute tells us, the compiler and any static analyzers that the driver wheel's lifetime is dependent upon the car's instance which is a local and consequently this last example should have produced an error.
+The fact is, there is no way of knowing with a compiled library without looking at the code and breaking `abstraction`. Even though the `Car` instance was local, `getDriverWheel` could be returning a global instance. However, the `parameter_dependency` attribute tells us, the compiler and any static analyzers that the driver wheel's lifetime is dependent upon the car's instance which is a local and consequently this last example should have produced an error.
+
+## Tooling Opportunities
+
+Compilers, static analyzers could further be enhanced to assert that the `parameter_dependency` matches what the documented function is doing.
+
+Tooling could either error if a function in need hasn't been document, suggest the appropriate documentation or automatically add it.
+
+None of these tooling opportunities are proposed at this time.
 
 ## Summary
 
