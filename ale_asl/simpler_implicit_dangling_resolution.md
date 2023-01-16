@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2740R0</td>
+<td>P2740R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-12-12</td>
+<td>2023-1-15</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -59,6 +59,7 @@ a code
 ## Table of contents
 
 - [Simpler implicit dangling resolution](#Simpler-implicit-dangling-resolution)
+  - [Changelog](#Changelog)
   - [Abstract](#Abstract)
   - [Motivation](#Motivation)
   - [Motivating examples](#Motivating-Examples)
@@ -66,9 +67,13 @@ a code
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
   - [References](#References)
 
+### R1
+
+- minor verbiage clarifications
+
 ## Abstract
 
-The `Simpler implicit move` proposal [^p2266r3] provided some dangling relief to the `C++` language. However, this relief was a consequence of fixing `implicit move`. Consequently, it did not clearly address similarly related types of dangling. This paper asks that similar fixes apply to related scenarios in order to ease more dangling in the language. This by no means fixes all dangling in general but it does compliment like minded proposals that address other contributing factors.
+The `Simpler implicit move` proposal [^p2266r3] provided some dangling relief to the `C++` language. However, this relief was a consequence of fixing `implicit move`. Consequently, it did not clearly address similarly related types of dangling such as returning a pointer to a local, dangling pointers and references to locals that exit an inner block, returning lambdas and coroutines that capture a pointer or reference to a local. This paper asks that similar fixes apply to related scenarios in order to ease more dangling in the language. <!--This by no means fixes all dangling in general but it does compliment like minded proposals that address other contributing factors.-->
 
 ## Motivation
 
@@ -128,7 +133,7 @@ Both fixes are welcomed but much more can be gained at minimal cost.
 
 ## Motivating Examples
 
-Any given function, already knows whether it returns a pointer or a reference. It knows whether any instances within the function are locals or globals. It also knows the lifetimes of these instances and the pointers and references that refers to them. In other words, a compiler does not need to go outside of the function in question for this information with the exception of globals. **Direct** pointers/references are easy but **indirect** requires computing a graph of instance dependencies. With the **indirect** exception of the **second example**, which is only one level away from its instance, this proposal is focused on that which is easy for all compilers to compute and verify.
+Any given function, already knows whether it returns a pointer or a reference. It knows whether any instances within the function are locals or globals. It also knows the lifetimes of these instances and the pointers and references that refers to them. In other words, a compiler does not need to go outside of the function in question for this information, with the exception of globals. **Direct** pointers/references are easy but **indirect** requires computing a graph of instance dependencies. Like the **indirect** exception of the **second example**, which is only one level away from its instance, this proposal is focused on that which is easy for all compilers to compute and verify.
 
 ### The wish
 
@@ -213,7 +218,7 @@ Compilers and the standard should. Forget the increased compile time, compilers 
 - maximum indirect dangling detection without library author contributions
 - maximum indirect dangling detection with library author contributions
 
-As the first phase is cheaper and easier to do than we should get this and similar proposals into the language as quickly as possible, as a triage measure. Later, the other phases can be addressed in turn whether in the same or succeeding releases.
+As the first phase is cheaper and easier to do than we should get this and similar proposals into the language as quickly as possible, as a triage measure. Later, the other phases can be addressed, in turn, whether in the same or succeeding releases.
 
 ## References
 
