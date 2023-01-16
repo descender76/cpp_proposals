@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2750R0</td>
+<td>P2750R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-12-19</td>
+<td>2023-1-15</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -67,14 +67,14 @@ a code
   - [References](#References)
 
 ## Changelog
-<!--
-### R0
 
-- The variable scope content was extracted and merged from the `temporary storage class specifiers` [^p2658r0] and `implicit constant initialization` [^p2623r2] proposals.
--->
+### R1
+
+- minor verbiage clarifications
+
 ## Abstract
 
-Dangling of the stack is a programming language and specification defect. Even though the programmer does tell the compiler what to create, size and alignment, also approximately where to create an instance, ultimately it is the compiler that does the actual pushing and popping. Further, the specification states when instances are destroyed and if that allows dangling than the specification needs to take responsibility for its decisions. Even if you don't agree with these sentiments, perhaps you can at least acknowledge that their is the perception of defectiveness and consequently this affects whether `C` is used or another language which doesn't have the perceived defect. This proposal considers multiple non breaking changes that can collectively greatly reduce the dangling of the stack.
+Dangling of the stack is a programming language and specification defect. Even though the programmer does tell the compiler what to create, size and alignment, also approximately where to create an instance, ultimately, it is the compiler that does the actual pushing and popping. Further, the specification states when instances are destroyed and if that allows dangling than the specification needs to take responsibility for its decisions. Even if you don't agree with these sentiments, perhaps you can at least acknowledge that their is the perception of defectiveness and consequently this affects whether `C` is used or another language which doesn't have the perceived defect. This proposal considers multiple non breaking changes that can collectively greatly reduce the dangling of the stack.
 
 ## Motivation
 
@@ -115,7 +115,7 @@ In these cases, these are the facts that a compiler already knows.
 - the variable `local` is locally scoped
 - function `f` is **directly** returning a pointer to a local
 
-The compiler has all that it needs to report this dangling. It also doesn't need to do whole translation unit analysis or whole program analysis just for this function. All of knowledge needed to perform the analysis on function `f` is available in function `f` meaning dangling detection can occur in parallel for speed, serially for resource utilization or some combination of the two. Since the graph of a function is smaller than the graph of a translation unit or program than the processing time is also minimized as graph algorithms processing time growths quadratically or exponentially based on the number nodes in the graph.
+The compiler has all that it needs to report this dangling. It also doesn't need to do whole translation unit analysis or whole program analysis just for this function. All of knowledge needed to perform the analysis on function `f` is available in function `f` meaning dangling detection can occur in parallel for speed, serially for resource utilization or some combination of the two. Since the graph of a function is smaller than the graph of a translation unit or program than the processing time is also minimized as graph algorithms processing time grows quadratically or exponentially based on the number nodes in the graph.
 
 **Why perform dangling error detection for even such a trivial example?**
 
@@ -173,7 +173,7 @@ At worse, this is dangling. At best, this is a logic error.
 
 #### Produce errors for as much **indirect** dangling
 
-In this example, the member of a local is still local.
+In this example, the member `y` of the local named `local` is still local.
 
 ```cpp
 struct Point
@@ -208,7 +208,7 @@ Point* f()
 
 #### Allow programmers to contribute information needed for more **indirect** dangling
 
-In the following example, a programmer uses an attribute `parameter_dependency` to tell the compiler that the return parameter/argument is dependent upon the `point` parameter/argument. In this call instance, `local` is locally scoped so the returned pointer is to something locally scoped.
+In the following example, a programmer uses an attribute `parameter_dependency` to tell the compiler that the return parameter/argument is dependent upon the `point` parameter/argument. In this call instance, `local` is locally scoped. Consequently, the returned pointer is to something locally scoped.
 
 ```cpp
 struct Point
@@ -232,7 +232,7 @@ Point* f()
 
 ### A little more life please
 
-Not all dangling should produce errors. Some code makes perfect sense but based on the current language rules dangle. If we give these instances more life than the code can remain simple and dangling is fixed automatically in the language in a logical way with no intervention from programmers.
+Not all dangling should produce errors. Some code makes perfect sense but based on the current language rules dangle. If we give these instances more life than the code can remain simple and dangling is fixed automatically in the language, in a logical way, with no intervention from programmers.
 
 <table>
 <tr>
