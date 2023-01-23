@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2742R1</td>
+<td>P2742R2</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-1-15</td>
+<td>2023-1-23</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -73,6 +73,10 @@ a code
 - minor verbiage clarifications
 - added the [Tooling Opportunities](#Tooling-Opportunities) section
 
+### R2
+
+- added more references to related proposals
+
 ## Abstract
 
 The `Bind Returned/Initialized Objects to the Lifetime of Parameters` proposal [^p0936r0] floated providing a means for programmers to tell their compilers that a return is dependent upon some parameters such as `this`. The intent was to either `warn only about some possible buggy behavior` [^p0936r0] or to `fix possible buggy behavior by extending the lifetime of temporaries` [^p0936r0]. This path was not pursued because it would result in a viral attribution effort. This proposal tries to resume this path, eventually, with the intention of producing errors on clearly incorrect code.
@@ -83,15 +87,28 @@ There are multiple resolutions to dangling in the `C++` language.
 
 1. Produce an error
     - `Simpler implicit move` [^p2266r3]
+    - `Simpler implicit dangling resolution` [^p2740r0]
     - **This proposal**
 1. Fix with block/variable scoping
     - `Fix the range-based for loop, Rev2` [^p2012r2]
     - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
+    - `variable scope` [^p2730r0]
 1. Fix by making the instance global
+    - `constant dangling` [^p2724r0]
 
 All are valid resolutions and individually are better than the others, given the scenario. This proposal is focused on the first option, which is to produce errors when code is clearly wrong.
 
-This paper advocates adding the `parameter_dependency` attribute to the standard. This attribute can only be applied to functions both free and member. It can be applied more than once. It should be applied only once for each `dependent`. The `dependent` member takes a string which is the name of the parameter that is dependent upon other parameters. The `providers` member takes an array of strings which are the names of the parameters that the `dependent` parameter is dependent upon. A parameter can not be dependent upon oneself. The string "return" can be used for the return parameter and the string "this" can be used for the "this" pointer parameter.
+This paper advocates adding the `parameter_dependency` attribute to the standard.
+
+- This attribute can only be applied to functions both free and member.
+- It can be applied more than once.
+- It should be applied only once for each `dependent`.
+- The `dependent` member takes a string which is the name of the parameter that is dependent upon other parameters.
+- The `providers` member takes an distinct set of strings which are the names of the parameters that the `dependent` parameter is dependent upon.
+- A parameter can not be dependent upon oneself.
+- The string "return" can be used for the return parameter.
+- The string "this" can be used for the "this" pointer parameter.
+- All of the `dependent` and `providers` names should be valid.
 
 ```cpp
 [[parameter_dependency(dependent{"return"}, providers{"this", "left", "right", "first", "second", "last"})]]
@@ -189,7 +206,7 @@ const Wheel& f()
 }
 ```
 
-The fact is, there is no way of knowing with a compiled library without looking at the code and breaking `abstraction`. Even though the `Car` instance was local, `getDriverWheel` could be returning a global instance. However, the `parameter_dependency` attribute tells us, the compiler and any static analyzers that the driver wheel's lifetime is dependent upon the car's instance which is a local and consequently this last example should have produced an error.
+The fact is, there is no way of knowing with a compiled library without looking at the code and breaking `abstraction`. Even though the `Car` instance was local, `getDriverWheel` could be returning a global instance. However, the `parameter_dependency` attribute tells us, the compiler and any static analyzers that the driver wheel's lifetime is dependent upon the car's instance which is a local. Consequently, this last example should also have produced an error.
 
 ## Tooling Opportunities
 
@@ -215,3 +232,9 @@ When coupled with `Simpler implicit move` [^p2266r3] this proposal fixes even mo
 [^p2644r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2644r0.pdf>
 <!--C++ Core Guidelines - F.43: Never (directly or indirectly) return a pointer or a reference to a local object-->
 [^cppcgrf43]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object>
+<!--constant dangling-->
+[^p2724r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2724r0.html>
+<!--variable scope-->
+[^p2730r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2730r0.html>
+<!--Simpler implicit dangling resolution-->
+[^p2740r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2740r0.html>
