@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2730R0</td>
+<td>P2730R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-11-25</td>
+<td>2023-1-28</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -66,6 +66,8 @@ a code
   - [Details](#Details)
     - [Other Anonymous Things](#Other-Anonymous-Things)
     - [Value Categories](#Value-Categories)
+    - [Temporaries](#Temporaries)
+  - [Design Alternatives](#Design-Alternatives)
   - [Summary](#Summary)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
   - [References](#References)
@@ -74,7 +76,12 @@ a code
 
 ### R0
 
-- The variable scope content was extracted and merged from the `temporary storage class specifiers` [^p2658r0] and `implicit constant initialization` [^p2623r2] proposals.
+- The variable scope content was extracted and merged from the `temporary storage class specifiers` [^p2658r1] and `implicit constant initialization` [^p2623r2] proposals.
+
+### R1
+
+- added more references to related proposals
+- added the [Temporaries](#Temporaries) and [Design Alternatives](#Design-Alternatives) sections
 
 ## Abstract
 
@@ -86,11 +93,14 @@ There are multiple resolutions to dangling in the `C++` language.
 
 1. Produce an error
     - `Simpler implicit move` [^p2266r3]
+    - `Simpler implicit dangling resolution` [^p2740r0]
+    - `indirect dangling identification` [^p2742r0]
 1. Fix with block/variable scoping
     - `Fix the range-based for loop, Rev2` [^p2012r2]
     - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
     - **`This proposal`**
 1. Fix by making the instance global
+    - `constant dangling` [^p2724r0]
 
 All are valid resolutions and individually are better than the others, given the scenario. This proposal is focused on the second option, which is to fix by changing the scope of the temporary instance from statement scope to block/variable scope.
 
@@ -276,7 +286,7 @@ The result is the unnatural `indirect dangling of caller's local`. This is also 
 </tr>
 </table>
 
-For simplicity sake, we'll call this `block scope`. In short, `C` has less dangling than `C++`. Dropping the superfluous unnatural braces fixes `indirect dangling of caller's local` but it also fixes `immediate dangling`.
+For simplicity sake, we'll call this `block/local scope`. In short, `C` has less dangling than `C++`. Dropping the superfluous unnatural braces fixes `indirect dangling of caller's local` but it also fixes `immediate dangling`.
 
 ### immediate dangling
 <!--divorced from lifetime of local variable-->
@@ -355,7 +365,7 @@ Let me summarize, statement scoping of a temporary is unnatural because ...
 Consequently, all of the non return direct dangling can be fixed by doing the following two things.
 
 - local variable's temporaries get `variable scope` and
-- function argument's temporaries get `block scope`
+- function argument's temporaries get `block/local scope`
 
 Extending the lifetime of the temporary to be the lifetime of the variable to which it is assigned is not unreasonable for C++. Matter of fact it is already happening but the rules are so targeted that it limits its use by many programmers as the following examples illustrate.
 
@@ -640,7 +650,7 @@ In the wording of these proposals, it says that the temporaries persist until th
 
 This is nothing more than `block scope` where the block in question is the additional block added via the revisions to the range based for loop. Notice too that each temporary was promoted to being an anonymously named variable. In short, this proposal's simplified verbiage covers all existing lifetime extensions.
 
-The only real concern is what would this proposal break. Instances still get destroyed in a deterministic RAII fashion, however, temporary instances will live longer in order to fix dangling. The biggest category of types impacted by this would be by **lock** objects. However, this only occurs when locks are used as a temporary instead of recommended usage of a named instance. This was the same problem for the `range based for loop fix` and was set aside for the greater good of fixing dangling defects in the `C++` language. The rationale is recorded in the following sections in that paper.
+The only real concern is what would this proposal break. Instances still get destroyed in a deterministic RAII fashion, however, temporary instances will live longer in order to fix dangling. The biggest category of types impacted by this would be by **lock** objects. However, this only occurs when locks are used as a temporary instead of the recommended usage of a named instance. This was the same problem for the `range based for loop fix` and was set aside for the greater good of fixing dangling defects in the `C++` language. The rationale is recorded in the following sections in that paper.
 
 - `Is there code that might be broken with the fix?` [^p2012r2]
 - `So, how much code is broken in practice?` [^p2012r2]
@@ -653,7 +663,7 @@ That paper also answers these questions.
 - `But don’t we have tools to detect such lifetime problems?` [^p2012r2]
 - `Shouldn’t we fix lifetime extension for references in general?` [^p2012r2]
 
-Even if it is decided not to fix dangling by changing the default automatically, the paper `temporary storage class specifiers` [^p2658r0] does propose allowing programmers to opt in to this change via a module level attribute. This would allow the vast majority of code bases to do away with most dangling and allow those who need more time to adjust to have the `statement scope` default. It would also serve as a vehicle to allow the standard to change over time. Granted this paper is all about fixing dangling as it is the best option and is inline with past decisions made for the `range based for loop fix`.
+Even if it is decided not to fix dangling by changing the default automatically, the paper `temporary storage class specifiers` [^p2658r1] does propose allowing programmers to opt in to this change via a module level attribute. This would allow the vast majority of code bases to do away with most dangling and allow those who need more time to adjust to have the `statement scope` default. It would also serve as a vehicle to allow the standard to change over time. Granted this paper is all about fixing dangling as it is the best option and is inline with past decisions made for the `range based for loop fix`.
 
 ## Proposed Wording
 
@@ -876,15 +886,15 @@ If temporaries can be changed to have block scope, variable scope or global scop
 </tr>
 </table>
 
-Throughout this paper, I have shown that it makes sense for temporaries [references and pointers] should have variable scope, unless they can be made global scope. From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is, this is simple whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
+Throughout this paper, I have shown that it makes sense for temporaries [references and pointers] should have variable scope, unless they can be made global scope. From the programmers perspective, temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have or is missing; the unmovable unnamed. The point is, this proposal doesn’t collide with the rest of the language whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
 
-### Avoids superfluous moves
+#### Avoids superfluous moves
 
 The proposed avoids superfluous moves. Copying pointers and lvalue references are cheaper than performing a move which is cheaper than performing any non trivial value copy.
 
-### Undo forced naming
+#### Undo forced naming
 
-The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can not be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling. Further, according to the `C++ Core Guidelines`, it is developers practice to do the following:
+The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can not be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling. Further, according to the `C++ Core Guidelines`, it is developers practice to limit our scopes:
 
 - *ES.5: Keep scopes small* [^cppcges5]
 - *ES.6: Declare names in for-statement initializers and conditions to limit scope* [^cppcges6]
@@ -1002,7 +1012,7 @@ int main()
 
 No templating needed. No duplicate functions. No superfluous naming. Just more anonymous and concise, easy to understand code.
 
-### Allows more anonymous variables
+#### Allows more anonymous variables
 
 The `C++ Core Guidelines` [^cppcgcp44] excourages programmers "to name your lock_guards and unique_locks" because "a temporary" "immediately goes out of scope".
 
@@ -1023,6 +1033,18 @@ lock_guard<mutex> {m2};
 ```
 
 With this proposal these instances do not immediately go out of scope. As such we get the locking benefits without having to make up a name. Again, not having a name means their is less to return and potentially dangle.
+
+### Temporaries
+
+With the sudden drop in the number of prvalues. One might wonder how this impacts move semantics. Xvalues would remain relatively untouched. Move semantics was created to provide 2 primary features to C++. The first feature, RVO, return value optimization is preserved as the temporary is an xvalue. Compilers can still use move constructors and assignment operators to move instances. The second feature, forwarding, is also preserved as values and lvalue references are simply copied. Now there are just more lvalue references.
+
+## Design Alternatives
+
+The `temporary storage class specifiers` [^p2658r1] proposal advocates for manually opting into this via a module level attribute. This has the advantage that it allows the standard to migrate their community to a new default. It has the disadvantage that it would first complicate the standard for a while until the migration is over with.
+
+While not advocating for this proposal, the `indirect dangling identification` [^p2742r0] proposal could be used to allow function authors to opt into this functionality on a per parameter basis. This has the advantage of greatly reducing breaking arcane <!-- understood by few; mysterious or secret --> temporary locking code. It has the disadvantage of not being able to simplify the standard verbiage and besides its verbiage would still need parts of this proposal applied selectively for native types.
+
+Either alternative could be used to extend the instance lifetime in the same way as this proposal.
 
 ## Summary
 
@@ -1089,14 +1111,15 @@ else
 <td>
 
 ```cpp
-int* i = &5;// or uninitialized
+// or uninitialized
+int* i = & (int) { 5 };
 if(whatever)
 {
-  i = &7;
+  i = & (int) { 7 };
 }
 else
 {
-  i = &9;
+  i = & (int) { 9 };
 }
 // use i
 ```
@@ -1147,7 +1170,9 @@ When programmers use temporaries, unnamed variables, instead of named variables,
 
 Consequently, this indeterminiteness remains regards of whether the temporary was scoped to the statement or the block. In this proposal, while the point of creation remains the same, the point of deletion gets extended just enough to remove **immediate** dangling. Since the temporary variable is by definition unnamed, any chance of breakage is greatly minimized because other than the parameter it was directly passed to, nothing else has a reference to it.
 
-The proposed lifetimes matches or exceeds those of the current temporary lifetime extension rules in `C++`. In all of the standard examples the temporary lifetime is extended to the assigned variable. However, in reality, since all of these initial assignments are to the block then the real lifetime is to the block that contains the expression that contains the temporary. This is the same as this proposal. However, when the initialization statement is passed directly as an argument of a function call than it is the current statement lifetime since the argument is the variable. In other words, no additional life was given. This proposal improves the consistency by giving these argument temporaries the same block lifetime in order to eliminate immediate dangling and reduce further dangling. This proposal examines the `?:` ternary operator example and asks the question shouldn't this work for variables that are delayed initialized or reinitialized inside of the `if` and `else` clauses of `if/else` statements? Shouldn't the block of the variable declared above a `if/else` statement be used over the blocks of `if` and `else` clause where the temporary was assigned? This seems reasonable and would fix even more dangling. Consequently, all direct dangling is fixed within any given function and all we are left with are the indirect dangling which tends to be more complicated and easily avoided with simpler code.
+The proposed lifetimes matches or exceeds those of the current temporary lifetime extension rules in `C++`. In all of the standard examples the temporary lifetime is extended to the assigned variable. However, in reality, since all of these initial assignments are to the block then the real lifetime is to the block that contains the expression that contains the temporary. This is the same as this proposal. However, when the initialization statement is passed directly as an argument of a function call than it is the current statement lifetime since the argument is the variable. In other words, no additional life was given. This proposal improves the consistency by giving these argument temporaries the same block lifetime in order to eliminate immediate dangling and reduce further dangling.
+    
+Rurther, this proposal examines the `?:` ternary operator example and asks the question shouldn't this work for variables that are delayed initialized or reinitialized inside of the `if` and `else` clauses of `if/else` statements? Shouldn't the block of the variable declared above a `if/else` statement be used over the blocks of `if` and `else` clause where the temporary was assigned? This seems reasonable and would fix even more dangling. Consequently, all direct dangling is fixed within any given function and all we are left with are the indirect dangling which tends to be more complicated and easily avoided with simpler code.
 
 ### Who would even use these features? Their isn't sufficient use to justify these changes.
 
@@ -1210,7 +1235,7 @@ All of this can be done without adding any new keywords or any new attributes. W
 ## References
 
 <!--temporary storage class specifiers-->
-[^p2658r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2658r0.html>
+[^p2658r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2658r1.html>
 <!--implicit constant initialization-->
 [^p2623r2]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2623r2.html>
 <!-- Constant initialization -->
@@ -1283,3 +1308,9 @@ All of this can be done without adding any new keywords or any new attributes. W
 [^p2012r2]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2012r2.pdf>
 <!--Get Fix of Broken Range-based for Loop Finally Done-->
 [^p2644r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2644r0.pdf>
+<!--constant dangling-->
+[^p2724r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2724r0.html>
+<!--Simpler implicit dangling resolution-->
+[^p2740r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2740r0.html>
+<!--indirect dangling identification-->
+[^p2742r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2742r0.html>
