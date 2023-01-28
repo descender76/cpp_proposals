@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2724R0</td>
+<td>P2724R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2022-12-11</td>
+<td>2023-1-28</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -78,9 +78,13 @@ a code
 
 - The constant content was extracted and merged from the `temporary storage class specifiers` [^p2658r0] and `implicit constant initialization` [^p2623r2] proposals.
 
+### R1
+
+- added more references to related proposals
+
 ## Abstract
 
-This paper proposes the standard adds anonymous global constants to the language with the intention of automatically fixing a shocking type of dangling which occurs when constants or that which should be constants dangle. This is shocking because constant like instances should really have constant-initialization meaning that they should have static storage duration and consequently should not dangle. This trips up beginner code requiring teaching dangling on day one. It is annoying to non beginners. Constants are used as defaults in production code. Constants are also frequently used in test and example code. Further, many instances of dangling used by non `C++` language comparisons frequently use constants as examples.
+This paper proposes the standard adds anonymous global constants to the language with the intention of automatically fixing a shocking type of dangling which occurs when constants or that which should be constants dangle. This is shocking because constant like instances should really have constant-initialization meaning that they should have static storage duration and consequently should not dangle. This trips up beginner code, requiring teaching dangling on day one. It is annoying to non beginners. Constants are used as defaults in production code. Constants are also frequently used in test and example code. Further, many instances of dangling used by non `C++` language comparisons frequently use constants as examples.
 
 ## Motivation
 
@@ -88,9 +92,12 @@ There are multiple resolutions to dangling in the `C++` language.
 
 1. Produce an error
     - `Simpler implicit move` [^p2266r3]
+    - `Simpler implicit dangling resolution` [^p2740r0]
+    - `indirect dangling identification` [^p2742r0]
 1. Fix with block/variable scoping
     - `Fix the range-based for loop, Rev2` [^p2012r2]
     - `Get Fix of Broken Range-based for Loop Finally Done` [^p2644r0]
+    - `variable scope` [^p2730r0]
 1. Fix by making the instance global
     - **`This proposal`**
 
@@ -123,7 +130,7 @@ Making an instance global is a legitimate fix to dangling.
 
 While making an instance global doesn't fix all dangling in the language, it is the only resolution that can fix all three most shocking types of dangling provided the instance in question is a constant. It is also the **best** fix for these instances.
 
-Since `constexpr` was added to the language in `C++11` there has been an increase in the candidates of temporary instances that could be turned into global constants. ROMability was in part the motivation for `constexpr` but the requirement was never made. Even if a `C++` architecture doesn't support ROM, it is still required by language to support `static storage duration` and `const`. Matter of fact, due to the immutable nature of constant-initialized constant expressions, these expressions/instances are constant for the entire program even though they, at present, don't have `static storage duration`, even if just <a href="#What-about-locality-of-reference" title="What-about-locality-of-reference">logically</a>. There is a greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time.
+Since `constexpr` was added to the language in `C++11` there has been an increase in the candidates of temporary instances that could be turned into global constants. ROMability was in part the motivation for `constexpr` but the requirement was never made. Even if a `C++` architecture doesn't support ROM, it is still required by the language to support `static storage duration` and `const`. Matter of fact, due to the immutable nature of constant-initialized constant expressions, these expressions/instances are constant for the entire program even though they, at present, don't have `static storage duration`, even if just <a href="#What-about-locality-of-reference" title="What-about-locality-of-reference">logically</a>. There is a greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time.
 
 ## Motivating Examples
 
@@ -144,7 +151,7 @@ The `constinit` specifier can be applied to temporaries. Applying it asserts tha
 
 While `implicit constant initialization` automatically fixes dangle, `constinit` allows the programmers to manually and explicitly fix some dangling. The former is better for programmers and the language, while the later favors code reviewers or programmers who copy an example and want to have the compiler, momentarily, verify whether it is correct.
 
-So what sorts of dangling does this fix for us. Besides fixing some dangling, this also fixes some inconsistencies between string literals [^n4910] <sup>*(5.13.5 String literals [lex.string])*</sup> and other literal types.
+So what sorts of issues does this fix for us. Besides fixing some dangling, this also fixes some inconsistencies between string literals [^n4910] <sup>*(5.13.5 String literals [lex.string])*</sup> and other literal types.
 
 ```cpp
 // does not dangle because string literals are lvalues with static storage duration
@@ -240,7 +247,7 @@ It should be noted too that the current rules of temporaries discourages the use
 
 **6.7.5.4 Automatic storage duration [basic.stc.auto]**
 
-<sub>1</sub> Variables that belong to a block or parameter scope and are not explicitly declared static, thread_local, ~~or~~ extern ++or had not underwent implicit constant initialization (6.9.3.2)++ have automatic storage duration. The storage for these entities lasts until the block in which they are created exits.
+<sub>1</sub> Variables that belong to a block or parameter scope and are not explicitly declared static, thread_local, ~~or~~ extern ++or had not underwent implicit or explicit constant initialization (6.9.3.2)++ have automatic storage duration. The storage for these entities lasts until the block in which they are created exits.
 
 ...
 
@@ -248,7 +255,7 @@ It should be noted too that the current rules of temporaries discourages the use
 
 ...
 
-<sub>2</sub> Constant initialization is performed ++explicitly++ if a variable or temporary object with static or thread storage duration is constant-initialized (7.7). ++Constant initialization is performed implicitly if a non mutable const variable or non mutable const temporary object is constant-initialized (7.7).++ If constant initialization is not performed, a variable with static storage duration (6.7.5.2) or thread storage duration (6.7.5.3) is zero-initialized (9.4). Together, zero-initialization and constant initialization are called static initialization; all other initialization is dynamic initialization. All static initialization strongly happens before (6.9.2.2) any dynamic initialization.
+<sub>2</sub> Constant initialization is performed ++explicitly++ if a variable or temporary object with static or thread storage duration is constant-initialized (7.7) ++or if a variable or temporary is specified with the `constinit` specifier. Constant initialization is performed implicitly if a non mutable const variable or non mutable const temporary object is constant-initialized (7.7).++ If constant initialization is not performed, a variable with static storage duration (6.7.5.2) or thread storage duration (6.7.5.3) is zero-initialized (9.4). Together, zero-initialization and constant initialization are called static initialization; all other initialization is dynamic initialization. All static initialization strongly happens before (6.9.2.2) any dynamic initialization.
 
 ...
 
@@ -320,7 +327,7 @@ Further, this behavior happens all the time with evaluations of constant express
 </tr>
 </table>
 
-These ROM-able instances do not dangle as globals but from our code perspective they currently look like dangling locals. This causes false positive with our static analyzers and the programmer's themselves. If we would just admit from a language standpoint that these are indeed constants than not only do we fix some dangling but also our mental model. This same reference also says "constant initialization is performed if a ... temporary object with static ... storage duration is constant-initialized". Programmers can't fully utilize this scenario because at present we can only use `static` on class members and locals but not temporary arguments. Since the code identified by this paper is already subject to constant initialization than there is no real chance of these changes causing any breakage.
+These ROM-able instances do not dangle as globals but from our code perspective they currently look like dangling locals. Further release builds may not dangle, while debug builds do. This also causes false positive with our static analyzers and the programmer's themselves. If we would just admit from a language standpoint that these are indeed constants than not only do we fix some dangling but also our mental model. This same reference also says "constant initialization is performed if a ... temporary object with static ... storage duration is constant-initialized". Programmers can't fully utilize this scenario because at present we can only use `static` on class members and locals but not temporary arguments. Since the code identified by this paper is already subject to constant initialization than there is no real chance of these changes causing any breakage.
 
 ## Value Categories
 
@@ -360,7 +367,7 @@ If some temporaries can be changed to have global scope than how does it affect 
 </tr>
 </table>
 
-From the programmers perspective, global temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have; the unmovable unnamed. The point is, this is simple whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
+From the programmers perspective, global temporaries are just anonymously named variables. When they are passed as arguments, they have life beyond the life of the function that it is given to. As such the expression is not movable. As such, the desired behavior described throughout the paper is that they are `lvalues` which makes sense from a anonymously named standpoint. However, it must be said that technically they are unnamed which places them into the value category that `C++` currently does not have or is missing; the unmovable unnamed. The point is, this proposal doesn't collide with the rest of the language whether it is worded as a `lvalue` or an unambiguous new value category that behaves like a `lvalue`. Regardless of which, there are some advantages that must be pointed out.
 
 ### Avoids superfluous moves
 
@@ -368,34 +375,34 @@ The proposed avoids superfluous moves. Copying pointers and lvalue references ar
 
 ### Undo forced naming
 
-The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can't be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling. Further, according to the `C++ Core Guidelines`, it is developers practice to do the following:
+The proposed makes using types that delete their `rvalue` reference constructor easier to use. For instance, `std::reference_wrapper` can't be created/reassigned with a `rvalue` reference, i.e. temporaries. Rather, it must be created/reassigned with a `lvalue` reference created on a seperate line. This requires superfluous naming which increases the chances of dangling and it adds an additional line of code. Further, according to the `C++ Core Guidelines`, it is developers practice to do the following:
 
 - *ES.5: Keep scopes small* [^cppcges5]
 - *ES.6: Declare names in for-statement initializers and conditions to limit scope* [^cppcges6]
 
 ```cpp
 // currently not permitted; works as proposed
-std::reference_wrapper<int> rwi1(5);
+std::reference_wrapper<const int> rwi1(5);
 // current forced usage
 int value1 = 5;
-std::reference_wrapper<int> rwi2(value1);
+std::reference_wrapper<const int> rwi2(value1);
 if(randomBool())
 {
     int value2 = 7;// ES.5, ES.6
-    rwi2 = ref(value2);// dangles with block scope
-    rwi2 = ref(7);// ok, safe and easy with global scope proposal
+    rwi2 = std::cref(value2);// dangles with block scope
+    rwi2 = std::cref(7);// ok, safe and easy with global scope proposal
     rwi2 = 7;// might make sense to add back direct assignment operator
 }
 else
 {
     int value3 = 9;// ES.5, ES.6
-    rwi2 = ref(value3);// dangles with block scope
-    rwi2 = ref(9);// ok, safe and easy with global scope proposal
+    rwi2 = std::cref(value3);// dangles with block scope
+    rwi2 = std::cref(9);// ok, safe and easy with global scope proposal
     rwi2 = 9;// might make sense to add back direct assignment operator
 }
 ```
 
-Since the variable `value2` and `value3` is likely to be created manually at block scope instead of variable scope, it can accidentally introduce more dangling. Constructing and reassigning with a `global scoped` `lvalue` temporary avoids these common dangling possibilities along with simplifying the code.
+Since the variable `value2` and `value3` is likely to be created manually at block scope instead of variable scope, it can accidentally and naturally introduce more dangling. Constructing and reassigning with a `global scoped` `lvalue` temporary avoids these common dangling possibilities along with simplifying the code.
 
 ## Performance Considerations
 
@@ -562,7 +569,7 @@ main:                                   # @main
 
 ### indirect dangling of caller's local
 
-Similarly to, the next three examples produce the same assembly in the 3 `clang` cases and 2 of the `gcc` cases. `GCC` would have produced the same result in its 2nd case had it had treated the `const` expected evaluation of a constant expression as a global constant as its third case did. 
+Similarly, the next three examples produce the same assembly in the 3 `clang` cases and 2 of the `gcc` cases. `GCC` would have produced the same result in its 2nd case had it had treated the `const` expected evaluation of a constant expression as a global constant as its third case did. 
 
 #### local constant but logically a global constant
 
@@ -659,7 +666,7 @@ main:                                   # @main
         ret
 ```
 
-In all these logically global constant cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So, the worst case performance of this proposal would be a single upfront load time cost. Contrast that with the current potential local constant cost of constantly creating and destroying instances, even multiple times concurrently in different threads. Even the proposed cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations since `std::string` and `std::vector` are now `constexpr`.
+In all these logically global constant cases, no instance was actually stored global but was perfectly inlined as an assembly opcode constant. So, the worst case performance of this proposal would be a single upfront load time cost. Contrast that with the current potential local constant cost of constantly creating and destroying instances, even multiple times concurrently in different threads. Even the proposed cost can go from 1 to 0 while the current non global local could result in superfluous dynamic allocations despite the fact that `std::string` and `std::vector` are now `constexpr`.
 
 ### Microsoft's compiler and existing dangling detection
 
@@ -696,7 +703,11 @@ int main()
 </td>
 </tr>
 <tr>
-<td>&nbsp;</td>
+<td>
+
+**unoptimized**
+
+</td>
 <td>
 
 **/Ox optimizations (favor speed)**
@@ -784,7 +795,11 @@ int main()
 </td>
 </tr>
 <tr>
-<td>&nbsp;</td>
+<td>
+
+**unoptimized**
+
+</td>
 <td>
 
 **/Ox optimizations (favor speed)**
@@ -876,7 +891,11 @@ int main()
 </td>
 </tr>
 <tr>
-<td>&nbsp;</td>
+<td>
+
+**unoptimized**
+
+</td>
 <td>
 
 **/Ox optimizations (favor speed)**
@@ -976,7 +995,11 @@ int main()
 </td>
 </tr>
 <tr>
-<td>&nbsp;</td>
+<td>
+
+**unoptimized**
+
+</td>
 <td>
 
 **/Ox optimizations (favor speed)**
@@ -1097,7 +1120,9 @@ mov <register>,<constant>
 mov <memory>,<constant>
 ```
 
-What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not. It should also be noted that the later unnamed/unaddressable version physically can't dangle.
+<!--What is more interesting is these two examples of constants have different value categories since the ROM version is addressable and the instruction only version, clearly, is not.-->
+
+It should also be noted that the later unnamed/unaddressable version physically can't dangle.
 
 ### Won't this break a lot of existing code?
 
@@ -1121,7 +1146,7 @@ This feature not only changes the point of destruction but also the point of con
 
 So, what is the point? For the instances that would benefit from implicit constant initialization, their are currently NO guarantees as far as their lifetime and as such is indeterminite. With this portion of the proposal, a guarantee is given and as such that which was non determinite becomes determinite.
 
-It should also be noted that while this enhancement is applied implicitly, programmers has opted into this up to three times.
+It should also be noted that if this enhancement is applied implicitly, programmers has still opted into this up to three times.
 
 1. The programmer of the type must have provided a means for the type to be constructed at compile time likely by having a `constexpr` constructor.
 1. The programmer of the variable or function parameter must have stated that they want a `const`.
@@ -1192,7 +1217,7 @@ It is plain to see that `{1,2}` is constant-initialized as it is composed entire
 - Is the first parameter to the function `f` const?
 - Is the type of the first parameter to the function `f` a `LiteralType`?
 
-The fact is some programmer had to have known the answer to both questions in order to have writtern  `f({1,2})` in the first place. The case could be made that it would be nice to be able to use the `constinit` keyword on temporary arguments, `f(constinit {1, 2})`, as this would allow those who don't write the code, such as code reviewers, to quickly validate the code. Even the programmer would benefit, some, if the code was copied. However, `constinit` would mostly be superfluous, if the `temporaries are just anonymously named variables` feature is added. As such, `constinit` should be optional. Consequently, any negative impact upon identifying and teaching dangling is negligible.
+The fact is some programmer had to have known the answer to both questions in order to have writtern  `f({1,2})` in the first place. The case could be made that it would be nice to be able to use the `constinit` keyword on temporary arguments, `f(constinit {1, 2})`, as this would allow those who don't write the code, such as code reviewers, to quickly validate the code. Even the programmer would benefit, some, if the code was copied. However, `constinit` would mostly be superfluous, if `variable scope` [^p2730r0] proposal's is added as it would be fixed regardless. As such, `constinit` should be optional. Consequently, any negative impact upon identifying and teaching dangling is negligible.
 
 Yet, both `implicit and explicit constant initialization` feature, by itself, makes it easier to identify and teach dangling.
 
@@ -1242,8 +1267,7 @@ All of this can be done without adding any new keywords or any new attributes. W
 These specifiers apply to the temporary immediately to the right of said specifier and to any child temporaries. It does not impact any parent or sibling temporaries. Consider these examples:
 
 ```cpp
-// all of the temporaries has the default temporary scope as
-// specified by the module attribute otherwise statement scope
+// all of the temporaries has the default temporary scope of statement scope
 f({1, { {2, 3}, 4}, {5, 6} });
 // only 4 has constinit scope
 f({1, { {2, 3}, constinit 4}, {5, 6} });
@@ -1366,3 +1390,9 @@ f({1, { {2, 3}, 4}, {constinit 5, 6} });
 [^n3038]: <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3038.htm>
 <!--The `constexpr` specifier-->
 [^n2917]: <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2917.pdf>
+<!--variable scope-->
+[^p2730r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2730r0.html>
+<!--Simpler implicit dangling resolution-->
+[^p2740r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2740r0.html>
+<!--indirect dangling identification-->
+[^p2742r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2742r0.html>
