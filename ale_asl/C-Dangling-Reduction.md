@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2750R1</td>
+<td>P2750R2</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-1-15</td>
+<td>2023-1-28</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -72,9 +72,13 @@ a code
 
 - minor verbiage clarifications
 
+### R2
+
+- revised examples for correctness
+
 ## Abstract
 
-Dangling of the stack is a programming language and specification defect. Even though the programmer does tell the compiler what to create, size and alignment, also approximately where to create an instance, ultimately, it is the compiler that does the actual pushing and popping. Further, the specification states when instances are destroyed and if that allows dangling than the specification needs to take responsibility for its decisions. Even if you don't agree with these sentiments, perhaps you can at least acknowledge that their is the perception of defectiveness and consequently this affects whether `C` is used or another language which doesn't have the perceived defect. This proposal considers multiple non breaking changes that can collectively greatly reduce the dangling of the stack.
+Dangling of the stack is a programming language and specification defect. Even though the programmer does tell the compiler what to create, size and alignment, also approximately where to create an instance, ultimately, it is the compiler that does the actual pushing and popping. Further, the specification states when instances are destroyed and if that allows dangling than the specification needs to take responsibility for its decisions. Even if you don't agree with these sentiments, perhaps you can at least acknowledge that their is the perception of defectiveness and consequently this affects whether `C` is used versus another language which doesn't have the perceived defect. This proposal considers multiple non breaking changes that can collectively greatly reduce the dangling of the stack.
 
 ## Motivation
 
@@ -95,7 +99,7 @@ Some code is just wrong and the compiler should know. As such it would be ideal 
 ```cpp
 int* f()
 {
-    return & 1;// dangling
+    return & (int) { 1 };// dangling
 }
 ```
 
@@ -115,7 +119,7 @@ In these cases, these are the facts that a compiler already knows.
 - the variable `local` is locally scoped
 - function `f` is **directly** returning a pointer to a local
 
-The compiler has all that it needs to report this dangling. It also doesn't need to do whole translation unit analysis or whole program analysis just for this function. All of knowledge needed to perform the analysis on function `f` is available in function `f` meaning dangling detection can occur in parallel for speed, serially for resource utilization or some combination of the two. Since the graph of a function is smaller than the graph of a translation unit or program than the processing time is also minimized as graph algorithms processing time grows quadratically or exponentially based on the number nodes in the graph.
+The compiler has all that it needs to report this dangling. It also doesn't need to do whole translation unit analysis or whole program analysis just for this function. All of knowledge needed to perform the analysis on function `f` is available in function `f` meaning dangling detection can occur in parallel for speed, serially for resource utilization or some combination of the two. Since the graph of a function is smaller than the graph of a translation unit or program than the processing time is also minimized as graph algorithms processing time grows quadratically or exponentially based on the number of nodes in the graph.
 
 **Why perform dangling error detection for even such a trivial example?**
 
@@ -128,7 +132,7 @@ Even if the language/specification/compiler doesn't handle **indirect** dangling
 I look at reporting errors as being provided by the standard in three phases.
 
 - Produce errors for simple **direct** dangling
-- Produce errors for as much **indirect** dangling
+- Produce errors for as much **indirect** dangling as possible
 - Allow programmers to contribute information needed for even more **indirect** dangling
 
 #### Produce errors for simple **direct** dangling
@@ -142,9 +146,9 @@ struct Point
     int y;
 };
 
-Point* f()
+struct Point* f()
 {
-    Point local = {1, 3};
+    struct Point local = {1, 3};
     return &local;// dangling
 }
 ```
@@ -171,7 +175,7 @@ In order to address these types of dangling, in the language, we need to add a r
 
 At worse, this is dangling. At best, this is a logic error.
 
-#### Produce errors for as much **indirect** dangling
+#### Produce errors for as much **indirect** dangling as possible
 
 In this example, the member `y` of the local named `local` is still local.
 
@@ -182,9 +186,9 @@ struct Point
     int y;
 };
 
-int* f()
+struct Point* f()
 {
-    Point local = {1, 3};
+    struct Point local = {1, 3};
     return &local.y;// dangling
 }
 ```
@@ -198,10 +202,10 @@ struct Point
     int y;
 };
 
-Point* f()
+struct Point* f()
 {
-    Point local = {1, 3};
-    Point* p = &local;
+    struct Point local = {1, 3};
+    struct Point* p = &local;
     return p;// dangling
 }
 ```
@@ -218,14 +222,14 @@ struct Point
 };
 
 [[parameter_dependency(dependent{"return"}, providers{"point"})]]
-Point* obfuscating_f(Point* point)
+struct Point* obfuscating_f(struct Point* point)
 {
     return point;
 }
 
-Point* f()
+struct Point* f()
 {
-    Point local = {1, 3};
+    struct Point local = {1, 3};
     return obfuscating_f(&local);// dangling
 }
 ```
@@ -267,14 +271,14 @@ else
 <td>
 
 ```cpp
-int* i = &5;// or uninitialized
+int* i = & (int) { 5 };// or uninitialized
 if(whatever)
 {
-  i = &7;
+  i = & (int) { 7 };
 }
 else
 {
-  i = &9;
+  i = & (int) { 9 };
 }
 // use i
 ```
@@ -347,7 +351,7 @@ Instances that are placed in read-only memory do not dangle because they are glo
 ```cpp
 const int* f()
 {
-    return & 1;// no dangling, logically global constant
+    return & (int) { 1 };// no dangling, logically global constant
 }
 ```
 
@@ -366,23 +370,23 @@ struct Point
     int y;
 };
 
-const Point* f()
+const struct Point* f()
 {
-    const Point local = {1, 3};// it could be argued this const is implicit
+    const struct Point local = {1, 3};// it could be argued this const is implicit
     return &local;// no dangling, logically global constant
 }
 ```
 
 ```cpp
-struct Point
+struct struct Point
 {
     int x;
     int y;
 };
 
-const int* f()
+const struct Point* f()
 {
-    const Point local = {1, 3};// it could be argued this const is implicit
+    const struct Point local = {1, 3};// it could be argued this const is implicit
     return &local.y;// no dangling, logically global constant
 }
 ```
@@ -395,9 +399,9 @@ struct Point
     int y;
 };
 
-const Point* f()
+const struct Point* f()
 {
-    const Point global = {1, 3};// it could be argued this const is implicit
+    const struct Point global = {1, 3};// it could be argued this const is implicit
     Point* p = &global;
     return p;// no dangling, logically global constant
 }
@@ -411,14 +415,14 @@ struct Point
 };
 
 [[parameter_dependency(dependent{"return"}, providers{"point"})]]
-const Point* obfuscating_f(Point* point)
+const struct Point* obfuscating_f(struct Point* point)
 {
     return point;
 }
 
-Point* f()
+struct Point* f()
 {
-    const Point global = {1, 3};// it could be argued this const is implicit
+    const struct Point global = {1, 3};// it could be argued this const is implicit
     return obfuscating_f(&global);// no dangling, logically global constant
 }
 ```
@@ -431,14 +435,14 @@ struct Point
 };
 
 [[parameter_dependency(dependent{"return"}, providers{"point"})]]
-const Point* obfuscating_f(Point* point)
+const struct Point* obfuscating_f(struct Point* point)
 {
     return point;
 }
 
-Point* f()
+struct Point* f()
 {
-    return obfuscating_f(constexpr &(Point){1, 3});// no dangling, logically global constant
+    return obfuscating_f(constexpr & (struct Point) {1, 3});// no dangling, logically global constant
 }
 ```
 
@@ -458,8 +462,7 @@ The advantages to `C++` with adopting this proposal is manifold.
 ### Why is this a `C` proposal and not a `C++` proposal?
 
 1. Think of this as a meta-proposal that the `C++` community can offer to the `C` community in order to strengthen our shared community.
-1. This paper is a consolidation of multiple dangling papers to show what could be done for a `C` subset of `C++` for code that is more pointer heavy instead of lvalue reference. This scenario may occur in older and larger code bases. Further, this serves to highlight that changes meant to make higher level code safer also applies to lower level.
-
+1. This paper is a consolidation of multiple dangling papers to show what could be done for a `C` subset of `C++` for code that is more pointer heavy instead of lvalue reference and reference_wrapper heavy. This scenario may occur in older and larger code bases. Further, this serves to highlight that changes meant to make higher level code safer also applies to lower level code.
 
 ## References
 
