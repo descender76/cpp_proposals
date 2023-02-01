@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-1-28</td>
+<td>2023-1-31</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -378,7 +378,7 @@ const struct Point* f()
 ```
 
 ```cpp
-struct struct Point
+struct Point
 {
     int x;
     int y;
