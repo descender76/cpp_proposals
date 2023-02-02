@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-1-31</td>
+<td>2023-2-1</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -186,7 +186,7 @@ struct Point
     int y;
 };
 
-struct Point* f()
+int* f()
 {
     struct Point local = {1, 3};
     return &local.y;// dangling
@@ -236,7 +236,7 @@ struct Point* f()
 
 ### A little more life please
 
-Not all dangling should produce errors. Some code makes perfect sense but based on the current language rules dangle. If we give these instances more life than the code can remain simple and dangling is fixed automatically in the language, in a logical way, with no intervention from programmers.
+Not all dangling should produce errors. Some code makes perfect sense but dangle based on the current language rules dangle. If we give these instances more life than the code can remain simple and dangling is fixed automatically in the language, in a logical way, with no intervention from programmers.
 
 <table>
 <tr>
@@ -384,7 +384,7 @@ struct Point
     int y;
 };
 
-const struct Point* f()
+const int* f()
 {
     const struct Point local = {1, 3};// it could be argued this const is implicit
     return &local.y;// no dangling, logically global constant
@@ -455,7 +455,7 @@ The advantages to `C++` with adopting this proposal is manifold.
 - Simpler
   - Encourages the use of [compound] literals
   - Encourages the use of `const` and `constexpr`
-  - Standardize existing practice allows programmers to take advantage of what compilers have already been doing for a long time
+  - Standardizing existing practice allows programmers to take advantage of what compilers have already been doing for a long time
 
 ## Frequently Asked Questions
 
