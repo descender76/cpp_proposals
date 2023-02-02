@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-2-1</td>
+<td>2023-2-2</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -236,7 +236,7 @@ struct Point* f()
 
 ### A little more life please
 
-Not all dangling should produce errors. Some code makes perfect sense but dangle based on the current language rules dangle. If we give these instances more life than the code can remain simple and dangling is fixed automatically in the language, in a logical way, with no intervention from programmers.
+Not all dangling should produce errors. Some code makes perfect sense but dangle based on the current language rules. If we give these instances more life than the code can remain simple and dangling is fixed automatically in the language, in a logical way, with no intervention from programmers.
 
 <table>
 <tr>
@@ -327,7 +327,7 @@ Here is the current C verbiage.
 
 ### A lot more life please
 
-While the preceding fixes would handle most dangling of the stack in `C` some instances would be better served if it had a lot more life. In particular, if they had `static storage duration`. This would apply for anything that reasonably could be made a constant either implicitly of explicitly.
+While the preceding fixes would handle most dangling of the stack in `C` some instances would be better served if it had a lot more life. In particular, if they had `static storage duration`. This would apply for anything that reasonably could be made a constant either implicitly or explicitly.
 
 I apologize for the next reference but I couldn't say it better or more succinctly.
 
@@ -346,7 +346,7 @@ Objects declared with const-qualified types **MAY** be placed in read-only memor
 </tr>
 </table>
 
-Instances that are placed in read-only memory do not dangle because they are global. Instances that are not "stored at all", because a global/local inline assembly constant was used, does not have anything to dangle. Even a instance that has static storage duration [and const] do not dangle. The issue is right now there are local constants that dangle, according to the standard, but doesn't dangle because the compiler handled it but the programmer is unaware that it was fixed. Due to this ambiguity, programmer have to pessimistically make their code ugly by adding more superfluous lines of code and more superfluous naming to ensure that dangling does not occur. If **MAY** is changed to a definitive **ARE** than dangling can be fixed in the language in the best possible way for these instances with no programmer intervention needed. Keep in mind too that `const` predates `constexpr` so their are many more instances that would benefit from this type of dangling resolution. We would just be standardising existing practice. So thet's consider some examples. These are just `const` versions of many of the previous examples.
+Instances that are placed in read-only memory do not dangle because they are global. Instances that are not "stored at all", because a global/local inline assembly constant was used, does not have anything to dangle. Even a instance that has static storage duration [and const] do not dangle. The issue is right now there are local constants that dangle, according to the standard, but doesn't dangle because the compiler handled it but the programmer is unaware that it was fixed. Due to this ambiguity, programmer have to pessimistically make their code ugly by adding more superfluous lines of code and more superfluous naming to ensure that dangling does not occur. If **MAY** is changed to a definitive **WILL** than dangling can be fixed in the language in the best possible way for these instances, with no programmer intervention needed. Keep in mind too that `const` predates `constexpr` so their are many more instances that would benefit from this type of dangling resolution. We would just be standardising existing practice. So thet's consider some examples. These are just `const` versions of many of the previous examples.
 
 ```cpp
 const int* f()
@@ -462,7 +462,7 @@ The advantages to `C++` with adopting this proposal is manifold.
 ### Why is this a `C` proposal and not a `C++` proposal?
 
 1. Think of this as a meta-proposal that the `C++` community can offer to the `C` community in order to strengthen our shared community.
-1. This paper is a consolidation of multiple dangling papers to show what could be done for a `C` subset of `C++` for code that is more pointer heavy instead of lvalue reference and reference_wrapper heavy. This scenario may occur in older and larger code bases. Further, this serves to highlight that changes meant to make higher level code safer also applies to lower level code.
+1. This paper is a consolidation of multiple dangling papers to show what could be done for a `C` subset of `C++` or for code that is more pointer heavy instead of lvalue reference and reference_wrapper heavy. This scenario may occur in older and larger code bases. Further, this serves to highlight that changes meant to make higher level code safer also applies to lower level code.
 
 ## References
 
