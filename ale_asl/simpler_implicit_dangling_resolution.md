@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-1-28</td>
+<td>2023-2-2</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -207,7 +207,7 @@ auto coroutine() {
 
 Consequently, another rule needs to be added.
 
-<span style="color:red">**RULE: You can not return a lambda or coroutine that captures a pointer or reference to a local.**</span>
+<span style="color:red">**RULE: You can not return a lambda or coroutine that directly captures a pointer or reference to a local.**</span>
 
 While a combination of these two rules would mean `std::optional` of a lambda or coroutine that captures a pointer or reference to a local should also be invalid, this proposal does not ask for that to be fixed, since it would get into two additional levels of indirection. I am limiting this proposal just to one additional level of indirection as the `Simpler implicit move` [^p2266r3] proposal did. Any more levels of indirection would require compilers, at greater compilation cost, to process the instance dependency graph and then do more when programmers can contribute to the dependency information via an attribute that documents whether returns and parameters are dependent upon one another.
 
