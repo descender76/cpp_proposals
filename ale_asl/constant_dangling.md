@@ -84,7 +84,13 @@ a code
 
 ## Abstract
 
-This paper proposes the standard adds anonymous global constants to the language with the intention of automatically fixing a shocking type of dangling which occurs when constants or that which should be constants dangle. This is shocking because constant like instances should really have constant-initialization meaning that they should have static storage duration and consequently should not dangle. This trips up beginner code, requiring teaching dangling on day one. It is annoying to non beginners. Constants are used as defaults in production code. Constants are also frequently used in test and example code. Further, many instances of dangling used by non `C++` language comparisons frequently use constants as examples.
+This paper proposes the standard adds anonymous global constants to the language with the intention of automatically fixing a shocking type of dangling which occurs when constants or that which should be constants dangle.
+
+- This is shocking because constant like instances should really have constant-initialization meaning that they should have static storage duration and consequently should not dangle.
+- This trips up beginner code, requiring teaching dangling on day one. It is annoying to non beginners.
+- Constants are used as defaults in production code.
+- Constants are also frequently used in test and example code.
+- Further, many instances of dangling used by non `C++` language comparisons frequently use constants as examples.
 
 ## Motivation
 
@@ -103,11 +109,12 @@ There are multiple resolutions to dangling in the `C++` language.
 
 All are valid resolutions and individually are better than the others, given the scenario. This proposal is focused on the third option, which is to fix by making the instance global.
 
-Dangling the stack is shocking because is violates our trust in our compilers and language, since they are primarily responsible for the stack. However, there are three types of dangling that are even more shocking than the rest.
+Dangling the stack is shocking because is violates our trust in our compilers and language, since they are primarily responsible for the stack. However, there are four types of dangling that are even more shocking than the rest.
 
 1. Returning a **direct** reference to a local
     - partially resolved by `Simpler implicit move` [^p2266r3]
 1. Immediate dangling
+1. Indirect dangling of caller's local
 1. **Dangling Constants**
 
 Making an instance global is a legitimate fix to dangling.
@@ -122,13 +129,13 @@ Making an instance global is a legitimate fix to dangling.
 
 ...
 
-***Note** This applies only to non-static local variables. All static variables are (as their name indicates) statically allocated, so that pointers to them cannot dangle.* [^cppcgrf43]
+***Note** This applies only to non-static local variables. <u>All static variables</u> are (as their name indicates) statically allocated, so that pointers to them <u>cannot dangle</u>.* [^cppcgrf43]
 
 </td>
 </tr>
 </table>
 
-While making an instance global doesn't fix all dangling in the language, it is the only resolution that can fix all three most shocking types of dangling provided the instance in question is a constant. It is also the **best** fix for these instances.
+While making an instance global doesn't fix all dangling in the language, it is the only resolution that can fix all four of the most shocking types of dangling provided the instance in question is a constant. It is also the **best** fix for these instances.
 
 Since `constexpr` was added to the language in `C++11` there has been an increase in the candidates of temporary instances that could be turned into global constants. ROMability was in part the motivation for `constexpr` but the requirement was never made. Even if a `C++` architecture doesn't support ROM, it is still required by the language to support `static storage duration` and `const`. Matter of fact, due to the immutable nature of constant-initialized constant expressions, these expressions/instances are constant for the entire program even though they, at present, don't have `static storage duration`, even if just <a href="#What-about-locality-of-reference" title="What-about-locality-of-reference">logically</a>. There is a greater need now that more types are getting constexpr constructors. Also types that would normally only be dynamically allocated, such as string and vector, since `C++20`, can also be `constexpr`. This has opened up the door wide for many more types being constructed at compile time.
 
@@ -202,23 +209,35 @@ The pain of immediate dangling associated with temporaries are especially felt w
 
 #### Lambda functions
 
-Whenever a lambda function captures a reference to a temporary it immediately dangles before an opportunity is given to call it, unless it is a immediately invoked lambda/function expression.
+In the following example, the lambda dangles its reference to a local constant.
 
 ```cpp
-[&c1 = "hello"s](const std::string& s)// OK
+auto return_lambda()
 {
-    return c1 + " "s + s;
-}("world"s);// immediately invoked lambda/function expression
-
-auto lambda = [&c1 = "hello"s](const std::string& s)// immediate dangling
-{
-    return c1 + " "s + s;
+    const auto constant = "hello"s;
+    auto lambda = [&c1 = constant](const std::string& s)
+    {
+        return c1 + " "s + s;
+    };
+    return lambda;
 }
-// ...
-lambda("world"s);
 ```
 
-This problem is resolved when the scope of temporaries has `static storage duration` instead of the containing expression provided `c1` resolves to a `const std::string&` since `c1` was constant-initialized. The `constinit` specifier could ensure this.
+However, had the local variable `constant` implicitly had static storage duration that this could have been fixed automatically. This can be fixed manually by adding `static`.
+
+```cpp
+auto return_lambda()
+{
+    const static auto constant = "hello"s;// static added
+    auto lambda = [&c1 = constant](const std::string& s)
+    {
+        return c1 + " "s + s;
+    };
+    return lambda;
+}
+```
+
+Unfortunately, there is currently no way to apply `const` and `static` to temporaries themselves as specifiers when used in a unnamed scenario. 
 
 #### Coroutines
 
@@ -317,11 +336,11 @@ Further, this behavior happens all the time with evaluations of constant express
 
 "*<sub>1</sub> Variables with static storage duration are initialized as a consequence of program initiation. Variables with thread storage duration are initialized as a consequence of thread execution. Within each of these phases of initiation, initialization occurs as follows.*"
 
-"*<sub>2</sub> Constant initialization is performed if a variable or temporary object with static or thread storage duration is constant-initialized (7.7). ...*"
+"*<sub>2</sub> Constant initialization is performed if a variable <u>or temporary</u> object with static or thread storage duration is constant-initialized (7.7). ...*"
 
 ...
     
-"*<sub>3</sub> An implementation is permitted to perform the initialization of a variable with static or thread storage duration as a static initialization even if such initialization is not required to be done statically, provided that ...*"
+"*<sub>3</sub> <u>An implementation is permitted to perform the initialization of a variable with static or thread storage duration as a static initialization even if such initialization is not required to be done statically</u>, provided that ...*"
 
 </td>
 </tr>
@@ -494,7 +513,7 @@ main:                                   # @main
 The point is all three are logically non dangling, constant global. Now let's look at reference examples.
 
 ### immediate dangling
-
+<!--
 Not only do all three following examples produce the exact same assembly, they also provide the exact same assembly as the previous three examples. They are all essentially global constants from the assembly and programmer standpoint but the current standard says two of the three dangle, unnecessarily.
 
 #### local constant but logically a global constant
@@ -566,7 +585,7 @@ main:                                   # @main
         mov     eax, 5
         ret
 ```
-
+-->
 ### indirect dangling of caller's local
 
 Similarly, the next three examples produce the same assembly in the 3 `clang` cases and 2 of the `gcc` cases. `GCC` would have produced the same result in its 2nd case had it had treated the `const` expected evaluation of a constant expression as a global constant as its third case did. 
@@ -581,8 +600,7 @@ const int& potential_dangler(const int& passthrough)
 
 int main()
 {
-    const int local = 5;
-    const int& reflocal = potential_dangler(local);
+    const int& reflocal = potential_dangler(5);
     return reflocal;
 }
 ```
@@ -738,98 +756,6 @@ $LN3:
         call    int const & potential_dangler(int const &)
         mov     QWORD PTR reftemp$[rsp], rax
         mov     rax, QWORD PTR reftemp$[rsp]
-        mov     eax, DWORD PTR [rax]
-        add     rsp, 56; 00000038H
-        ret     0
-main    ENDP
-```
-
-
-</td>
-<td>
-
-```assembly
-passthrough$ = 8
-; potential_dangler
-int const & potential_dangler(int const &) PROC
-        mov     rax, rcx
-        ret     0
-; potential_dangler
-int const & potential_dangler(int const &) ENDP
-
-main    PROC
-        mov     eax, 5
-        ret     0
-main    ENDP
-```
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td colspan="2">
-
-**local constant but logically a global constant**
-
-</td>
-</tr>
-<tr>
-<td colspan="2">
-
-```cpp
-const int& potential_dangler(const int& passthrough)
-{
-    return passthrough;
-}
-
-int main()
-{
-    const int local = 5;
-    const int& reflocal = potential_dangler(local);
-    return reflocal;
-}
-```
-
-</td>
-</tr>
-<tr>
-<td>
-
-**unoptimized**
-
-</td>
-<td>
-
-**/Ox optimizations (favor speed)**
-
-</td>
-</tr>
-<tr>
-<td>
-
-```assembly
-passthrough$ = 8
-; potential_dangler
-int const & potential_dangler(int const &) PROC
-        mov     QWORD PTR [rsp+8], rcx
-        mov     rax, QWORD PTR passthrough$[rsp]
-        ret     0
-; potential_dangler
-int const & potential_dangler(int const &) ENDP
-
-local$ = 32
-reflocal$ = 40
-main    PROC
-$LN3:
-        sub     rsp, 56; 00000038H
-        mov     DWORD PTR local$[rsp], 5
-        lea     rcx, QWORD PTR local$[rsp]
-        ; potential_dangler
-        call    int const & potential_dangler(int const &)
-        mov     QWORD PTR reflocal$[rsp], rax
-        mov     rax, QWORD PTR reflocal$[rsp]
         mov     eax, DWORD PTR [rax]
         add     rsp, 56; 00000038H
         ret     0
@@ -1058,7 +984,7 @@ main    ENDP
 </tr>
 </table>
 
-In all four cases, when optimizations (favor speed) is turned on, the Microsoft compiler produced the same **non dangling** code regardless of whether it was an actual global, a local constant, a temporary constant or a constant expression evaluation. This is also the same that `GCC` and `Clang` was generating. To the `msvc` compiler's credit, it not only detect functions that can potentially dangle but also executions that could as well. In all cases, it was a warning instead of an error. While the temporary constant and the constant expression evaluation is truly dangling when not optimized, it was not a compiler error. Further, the global example was incorrectly flagged as potentially dangling even though it new it was a global. Regardless the optimized compilation, fixed the dangling and removed the potentially dangling flag.
+In all three cases, when optimizations (favor speed) is turned on, the Microsoft compiler produced the same **non dangling** code regardless of whether it was an actual global, a temporary constant or a constant expression evaluation. This is also the same that `GCC` and `Clang` was generating. To the `msvc` compiler's credit, it not only detect functions that can potentially dangle but also executions that could as well. In all cases, it was a warning instead of an error. While the temporary constant and the constant expression evaluation is truly dangling when not optimized, it was not a compiler error. Further, the global example was incorrectly flagged as potentially dangling even though it new it was a global. Regardless the optimized compilation, fixed the dangling and removed the potentially dangling flag.
 
 This proposal advocates standardizing an optimization that compiler's are already doing and have been doing before `C++` got `constexpr` in the language. Fixing this type of dangling in this fashion is the best possible way because potentially invalid code becomes valid with no programmer intervention, it produces no errors, it is faster, uses less memory and produces smaller executable sizes. In short, the compiler/language already has all it needs to fix dangling constants. Compilers are already doing this but there is currently no verbiage in the standard that state that anonymous constants don't dangle because they are logically a global constant. Adopting this proposal ensures programmers do not have to fix something that was never dangling in the first place even though the current language makes it look like it is, needlessly.
 
@@ -1081,7 +1007,7 @@ The advantages to `C++` with adopting this proposal is manifold.
   - Reduce returning direct reference dangling when the instance is a constant
   - Reduce returning indirect reference dangling when the instance is a constant and was provided as an argument
   - Reduce indirect dangling that can occur in the body of a function
-  - Reduce unitialized and delayed initialization errors
+  - Reduce delayed initialization errors
   - Increases safety by avoiding data races.
 - Simpler
   - Encourages the use of temporaries
@@ -1091,15 +1017,12 @@ The advantages to `C++` with adopting this proposal is manifold.
     - Reduce lines of code
     - Reduce naming; fewer names to return dangle
   - Make constexpr literals less surprising for new and old developers alike
-  - Reduce the gap between `C++` and `C99` compound literals
+  - Reduce the gap between `C++` and `C` compound literals
   - Improve the potential contribution of `C++`'s dangling resolutions back to `C`
   - Make string literals and `C++` literals more consistent with one another
-  - Taking a step closer to reducing undefined behavior in string literals
-  - Simplify the language to match existing practice
-  - Consequently, a “cleanup”, i.e. adoption of simpler, more general rules/guidelines
-- Faster & More Memory Efficient
+- Efficient
   - Reduce unnecessary heap allocations
-  - Increase and improve upon the utilization of ROM and the benefits that entails
+    - std::string, std::vector, ...
 
 ## Frequently Asked Questions
 
@@ -1396,3 +1319,36 @@ f({1, { {2, 3}, 4}, {constinit 5, 6} });
 [^p2740r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2740r0.html>
 <!--indirect dangling identification-->
 [^p2742r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2742r0.html>
+<!--
+#include <functional>
+#include <string>
+#include <string_view>
+
+using namespace std::literals::string_literals;
+
+int main()
+{
+    std::string_view sv = "hello world"s;
+    return sv.size();
+}
+-->
+<!--
+main:                                   # @main
+        mov     eax, 11
+        ret
+-->
+<!--
+#include <functional>
+#include <string>
+#include <string_view>
+
+using namespace std::literals::string_literals;
+
+const static auto GLOBAL = "hello world"s; 
+
+int main()
+{
+    std::string_view sv = GLOBAL;
+    return sv.size();
+}
+-->
