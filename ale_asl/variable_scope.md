@@ -64,7 +64,6 @@ a code
   - [Motivation](#Motivation)
   - [Proposed Wording](#Proposed-Wording)
   - [Details](#Details)
-    - [Other Anonymous Things](#Other-Anonymous-Things)
     - [Value Categories](#Value-Categories)
     - [Temporaries](#Temporaries)
   - [Design Alternatives](#Design-Alternatives)
@@ -811,42 +810,6 @@ S obj2;
 <span style="color:red">**NOTE: Wording still need to capture that these temporaries are no longer temporaries and that their value category is `lvalue`.**</span>
 
 ## Details
-
-### Other Anonymous Things
-
-The pain of immediate dangling associated with temporaries are especially felt when working with other anonymous language features of `C++` such as lambda functions.
-
-#### Lambda functions
-
-Whenever a lambda function captures a reference to a temporary it immediately dangles before an opportunity is given to call it, unless it is a immediately invoked lambda/function expression.
-
-```cpp
-[&c1 = "hello"s](const std::string& s)// OK
-{
-    return c1 + " "s + s;
-}("world"s);// immediately invoked lambda/function expression
-
-auto lambda = [&c1 = "hello"s](const std::string& s)// immediate dangling
-{
-    return c1 + " "s + s;
-}
-// ...
-lambda("world"s);
-```
-
-This problem is resolved when the scope of temporaries is to the enclosing block instead of the containing expression. This is the same had the temporary been named.
-
-```cpp
-auto anonymous = "hello"s;
-auto lambda = [&c1 = anonymous](const std::string& s)
-{
-    return c1 + " "s + s;
-}
-// ...
-lambda("world"s);
-```
-
-Unless resolved, this problem will continue to be a problem for future `C++` features, type erased or not, anonymous or not, where there are a separate construction and execution steps.
 
 ### Value Categories
 
