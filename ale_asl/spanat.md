@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2821R0</td>
+<td>P2821R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-2-20</td>
+<td>2023-4-13</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -59,12 +59,14 @@ a code
 ## Table of contents
 
 - [span.at()](#spanat)
+  - [Changelog](#Changelog)
   - [Abstract](#Abstract)
   - [Request](#Request)
   - [Motivation](#Motivation)
     - [Safety](#Safety)
     - [Consistency](#Consistency)
     - [Public Relations](#Public-Relations)
+  - [Feature test macro](#Feature-test-macro)
   - [Implementation Experience](#Implementation-Experience)
   - [Summary](#Summary)
   - [References](#References)
@@ -73,6 +75,13 @@ a code
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
 -->
 
+## Changelog
+
+### R0
+
+- Added verbiage stating that this is not freestanding due to its throwing an exception
+- Added feature test macro section
+
 ## Abstract
 
 This paper proposes the standard adds the `at` method to `std::span` class in order to address safety, consistency and PR (public relations) concerns.
@@ -80,7 +89,10 @@ This paper proposes the standard adds the `at` method to `std::span` class in or
 ## Request
 
 ```cpp
+// no freestanding
+#if __STDC_HOSTED__ == 1
 constexpr reference at(size_type idx) const;
+#endif
 ```
 
 Returns a reference to the element at specified location idx, with bounds checking.
@@ -209,6 +221,18 @@ Ultimately, this becomes a stereotypical example of how `C++` traditionally hand
 <!--
 ## Proposed Wording
 -->
+## Feature test macro
+
+> Insert the following to [[version.syn]](https://eel.is/c++draft/version.syn), header `<version>` synopsis:
+<!--
+<pre>
+#define __cpp_lib_span_at 20XXXXL <i>// also in &lt;functional&gt</i>
+</pre>
+-->
+```cpp
+#define __cpp_lib_span_at 20XXXXL // also in <functional>
+```
+
 ## Implementation Experience
 
 Both of the `span lite` and `Guidelines Support Library` libraries have this new method implemented for years.
