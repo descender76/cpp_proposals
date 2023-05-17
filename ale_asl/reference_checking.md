@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-5-10</td>
+<td>2023-5-17</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -304,7 +304,7 @@ Things get really interesting when programmers are allowed to provide explicit l
 This is also time to add two more checks.
 
 **2nd check: Returning a reference to a `temporary` produces an error.
-3rd check: Using a reference to a `temporary` after it has been assigned, i.e. on another line of code which is not the full-expression, produces an error.**
+<br/>3rd check: Using a reference to a `temporary` after it has been assigned, i.e. on another line of code which is not the full-expression, produces an error.**
 
 ```cpp
 const int GLOBAL = 42;
@@ -803,7 +803,7 @@ const int& f2()
 
 Since locals and temporaries should not be returned from functions, most functions that possess this type of dangling may be in need of some refactoring, perhaps using movable value types. For dangling that occurs in the body of a function, locals need to be moved up in scope and temporaries need to be changed into locals and then perhaps moved up in scope. This results in more lines of code, superfluous naming and excessive refactoring. If the fixed temporary is only ever used in a constant fashion and if it is a literal type and constant initialized than it would likely be manually turned into a global and moved far from the point of use. All of this could be made easier upon programmers with the following features.
 
-1. Temporaries that are initially constant referenced, where the type is a literal type and the instance could be constant initialized, then the compiler would automatically promote these to having static storage duration. [^p2724r1]
+1. Temporaries that are initially constant referenced, where the type is a literal type and the instance could be constant initialized, then the compiler would automatically promote these to having static storage duration [^p2724r1] just like a string and hopefully in the future like `std::initializer_list` [^p2752r1].
 1. C23 introduced storage-class specifiers for compound literals. [^n3038] If C++ followed suit, than we could be able to apply `static` and `constexpr` to our temporaries. Since these two would frequently be used together it could be shortened to `constant` or `constinit`. C++ could go even farther by introducting a new specifier perhaps called `var` for variable scope that would turn the temporary into a anonymously named variable with the same life of the left most instance in the full expression. [^p2658r1]
 
 This proposal and these three resolutions all satisfy the design group’s opinion on safety for C++.
@@ -1012,7 +1012,8 @@ References have to be initialized, can't be `nullptr` and can't be rebound which
 [^p0792r14]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0792r14.html>
 <!--Introduce storage-class specifiers for compound literals-->
 [^n3038]: <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3038.htm>
-
+<!--Static storage for braced initializers-->
+[^p2752r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2752r1.html>
 <!---->
 <!--
 [^]: <>
