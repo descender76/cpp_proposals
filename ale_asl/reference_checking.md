@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2878R0</td>
+<td>P2878R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-5-17</td>
+<td>2023-5-18</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -719,7 +719,7 @@ So, how does this proposal stack up to the design group's opinion on safety for 
 - Do not deliver safety at the cost of an inability to express the abstractions that are currently at the core of C++ strengths. [^p2759r1]
   - **This proposal does not compromise nor remove any of C++ features so abstractions are still there.**
 - Do not leave us with a “safe” subset of C that eliminates C++’s productivity advantages. [^p2759r1]
-  - **This proposal works will all existing code. It is purely optin.**
+  - **This proposal works with all existing code. It is purely optin.**
 - Do not deliver a purely run-time model that imposes overheads that eliminate C++’s strengths in the area of performance. [^p2759r1]
   - **This proposal is completely compile time.**
 - Do not imply that there is exactly one form of “safety” that must be adopted by all. [^p2759r1]
@@ -916,6 +916,12 @@ Do not imply that equivalent-looking code written in different environments will
 </td>
 </tr>
 </table>
+
+What's more, `implicit constant` is the most effective. While both '&<span style="color:green">&#x2713;</span>' and `implicit constant` can be categorized as `elimination`, only `implicit constant` automatically fixes instances of dangling in a non breaking way that is logical to end programmers.
+
+![Hierarchy of Controls](https://upload.wikimedia.org/wikipedia/commons/3/36/NIOSH%E2%80%99s_%E2%80%9CHierarchy_of_Controls_infographic%E2%80%9D_as_SVG.svg)
+
+While `explicit constant` and `var` are only `Personal Protective Equipment`, they are highly useful with or without this proposal as generic tools programmers can use to fix instances of dangling simply. They especially compliment this proposal as tools to fix dangling identified by this proposal.
 
 ## Summary
 
