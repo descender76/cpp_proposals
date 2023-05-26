@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2821R1</td>
+<td>P2821R2</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-4-13</td>
+<td>2023-5-26</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -77,7 +77,12 @@ a code
 
 ## Changelog
 
-### R0
+### R2
+
+- Corrected `Feature test macro`
+- Added references to `Usability Enhancements for std::span` [^p1024r0] [^p1024r1]
+
+### R1
 
 - Added verbiage stating that this is not freestanding due to its throwing an exception
 - Added feature test macro section
@@ -210,8 +215,8 @@ Unfortunately this isn't totally true.
 
 Consequently, the programming community in general are encouraged to ask some tough questions.
 
-1. Why was `span::at()` not provided in `C++20`?
-1. Was this an accidental omission or was it deliberate?
+1. Why was `span::at()` not provided in `C++20`? [^p1024r0]
+1. Was this an accidental omission or was it deliberate? [^p1024r1]
 1. If delibrerate, what was the rationale?
 1. If delibrerate, are the other `at` functions going to be deprecated?
 1. Why was `span::at()` not added in `C++23`?
@@ -230,7 +235,7 @@ Ultimately, this becomes a stereotypical example of how `C++` traditionally hand
 </pre>
 -->
 ```cpp
-#define __cpp_lib_span_at 20XXXXL // also in <functional>
+#define __cpp_lib_span_at 20XXXXL // also in <span>
 ```
 
 ## Implementation Experience
@@ -291,5 +296,9 @@ Please add the `at` method to `std::span` class in order to address safety, cons
 [^fair]: <https://www.thecodedmessage.com/posts/unsafe/>
 <!--Modern C++ Won't Save Us-->
 [^modern]: <https://alexgaynor.net/2019/apr/21/modern-c++-wont-save-us/>
+<!--Usability Enhancements for std::span-->
+[^p1024r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1024r0.pdf>
+<!--Usability Enhancements for std::span-->
+[^p1024r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1024r1.pdf>
 <!--TODO-->
 [^TODO]: <TODO>
