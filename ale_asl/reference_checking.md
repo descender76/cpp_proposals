@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2878R1</td>
+<td>P2878R3</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-5-18</td>
+<td>2023-6-17</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -59,6 +59,7 @@ a code
 ## Table of contents
 
 - [Reference checking](#Reference-checking)
+  - [Changelog](#Changelog)
   - [Abstract](#Abstract)
   - [Motivational Example](#Motivational-Example)
   - [Motivation](#Motivation)
@@ -72,6 +73,19 @@ a code
   - [Summary](#Summary)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
   - [References](#References)
+
+## Changelog
+
+### R3
+
+- added resolution to the do expression/pattern matching dangling problem
+- adde check for assigning a temporary to a named variable produces an error
+
+### R2
+
+- fixed `f3` example of returning a `struct`
+- revised comments of `4th check` example
+- added resolved resolution example
 
 ## Abstract
 
@@ -301,10 +315,10 @@ Things get really interesting when programmers are allowed to provide explicit l
 
     global > local > temporary
 
-This is also time to add two more checks.
+This is also time to add three more checks.
 
 **2nd check: Returning a reference to a `temporary` produces an error.
-<br/>3rd check: Using a reference to a `temporary` after it has been assigned, i.e. on another line of code which is not the full-expression, produces an error.**
+<br/>3rd check: Using a reference to a `temporary` after it has been assigned, i.e. on another line of code which is not the full-expression, produces an error.<br/>4th check: Assigning a `temporary` to a named variable produces an error.**
 
 ```cpp
 const int GLOBAL = 42;
@@ -327,10 +341,10 @@ int& f2()
     int local = 42;
     const int& r1 /*local*/ = f1(local, local);
     const int& r2 /*global*/ = f1(GLOBAL, GLOBAL);
-    const int& r3 /*temporary*/ = f1(42, 42);
+    const int& r3 /*temporary*/ = f1(42, 42);// error: can't assign temporary to a named instance
     const int& r4 /*local*/ = f1(local, GLOBAL);
-    const int& r5 /*temporary*/ = f1(local, 42);
-    const int& r6 /*temporary*/ = f1(GLOBAL, 42);
+    const int& r5 /*temporary*/ = f1(local, 42);// error: can't assign temporary to a named instance 
+    const int& r6 /*temporary*/ = f1(GLOBAL, 42);// error: can't assign temporary to a named instance 
     if(randomBool())
     {
         return r1;// error: can't return local
@@ -426,11 +440,11 @@ int& f2()
 {
     int local = 42;
     S s1{GLOBAL, local};
-    S s2{local, f1(GLOBAL, 24)};
+    S s2{local, f1(GLOBAL, 24)};// error: can't assign temporary to a named instance
     const int& r1 /*global*/ = s1.first;
     const int& r2 /*local*/ = s1.second;
     const int& r3 /*local*/ = s2.first;
-    const int& r4 /*temporary*/ = s2.second;
+    const int& r4 /*temporary*/ = s2.second;// error: can't assign temporary to a named instance
     if(randomBool())
     {
         return r1;// OK its a reference to a global
@@ -455,12 +469,12 @@ S f3()
 {
     int local = 42;
     S s1{GLOBAL, local};
-    S s2{local, f1(GLOBAL, 24)};
+    S s2{local, f1(GLOBAL, 24)};// error: can't assign temporary to a named instance
     if(randomBool())
     {
-        return r1;// error: still returning a local
+        return s1;// error: still returning a local
     }
-    return r2;// error: still returning a local
+    return s2;// error: still returning a local
     // error: still returning a temporary
 }
 
@@ -468,7 +482,7 @@ S f3()
 auto lambda()
 {
     int local = 42;
-    const int& ref_temporary = f1(GLOBAL, 24);
+    const int& ref_temporary = f1(GLOBAL, 24);// error: can't assign temporary to a named instance
     return [&local, &ref_temporary]() -> const int&
     {
         if(randomBool())
@@ -484,7 +498,7 @@ auto lambda()
 auto coroutine()
 {
     int local = 42;
-    const int& ref_temporary = f1(GLOBAL, 24);
+    const int& ref_temporary = f1(GLOBAL, 24);// error: can't assign temporary to a named instance
     return [&local, &ref_temporary]() -> generator<const int&>
     {
         if(randomBool())
@@ -506,7 +520,7 @@ constexpr std::string::operator [[dependson(this)]] std::basic_string_view<CharT
 ```
 
 ```cpp
-std::string_view sv /* dependent upon temporary */ = "hello world"s;// temporary
+std::string_view sv /* dependent upon temporary */ = "hello world"s;// error: can't assign temporary to a named instance
 sv.size();// error: can't use a temporary outside of the line it was created on
 ```
 
@@ -531,7 +545,7 @@ const std::reference_wrapper<const int> f(const int& left/* unknown lifetime */,
 
 This is also time to mention our final check.
 
-**4th check: You can't use a temporary in a `new` expression if the type being instantiated will become dependent upon that temporary.**
+**5th check: You can't use a temporary in a `new` expression if the type being instantiated will become dependent upon that temporary.**
 
 <table>
 <tr>
@@ -582,7 +596,8 @@ private:
     const std::pair<int,int>& mp;
 };
 
-S a { 1, {2,3} }; // error: instance dependent upon temporary
+S a { 1, {2,3} }; // error: can't assign temporary to a named instance
+some_other_function(a); // error: can't use `a` as it is dependent upon a temporary
 S* p = new S{ 1, {2,3} }; // error: instance dependent upon temporary
 ```
 
@@ -622,10 +637,10 @@ const int& x = do
     int local = 42;
     const int& r1 /*local*/ = f1(local, local);
     const int& r2 /*global*/ = f1(GLOBAL, GLOBAL);
-    const int& r3 /*temporary*/ = f1(42, 42);
+    const int& r3 /*temporary*/ = f1(42, 42);// error: can't assign temporary to a named instance
     const int& r4 /*local*/ = f1(local, GLOBAL);
-    const int& r5 /*temporary*/ = f1(local, 42);
-    const int& r6 /*temporary*/ = f1(GLOBAL, 42);
+    const int& r5 /*temporary*/ = f1(local, 42);// error: can't assign temporary to a named instance
+    const int& r6 /*temporary*/ = f1(GLOBAL, 42);// error: can't assign temporary to a named instance
     if(randomBool())
     {
         do return r1;// error: can't do return local
@@ -695,12 +710,68 @@ const int& f()
 
 ```
 
-The problem on `rint2` is that what should its lifetime response be; an error or unknown? I could think of a couple of solutions.
+The problem on `rint2` is that what should its lifetime response be; an error or unknown? The fact is even that can remain a local and the dangling can be identified by adding an integer to the two bits of compile time metadata.
+
+First of all, each scope is given a `level identifier`. Multiple scopes will share the same number if they are on the same level. Starting at 1, each number is applied to each inner scope in a `breadth first search` i.e. `level order` manner. Next each local also receive a `level identifier` equal to the `level identifier` of the scope they were created in. Similarly, references gets a `level identifier` equal to the `level identifier` of the instance that they reference. While this metadata is meant only for locals, it may make it easier in one's implementations to assign 0 for globals and max int for temporaries. A reference returned from a do is set to the maximum value of all the `level identifier`'s of all the references and variables do returned. Errors result from do returns if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`. See below for the previous example modified with all of this new metadata.
+
+<!--
+I could think of a couple of solutions.
 
 - Prevent `do expressions` whether explicit or implicit in some other pattern matching proposals from `do returning` references to locals that are not declared before the top most nested `do`. "An ounce of prevention is worth a pound of cure."
 - Do nothing as this proposal is not meant to fix runtime dangling of the stack
 
-Regardless of the decision that would need to be made, so much definitively bad dangling has been identified and made more transparent. 
+Regardless of the decision that would need to be made, so much definitively bad dangling has been identified and made more transparent.
+-->
+
+```cpp
+
+const int& f()
+{// scope level 1
+    int local1 = 42;// local with scope level 1
+    const int& rint1 = do// reference with scope level 3
+    // reference scope level 3 = max(1, 2, 3) from the do return(s)
+    // error at the do: can't return reference to one or more locals
+    // rint1's scope level 3 >= this do's scope level 2
+    {// scope level 2
+        int local2 = 42;// local with scope level 2
+        const int& rint2 = do// reference with scope level 3
+        // reference scope level 3 = max(1, 2, 3) from the do return(s)
+        // error at the do: can't return reference to one or more locals
+        // rint2's scope level 3 == this do's scope level 3
+        {// scope level 3
+            int local3 = 42;// local with scope level 3
+            if(randomBool())
+            {// scope level 4
+                do return local1;// OK, definitively safe
+                // local1's scope level 1 > this do's scope level 3
+            }
+            if(randomBool())
+            {// scope level 4
+                do return local2;// OK for now, problem later
+                // local2's scope level 2 > this do's scope level 3
+            }
+            do return local3;// error: can't do return local
+            // local3's scope level 3 == this do's scope level 3
+        };
+        if(randomBool())
+        {// scope level 3
+            do return local1;// OK, definitively safe
+            // local1's scope level 1 > this do's scope level 2
+        }
+        if(randomBool())
+        {// scope level 3
+            do return local2;// error: can't do return local
+            // local2's scope level 2 == this do's scope level 2
+        }
+        do return rint2;// error: can't do return local
+        // reference has scope level 3 ... 2 when do return local3 changed
+        // rint2's scope level 3 >= this do's scope level 2
+    };
+}
+
+```
+
+Consequently, a lot of definitively bad dangling has been identified and made more transparent.
 
 ---
 
@@ -766,10 +837,10 @@ const int& f2()
     int local = 42;
     const int& r1 /*local*/ = f1(local, local);
     const int& r2 /*global*/ = f1(GLOBAL, GLOBAL);
-    const int& r3 /*temporary*/ = f1(42, 42);
+    const int& r3 /*temporary*/ = f1(42, 42);// error: can't assign temporary to a named instance
     const int& r4 /*local*/ = f1(local, GLOBAL);
-    const int& r5 /*temporary*/ = f1(local, 42);
-    const int& r6 /*temporary*/ = f1(GLOBAL, 42);
+    const int& r5 /*temporary*/ = f1(local, 42);// error: can't assign temporary to a named instance
+    const int& r6 /*temporary*/ = f1(GLOBAL, 42);// error: can't assign temporary to a named instance
     if(randomBool())
     {
         return r1;// error: can't return local
@@ -805,6 +876,65 @@ Since locals and temporaries should not be returned from functions, most functio
 
 1. Temporaries that are initially constant referenced, where the type is a literal type and the instance could be constant initialized, then the compiler would automatically promote these to having static storage duration [^p2724r1] just like a string and hopefully in the future like `std::initializer_list` [^p2752r1].
 1. C23 introduced storage-class specifiers for compound literals. [^n3038] If C++ followed suit, than we could be able to apply `static` and `constexpr` to our temporaries. Since these two would frequently be used together it could be shortened to `constant` or `constinit`. C++ could go even farther by introducting a new specifier perhaps called `var` for variable scope that would turn the temporary into a anonymously named variable with the same life of the left most instance in the full expression. [^p2658r1]
+
+Let's see how these resolutions simply fixes some of the dangling in the previous example. In the following example, the keyword `constinit` is used to represent explicit constant initialization while the keyword `variable` is used to represent variable scope i.e. explicit lifetime extension. All of the `constinit` keywords in the example could be removed if there was implicit constant initialization.
+
+```cpp
+const int GLOBAL = 42;
+
+[[dependson(left, right)]]
+const int& f1(const int& left/* unknown lifetime */, const int& right/* unknown lifetime */)
+{
+    if(randomBool())
+    {
+        return left;
+    }
+    else
+    {
+        return right;
+    }
+}
+
+const int& f2()
+{
+    int local = 42;
+    const int& r1 /*local*/ = f1(local, local);
+    const int& r2 /*global*/ = f1(GLOBAL, GLOBAL);
+    const int& r3 /*local*/ = f1(constinit 42, variable 42);// was temporary
+    const int& r4 /*local*/ = f1(local, GLOBAL);
+    const int& r5 /*local*/ = f1(local, constinit 42);// was temporary
+    const int& r6 /*local*/ = f1(GLOBAL, variable 42);// was temporary
+    if(randomBool())
+    {
+        return r1;// error: can't return local
+    }
+    if(randomBool())
+    {
+        return r2;// OK its a reference to a global
+    }
+    if(randomBool())
+    {
+        return r3;// error: can't return local// NOTE: was temporary
+    }
+    if(randomBool())
+    {
+        return r4;// error: can't return local
+    }
+    if(randomBool())
+    {
+        return r5;// error: can't return local// NOTE: was temporary
+    }
+    if(randomBool())
+    {
+        return r6;// error: can't return local// NOTE: was temporary
+    }
+    int x1 = r3 + 43;// FIXED: was a reference to a temporary, now local
+    int x2 = r5 + 44;// FIXED: was a reference to a temporary, now local
+    int x3 = r6 + 45;// FIXED: was a reference to a temporary, now local
+    return f1(f1(GLOBAL, variable 4), f1(local, constinit 2));// error: can't return local
+    // NOTE: was temporary instead of local
+}
+```
 
 This proposal and these three resolutions all satisfy the design group’s opinion on safety for C++.
 
