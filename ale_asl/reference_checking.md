@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-6-17</td>
+<td>2023-6-19</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -68,6 +68,7 @@ a code
     - [Impact on Contracts](#Impact-on-Contracts)
   - [Technical Details](#Technical-Details)
     - [Structs and Classes](#Structs-and-Classes)
+    - [Lambdas revisited](#Lambdas-revisited)
     - [Impact on Pattern Matching](#Impact-on-Pattern-Matching)
   - [Resolution](#Resolution)
   - [Summary](#Summary)
@@ -79,7 +80,9 @@ a code
 ### R3
 
 - added resolution to the do expression/pattern matching dangling problem
-- adde check for assigning a temporary to a named variable produces an error
+- added check for assigning a temporary to a named variable produces an error
+- added recursive function call example to illustrate functions being analyzed in isolation
+- added the `Lambdas revisited` example
 
 ### R2
 
@@ -412,7 +415,59 @@ S* p = new S{ 1, {2,3} }; // creates dangling reference
 </tr>
 </table>
 
-If we fixed nothing else identified in this proposal, that would be a welcome reprieve. However, much more can be done simply. Let's say, instead of adding this lifetime metadata to each reference, we add it to each instance. For references, lifetime metadata would still say that the reference refers to an instance with a particular lifetime but for non reference and non pointer instances, lifetime metadata would indicate that the instance is dependent upon another instance. Let's see what type of dangling this would mitigate.
+Before going further, let's consider a recursive example in order to illustrate why each function is considered in isolation.
+
+```cpp
+const int GLOBAL = 42;
+
+[[dependson(left, right)]]
+const int& recursive(const int& input/* unknown lifetime */)
+{
+    if(randomBool())
+    {
+        return GLOBAL;// globals always file
+    }
+    int local = randomInt();
+    if(randomBool())
+    {
+        return local;// error: can't return local
+    }
+    if(randomBool())
+    {
+        return 42;// error: can't return temporary
+    }
+    return recursive(input);// unknown
+    // doesn't matter
+    // local's and temporaries lower on the stack are safe
+    // dynamic would have to be cleaned up after the fact anyway
+    // and if dynamic was deleted prior than that would be a problem
+    // prior to this call; in all cases caller's responsibility
+}
+
+int& f()
+{
+    int local = 42;
+    const int& r1 /*global*/ = recursive(GLOBAL);
+    const int& r2 /*local*/ = recursive(local);
+    const int& r3 /*temporary*/ = recursive(42);// error: can't assign temporary to a named instance
+    if(randomBool())
+    {
+        return r1;// OK its a reference to a global
+    }
+    if(randomBool())
+    {
+        return r2;// error: can't return local
+    }
+    if(randomBool())
+    {
+        return r3;// error: can't return temporary
+    }
+    int x1 = r3 + 43;// error: can't use reference to a temporary
+    return recursive(42);// error: can't return temporary
+}
+```
+
+If we fixed nothing else identified in this proposal, this would be a welcome reprieve. However, much more can be done simply. Let's say, instead of adding this lifetime metadata to each reference, we add it to each instance. For references, lifetime metadata would still say that the reference refers to an instance with a particular lifetime but for non reference and non pointer instances, lifetime metadata would indicate that the instance is dependent upon another instance. Let's see what type of dangling this would mitigate.
 
 ### Structs and Classes
 
@@ -600,6 +655,66 @@ S a { 1, {2,3} }; // error: can't assign temporary to a named instance
 some_other_function(a); // error: can't use `a` as it is dependent upon a temporary
 S* p = new S{ 1, {2,3} }; // error: instance dependent upon temporary
 ```
+
+### Lambdas revisited
+
+Lambdas can be expressed in terms of the previous examples in two different ways depending upon whether the lambdas are capturing or not.
+
+```cpp
+struct S
+{
+    int& first;
+    const int& second;
+    [[dependson(input)]]
+    const int& f(const int& input/* unknown lifetime */);
+};
+
+[[dependson(input)]]
+const int& f(const int& input/* unknown lifetime */);
+
+// a non capturing lambda is no different than a function
+// and in this case this `lambda` is essentially the same as `f`
+auto non_capturing_lambda()
+{
+    int local = 42;
+    auto lambda = [](const int& input) -> [[dependson(input)]] const int&
+    {
+        return input;// OK will be handled by caller
+    };
+    if(randomBool())
+    {
+        return lambda(local);// error: can't return local
+    }
+    return lambda(24);// error: can't return temporary
+}
+
+// a capturing lambda is no different than a functor
+// and in this case this `lambda` is essentially the same as an instance of `S`
+auto capturing_lambda()
+{
+    int local = 42;
+    const int& ref_temporary = f1(GLOBAL, 24);// error: can't assign temporary to a named instance
+    auto lambda = [&local, &ref_temporary](const int& input) -> [[dependson(input)]] const int&
+    {
+        if(randomBool())
+        {
+            return local;// error: can't return local
+        }
+        if(randomBool())
+        {
+            return ref_temporary;// error: can't return temporary
+        }
+        return input;// OK will be handled by caller
+    };
+    if(randomBool())
+    {
+        return lambda(local);// error: can't return local
+    }
+    return lambda(24);// error: can't return temporary
+}
+```
+
+This set of examples illustrates that lambdas are no different than the previous function and class examples other than that they are anonymous and the compiler has greater responsibility in handling dangling correctly.
 
 ### Impact on Pattern Matching
 
