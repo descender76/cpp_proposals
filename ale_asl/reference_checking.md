@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-6-19</td>
+<td>2023-6-21</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -425,7 +425,7 @@ const int& recursive(const int& input/* unknown lifetime */)
 {
     if(randomBool())
     {
-        return GLOBAL;// globals always file
+        return GLOBAL;// globals always fine
     }
     int local = randomInt();
     if(randomBool())
@@ -452,7 +452,7 @@ int& f()
     const int& r3 /*temporary*/ = recursive(42);// error: can't assign temporary to a named instance
     if(randomBool())
     {
-        return r1;// OK its a reference to a global
+        return r1;// OK, its a reference to a global
     }
     if(randomBool())
     {
@@ -679,7 +679,7 @@ auto non_capturing_lambda()
     int local = 42;
     auto lambda = [](const int& input) -> [[dependson(input)]] const int&
     {
-        return input;// OK will be handled by caller
+        return input;// OK, will be handled by caller
     };
     if(randomBool())
     {
@@ -704,7 +704,7 @@ auto capturing_lambda()
         {
             return ref_temporary;// error: can't return temporary
         }
-        return input;// OK will be handled by caller
+        return input;// OK, will be handled by caller
     };
     if(randomBool())
     {
@@ -827,7 +827,7 @@ const int& f()
 
 The problem on `rint2` is that what should its lifetime response be; an error or unknown? The fact is even that can remain a local and the dangling can be identified by adding an integer to the two bits of compile time metadata.
 
-First of all, each scope is given a `level identifier`. Multiple scopes will share the same number if they are on the same level. Starting at 1, each number is applied to each inner scope in a `breadth first search` i.e. `level order` manner. Next each local also receive a `level identifier` equal to the `level identifier` of the scope they were created in. Similarly, references gets a `level identifier` equal to the `level identifier` of the instance that they reference. While this metadata is meant only for locals, it may make it easier in one's implementations to assign 0 for globals and max int for temporaries. A reference returned from a do is set to the maximum value of all the `level identifier`'s of all the references and variables do returned. Errors result from do returns if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`. See below for the previous example modified with all of this new metadata.
+First of all, each scope is given a `level identifier`. Multiple scopes will share the same number if they are on the same level. Starting at 1, each number is applied to each inner scope in a `breadth first search` i.e. `level order` manner. Next each local also receive a `level identifier` equal to the `level identifier` of the scope they were created in. Similarly, references gets a `level identifier` equal to the `level identifier` of the instance that they reference. While this metadata is meant only for locals, it may make it easier in one's implementations to assign 0 for globals and max int for temporaries. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. Errors result from `do return`s if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`. See below for the previous example modified with all of this new metadata.
 
 <!--
 I could think of a couple of solutions.
