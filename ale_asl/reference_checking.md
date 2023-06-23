@@ -71,6 +71,8 @@ a code
     - [Lambdas revisited](#Lambdas-revisited)
     - [Impact on Pattern Matching](#Impact-on-Pattern-Matching)
   - [Resolution](#Resolution)
+  - [Usage](#Usage)
+  - [Viral Attribution Effort](#Viral-Attribution-Effort)
   - [Summary](#Summary)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
   - [References](#References)
@@ -83,6 +85,8 @@ a code
 - added check for assigning a temporary to a named variable produces an error
 - added recursive function call example to illustrate functions being analyzed in isolation
 - added the `Lambdas revisited` example
+- added a `Usage` section
+- added a `Viral Attribution Effort` section
 
 ### R2
 
@@ -1168,6 +1172,108 @@ What's more, `implicit constant` is the most effective. While both '&<span style
 
 While `explicit constant` and `var` are only `Personal Protective Equipment`, they are highly useful with or without this proposal as generic tools programmers can use to fix instances of dangling simply. They especially compliment this proposal as tools to fix dangling identified by this proposal.
 
+## Usage
+
+A common complaint is that programmers would never use any attribution feature based on past experience with similar attribution efforts that existed outside of the standard. One usage of this proposal is applying its annotations to the STL itself. Taking just the `std::string` class as an example, following are the functions made safer with this proposal.
+
+- Element access
+  1. `at`
+  1. `operator []`
+  1. `front`
+  1. `back`
+  1. `data`
+  1. `c_str`
+  1. `operator basic_string_view`
+- Iterators
+  1. `begin`
+  1. `cbegin`
+  1. `end`
+  1. `cend`
+  1. `rbegin`
+  1. `crbegin`
+  1. `rend`
+  1. `crend`
+- Operations
+  1. `insert`
+  1. `insert_range`
+  1. `erase`
+  1. `append`
+  1. `append_range`
+  1. `operator +=`
+  1. `replace`
+  1. `replace_with_range`
+- Input/output
+  1. `getline`
+
+The point is programmers who consume safer libraries don't have to do anything. The programmer of a library should apply this proposals annotations to its public top most API for documentation and if standardized for specification purposes. However, if a library producer does add it to its implementation than the library producer themselves would also benefit.
+
+## Viral Attribution Effort
+
+Another common complaint with this and really any annotation based proposal is the work involved in annotating everything, in this proposal's case, functions. In this proposal's case, this attribution effort is just good documentation that a library producer should already be doing anyway to at least their public API. This proposal moves this documentation from non standard comments and/or non standard external documentation to standardized annotations. Other static analysis tools produce mostly warnings which would require some type of viral attribution effort in the code to tell those tools to ignore false positives.
+
+<table>
+<tr>
+<td>
+
+```cpp
+//NOSONAR
+```
+
+</td>
+<td>
+
+Sonar
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+@SuppressWarnings({"", "", ""})
+```
+
+</td>
+<td>
+
+Java [^javasuppresswarnings] [^baeldungjavasuppresswarnings]
+
+</td>
+</tr>
+<tr>
+<td>
+
+```c#
+#pragma warning disable 0000
+// code
+#pragma warning restore 0000
+```
+
+</td>
+<td>
+
+C# [^so1378634]
+
+</td>
+</tr>
+<tr>
+<td>
+
+```c#
+[SuppressMessage("", "", Justification = "")]
+```
+
+</td>
+<td>
+
+C# [^so1378634]
+
+</td>
+</tr>
+</table>
+
+This proposal produces errors for definitely bad code and as such avoids the need for additional viral attribution efforts for ignoring false positives.
+
 ## Summary
 
 The advantages of adopting said proposal are as follows:
@@ -1265,6 +1371,12 @@ References have to be initialized, can't be `nullptr` and can't be rebound which
 [^n3038]: <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3038.htm>
 <!--Static storage for braced initializers-->
 [^p2752r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2752r1.html>
+<!--SuppressWarnings-->
+[^javasuppresswarnings]: <https://docs.oracle.com/javase/8/docs/api/java/lang/SuppressWarnings.html>
+<!--Java @SuppressWarnings Annotation-->
+[^baeldungjavasuppresswarnings]: <https://www.baeldung.com/java-suppresswarnings>
+<!--Is there a way to suppress warnings in C# similar to Java's @SuppressWarnings annotation?-->
+[^so1378634]: <https://stackoverflow.com/questions/1378634/is-there-a-way-to-suppress-warnings-in-c-sharp-similar-to-javas-suppresswarnin>
 <!---->
 <!--
 [^]: <>
