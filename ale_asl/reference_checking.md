@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2878R3</td>
+<td>P2878R4</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-6-21</td>
+<td>2023-7-4</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -78,6 +78,12 @@ a code
   - [References](#References)
 
 ## Changelog
+
+### R4
+
+- revised recursive example
+- minor formatting changes
+- improved FAQ: Why not pointers?
 
 ### R3
 
@@ -424,7 +430,7 @@ Before going further, let's consider a recursive example in order to illustrate 
 ```cpp
 const int GLOBAL = 42;
 
-[[dependson(left, right)]]
+[[dependson(input)]]
 const int& recursive(const int& input/* unknown lifetime */)
 {
     if(randomBool())
@@ -439,6 +445,10 @@ const int& recursive(const int& input/* unknown lifetime */)
     if(randomBool())
     {
         return 42;// error: can't return temporary
+    }
+    if(randomBool())
+    {
+        return input;// handled by attribute lower on call stack
     }
     return recursive(input);// unknown
     // doesn't matter
@@ -831,7 +841,16 @@ const int& f()
 
 The problem on `rint2` is that what should its lifetime response be; an error or unknown? The fact is even that can remain a local and the dangling can be identified by adding an integer to the two bits of compile time metadata.
 
-First of all, each scope is given a `level identifier`. Multiple scopes will share the same number if they are on the same level. Starting at 1, each number is applied to each inner scope in a `breadth first search` i.e. `level order` manner. Next each local also receive a `level identifier` equal to the `level identifier` of the scope they were created in. Similarly, references gets a `level identifier` equal to the `level identifier` of the instance that they reference. While this metadata is meant only for locals, it may make it easier in one's implementations to assign 0 for globals and max int for temporaries. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. Errors result from `do return`s if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`. See below for the previous example modified with all of this new metadata.
+1. First of all, each scope is given a `level identifier`.
+1. Multiple scopes will share the same number if they are on the same level. 
+1. Starting at 1, each number is applied to each inner scope in a `breadth first search` i.e. `level order` manner.
+1. Next each local also receive a `level identifier` equal to the `level identifier` of the scope they were created in. Similarly, references gets a `level identifier` equal to the `level identifier` of the instance that they reference.
+1. While this metadata is meant only for locals, it may make it easier in one's implementations to assign 0 for globals and max int for temporaries.
+1. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. 
+1. Errors result from `do return`s if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`.
+1. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`.
+
+See below for the previous example modified with all of this new metadata.
 
 <!--
 I could think of a couple of solutions.
@@ -1290,6 +1309,24 @@ The advantages of adopting said proposal are as follows:
 
 References have to be initialized, can't be `nullptr` and can't be rebound which means by default the lifetime of the instance the reference points to is fixed at the moment of construction which has to exist lower on the stack i.e. prior to reference creation which is known at compile time. This is very safe by default. Pointers and reference classes that has pointer semantics are none of these things. Since they are so dynamic, the relevant metadata would more frequently be needed at run time.
 
+That having been said, pointers used in a reference like way could benefit from the checks proposed in this paper.
+
+<table>
+<tr>
+<td>
+
+*"**a reference is similar to a const pointer such as `int* const p`** (as opposed to a pointer to const such as `const int* p`)"* [^reseatingrefs]
+
+---
+
+**How can you reseat a reference to make it refer to a different object?** [^reseatingrefs]<br/>*ISOCPP > Wiki Home > References*
+
+</td>
+</tr>
+</table>
+
+This would require increasing the two bits of metadata to include a third bit in order to handle `nullptr` and uninitialized. This is not currently in scope of this proposal.
+
 ### Why not `explicit lifetime dependence` on `struct`(s)?
 
 1. References are rarely used in class definitions. Instead programmers use std::reference_wrapper, smart pointers and plain old pointers. Since all of these are rebindable, they are more runtime than compile time and as such is not the subject of this proposal. See `Why not pointers?` for more information.
@@ -1377,6 +1414,8 @@ References have to be initialized, can't be `nullptr` and can't be rebound which
 [^baeldungjavasuppresswarnings]: <https://www.baeldung.com/java-suppresswarnings>
 <!--Is there a way to suppress warnings in C# similar to Java's @SuppressWarnings annotation?-->
 [^so1378634]: <https://stackoverflow.com/questions/1378634/is-there-a-way-to-suppress-warnings-in-c-sharp-similar-to-javas-suppresswarnin>
+<!--How can you reseat a reference to make it refer to a different object?-->
+[^reseatingrefs]: <https://isocpp.org/wiki/faq/references#reseating-refs>
 <!---->
 <!--
 [^]: <>
