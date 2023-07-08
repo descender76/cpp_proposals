@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-7-4</td>
+<td>2023-7-8</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -82,6 +82,7 @@ a code
 ### R4
 
 - revised recursive example
+- revised `do return`'s `return` example
 - minor formatting changes
 - improved FAQ: Why not pointers?
 
@@ -772,32 +773,32 @@ const int& x = do
     const int& r6 /*temporary*/ = f1(GLOBAL, 42);// error: can't assign temporary to a named instance
     if(randomBool())
     {
-        do return r1;// error: can't do return local
+        return r1;// error: can't `return` local
     }
     if(randomBool())
     {
-        do return r2;// OK its a reference to a global
+        return r2;// OK its a reference to a global
     }
     if(randomBool())
     {
-        do return r3;// error: can't do return temporary
+        return r3;// error: can't `return` or `do return` a temporary
     }
     if(randomBool())
     {
-        do return r4;// error: can't do return local
+        return r4;// error: can't `return` local
     }
     if(randomBool())
     {
-        do return r5;// error: can't do return temporary
+        return r5;// error: can't `return` or `do return` a temporary
     }
     if(randomBool())
     {
-        do return r6;// error: can't do return temporary
+        return r6;// error: can't `return` or `do return` a temporary
     }
     int x1 = r3 + 43;// error: can't use reference to a temporary
     int x2 = r5 + 44;// error: can't use reference to a temporary
     int x3 = r6 + 45;// error: can't use reference to a temporary
-    return f1(f1(GLOBAL, 4), f1(local, 2));// error: can't return temporary
+    return f1(f1(GLOBAL, 4), f1(local, 2));// error: can't `return` or `do return` a temporary
 };
 
 ```
