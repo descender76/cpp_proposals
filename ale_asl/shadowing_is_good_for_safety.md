@@ -416,8 +416,9 @@ While both names would work, dename seems simpler to me than unname. Personally,
 [^Principle_of_least_privilege]: <https://en.wikipedia.org/wiki/Principle_of_least_privilege>
 <!--Pattern matching using is and as-->
 [^as]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2392r1.pdf>
+<!--Type checks and casts-->
+[^typecasts]: <https://kotlinlang.org/docs/typecasts.html>
 <!---->
 <!--
 [^]: <>
 -->
-
