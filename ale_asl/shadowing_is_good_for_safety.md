@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-7-15</td>
+<td>2023-7-16</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -77,6 +77,7 @@ a code
 
 - updated `1st request`, explaining advantage of language solution over library solution in terms of error message
 - added `std::optional` example to `2nd request`
+- added the `4th request` and its corresponding FAQ
 - added a `Safety and Security` section
 - revised `Summary` section
 
@@ -154,6 +155,8 @@ int main()
 </tr>
 </table>
 
+This feature allows programmers to relinquish access to the variable preventing all further operations that could jeopardize safety.
+
 Even if this feature could not be standardized as a language feature, by removing a non breaking restriction, the tag class is adequate, provided the tag class name could be standardized as a library feature.
 
 The advantage of having the language feature over the library feature would appear in the error message.
@@ -169,10 +172,13 @@ The advantage of having the language feature over the library feature would appe
 </tr>
 </table>
 
-In the language, `void vs;`, case, the focus is on the variable that was denamed, which is better. While the library, `dename vs;`, case, the focus is on the non existent member.
+In the language case, `void vs;`, the focus is on the variable that was denamed, which is better. With the library case, `dename vs;`, the focus is on the non existent member.
 <!--
 Either standardize `dename` as a library or allow `void` initialization.
 -->
+
+---
+ 
 **2nd request:** It would be beneficial if programmers could initialize shadowed variables with the variable that is being shadowed.
 
 <table>
@@ -259,6 +265,8 @@ int main()
 </tr>
 </table>
 
+By temporarily restricting access to non `const` methods, programmers prevent unintended mutations that could jeopardize safety.
+
 ### Implementation Experience
 
 <table>
@@ -300,7 +308,9 @@ warning C4700: uninitialized local variable 'vs' used
 </tr>    
 </table>
 
-**3rd request:** It would be beneficial if programmers could shadow variables without having involve a child scope.
+---
+
+**3rd request:** It would be beneficial if programmers could shadow variables without having to involve a child scope.
 
 <table>
 <caption>shadowing limitation: same level</caption>
@@ -373,15 +383,115 @@ int main()
 </tr>
 </table>
 
+By relinquish access to non `const` methods as quickly as possible, programmers prevent unintended mutations that could jeopardize safety.
+
 The error in the `Present and Request` example may read something like <span style="color:red">"error: conflicting declaration 'const vector&lt;string&gt; vs'//note: previous declaration as 'vector&lt;string&gt; vs'".</span>
-    
+
+---
+
+**4th request:** All of the previous requests have either been hiding variable altogether or replacing with an unconditionally casting. It would be beneficial if programmers had a mechanism for conditional casting.
+
+<table>
+<caption>NEW shadowing feature: conditional casting</caption>
+<tr>
+<th>
+
+Request #4
+
+</th>
+<th>
+
+Request #2
+
+</th>
+</tr>
+<tr>
+<td>
+
+```cpp
+#include <string>
+#include <optional>
+#include <memory>
+
+using namespace std;
+
+int main()
+{
+  auto s = optional<string>{"Godzilla"};
+  if(s as string)// or if(s is string)
+  {
+    // s is string&
+  }
+  else
+  {
+    // s is still optional<string>
+  }
+  auto i = shared_ptr<int>{42};
+  if(i as string)// or if(i is string)
+  {
+    // i is int&
+  }
+  else
+  {
+    // i is still shared_ptr<int>
+  }
+  return 0;
+}
+```
+
+</td>
+<td>
+
+```cpp
+#include <string>
+#include <optional>
+#include <memory>
+
+using namespace std;
+
+int main()
+{
+  auto s = optional<string>{"Godzilla"};
+  if(s)
+  {
+    auto s = *s;
+    // s is string&
+  }
+  else
+  {
+    // s is still optional<string>
+  }
+  auto i = shared_ptr<int>{42};
+  if(i)
+  {
+    auto i = *i;
+    // s is int&
+  }
+  else
+  {
+    // i is still shared_ptr<int>
+  }
+  return 0;
+}
+```
+
+</td>
+</tr>
+</table>
+
+This request is all about being simple and succint. The programmer need not know which conversion, `*`, `get()` or `value()`, gets paired with which test.
+
+This is similar to what Herb Sutter proposed in `Pattern matching using is and as` [^as]. While that proposal was focused on pattern matching, this proposal is focused on shadowing and the resulting safety benefits presented.
+
+This functionality exists in the Kotlin [^typecasts] and other programming languages.
+
 ## Safety and Security
 
 Does these requests provide any safety or security?
 
 *"In information security, computer science, and other fields, the principle of least privilege (PoLP), also known as the principle of minimal privilege (PoMP) or the principle of least authority (PoLA), requires that in a particular abstraction layer of a computing environment, every module (such as a process, a user, or a program, depending on the subject) must be able to access only the information and resources that are necessary for its legitimate purpose."* [^Principle_of_least_privilege]
 
-Typically when someone considers this principle it is in the context that someone else is restricting the access of someone or something else. However, it also applies to someone who have been given access, then relinquishing that access or a portion of it when it is no longer needed. The later context is what shadowing is about. When a programmer dename/void their access to a variable they are relinquishing access for the remainder of the scope. When a programmer restrict their access to a variable to only its `const` methods than they relinquish part of their access. In both cases, it means you can't mutate an instance, which means the defensive programmer proactively avoid iterator, reference and pointer invalidation. Attempting to call a member that one does not have access to results in an error being provided by the compiler instead of by some external tool.
+Typically, when someone considers this principle it is in the context that someone is restricting the access of someone or something else. However, it also applies to someone who have been given access, then relinquishing that access or a portion of it when it is no longer needed. The later context is what shadowing is about. When a programmer dename/void their access to a variable they are relinquishing access for the remainder of the scope. When a programmer restrict their access to a variable to only its `const` methods than they relinquish part of their access. In both cases, it means you can't mutate an instance, which means the defensive programmer proactively avoid iterator, reference and pointer invalidation. Attempting to call a member that one does not have access to results in an error being provided by the compiler instead of by some external tool.
 
 This is also related to borrow checking. Borrow checking is more about aliasing and restricting ownership to just 1. Shadowing allows programmers to reduce their aliases, actually accessible reference count, to 1 just like borrow checking and in some cases even farther to just 0.
 
@@ -389,7 +499,7 @@ Shadowing is of benefit of certain analyzers. Analyzer processing time is usuall
 
 ## Summary
 
-All of these requests are mutually exclusive, the C++ community, could adopt any combination of them. This proposal brings all these requests together because they are related.
+Since all of these requests are independent and compatible, the C++ community could adopt any combination of them. This proposal brings all these requests together because they are related.
 
 The advantages of adopting said proposal are as follows:
 
@@ -405,6 +515,13 @@ The advantages of adopting said proposal are as follows:
 2. unname [^unname]: To cease to name; to deprive (someone or something) of their name
 
 While both names would work, dename seems simpler to me than unname. Personally, I think using `void` or slightly less so `auto` would be the more intuitive `C++` name.
+
+### Why `as` instead of `is`?
+
+1. `as` focuses on the casting and hence what a variable will be
+2. `is` focuses on the testing and hence what a variable was
+
+Since the `if` clause is more focused on what the variable will be instead of what it was, going with `as` over `is` seemed like a intuitive choice.
 
 ## References
 
