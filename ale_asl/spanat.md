@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2821R2</td>
+<td>P2821R4</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-5-26</td>
+<td>2023-7-26</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -66,16 +66,24 @@ a code
     - [Safety](#Safety)
     - [Consistency](#Consistency)
     - [Public Relations](#Public-Relations)
+  - [Wording](#Wording)
   - [Feature test macro](#Feature-test-macro)
   - [Implementation Experience](#Implementation-Experience)
   - [Summary](#Summary)
   - [References](#References)
 <!--
-  - [Proposed Wording](#Proposed-Wording)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
 -->
 
 ## Changelog
+
+### R4
+
+- Added a wording section
+
+### R3
+
+- Fixed some typos
 
 ### R2
 
@@ -217,15 +225,51 @@ Consequently, the programming community in general are encouraged to ask some to
 
 1. Why was `span::at()` not provided in `C++20`? [^p1024r0]
 1. Was this an accidental omission or was it deliberate? [^p1024r1]
-1. If delibrerate, what was the rationale?
-1. If delibrerate, are the other `at` functions going to be deprecated?
+1. If deliberate, what was the rationale?
+1. If deliberate, are the other `at` functions going to be deprecated?
 1. Why was `span::at()` not added in `C++23`?
 1. Is it going to be in `C++26`?
 
 Ultimately, this becomes a stereotypical example of how `C++` traditionally handles safety. This example gets to be pointed at for years/decades to come. All of this could have been avoided, along with more effort of adding this function individually had more consideration been given valid safety concerns.
+
+## Wording
+
+The wording is relative to N4950 [^n4950].
+
 <!--
-## Proposed Wording
+17.3.2 Header <version> synopsis [version.syn]
 -->
+
+> Insert the following into [[span.overview]](https://eel.is/c++draft/span.overview), header `<span>` synopsis within the span class, immediately after the subscript operator in the element access section:
+<!--
+24.7.2.2.1 Overview [span.overview]
+
+class span {
+
+// 24.7.2.2.6, element access
+constexpr reference operator[](size_type idx) const;
+-->
+```cpp
+// no freestanding
+#if __STDC_HOSTED__ == 1
+constexpr reference at(size_type idx) const;
+#endif
+```
+
+> Insert the following into [[span.elem]](https://eel.is/c++draft/span.elem), span's `Element access` section, immediately after the subscript operator:
+<!--
+24.7.2.2.6 Element access [span.elem]
+constexpr reference operator[](size_type idx) const;
+1 Preconditions: idx < size() is true.
+2 Effects: Equivalent to: return *(data() + idx);
+-->
+> constexpr reference at(size_type idx) const;
+>
+> *Returns*: *(data() + idx).
+>
+> *Throws*: out_of_range if idx >= size().
+
+
 ## Feature test macro
 
 > Insert the following to [[version.syn]](https://eel.is/c++draft/version.syn), header `<version>` synopsis:
@@ -300,5 +344,13 @@ Please add the `at` method to `std::span` class in order to address safety, cons
 [^p1024r0]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1024r0.pdf>
 <!--Usability Enhancements for std::span-->
 [^p1024r1]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1024r1.pdf>
+<!--Working Draft, Standard for Programming Language C++-->
+[^n4950]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf>
+<!--inplace_vector-->
+[^p0843r8]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0843r8.html>
+<!--function_ref: a type-erased callable reference-->
+[^p0792r14]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p0792r14.html>
+<!--MDSPAN-->
+[^p0009r18]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p0009r18.html>
 <!--TODO-->
 [^TODO]: <TODO>
