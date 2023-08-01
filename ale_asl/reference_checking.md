@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2878R4</td>
+<td>P2878R5</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-7-8</td>
+<td>2023-7-31</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -78,6 +78,10 @@ a code
   - [References](#References)
 
 ## Changelog
+
+### R5
+
+- revised resolution to the do expression/pattern matching dangling problem, explaining it iteratively
 
 ### R4
 
@@ -851,8 +855,129 @@ The problem on `rint2` is that what should its lifetime response be; an error or
 1. Errors result from `do return`s if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`.
 1. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`.
 
-See below for the previous example modified with all of this new metadata.
+Let's iteratively apply this to the previous example.
 
+1. First of all, each scope is given a `level identifier`.
+1. Multiple scopes will share the same number if they are on the same level. 
+1. Starting at 1, each number is applied to each inner scope in a `breadth first search` i.e. `level order` manner.
+
+```cpp
+
+const int& f()
+{// scope level 1
+    int local1 = 42;
+    const int& rint1 = do
+    {// scope level 2
+        int local2 = 42;
+        const int& rint2 = do
+        {// scope level 3
+            int local3 = 42;
+            if(randomBool())
+            {// scope level 4
+                do return local1;
+            }
+            if(randomBool())
+            {// scope level 4
+                do return local2;
+            }
+            do return local3;
+        };
+        if(randomBool())
+        {// scope level 3
+            do return local1;
+        }
+        if(randomBool())
+        {// scope level 3
+            do return local2;
+        }
+        do return rint2;
+    };
+}
+
+```
+
+4. Next each local also receive a `level identifier` equal to the `level identifier` of the scope they were created in. Similarly, references gets a `level identifier` equal to the `level identifier` of the instance that they reference.
+4. While this metadata is meant only for locals, it may make it easier in one's implementations to assign 0 for globals and max int for temporaries.
+
+```cpp
+
+const int& f()
+{// scope level 1
+    int local1 = 42;// local with scope level 1
+    const int& rint1 = do
+    {// scope level 2
+        int local2 = 42;// local with scope level 2
+        const int& rint2 = do
+        {// scope level 3
+            int local3 = 42;// local with scope level 3
+            if(randomBool())
+            {// scope level 4
+                do return local1;
+            }
+            if(randomBool())
+            {// scope level 4
+                do return local2;
+            }
+            do return local3;
+        };
+        if(randomBool())
+        {// scope level 3
+            do return local1;
+        }
+        if(randomBool())
+        {// scope level 3
+            do return local2;
+        }
+        do return rint2;
+    };
+}
+
+```
+
+6. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. 
+
+```cpp
+
+const int& f()
+{// scope level 1
+    int local1 = 42;// local with scope level 1
+    const int& rint1 = do// reference with scope level 3
+    // reference scope level 3 = max(1, 2, 3) from the do return(s)
+    {// scope level 2
+        int local2 = 42;// local with scope level 2
+        const int& rint2 = do// reference with scope level 3
+        // reference scope level 3 = max(1, 2, 3) from the do return(s)
+        {// scope level 3
+            int local3 = 42;// local with scope level 3
+            if(randomBool())
+            {// scope level 4
+                do return local1;
+            }
+            if(randomBool())
+            {// scope level 4
+                do return local2;
+            }
+            do return local3;
+        };
+        if(randomBool())
+        {// scope level 3
+            do return local1;
+        }
+        if(randomBool())
+        {// scope level 3
+            do return local2;
+        }
+        do return rint2;
+    };
+}
+
+```
+
+7. Errors result from `do return`s if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`.
+7. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`.
+<!--
+See below for the previous example modified with all of this new metadata.
+-->
 <!--
 I could think of a couple of solutions.
 
