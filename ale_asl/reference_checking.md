@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-7-31</td>
+<td>2023-8-2</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -851,7 +851,7 @@ The problem on `rint2` is that what should its lifetime response be; an error or
 1. Starting at 1, each number is applied to each inner scope in a `breadth first search` i.e. `level order` manner.
 1. Next each local also receive a `level identifier` equal to the `level identifier` of the scope they were created in. Similarly, references gets a `level identifier` equal to the `level identifier` of the instance that they reference.
 1. While this metadata is meant only for locals, it may make it easier in one's implementations to assign 0 for globals and max int for temporaries.
-1. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. 
+1. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. **NOTE:** Inner `do`(s) must be evaluated before containing `do`(s). 
 1. Errors result from `do return`s if the variable or reference has a `level identifier` greater than or equal the the `do return`(s) `do`'s `level identifier`.
 1. Errors also result from `do`(s) if the aggregated `level identifier` is greater than or equal to the do's `level identifier`.
 
@@ -934,7 +934,7 @@ const int& f()
 
 ```
 
-6. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. 
+6. A reference returned from a `do` is set to the maximum value of all the `level identifier`'s of all the references and variables `do return`ed. **NOTE:** Inner `do`(s) must be evaluated before containing `do`(s).
 
 ```cpp
 
