@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-7-28</td>
+<td>2023-8-3</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -64,6 +64,7 @@ a code
     - [The common challenges](#The-common-challenges)
     - [The common safe member functions](#The-common-safe-member-functions)
     - [The common safe free functions](#The-common-safe-free-functions)
+  - [Optional Design Considerations](#Optional-Design-Considerations)
   - [Example](#Example)
   - [Resolution](#Resolution)
   - [Summary](#Summary)
@@ -468,6 +469,55 @@ constexpr void copy_and_grow( std::vector<T>& destination, std::size_t pos, std:
 
 Besides being safe for not returning a reference, these two functions perform batch copies, reducing the number of individual checks that have to be performed. Both batch copy a source span to a destination range based collection or view. In the case of `copy_and_crop`, any elements that are outside the range of the destination do not get copied. In the case of `copy_and_grow`, the destination range based collection grows to accommodate the elements of the source span that exceeds the destinations current bounds. These two functions are analogous to combining two dimensional arrays such as images.
 
+## Optional Design Considerations
+
+One of the criticisms of the checked `at` methods is that the `out_of_range` and other exceptions implies a dynamic allocation upon construction of the exception with a custom descriptive message.
+
+This issue could be resolved by adding a new `virtual` `what` method to `std::exception` that instead of return a `const char *`, takes and returns a `std::ostream`.
+
+```cpp
+class exception : virtual public std::exception {
+public:
+    virtual std::ostream& what(std::ostream& os) const noexcept
+    {
+        return os << std::exception::what();
+    }
+};
+```
+
+New `out_of_range` exceptions could be created that don't initially take a `std::string`.
+
+```cpp
+class logic_error_v2 : virtual public std::exception {
+};
+
+class out_of_range_v2 : virtual public logic_error_v2 {
+};
+
+template<class T>
+class out_of_range_v2_1 : virtual public out_of_range_v2 {
+private:
+    const std::vector<T>::size_type pos;
+    const std::source_location location;
+public:
+    out_of_range_v2_1(const std::vector<T>::size_type pos, const std::source_location location) : pos{pos}, location{location}
+    {
+    }
+    virtual std::ostream& what(std::ostream& os) const noexcept override
+    {
+        //os << this->what();
+        return os << "file: "
+            << location.file_name() << '('
+            << location.line() << ':'
+            << location.column() << ") `"
+            << location.function_name() << "`: "
+            << "invalid index: " << pos << '\n';
+    }
+};
+```
+
+This delays creation of the error message to point of use instead of exception creation. While getting the message into a `std::string` is still possible with `std::stringstream`, the end result is no dynamic allocation for `std::string` needs be created, if it was logged instead or sent to a static buffer.
+
 ## Example
 
 ```cpp
@@ -483,11 +533,48 @@ Besides being safe for not returning a reference, these two functions perform ba
 
 using namespace std::literals::string_literals;
 
+class exception_v2 : virtual public std::exception {
+public:
+    virtual std::ostream& what(std::ostream& os) const noexcept
+    {
+        return os << std::exception::what();
+    }
+};
+
+class logic_error_v2 : virtual public exception_v2 {
+};
+
+class out_of_range_v2 : virtual public logic_error_v2 {
+};
+
+template<class T>
+class out_of_range_v2_1 : virtual public out_of_range_v2 {
+private:
+    const T pos;
+    const std::source_location location;
+public:
+    out_of_range_v2_1(const T pos, const std::source_location location) : pos{pos}, location{location}
+    {
+    }
+    virtual std::ostream& what(std::ostream& os) const noexcept override
+    {
+        //os << this->what();
+        return os << "file: "
+            << location.file_name() << '('
+            << location.line() << ':'
+            << location.column() << ") `"
+            << location.function_name() << "`: "
+            << "invalid index: " << pos << '\n';
+    }
+};
+
+
 // currently 12 unsafe element access methods
 // proposed  14 unsafe element access methods, 56 safe element access methods/functions
 template<class T>
 class my_vector : public std::vector<T> {
 private:
+/*
     static std::string to_string(const std::vector<T>::size_type pos, const std::source_location location)
     {
         std::stringstream ss;
@@ -499,15 +586,19 @@ private:
             << "invalid index: " << pos << '\n';
         return ss.str();
     }
-
+*/
     static void log(const std::vector<T>::size_type pos, const std::source_location location)
     {
+        /*
         std::clog << "file: "
             << location.file_name() << '('
             << location.line() << ':'
             << location.column() << ") `"
             << location.function_name() << "`: "
             << "invalid index: " << pos << '\n';
+        */
+        out_of_range_v2_1<size_type> oor{pos, location};
+        oor.what(std::clog) << '\n';
     }
 public:
     using std::vector<T>::vector;
@@ -547,7 +638,8 @@ public:
         }
         else
         {
-            throw std::out_of_range(to_string(pos, location));
+            //throw std::out_of_range(to_string(pos, location));
+            throw out_of_range_v2_1<size_type>(pos, location);
         }
     }
 
@@ -562,7 +654,8 @@ public:
         }
         else
         {
-            throw std::out_of_range(to_string(pos, location));
+            //throw std::out_of_range(to_string(pos, location));
+            throw out_of_range_v2_1<size_type>(pos, location);
         }
     }
 
@@ -664,7 +757,8 @@ public:
         }
         else
         {
-            throw std::out_of_range(to_string(pos, location));
+            //throw std::out_of_range(to_string(pos, location));
+            throw out_of_range_v2_1<size_type>(pos, location);
         }
     }
 
@@ -678,7 +772,8 @@ public:
         }
         else
         {
-            throw std::out_of_range(to_string(pos, location));
+            //throw std::out_of_range(to_string(pos, location));
+            throw out_of_range_v2_1<size_type>(pos, location);
         }
     }
 
@@ -766,7 +861,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -781,7 +877,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -883,7 +980,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -897,7 +995,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -989,7 +1088,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -1004,7 +1104,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -1106,7 +1207,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -1120,7 +1222,8 @@ public:
     {
         if(this->empty())
         {
-            throw std::out_of_range(to_string(0, location));
+            //throw std::out_of_range(to_string(0, location));
+            throw out_of_range_v2_1<size_type>(0, location);
         }
         else
         {
@@ -1232,101 +1335,115 @@ constexpr void copy_and_grow( std::vector<T>& destination, std::size_t pos, std:
 // shadowing enhances safety
 int main()
 {
-    my_vector<int> myints{1};
-    bool t = myints.test(0);
-    t = myints.test(1);
-    // get whole
-    int pv = myints.get_value( 0 );//throws
-    pv = myints.get_value( 0, 42 );//default value
-    std::optional<int> opv = myints.get_optional( 0 );
-    pv = myints.get_or_terminate( 0 );
+    try
+    {
+        my_vector<int> myints{1};
+        bool t = myints.test(0);
+        t = myints.test(1);
+        // get whole
+        int pv = myints.get_value( 0/*5*/ );//throws
+        pv = myints.get_value( 0, 42 );//default value
+        std::optional<int> opv = myints.get_optional( 0 );
+        pv = myints.get_or_terminate( 0 );
 
-    pv = myints.get_front_value();//throws
-    pv = myints.get_front_value( 42 );//default value
-    opv = myints.get_front_optional();
-    pv = myints.get_front_or_terminate();
+        pv = myints.get_front_value();//throws
+        pv = myints.get_front_value( 42 );//default value
+        opv = myints.get_front_optional();
+        pv = myints.get_front_or_terminate();
 
-    pv = myints.get_back_value();//throws
-    pv = myints.get_back_value( 42 );//default value
-    opv = myints.get_back_optional();
-    pv = myints.get_back_or_terminate();
-    // set whole
-    myints.set_value( 0, 42 );//throws
-    myints.set_or_terminate( 0, 42 );
-    myints.set_and_crop( 0, 42 );
-    myints.set_and_grow( 1, 42 );
-    myints.set_and_grow( 3, 42, 0 );
+        pv = myints.get_back_value();//throws
+        pv = myints.get_back_value( 42 );//default value
+        opv = myints.get_back_optional();
+        pv = myints.get_back_or_terminate();
+        // set whole
+        myints.set_value( 0, 42 );//throws
+        myints.set_or_terminate( 0, 42 );
+        myints.set_and_crop( 0, 42 );
+        myints.set_and_grow( 1, 42 );
+        myints.set_and_grow( 3, 42, 0 );
 
-    myints.set_front_value( 42 );//throws
-    myints.set_front_or_terminate( 42 );
-    myints.set_front_and_crop( 42 );
-    myints.set_front_and_grow( 42 );
-    myints.set_front_and_grow( 42, 0 );
+        myints.set_front_value( 42 );//throws
+        myints.set_front_or_terminate( 42 );
+        myints.set_front_and_crop( 42 );
+        myints.set_front_and_grow( 42 );
+        myints.set_front_and_grow( 42, 0 );
 
-    myints.set_back_value( 42 );//throws
-    myints.set_back_or_terminate( 42 );
-    myints.set_back_and_crop( 42 );
-    myints.set_back_and_grow( 42 );
-    myints.set_back_and_grow( 42, 0 );
+        myints.set_back_value( 42 );//throws
+        myints.set_back_or_terminate( 42 );
+        myints.set_back_and_crop( 42 );
+        myints.set_back_and_grow( 42 );
+        myints.set_back_and_grow( 42, 0 );
 
-    my_vector<std::string> mystrings{"1"};
-    bool ts = mystrings.test(0);
-    ts = mystrings.test(1);
+        my_vector<std::string> mystrings{"1"};
+        bool ts = mystrings.test(0);
+        ts = mystrings.test(1);
 
-    auto s42 = "42"s;
-    // get/transform whole or part
-    size_t pvi = mystrings.transform_value( 0, [](const std::string& item){return item.size();} );
-    pvi = mystrings.transform_value( 0, [](const std::string& item){return item.size();}, 42ul );
-    std::optional<size_t> opvs = mystrings.transform_optional( 0, [](const std::string& item){return item.size();} );
-    pvi = mystrings.transform_or_terminate( 0, [](const std::string& item){return item.size();} );
+        auto s42 = "42"s;
+        // get/transform whole or part
+        size_t pvi = mystrings.transform_value( 0, [](const std::string& item){return item.size();} );
+        pvi = mystrings.transform_value( 0, [](const std::string& item){return item.size();}, 42ul );
+        std::optional<size_t> opvs = mystrings.transform_optional( 0, [](const std::string& item){return item.size();} );
+        pvi = mystrings.transform_or_terminate( 0, [](const std::string& item){return item.size();} );
 
-    pvi = mystrings.transform_front_value( [](const std::string& item){return item.size();} );
-    pvi = mystrings.transform_front_value( [](const std::string& item){return item.size();}, 42ul );
-    opvs = mystrings.transform_front_optional( [](const std::string& item){return item.size();} );
-    pvi = mystrings.transform_front_or_terminate( [](const std::string& item){return item.size();} );
+        pvi = mystrings.transform_front_value( [](const std::string& item){return item.size();} );
+        pvi = mystrings.transform_front_value( [](const std::string& item){return item.size();}, 42ul );
+        opvs = mystrings.transform_front_optional( [](const std::string& item){return item.size();} );
+        pvi = mystrings.transform_front_or_terminate( [](const std::string& item){return item.size();} );
 
-    pvi = mystrings.transform_back_value( [](const std::string& item){return item.size();} );
-    pvi = mystrings.transform_back_value( [](const std::string& item){return item.size();}, 42ul );
-    opvs = mystrings.transform_back_optional( [](const std::string& item){return item.size();} );
-    pvi = mystrings.transform_back_or_terminate( [](const std::string& item){return item.size();} );
-    // set/visit whole or part
-    mystrings.visit_value( 0, [&s42](std::string& item){item = s42;} );
-    mystrings.visit_or_terminate( 0, [&s42](std::string& item){item = s42;} );
-    mystrings.visit_and_crop( 0, [&s42](std::string& item){item = s42;} );
-    mystrings.visit_and_grow( 1, [&s42](std::string& item){item = s42;} );
-    mystrings.visit_and_grow( 3, [&s42](std::string& item){item = s42;}, "0" );
+        pvi = mystrings.transform_back_value( [](const std::string& item){return item.size();} );
+        pvi = mystrings.transform_back_value( [](const std::string& item){return item.size();}, 42ul );
+        opvs = mystrings.transform_back_optional( [](const std::string& item){return item.size();} );
+        pvi = mystrings.transform_back_or_terminate( [](const std::string& item){return item.size();} );
+        // set/visit whole or part
+        mystrings.visit_value( 0, [&s42](std::string& item){item = s42;} );
+        mystrings.visit_or_terminate( 0, [&s42](std::string& item){item = s42;} );
+        mystrings.visit_and_crop( 0, [&s42](std::string& item){item = s42;} );
+        mystrings.visit_and_grow( 1, [&s42](std::string& item){item = s42;} );
+        mystrings.visit_and_grow( 3, [&s42](std::string& item){item = s42;}, "0" );
 
-    mystrings.visit_front_value( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_front_or_terminate( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_front_and_crop( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_front_and_grow( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_front_and_grow( [&s42](std::string& item){item = s42;}, "0" );
+        mystrings.visit_front_value( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_front_or_terminate( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_front_and_crop( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_front_and_grow( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_front_and_grow( [&s42](std::string& item){item = s42;}, "0" );
 
-    mystrings.visit_back_value( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_back_or_terminate( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_back_and_crop( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_back_and_grow( [&s42](std::string& item){item = s42;} );
-    mystrings.visit_back_and_grow( [&s42](std::string& item){item = s42;}, "0" );
+        mystrings.visit_back_value( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_back_or_terminate( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_back_and_crop( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_back_and_grow( [&s42](std::string& item){item = s42;} );
+        mystrings.visit_back_and_grow( [&s42](std::string& item){item = s42;}, "0" );
 
-    std::vector<std::string> destination{"1", "2", "3"};
-    /*const*/ std::vector<std::string> source1{"3", "4", "5"};
-    /*const*/ std::vector<std::string> source2{"6", "7", "8"};
+        std::vector<std::string> destination{"1", "2", "3"};
+        /*const*/ std::vector<std::string> source1{"3", "4", "5"};
+        /*const*/ std::vector<std::string> source2{"6", "7", "8"};
 
-    copy_and_crop(std::span<std::string>{destination}, 1, std::span<const std::string>{source1});// 1, 3, 4
-    copy_and_grow(destination, 2, std::span<const std::string>{source2});// 1, 3, 6, 7, 8
-    //static_assert( destination[0] == "1"s );
-    //static_assert( destination[1] == "3"s );
-    //static_assert( destination[2] == "6"s );
-    //static_assert( destination[3] == "7"s );
-    //static_assert( destination[4] == "8"s );
-    assert( destination.size() == 5 );
-    assert( destination[0] == "1"s );
-    assert( destination[1] == "3"s );
-    assert( destination[2] == "6"s );
-    assert( destination[3] == "7"s );
-    assert( destination[4] == "8"s );
+        copy_and_crop(std::span<std::string>{destination}, 1, std::span<const std::string>{source1});// 1, 3, 4
+        copy_and_grow(destination, 2, std::span<const std::string>{source2});// 1, 3, 6, 7, 8
+        //static_assert( destination[0] == "1"s );
+        //static_assert( destination[1] == "3"s );
+        //static_assert( destination[2] == "6"s );
+        //static_assert( destination[3] == "7"s );
+        //static_assert( destination[4] == "8"s );
+        assert( destination.size() == 5 );
+        assert( destination[0] == "1"s );
+        assert( destination[1] == "3"s );
+        assert( destination[2] == "6"s );
+        assert( destination[3] == "7"s );
+        assert( destination[4] == "8"s );
+    }
+    //catch(const std::out_of_range& oor)
+    //{
+    //    std::clog << oor.what() << '\n';
+    //}
+    catch(const out_of_range_v2_1<std::vector<int>::size_type>& oor)
+    {
+        std::stringstream ss;
+        oor.what(ss);
+        std::clog << ss.str() << '\n';
+    }
     return 0;
 }
+
 ```
 
 ## Resolution
