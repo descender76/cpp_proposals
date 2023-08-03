@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2951R1</td>
+<td>P2951R2</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-7-16</td>
+<td>2023-8-3</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -72,6 +72,10 @@ a code
   - [References](#References)
 
 ## Changelog
+
+### R2
+
+- added the `5th request` for checked range based for loops
 
 ### R1
 
@@ -484,6 +488,114 @@ This request is all about being simple and succint. The programmer need not know
 This is similar to what Herb Sutter proposed in `Pattern matching using is and as` [^as]. While that proposal was focused on pattern matching, this proposal is focused on shadowing and the resulting safety benefits presented.
 
 This functionality exists in the Kotlin [^typecasts] and other programming languages.
+
+---
+
+**5th request:** This final request is very similar to the second request in example. Three pieces are required for invalidation errors to occur.
+
+1. A mutable instance
+1. A reference type that refers to the mutable instance and can be impacted by mutations in the mutable instance
+1. Mutating the mutable instance
+
+Because changes occur overwhelming at runtime instead of compile time, it is no big surprise that safety measures are applied at runtime via external test tools or by safer libraries with extra runtime checks built in.
+
+In the range based `for` loop, the iterators, i.e. the reference type, is concealed in the `for` construct. The following example is stripped from the 2nd example.
+
+<table>
+<caption>checked range based for loop</caption>
+<tr>
+<th>
+
+Present and Request
+
+</th>
+<th>
+
+Present Workaround
+
+</th>
+</tr>
+<tr>
+<td>
+
+```cpp
+#include <string>
+#include <vector>
+#include <optional>
+
+using namespace std;
+
+int main()
+{
+  vector<string> vs{"1", "2", "3"};
+  //[[checked]]
+  //for (auto &s : vs) {
+  // or
+  cfor (auto &s : vs) {
+    //const vector<string>& vs = vs;
+    // automatically narrow vs to a constant &
+  }
+  return 0;
+}
+```
+
+</td>
+<td>
+
+```cpp
+#include <string>
+#include <vector>
+#include <optional>
+
+using namespace std;
+
+struct dename{};
+
+int main()
+{
+  vector<string> vs{"1", "2", "3"};
+  //[[checked]]
+  //for (auto &s : vs) {
+  // or
+  cfor (auto &s : vs) {
+    //const vector<string>& vs1 = vs;
+    //dename vs;
+    // automatically narrow vs/vs1 to a constant &
+  }
+  return 0;
+}
+```
+
+</td>
+</tr>
+</table>
+
+The challenging with implementing this request is that while simple variable names being iterated over could be shadowed easily, more complicated expressions would require pattern matching the expression as a whole and a combination of its components. Consequently, there are three increasing degrees of checks that would help programmers.
+
+1. automatically shadow simple expressions such as `vs`
+1. prevent complex expressions such as `vs.member.function().member` from being used elsewhere in the checked range based for loop in a non constant basis
+1. prevent combinations of the expression from being used in the loop in a non constant manner
+
+Examples of the latter two cases follows:
+
+```cpp
+[[checked]]
+for (auto &s : vs.member.function().member) {
+  // shouldn't be able to use `vs.member.function().member`
+  // in a non const fashion
+  vs.member.function().member.non_const_method();// error
+}
+// or
+cfor (auto &s : vs.member.function().member) {
+  auto first2 = vs.member;
+  auto remainder = first2.function().member;
+  // shouldn't be able to use `vs.member.function().member`
+  // in a non const fashion
+  remainder.non_const_method();// error
+}
+```
+
+Even if these two more complicated scenarios were not handled, the single variable scenario is still of value even if programmers have to opt into this with `cfor` or `[[checked]]`.
 
 ## Safety and Security
 
