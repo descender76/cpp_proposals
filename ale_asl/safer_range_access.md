@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-3</td>
+<td>2023-8-4</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -473,7 +473,7 @@ Besides being safe for not returning a reference, these two functions perform ba
 
 One of the criticisms of the checked `at` methods is that the `out_of_range` and other exceptions implies a dynamic allocation upon construction of the exception with a custom descriptive message.
 
-This issue could be resolved by adding a new `virtual` `what` method to `std::exception` that instead of return a `const char *`, takes and returns a `std::ostream`.
+This issue could be resolved by adding a new `virtual` `what` method to `std::exception` that instead of returning a `const char *`, rather it takes and returns a `std::ostream`.
 
 ```cpp
 class exception : virtual public std::exception {
@@ -1470,6 +1470,7 @@ The advantages of adopting said proposal are as follows:
 1. Reduces range based access errors
 1. Reduces dangling references at run time
 1. Reduces reference invalidation errors at run time
+1. Allows programmers to avoid superfluous dynamic allocation when working with exceptions
 
 <!--
 ## Frequently Asked Questions
