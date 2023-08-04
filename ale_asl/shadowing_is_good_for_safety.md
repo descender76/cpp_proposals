@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-3</td>
+<td>2023-8-4</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -491,7 +491,9 @@ This functionality exists in the Kotlin [^typecasts] and other programming langu
 
 ---
 
-**5th request:** This final request is very similar to the second request in example. Three pieces are required for invalidation errors to occur.
+**5th request:** This final request is very similar to the second request in example. Minimize the invalidation errors associated with range based `for` loop by limiting the usage of the instance being iterated over to const access only.
+
+Three pieces are required for invalidation errors to occur.
 
 1. A mutable instance
 1. A reference type that refers to the mutable instance and can be impacted by mutations in the mutable instance
