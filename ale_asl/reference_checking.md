@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-2</td>
+<td>2023-8-5</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -82,6 +82,7 @@ a code
 ### R5
 
 - revised resolution to the do expression/pattern matching dangling problem, explaining it iteratively
+- added a 6th check for `std::thread` and `std::jthread`
 
 ### R4
 
@@ -617,7 +618,7 @@ const std::reference_wrapper<const int> f(const int& left/* unknown lifetime */,
 }
 ```
 
-This is also time to mention our final check.
+This is also time for our next check.
 
 **5th check: You can't use a temporary in a `new` expression if the type being instantiated will become dependent upon that temporary.**
 
@@ -1034,6 +1035,45 @@ const int& f()
 }
 
 ```
+
+This is also time to mention our final check.
+
+**6th check: You can't pass a temporary to `std::thread` and `std::jthread`.**
+
+While the usefulness of this proposal for multithreading in general is limited because each function is considered in isolation, the fact we get any benefit here is some icing on the cake.
+
+```cpp
+#include <iostream>
+#include <thread>
+
+using namespace std;
+
+[[dependson(input)]]
+const int& temporary_factory(const int& input/* unknown lifetime */)
+{
+    return input;
+}
+
+std::thread run() {
+    const int& r1 /*temporary*/ = temporary_factory(42);
+    std::thread t1([&](const int& r2) {
+        std::cout << "r1 and r2 is a temporary " << r1 << r2 << std::endl;
+    }, r1);// error lambda captures a temporary
+    // error lambda is given a tempory upon call
+    std::jthread t2([&](const int& r2) {
+        std::cout << "r1 and r2 is a temporary " << r1 << r2 << std::endl;
+    }, r1);// error lambda captures a temporary
+    // error lambda is given a tempory upon call
+    return t1;
+}
+
+int main() {
+    std::thread t = run();
+    t.join();
+}
+```
+
+In both threads of the above example, errors are produced because the lamba gets flagged as temporary because they capture a temporary. Further, the parameter passed to temporary when it is called is also a temporary.
 
 Consequently, a lot of definitively bad dangling has been identified and made more transparent.
 
