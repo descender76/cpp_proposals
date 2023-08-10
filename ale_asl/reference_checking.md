@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-5</td>
+<td>2023-8-10</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -75,6 +75,8 @@ a code
   - [Viral Attribution Effort](#Viral-Attribution-Effort)
   - [Summary](#Summary)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
+    - [Why not pointers?](#Why-not-pointers)
+    - [Why not explicit lifetime dependence on struct(s)?](#Why-not-explicit-lifetime-dependence-on-structs)
   - [References](#References)
 
 ## Changelog
@@ -1059,11 +1061,11 @@ std::thread run() {
     std::thread t1([&](const int& r2) {
         std::cout << "r1 and r2 is a temporary " << r1 << r2 << std::endl;
     }, r1);// error lambda captures a temporary
-    // error lambda is given a tempory upon call
+    // error lambda is given a temporary upon call
     std::jthread t2([&](const int& r2) {
         std::cout << "r1 and r2 is a temporary " << r1 << r2 << std::endl;
     }, r1);// error lambda captures a temporary
-    // error lambda is given a tempory upon call
+    // error lambda is given a temporary upon call
     return t1;
 }
 
