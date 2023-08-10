@@ -69,6 +69,7 @@ a code
   - [Resolution](#Resolution)
   - [Summary](#Summary)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
+    - [Why not just wait for contracts](#Why-not-just-wait-for-contracts)
   - [References](#References)
 
 ## Abstract
@@ -1465,6 +1466,8 @@ Armed with this type of documentation, a tool could be provided that outputs a J
 
 ## Summary
 
+Excluding overloads and contrasting the current `operator[]`, `at`, `back` and `front` methods with this proposals value based additions, the current design is 75% undefined/unsafe for range based access on `std::array`, `std::deque`, `std::string`, `std::string_view`, `std::vector`. This grows to 100% for `std::span` since it currently doesn't have an `at` method. This doesn't even include the undefined/unsafe behavior of iterators, direct access via `data` or the fact that `operator[]` is disproportionately used over `at`, even in large code bases, which means, in the wild, this percentage is closer to 100%. This proposal adds 44 safe functions and 1 unsafe function with defined behavior. This drops the percentage of undefined/unsafe behavior for range based access to <11%<!-- (4+1) * 100 / (4 + 1 + 44) = 10.204% -->. Consequently, with minimal training, it will be easier for a programmer to reach for a safer function over a less safe one. This doesn't even include the fact that all of the existing element access methods are also susceptible to dangling and invalidation issues which these new functions avoids and minimizes.
+
 The advantages of adopting said proposal are as follows:
 
 1. Reduces range based access errors
@@ -1472,11 +1475,29 @@ The advantages of adopting said proposal are as follows:
 1. Reduces reference invalidation errors at run time
 1. Allows programmers to avoid superfluous dynamic allocation when working with exceptions
 
-<!--
 ## Frequently Asked Questions
 
-### Why not ...?
--->
+### Why not just wait for contracts?
+
+1. Besides the fact that we do not know exactly when `contracts` will land, real harm is occuring in the mean time.
+1. Even if `contracts` were added to `operator[]`, `front` and `back`, these methods would still be returning references which would still be susceptible to dangling and invalidation issues.
+1. The following void returning, crop, grow and batch funtions has utility apart from `contracts` because no error is expected, rather just well designed behavior.
+   - `set_and_crop`
+   - `set_front_and_crop`
+   - `set_back_and_crop`
+   - `set_and_grow`
+   - `set_front_and_grow`
+   - `set_back_and_grow`
+   - `visit_and_crop`
+   - `visit_front_and_crop`
+   - `visit_back_and_crop`
+   - `visit_and_grow`
+   - `visit_front_and_grow`
+   - `visit_back_and_grow`
+   - `copy_and_crop`
+   - `copy_and_grow`
+1. Programmers like to be in control of their error handling strategy, (return, throw, terminate, void/crop, void/grow), which can vary from one call to the next.
+
 ## References
 
 <!--Hierarchy of Controls-->
