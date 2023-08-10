@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-4</td>
+<td>2023-8-10</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -66,9 +66,16 @@ a code
   - [Changelog](#Changelog)
   - [Abstract](#Abstract)
   - [Motivational Examples](#Motivational-Examples)
+    - [Removing Names](#Removing-Names)
+    - [Reinitialization](#Reinitialization)
+    - [Same Level Shadowing](#Same-Level-Shadowing)
+    - [Conditional Casting](#Conditional-Casting)
+    - [The checked range based for loop](#The-checked-range-based-for-loop)
   - [Safety and Security](#Safety-and-Security)
   - [Summary](#Summary)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
+    - [Why dename instead of unname?](#Why-dename-instead-of-unname)
+    - [Why as instead of is?](#Why-as-instead-of-is)
   - [References](#References)
 
 ## Changelog
@@ -90,6 +97,8 @@ a code
 Removing arbitrary limitations in the language associated with shadowing can improve how programmers deal with invalidation safety issues. It can also benefit a programmer's use of const correctness which impacts immutability and thread safety concerns. Regardless, it promotes simple and succinct code.
 
 ## Motivational Examples
+
+### Removing Names
 
 **1st request:** It would be beneficial if programmers could shadow a variable with void initialization instead of having to resort to a tag class.
 
@@ -181,7 +190,7 @@ In the language case, `void vs;`, the focus is on the variable that was denamed,
 Either standardize `dename` as a library or allow `void` initialization.
 -->
 
----
+### Reinitialization
  
 **2nd request:** It would be beneficial if programmers could initialize shadowed variables with the variable that is being shadowed.
 
@@ -312,7 +321,7 @@ warning C4700: uninitialized local variable 'vs' used
 </tr>    
 </table>
 
----
+### Same Level Shadowing
 
 **3rd request:** It would be beneficial if programmers could shadow variables without having to involve a child scope.
 
@@ -391,7 +400,7 @@ By relinquish access to non `const` methods as quickly as possible, programmers 
 
 The error in the `Present and Request` example may read something like <span style="color:red">"error: conflicting declaration 'const vector&lt;string&gt; vs'//note: previous declaration as 'vector&lt;string&gt; vs'".</span>
 
----
+### Conditional Casting
 
 **4th request:** All of the previous requests have either been hiding variable altogether or replacing with an unconditionally casting. It would be beneficial if programmers had a mechanism for conditional casting.
 
@@ -489,7 +498,7 @@ This is similar to what Herb Sutter proposed in `Pattern matching using is and a
 
 This functionality exists in the Kotlin [^typecasts] and other programming languages.
 
----
+### The checked range based for loop
 
 **5th request:** This final request is very similar to the second request in example. Minimize the invalidation errors associated with range based `for` loop by limiting the usage of the instance being iterated over to const access only.
 
@@ -572,7 +581,7 @@ int main()
 </tr>
 </table>
 
-The challenging with implementing this request is that while simple variable names being iterated over could be shadowed easily, more complicated expressions would require pattern matching the expression as a whole and a combination of its components. Consequently, there are three increasing degrees of checks that would help programmers.
+The challenge with implementing this request is that while simple variable names being iterated over could be shadowed easily, more complicated expressions would require pattern matching the expression as a whole and a combination of its components. Consequently, there are three increasing degrees of checks that would help programmers.
 
 1. automatically shadow simple expressions such as `vs`
 1. prevent complex expressions such as `vs.member.function().member` from being used elsewhere in the checked range based for loop in a non constant basis
