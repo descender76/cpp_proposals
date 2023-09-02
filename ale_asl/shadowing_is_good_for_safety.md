@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2951R2</td>
+<td>P2951R3</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-10</td>
+<td>2023-9-2</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -80,6 +80,10 @@ a code
 
 ## Changelog
 
+### R3
+
+- minor verbiage changes and clarifying examples
+
 ### R2
 
 - added the `5th request` for checked range based for loops
@@ -132,6 +136,8 @@ int main()
   vector<string> vs{"1", "2", "3"};
   for (auto &s : vs) {
     dename vs;
+    // or
+    //decltype(ignore) vs;
     // this helps prevents iterator
     // and reference invalidation
     // as the programmer can't use
@@ -387,6 +393,9 @@ int main()
   {
     // superfluous lines of code
     // superfluous level
+    // initialization split in two
+    // variable declaration at begining of lambda
+    // variable initialization at end of lambda
   }(vs);
   return 0;
 }
@@ -402,7 +411,7 @@ The error in the `Present and Request` example may read something like <span sty
 
 ### Conditional Casting
 
-**4th request:** All of the previous requests have either been hiding variable altogether or replacing with an unconditionally casting. It would be beneficial if programmers had a mechanism for conditional casting.
+**4th request:** All of the previous requests have either been hiding a variable altogether or replacing it with an unconditionally casting. It would be beneficial if programmers had a mechanism for conditional casting.
 
 <table>
 <caption>NEW shadowing feature: conditional casting</caption>
@@ -440,7 +449,7 @@ int main()
     // s is still optional<string>
   }
   auto i = shared_ptr<int>{42};
-  if(i as string)// or if(i is string)
+  if(i as int)// or if(i is int)
   {
     // i is int&
   }
@@ -505,19 +514,19 @@ This functionality exists in the Kotlin [^typecasts] and other programming langu
 Three pieces are required for invalidation errors to occur.
 
 1. A mutable instance
-1. A reference type that refers to the mutable instance and can be impacted by mutations in the mutable instance
+1. A reference instance that refers to the mutable instance and can be impacted by mutations in the mutable instance
 1. Mutating the mutable instance
 
 Because changes occur overwhelming at runtime instead of compile time, it is no big surprise that safety measures are applied at runtime via external test tools or by safer libraries with extra runtime checks built in.
 
-In the range based `for` loop, the iterators, i.e. the reference type, is concealed in the `for` construct. The following example is stripped from the 2nd example.
+In the range based `for` loop, the iterators, i.e. the reference instances, are concealed in the `for` construct. The following example is stripped from the 2nd example.
 
 <table>
 <caption>checked range based for loop</caption>
 <tr>
 <th>
 
-Present and Request
+Request
 
 </th>
 <th>
@@ -543,7 +552,6 @@ int main()
   //for (auto &s : vs) {
   // or
   cfor (auto &s : vs) {
-    //const vector<string>& vs = vs;
     // automatically narrow vs to a constant &
   }
   return 0;
@@ -565,13 +573,9 @@ struct dename{};
 int main()
 {
   vector<string> vs{"1", "2", "3"};
-  //[[checked]]
-  //for (auto &s : vs) {
-  // or
-  cfor (auto &s : vs) {
-    //const vector<string>& vs1 = vs;
-    //dename vs;
-    // automatically narrow vs/vs1 to a constant &
+  for (auto &s : vs) {
+    const vector<string>& vs1 = vs;
+    dename vs;
   }
   return 0;
 }
