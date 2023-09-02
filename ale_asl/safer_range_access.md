@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2955R0</td>
+<td>P2955R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-4</td>
+<td>2023-9-2</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -59,6 +59,7 @@ a code
 ## Table of contents
 
 - [Safer Range Access](#Safer-Range-Access)
+  - [Changelog](#Changelog)
   - [Abstract](#Abstract)
   - [Technical Details](#Technical-Details)
     - [The common challenges](#The-common-challenges)
@@ -71,6 +72,12 @@ a code
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
     - [Why not just wait for contracts](#Why-not-just-wait-for-contracts)
   - [References](#References)
+
+## Changelog
+
+### R1
+
+- Minor verbiage changes
 
 ## Abstract
 
@@ -122,10 +129,10 @@ constexpr const_reference at( size_type pos ) const;
 ### The common challenges
 
 1. `C++`'s subscript operators tend to have reference semantics instead of value semantics because our language does not have seperate operators for getting and setting values.
-    1.  `C++`'s subscript operators does not support additional parameters such as `std::source_location` which are not part of the indexer.
-1. `std::optional`, `std::variant` and `std::expected` does not support references
+    1.  `C++`'s subscript operators does not support additional parameters such as `std::source_location`, assigned value or default value which are not part of the indexer.
+1. `std::optional`, `std::variant` and `std::expected` does not support references so they can not be used simply with the subscript operator
 
-Consequently, this proposal just use functions instead of any operators and transient proxy classes. While I prefer `deducing this` [^p0847r7] style member functions since these won't be overloaded, as most compilers currently do not support such feature, the examples will be regular member functions.
+Consequently, this proposal just use functions instead of any operators or transient proxy classes. While I prefer `deducing this` [^p0847r7] style member functions since these proposed functions won't be overloaded, as most compilers currently do not support such feature, the examples will be regular member functions.
 
 ### The common safe member functions
 
@@ -1466,13 +1473,13 @@ Armed with this type of documentation, a tool could be provided that outputs a J
 
 ## Summary
 
-Excluding overloads and contrasting the current `operator[]`, `at`, `back` and `front` methods with this proposals value based additions, the current design is 75% undefined/unsafe for range based access on `std::array`, `std::deque`, `std::string`, `std::string_view`, `std::vector`. This grows to 100% for `std::span` since it currently doesn't have an `at` method. This doesn't even include the undefined/unsafe behavior of iterators, direct access via `data` or the fact that `operator[]` is disproportionately used over `at`, even in large code bases, which means, in the wild, this percentage is closer to 100%. This proposal adds 44 safe functions and 1 unsafe function with defined behavior. This drops the percentage of undefined/unsafe behavior for range based access to <11%<!-- (4+1) * 100 / (4 + 1 + 44) = 10.204% -->. Consequently, with minimal training, it will be easier for a programmer to reach for a safer function over a less safe one. This doesn't even include the fact that all of the existing element access methods are also susceptible to dangling and invalidation issues which these new functions avoids and minimizes.
+Excluding overloads and contrasting the current `operator[]`, `at`, `back` and `front` methods with this proposals value based additions, the current design is 75% undefined/unsafe for range based access on `std::array`, `std::deque`, `std::string`, `std::string_view` and `std::vector`. This grows to 100% for `std::span` since it currently doesn't have an `at` method. This doesn't even include the undefined/unsafe behavior of iterators, direct access via `data` or the fact that `operator[]` is disproportionately used over `at`, even in large code bases, which means, in the wild, this percentage is closer to 100%. This proposal adds 44 safe functions and 1 unsafe function with defined behavior. This drops the percentage of undefined/unsafe behavior for range based access to <11%<!-- (4+1) * 100 / (4 + 1 + 44) = 10.204% -->. Consequently, with minimal training, it will be easier for a programmer to reach for a safer function over a less safe one. This doesn't even include the fact that all of the existing element access methods are also susceptible to dangling and invalidation issues which these new functions avoids and minimizes.
 
 The advantages of adopting said proposal are as follows:
 
 1. Reduces range based access errors
-1. Reduces dangling references at run time
-1. Reduces reference invalidation errors at run time
+1. Reduces dangling references because there are a lower ratio of reference returning functions
+1. Reduces reference invalidation errors because there are a lower ratio of reference returning functions
 1. Allows programmers to avoid superfluous dynamic allocation when working with exceptions
 
 ## Frequently Asked Questions
