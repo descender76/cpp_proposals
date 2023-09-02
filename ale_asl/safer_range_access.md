@@ -23,7 +23,7 @@ Jarrad J. Waterloo &lt;descender76 at gmail dot com&gt;
 </tr>
 <tr>
 <td>Audience</td>
-<td>SG23 Safety and Security</td>
+<td>SG23 Safety and Security<br/>Library Evolution Working Group (LEWG)</td>
 </tr>
 </table>
 
