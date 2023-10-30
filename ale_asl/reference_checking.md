@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2878R5</td>
+<td>P2878R6</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-8-10</td>
+<td>2023-10-29</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -67,6 +67,7 @@ a code
     - [Impact on general lifetime safety](#Impact-on-general-lifetime-safety)
     - [Impact on Contracts](#Impact-on-Contracts)
   - [Technical Details](#Technical-Details)
+    - [Recursion](#Recursion)
     - [Structs and Classes](#Structs-and-Classes)
     - [Lambdas revisited](#Lambdas-revisited)
     - [Impact on Pattern Matching](#Impact-on-Pattern-Matching)
@@ -81,26 +82,31 @@ a code
 
 ## Changelog
 
+### R6
+
+- revising comments in [Impact on Pattern Matching](#Impact-on-Pattern-Matching) example
+- added more links to changelog for easier navigation
+
 ### R5
 
-- revised resolution to the do expression/pattern matching dangling problem, explaining it iteratively
-- added a 6th check for `std::thread` and `std::jthread`
+- revised resolution to the [do expression/pattern matching dangling problem](#Impact-on-Pattern-Matching), explaining it iteratively
+- added a [6th check](#multithreadcheck) for `std::thread` and `std::jthread`
 
 ### R4
 
-- revised recursive example
-- revised `do return`'s `return` example
+- revised [recursive example](#Recursion)
+- revised [`do return`'s `return` example](#Impact-on-Pattern-Matching)
 - minor formatting changes
-- improved FAQ: Why not pointers?
+- improved [FAQ](#Frequently-Asked-Questions): [Why not pointers?](#Why-not-pointers)
 
 ### R3
 
-- added resolution to the do expression/pattern matching dangling problem
-- added check for assigning a temporary to a named variable produces an error
-- added recursive function call example to illustrate functions being analyzed in isolation
-- added the `Lambdas revisited` example
-- added a `Usage` section
-- added a `Viral Attribution Effort` section
+- added resolution to the [do expression/pattern matching dangling problem](#Impact-on-Pattern-Matching)
+- added [check for assigning a temporary](#assigningtemporary) to a named variable produces an error
+- added [recursive function call example](#Recursion) to illustrate functions being analyzed in isolation
+- added the [Lambdas revisited](#Lambdas-revisited) example
+- added a [Usage](#Usage) section
+- added a [Viral Attribution Effort](#Viral-Attribution-Effort) section
 
 ### R2
 
@@ -248,7 +254,7 @@ Just like the `Lifetime safety: Preventing common dangling` [^p1179r1] paper, th
 
 ### Impact on Contracts
 
-This proposal also does not conflict with contracts. Matter of fact this proposal could be described in terms of contracts, just applied to existing language features. Since, none of the current contract proposals allow applying contracts to existing and future non functional language features such as `return` and `do return` [^p2806r1], this proposal is complimentary. 
+This proposal also does not conflict with contracts. Matter of fact, this proposal could be described in terms of contracts, just applied to existing language features. Since, none of the current contract proposals allow applying contracts to existing and future non functional language features such as `return` and `do return` [^p2806r1], this proposal is complimentary. 
 
 <table>
 <tr>
@@ -339,7 +345,7 @@ Things get really interesting when programmers are allowed to provide explicit l
 This is also time to add three more checks.
 
 **2nd check: Returning a reference to a `temporary` produces an error.
-<br/>3rd check: Using a reference to a `temporary` after it has been assigned, i.e. on another line of code which is not the full-expression, produces an error.<br/>4th check: Assigning a `temporary` to a named variable produces an error.**
+<br/>3rd check: Using a reference to a `temporary` after it has been assigned, i.e. on another line of code which is not the full-expression, produces an error.<br/><span id="assigningtemporary">4th check: Assigning a `temporary` to a named variable produces an error.</span>**
 
 ```cpp
 const int GLOBAL = 42;
@@ -432,6 +438,8 @@ S* p = new S{ 1, {2,3} }; // creates dangling reference
 </td>
 </tr>
 </table>
+
+### Recursion
 
 Before going further, let's consider a recursive example in order to illustrate why each function is considered in isolation.
 
@@ -847,7 +855,7 @@ const int& f()
 
 ```
 
-The problem on `rint2` is that what should its lifetime response be; an error or unknown? The fact is even that can remain a local and the dangling can be identified by adding an integer to the two bits of compile time metadata.
+The problem on `rint2` is that what should its lifetime response be; an error or unknown? The fact is even that lifetime flag can remain a local and the dangling can be identified by adding an integer to the two bits of compile time metadata.
 
 1. First of all, each scope is given a `level identifier`.
 1. Multiple scopes will share the same number if they are on the same level. 
@@ -867,30 +875,30 @@ Let's iteratively apply this to the previous example.
 ```cpp
 
 const int& f()
-{// scope level 1
+{// #1, #3: scope level 1
     int local1 = 42;
     const int& rint1 = do
-    {// scope level 2
+    {// #1, #3: scope level 2
         int local2 = 42;
         const int& rint2 = do
-        {// scope level 3
+        {// #1, #2, #3: scope level 3
             int local3 = 42;
             if(randomBool())
-            {// scope level 4
+            {// #1, #2, #3: scope level 4
                 do return local1;
             }
             if(randomBool())
-            {// scope level 4
+            {// #1, #2, #3: scope level 4
                 do return local2;
             }
             do return local3;
         };
         if(randomBool())
-        {// scope level 3
+        {// #1, #2, #3: scope level 3
             do return local1;
         }
         if(randomBool())
-        {// scope level 3
+        {// #1, #2, #3: scope level 3
             do return local2;
         }
         do return rint2;
@@ -905,30 +913,30 @@ const int& f()
 ```cpp
 
 const int& f()
-{// scope level 1
-    int local1 = 42;// local with scope level 1
+{// #1, #3: scope level 1
+    int local1 = 42;// #4: local with scope level 1
     const int& rint1 = do
-    {// scope level 2
-        int local2 = 42;// local with scope level 2
+    {// #1, #3: scope level 2
+        int local2 = 42;// #4: local with scope level 2
         const int& rint2 = do
-        {// scope level 3
-            int local3 = 42;// local with scope level 3
+        {// #1, #2, #3: scope level 3
+            int local3 = 42;// #4: local with scope level 3
             if(randomBool())
-            {// scope level 4
+            {// #1, #2, #3: scope level 4
                 do return local1;
             }
             if(randomBool())
-            {// scope level 4
+            {// #1, #2, #3: scope level 4
                 do return local2;
             }
             do return local3;
         };
         if(randomBool())
-        {// scope level 3
+        {// #1, #2, #3: scope level 3
             do return local1;
         }
         if(randomBool())
-        {// scope level 3
+        {// #1, #2, #3: scope level 3
             do return local2;
         }
         do return rint2;
@@ -942,32 +950,32 @@ const int& f()
 ```cpp
 
 const int& f()
-{// scope level 1
-    int local1 = 42;// local with scope level 1
-    const int& rint1 = do// reference with scope level 3
+{// #1, #3: scope level 1
+    int local1 = 42;// #4: local with scope level 1
+    const int& rint1 = do// #6: reference with scope level 3
     // reference scope level 3 = max(1, 2, 3) from the do return(s)
-    {// scope level 2
-        int local2 = 42;// local with scope level 2
-        const int& rint2 = do// reference with scope level 3
+    {// #1, #3: scope level 2
+        int local2 = 42;// #4: local with scope level 2
+        const int& rint2 = do// #6: reference with scope level 3
         // reference scope level 3 = max(1, 2, 3) from the do return(s)
-        {// scope level 3
-            int local3 = 42;// local with scope level 3
+        {// #1, #2, #3: scope level 3
+            int local3 = 42;// #4: local with scope level 3
             if(randomBool())
-            {// scope level 4
+            {// #1, #2, #3: scope level 4
                 do return local1;
             }
             if(randomBool())
-            {// scope level 4
+            {// #1, #2, #3: scope level 4
                 do return local2;
             }
             do return local3;
         };
         if(randomBool())
-        {// scope level 3
+        {// #1, #2, #3: scope level 3
             do return local1;
         }
         if(randomBool())
-        {// scope level 3
+        {// #1, #2, #3: scope level 3
             do return local2;
         }
         do return rint2;
@@ -993,54 +1001,61 @@ Regardless of the decision that would need to be made, so much definitively bad 
 ```cpp
 
 const int& f()
-{// scope level 1
-    int local1 = 42;// local with scope level 1
-    const int& rint1 = do// reference with scope level 3
+{// #1, #3: scope level 1
+    int local1 = 42;// #4: local with scope level 1
+    const int& rint1 = do// #6: reference with scope level 3
     // reference scope level 3 = max(1, 2, 3) from the do return(s)
-    // error at the do: can't return reference to one or more locals
+    // #8: error at the do: can't return reference to one or more locals
     // rint1's scope level 3 >= this do's scope level 2
-    {// scope level 2
-        int local2 = 42;// local with scope level 2
-        const int& rint2 = do// reference with scope level 3
+    {// #1, #3: scope level 2
+        int local2 = 42;// #4: local with scope level 2
+        const int& rint2 = do// #6: reference with scope level 3
         // reference scope level 3 = max(1, 2, 3) from the do return(s)
-        // error at the do: can't return reference to one or more locals
+        // #8: error at the do: can't return reference to one or more locals
         // rint2's scope level 3 == this do's scope level 3
-        {// scope level 3
-            int local3 = 42;// local with scope level 3
+        {// #1, #2, #3: scope level 3
+            int local3 = 42;// #4: local with scope level 3
             if(randomBool())
-            {// scope level 4
-                do return local1;// OK, definitively safe
-                // local1's scope level 1 > this do's scope level 3
+            {// #1, #2, #3: scope level 4
+                do return local1;// #7: OK, definitively safe
+                // local1's scope level 1 < this do's scope level 3
             }
             if(randomBool())
-            {// scope level 4
-                do return local2;// OK for now, problem later
-                // local2's scope level 2 > this do's scope level 3
+            {// #1, #2, #3: scope level 4
+                do return local2;// #7: OK for now, problem later
+                // local2's scope level 2 < this do's scope level 3
             }
-            do return local3;// error: can't do return local
+            do return local3;// #7: error: can't do return local
             // local3's scope level 3 == this do's scope level 3
         };
         if(randomBool())
-        {// scope level 3
-            do return local1;// OK, definitively safe
-            // local1's scope level 1 > this do's scope level 2
+        {// #1, #2, #3: scope level 3
+            do return local1;// #7: OK, definitively safe
+            // local1's scope level 1 < this do's scope level 2
         }
         if(randomBool())
-        {// scope level 3
-            do return local2;// error: can't do return local
+        {// #1, #2, #3: scope level 3
+            do return local2;// #7: error: can't do return local
             // local2's scope level 2 == this do's scope level 2
         }
-        do return rint2;// error: can't do return local
-        // reference has scope level 3 ... 2 when do return local3 changed
+        do return rint2;// #7: error: can't do return local
         // rint2's scope level 3 >= this do's scope level 2
     };
 }
 
 ```
 
+<!--
+        // reference has scope level 3 ... 2 when do return local3 changed
+-->
+
 This is also time to mention our final check.
 
+<span id="multithreadcheck">
+
 **6th check: You can't pass a temporary to `std::thread` and `std::jthread`.**
+
+</span>
 
 While the usefulness of this proposal for multithreading in general is limited because each function is considered in isolation, the fact we get any benefit here is some icing on the cake.
 
