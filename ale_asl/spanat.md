@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P2821R4</td>
+<td>P2821R5</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-7-26</td>
+<td>2023-11-9</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -76,6 +76,10 @@ a code
 -->
 
 ## Changelog
+
+### R5 
+
+- At LWG direction removed superfluous freestanding comments
 
 ### R4
 
@@ -250,10 +254,7 @@ class span {
 constexpr reference operator[](size_type idx) const;
 -->
 ```cpp
-// no freestanding
-#if __STDC_HOSTED__ == 1
 constexpr reference at(size_type idx) const;
-#endif
 ```
 
 > Insert the following into [[span.elem]](https://eel.is/c++draft/span.elem), span's `Element access` section, immediately after the subscript operator:
@@ -271,17 +272,20 @@ constexpr reference operator[](size_type idx) const;
 
 
 ## Feature test macro
-
+<!--
 > Insert the following to [[version.syn]](https://eel.is/c++draft/version.syn), header `<version>` synopsis:
+-->
+Update the value of `__cpp_lib_span` in [[version.syn]](https://eel.is/c++draft/version.syn), header `<version>` synopsis, to reflect the date of approval of this proposal.
 <!--
 <pre>
 #define __cpp_lib_span_at 20XXXXL <i>// also in &lt;functional&gt</i>
 </pre>
 -->
+<!--
 ```cpp
 #define __cpp_lib_span_at 20XXXXL // also in <span>
 ```
-
+-->
 ## Implementation Experience
 
 Both of the `span lite` and `Guidelines Support Library` libraries have this new method implemented for years.
