@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2023-10-29</td>
+<td>2023-11-13</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -75,6 +75,7 @@ a code
   - [Usage](#Usage)
   - [Viral Attribution Effort](#Viral-Attribution-Effort)
   - [Summary](#Summary)
+  - [Poll Results](#Poll-Results)
   - [Frequently Asked Questions](#Frequently-Asked-Questions)
     - [Why not pointers?](#Why-not-pointers)
     - [Why not explicit lifetime dependence on struct(s)?](#Why-not-explicit-lifetime-dependence-on-structs)
@@ -86,6 +87,8 @@ a code
 
 - revising comments in [Impact on Pattern Matching](#Impact-on-Pattern-Matching) example
 - added more links to changelog for easier navigation
+- added [Poll Results](#Poll-Results) section
+- revised [Viral Attribution Effort](#Viral-Attribution-Effort) section to include the ability for the compiler to provide the attributes/metadata upon module compilation
 
 ### R5
 
@@ -336,9 +339,9 @@ int& f(int* ip, int& ir/* unknown lifetime */)
 }
 ```
 
-This error doesn't give programmers much as C++ addressed this in C++23 with `Simpler implicit move` [^p2266r3]. However, since `Simpler implicit move` [^p2266r3] was framed in terms of value categories than any error message would also be in terms of value categories. This proposal advises such an error would be expressed in terms of dangling which is more human readable for programmers.
+This error doesn't give programmers much as C++ addressed this in C++23 with `Simpler implicit move` [^p2266r3]. However, since `Simpler implicit move` [^p2266r3] was framed in terms of value categories than any error message would also be in terms of value categories. This proposal advises such an error would be expressed in terms of dangling which is more human readable for programmers. It also allows infinitely levels of indirection.
 
-Things get really interesting when programmers are allowed to provide explicit lifetime dependence information to the compiler. Unlike Rust's `explicit lifetimes`, this feature, `explicit lifetime dependence`, allows a reference to be tied to the lifetimes of multiple other references. In these cases, the lifetime is the most constrained as in `temporary` is more constrained than `local` which is more constrained than `global`.
+Things get really interesting when programmers are allowed to provide explicit lifetime dependence information to the compiler. <!--Unlike Rust's `explicit lifetimes`, -->This feature, `explicit lifetime dependence`, allows a reference to be tied to the lifetimes of multiple other references. In these cases, the lifetime is the most constrained as in `temporary` is more constrained than `local` which is more constrained than `global`.
 
     global > local > temporary
 
@@ -1411,7 +1414,7 @@ The point is programmers who consume safer libraries don't have to do anything. 
 
 ## Viral Attribution Effort
 
-Another common complaint with this and really any annotation based proposal is the work involved in annotating everything, in this proposal's case, functions. In this proposal's case, this attribution effort is just good documentation that a library producer should already be doing anyway to at least their public API. This proposal moves this documentation from non standard comments and/or non standard external documentation to standardized annotations. Other static analysis tools produce mostly warnings which would require some type of viral attribution effort in the code to tell those tools to ignore false positives.
+Another common complaint with this and really any annotation based proposal is the work involved in annotating everything, in this proposal's case, functions. This attribution effort is just good documentation that a library producer should already be doing anyway to at least their public API. This proposal moves this documentation from non standard comments and/or non standard external documentation to standardized annotations. Further, other static analysis tools produce mostly warnings which would require some type of viral attribution effort in the code to tell those tools to ignore false positives.
 
 <table>
 <tr>
@@ -1476,6 +1479,207 @@ C# [^so1378634]
 
 This proposal produces errors for definitely bad code and as such avoids the need for additional viral attribution efforts for ignoring false positives.
 
+For this whole proposal, it has been advocated that library writers should provide such standardized documentation for the benefit of their consumers and the standardization effort. However, let's entertain for the moment, if the library writer did not document their methods but instead their compilers did it for them i.e. **minimize attribution effort**. This would be performed when modules are compiled and the metadata/attributes retained in the module.
+
+Direct reference to parameters buys programmers alternatives and default values.
+
+<table>
+<tr>
+<td>
+
+```cpp
+const int& alternative(const int& left,
+    const int& right)
+{
+    if(randomBool())
+    {
+        return left;
+    }
+    else
+    {
+        return right;
+    }
+}
+
+const V& find_or_default(const std::map<K,V>& m,
+    const K& key, const V& default_value)
+{
+    if(m.contains(key))
+    {
+        return m.get(key);
+    }
+    else
+    {
+        return default_value;
+    }
+}
+```
+
+</td>
+<td>
+
+```cpp
+[[dependson(left, right)]]
+const int& alternative(const int& left,
+    const int& right)
+{
+    if(randomBool())
+    {
+        return left;
+    }
+    else
+    {
+        return right;
+    }
+}
+    
+[[dependson(default_value)]]
+const V& find_or_default(const std::map<K,V>& m,
+    const K& key, const V& default_value)
+{
+    if(m.contains(key))
+    {
+        return m.get(key);
+    }
+    else
+    {
+        return default_value;
+    }
+}
+```
+
+</td>
+</tr>
+</table>
+
+By supporting `*this` programmers would obtain support for chained functions.
+
+<table>
+<tr>
+<td>
+
+```cpp
+class S
+{
+public:
+    S& assign()
+    {
+        return *this;
+    }
+    S& assign_alt(this S& self)
+    {
+        return self;
+    }
+};
+```
+
+</td>
+<td>
+
+```cpp
+class S
+{
+public:
+    [[dependson(this)]]
+    S& assign()
+    {
+        return *this;
+    }
+    [[dependson(this)]]
+    S& assign_alt(this S& self)
+    {
+        return self;
+    }
+};
+```
+
+</td>
+</tr>
+</table>
+
+<!--What does this buy us? -->
+In the `string` class alone, `operator=`, `assign`, `assign_range`, `insert`, `erase`, `append`, `operator+=` and `replace` are already required by the standard to return `*this`.
+
+By supporting member references programmers would obtain support for some getters.
+
+<table>
+<tr>
+<td>
+
+```cpp
+class S
+{
+private:
+    int i;
+public:
+    int& get()
+    {
+        return i;
+    }
+};
+```
+
+</td>
+<td>
+
+```cpp
+class S
+{
+private:
+    int i;
+public:
+    [[dependson(this)]]
+    int& get()
+    {
+        return i;
+    }
+};
+```
+
+</td>
+</tr>
+</table>
+
+By analyzing simple constructor member initializer lists, pointer/reference types can be detected.
+
+<table>
+<tr>
+<td>
+
+```cpp
+class PointerReferenceIterator
+{
+private:
+    int* p;
+    int& r;
+public:
+    S(int* pp, int& rr) : p(pp), r(rr) {}
+};
+```
+
+</td>
+<td>
+
+```cpp
+class PointerReferenceIterator
+{
+private:
+    int* p;
+    int& r;
+public:
+    [[dependson(pp, rr)]]
+    S(int* pp, int& rr) : p(pp), r(rr) {}
+};
+```
+
+</td>
+</tr>
+</table>
+
+With this `string_view`(s), `span`(s), `function_ref`(s) can be recognized as being dependent upon some state.
+
+All of the example expressions analyzed were simple instead of complex and combined provides significant less manual attribution and significant functional propagation of lifetime analysis.
+
 ## Summary
 
 The advantages of adopting said proposal are as follows:
@@ -1485,6 +1689,32 @@ The advantages of adopting said proposal are as follows:
 1. Produce more meaningful return error messages that doesn't involve value categories
 1. Empowers programmers with tools to identify indirect occurences of immediate dangling of references to the stack, simply
 1. Empowers programmers with tools to identify indirect occurences of return dangling of references to the stack, simply
+
+## Poll Results
+
+### [R2](#R2)
+
+***POLL: We should promise more committee time to pursuing this paper, knowing that our time is scarce and this will leave less time for other work***
+
+<table>
+<tr>
+<td>Favor</td>
+<td>Neutral</td>
+<td>Against</td>
+</tr>
+<tr>
+<td>&mdash;</td>
+<td>&mdash;</td>
+<td>&mdash;</td>
+</tr>
+<tr>
+<td>5</td>
+<td>12</td>
+<td>18</td>
+</tr>
+</table>
+
+**Outcome**: Consensus against
 
 ## Frequently Asked Questions
 
