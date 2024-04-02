@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2024-04-01</td>
+<td>2024-04-02</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -60,7 +60,6 @@ a code
 
 - [const references to constexpr variables](#const-references-to-constexpr-variables)
   - [Abstract](#Abstract)
-  - [Examples](#Examples)
   - [Simpler](#Simpler)
   - [Safer](#Safer)
   - [Relationship to constexpr wrapper](#Relationship-to-constexpr-wrapper)
@@ -71,9 +70,20 @@ a code
 
 ## Abstract
 
-This proposal is an addendum to `constexpr structured bindings and references to constexpr variables` [^p2686r3] with a focus on simplicity and safety.
+This proposal is an addendum to the `"constexpr structured bindings and references to constexpr variables"` [^p2686r3] proposal with a focus on simplicity and safety.
 
-## Examples
+## Simpler
+
+The `P2686`, `constexpr structured bindings and references to constexpr variables` [^p2686r3], proposal outlines 4 solutions to its problem.
+
+1. `"Allowing static and non-tuple constexpr structured binding"`
+1. `"Making constexpr implicitly static"`
+1. `"Always re-evaluate a call to get?"`
+1. `"Symbolic addressing"`
+
+Of these four, `P2686` [^p2686r3] recommends that the first and the last be implemented. Concerning the first, the authors wrote; "Independently of the other solutions presented here, this option would be useful and should be done". Concerning the last, the authors wrote; "The most promising option - the one we think should be pursued".
+
+This proposal does not argue for or against the first and the last. To the contrary, this proposal argues that there is a place in at least some [limited] capacity for the second solution, `Making constexpr implicitly static`.
 
 ### given
 
@@ -149,19 +159,6 @@ const std::string always_safe{"42"};
 </tr>
 </table>
 
-## Simpler
-
-The `P2686`, `constexpr structured bindings and references to constexpr variables` [^p2686r3], proposal outlines 4 solutions to its problem.
-
-1. `"Allowing static and non-tuple constexpr structured binding"`
-1. `"Making constexpr implicitly static"`
-1. `"Always re-evaluate a call to get?"`
-1. `"Symbolic addressing"`
-
-Of these four, `P2686` [^p2686r3] recommends that the first and the last be implemented. Concerning the first, the authors wrote; "Independently of the other solutions presented here, this option would be useful and should be done". Concerning the last, the authors wrote; "The most promising option - the one we think should be pursued".
-
-This proposal does not argue for or against the first and the last. To the contrary, this proposal argues that there is a place in at least some [limited] capacity for the second solution, `Making constexpr implicitly static`.
-
 It should be noted that the first option is simpler than the last, at least in wording but is more complex than the last in the sense that it explictly requires the programmer to litter their code with `static`. The second option is simpler than both the first and the last options because the static is implied just as it is at namespace scope resulting in simplified wording and simplified usage by the end programmers. Are the reasons presented against the second option totally legitimate or could those rare exceptions be handled in such a way that simplicity wouldn't be lost for the greater whole? Lets consider each point in turn.
 
 <table>
@@ -195,7 +192,7 @@ int main() {
 
 ### *"doing so would most certainly break existing code"*
 
-NO, if any. To the contrary, code that is broken is now fixed. Code that would be invalid is now valid, makes sense and can be rationally explained. Let me explain. This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration, are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken! The `C++` standard already recognized that their are other opportunities for constant initialization.
+To the contrary, code that is broken is now fixed. Code that would be invalid is now valid, makes sense and can be rationally explained. Let me explain. This feature not only changes the point of destruction but also the point of construction. Instances that were of automatic storage duration, are now of static storage duration. Instances that were temporaries, are no longer temporaries. Surely, something must be broken! The `C++` standard already recognized that their are other opportunities for constant initialization.
 
 <table>
 <tr>
@@ -405,7 +402,7 @@ This already accepted solution to the mutable problem could also be used as the 
 
 ## Safer
 
-Besides simplicity, why do this proposal recommend that const references to constexpr variables have static storage duration? One word, safety. These objects would be impossible to dangle and also would be thread safe. This also fixes one of C++'s most embarassing forms of dangling; dangling constants. This problem is unique to C++. Practically all languages, except C++, doesn't immediately dangle their constants, not even assembly, C, or even the earliest version of C++, cfront. Things are even worse in C++ because as programmers we can't look at the code and know for sure whether an object is static or not. This requires C++ programmers even beginners to have to look at machine code to see how the compiler decided where to store the object. Not only does this vary from compiler to compiler, it also varies within any given compiler. Frequently in optimized release builds these constant objects are given static duration but made a dangling local in debug builds. This is totally backwards as the increased safety is expected in debug builds. Futher if the optimized is the safest and the better performant than why shouldn't it be available always. Dangling constants is like returning from a function using an input parameter before C++11 because programmers did not have sufficient assurance that rvalue moving would occur. Similarly, programmers have to name the currently unnamed and move it far from the point of use just to ensure dangling doesn't occur in both debug and release builds. This habit works against the recommendation to use unnamed [temporary] and move semantics. 
+Besides simplicity, why does this proposal recommend that const references to constexpr variables have static storage duration? One word, safety. These objects would be impossible to dangle and also would be thread safe. This also fixes one of C++'s most embarassing forms of dangling; dangling constants. This problem is unique to C++. Practically all languages, except C++, doesn't immediately dangle their constants, not even assembly, C, or even the earliest version of C++, cfront. Things are even worse in C++ because as programmers we can't look at the code and know for sure whether an object is static or not. This requires C++ programmers even beginners to have to look at machine code to see how the compiler decided where to store the object. Not only does this vary from compiler to compiler, it also varies within any given compiler. Frequently in optimized release builds these constant objects are given static duration but made a dangling local in debug builds. This is totally backwards as the increased safety is expected in debug builds. Futher if the optimized is the safest and the better performant than why shouldn't it be available always. Dangling constants is like returning from a function using an input parameter before C++11 because programmers did not have sufficient assurance that rvalue moving would occur. Similarly, programmers have to name the currently unnamed and move it far from the point of use just to ensure dangling doesn't occur in both debug and release builds. This habit works against the recommendation to use unnamed [temporary] and move semantics. 
 
 ## Relationship to constexpr wrapper
 
@@ -563,16 +560,16 @@ Further, what is proposed is easy to teach because we already teach it and it ma
 
 All of this can be done without adding any new keywords or any new attributes. We just use constant concepts that beginners are already familiar with. In fact, we will would be working in harmony with all that we already teach about globals in the `Core C++ Guidelines` [^cppcg].
 
-- `I.2: Avoid non-const global variables` [^cppcgrf42]
-- `I.22: Avoid complex initialization of global objects` [^cppcgrf42]
-- `F.15: Prefer simple and conventional ways of passing information` [^cppcgrf42]
-- `F.16: For “in” parameters, pass cheaply-copied types by value and others by reference to const` [^cppcgrf42]
+- `I.2: Avoid non-const global variables` [^cppcgi2]
+- `I.22: Avoid complex initialization of global objects` [^cppcgi22]
+- `F.15: Prefer simple and conventional ways of passing information` [^cppcgf15]
+- `F.16: For “in” parameters, pass cheaply-copied types by value and others by reference to const` [^cppcgf16]
 - `F.43: Never (directly or indirectly) return a pointer or a reference to a local object` [^cppcgrf43]
-- `R.5: Prefer scoped objects, don’t heap-allocate unnecessarily` [^cppcgrf42]
-- `R.6: Avoid non-const global variables` [^cppcgrf42]
-- `CP.2: Avoid data races` [^cppcgrf42]
-- `CP.24: Think of a thread as a global container` [^cppcgrf42]
-- `CP.32: To share ownership between unrelated threads use shared_ptr` [^cppcgrf42]
+- `R.5: Prefer scoped objects, don’t heap-allocate unnecessarily` [^cppcgr5]
+- `R.6: Avoid non-const global variables` [^cppcgr6]
+- `CP.2: Avoid data races` [^cppcgcp2]
+- `CP.24: Think of a thread as a global container` [^cppcgcp24]
+- `CP.32: To share ownership between unrelated threads use shared_ptr` [^cppcgcp32]
 
 ## References
 
@@ -598,11 +595,28 @@ All of this can be done without adding any new keywords or any new attributes. W
 [^cppcg]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines>
 <!--C++ Core Guidelines-->
 [^cppcgrfin]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rf-in>
+<!-- I.2: Avoid non-const global variables -->
+[^cppcgi2]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i2-avoid-non-const-global-variables>
+<!-- I.22: Avoid complex initialization of global objects -->
+[^cppcgi22]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i22-avoid-complex-initialization-of-global-objects>
+<!-- F.15: Prefer simple and conventional ways of passing information -->
+[^cppcgf15]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f15-prefer-simple-and-conventional-ways-of-passing-information>
+<!-- F.16: For “in” parameters, pass cheaply-copied types by value and others by reference to const -->
+[^cppcgf16]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f16-for-in-parameters-pass-cheaply-copied-types-by-value-and-others-by-reference-to-const>
 <!--C++ Core Guidelines - F.42: Return a T* to indicate a position (only) -->
 [^cppcgrf42]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f42-return-a-t-to-indicate-a-position-only>
 <!--C++ Core Guidelines - F.43: Never (directly or indirectly) return a pointer or a reference to a local object-->
 [^cppcgrf43]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f43-never-directly-or-indirectly-return-a-pointer-or-a-reference-to-a-local-object>
-
+<!-- R.5: Prefer scoped objects, don’t heap-allocate unnecessarily -->
+[^cppcgr5]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r5-prefer-scoped-objects-dont-heap-allocate-unnecessarily>
+<!-- R.6: Avoid non-const global variables -->
+[^cppcgr6]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#r6-avoid-non-const-global-variables>
+<!-- CP.2: Avoid data races -->
+[^cppcgcp2]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cp2-avoid-data-races>
+<!-- CP.24: Think of a thread as a global container -->
+[^cppcgcp24]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cp24-think-of-a-thread-as-a-global-container>
+<!-- CP.32: To share ownership between unrelated threads use shared_ptr -->
+[^cppcgcp32]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#cp32-to-share-ownership-between-unrelated-threads-use-shared_ptr>
 <!--
 <table>
 <tr>
