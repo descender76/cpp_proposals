@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2024-04-02</td>
+<td>2024-04-03</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -81,7 +81,7 @@ The `P2686`, `constexpr structured bindings and references to constexpr variable
 1. `"Always re-evaluate a call to get?"`
 1. `"Symbolic addressing"`
 
-Of these four, `P2686` [^p2686r3] recommends that the first and the last be implemented. Concerning the first, the authors wrote; "Independently of the other solutions presented here, this option would be useful and should be done". Concerning the last, the authors wrote; "The most promising option - the one we think should be pursued".
+Of these four, `P2686` [^p2686r3] recommends that the first and the last be implemented. Concerning the first, the authors wrote; *"Independently of the other solutions presented here, this option would be useful and should be done"*. Concerning the last, the authors wrote; *"The most promising option - the one we think should be pursued"*.
 
 This proposal does not argue for or against the first and the last. To the contrary, this proposal argues that there is a place in at least some [limited] capacity for the second solution, `Making constexpr implicitly static`.
 
@@ -118,7 +118,7 @@ const std::string& always_safe = "42"s;
 const std::string& safe = dangler("42"s);
 ```
 
-NOTE: While this proposal is only concerned about const references to constant expressions implicity creating constants, it would make sense to end programmers for const variables as well.
+NOTE: While this proposal is only concerned about "const references to constant expressions" implicity creating constants, it would make sense to end programmers for const variables as well.
 
 <table>
 <tr>
@@ -159,7 +159,7 @@ const std::string always_safe{"42"};
 </tr>
 </table>
 
-It should be noted that the first option is simpler than the last, at least in wording but is more complex than the last in the sense that it explictly requires the programmer to litter their code with `static`. The second option is simpler than both the first and the last options because the static is implied just as it is at namespace scope resulting in simplified wording and simplified usage by the end programmers. Are the reasons presented against the second option totally legitimate or could those rare exceptions be handled in such a way that simplicity wouldn't be lost for the greater whole? Lets consider each point in turn.
+It should be noted that `constexpr structured bindings and references to constexpr variables`'s [^p2686r3] first option is simpler than the last, at least in wording but is more complex than the last in the sense that it explictly requires the programmer to litter their code with `static`. The second option is simpler than both the first and the last options because the static is implied, just as it is at namespace scope, resulting in simplified wording and simplified usage by the end programmers. Are the reasons presented against the second option totally legitimate or could those rare exceptions be handled in such a way that simplicity wouldn't be lost for the greater whole? Lets consider each point in turn.
 
 <table>
 <tr>
@@ -218,7 +218,7 @@ It should also be noted that while this enhancement is applied implicitly, progr
 
 Having expressed contant requirements three times, it is pretty certain that the end programmer wanted a constant, even if it is anonymous.
 
-Next, a function that takes an argument by reference does not know whether the caller of said function will pass to it a global, local, temporary or a dynamically created object. Rather it expects that said parameter would exist for the life of the function and if the reference is returned in part or in whole than the life of the object needs to be longer.
+Next, a function that takes an argument by reference does not know whether the caller of said function will pass to it a global, local, temporary or a dynamically created object. Rather it expects that said parameter would exist for the life of the function and if the reference is returned, in part or in whole, than the life of the object needs to be longer.
 
 ### *"inconsistent with the meaning of `constexpr`"*
 
@@ -316,7 +316,7 @@ f(&(struct foo) { 1,2 });
 </tr>
 </table>
 
-One of the motivations of main motivations for `constexpr` was for objects to be placed in `ROM`. What is read only memory, if not const and static storage duration!
+One of the main motivations for `constexpr` was for objects to be placed in `ROM`. What is read only memory, if not const and static storage duration!
 
 ### *"the mutable example"*
 
@@ -333,7 +333,7 @@ int main() {
 }
 ```
 
-It's a shame that mutable is permitted to be used in constant expressions as it is rarely used, actively discouraged and potentially disabled by future safety enhancements. It is barely rational to have mutation associated with something associated with ROM as that typically brings about segmentation faults. It is also unnatural since template, constexpr and consteval functions are C++'s closest thing to pure functions. One can hardly say in the example f() is pure if it sometimes return 1 and another time returns 2 given the same arguments. The damage is done but also mostly irrelevant with respect to this proposal. We'll see this in the next point but before moving on to it keep in mind that the example is not an example of taking a reference to constexpr variable more less a const reference to constexpr variable.
+It's a shame that mutable is permitted to be used in constant expressions as it is rarely used, actively discouraged and potentially disabled by future safety enhancements. It is barely rational to have mutation associated with something associated with ROM as that typically brings about segmentation faults. It is also unnatural since template, constexpr and consteval functions are C++'s closest thing to pure functions. One can hardly say in the example f() is pure if it sometimes return 1 and another time returns 2 given the same arguments. The damage is done but also mostly irrelevant with respect to this proposal. We'll see this in the next point but before moving on to it, keep in mind that the example is not an example of taking a reference to constexpr variable, more less a const reference to constexpr variable.
 
 ### *"We could make constexpr static only in some cases to alleviate some of the breakages or even make only constexpr bindings static, not other variables, but this option feels like a hack rather than an actual solution."*
 
@@ -402,7 +402,7 @@ This already accepted solution to the mutable problem could also be used as the 
 
 ## Safer
 
-Besides simplicity, why does this proposal recommend that const references to constexpr variables have static storage duration? One word, safety. These objects would be impossible to dangle and also would be thread safe. This also fixes one of C++'s most embarassing forms of dangling; dangling constants. This problem is unique to C++. Practically all languages, except C++, doesn't immediately dangle their constants, not even assembly, C, or even the earliest version of C++, cfront. Things are even worse in C++ because as programmers we can't look at the code and know for sure whether an object is static or not. This requires C++ programmers even beginners to have to look at machine code to see how the compiler decided where to store the object. Not only does this vary from compiler to compiler, it also varies within any given compiler. Frequently in optimized release builds these constant objects are given static duration but made a dangling local in debug builds. This is totally backwards as the increased safety is expected in debug builds. Futher if the optimized is the safest and the better performant than why shouldn't it be available always. Dangling constants is like returning from a function using an input parameter before C++11 because programmers did not have sufficient assurance that rvalue moving would occur. Similarly, programmers have to name the currently unnamed and move it far from the point of use just to ensure dangling doesn't occur in both debug and release builds. This habit works against the recommendation to use unnamed [temporary] and move semantics. 
+Besides simplicity, why does this proposal recommend that const references to constexpr variables have static storage duration? One word, safety. These objects would be impossible to dangle and also would be thread safe. This also fixes one of C++'s most embarassing forms of dangling; dangling constants. This problem is unique to C++. Practically all languages, except C++, doesn't immediately dangle their constants, not even assembly, C, or even the earliest version of C++, cfront. Things are even worse in C++ because as programmers we can't look at the code and know for sure whether an object is static or not. This requires C++ programmers even beginners to have to look at machine code to see how the compiler decided where to store the object. Not only does this vary from compiler to compiler, it also varies within any given compiler. Frequently in optimized release builds these constant objects are given static duration but made a dangling local in debug builds. This is totally backwards, as the increased safety is expected in debug builds. Futher if the optimized is the safest and the better performant than why shouldn't it be available always! Dangling constants is like returning from a function using an input parameter before C++11 because programmers did not have sufficient assurance that "return value optimization" would occur. Similarly, programmers have to name the currently unnamed temporary and move it far from the point of use, just to ensure dangling doesn't occur in both debug and release builds. This habit works against the recommendation to use unnamed [temporary] variables and move semantics. 
 
 ## Relationship to constexpr wrapper
 
@@ -466,7 +466,12 @@ const std::string& safe = dangler("42"s);
 
 ```cpp
 // "42"s is a temporary
-const std::string& safe = dangler([] /*consteval*/ -> auto const & { static constinit const std::string anonymous{"42"}; return g; }());
+const std::string& safe = dangler(
+    [] /*consteval*/ -> auto const &
+    {
+        static constinit const std::string anonymous{"42"};
+        return anonymous;
+    }());
 ```
 
 </td>
