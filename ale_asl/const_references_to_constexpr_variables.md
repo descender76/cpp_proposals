@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2024-04-03</td>
+<td>2024-04-09</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -159,7 +159,9 @@ const std::string always_safe{"42"};
 </tr>
 </table>
 
-It should be noted that `constexpr structured bindings and references to constexpr variables`'s [^p2686r3] first option is simpler than the last, at least in wording but is more complex than the last in the sense that it explictly requires the programmer to litter their code with `static`. The second option is simpler than both the first and the last options because the static is implied, just as it is at namespace scope, resulting in simplified wording and simplified usage by the end programmers. Are the reasons presented against the second option totally legitimate or could those rare exceptions be handled in such a way that simplicity wouldn't be lost for the greater whole? Lets consider each point in turn.
+It should be noted that `constexpr structured bindings and references to constexpr variables`'s [^p2686r3] first option is simpler than the last, at least in wording but is more complex than the last in the sense that it explictly requires the programmer to litter their code with `static`. The second option is simpler than both the first and the last options because the static is implied, just as it is at namespace scope, resulting in simplified wording and simplified usage by the end programmers. Are the reasons presented against the second option totally legitimate or could those rare exceptions be handled in such a way that simplicity wouldn't be lost for the greater whole?
+
+Let's consider the complete rationale against, before breaking down each point in turn.
 
 <table>
 <tr>
@@ -234,7 +236,7 @@ Really! One only have to read the original motivations for `constexpr` to realiz
 
 **2003**
 
-*"This note proposes a notion of **user-defined literals** based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the **C99 notion of compound literals**."*
+*"This note proposes a notion of user-defined literals based on literal constructors without requiring new syntax. If combined with the separate proposal for generalized initializer lists, it becomes a generalization of the C99 notion of compound literals."*
 
 *"However, a constructor is a very general construct and there have been many requests for a way to express literals for user-defined types in such a way that a programmer can be **confident that a value <u>will be</u> constructed at compile time** and **potentially stored in ROM**. For example:"*
 
@@ -272,7 +274,7 @@ f(&(struct foo) { 1,2 });
 
 **2007**
 
-*"This paper generalizes the notion of constant expressions to include constant-expression functions and **user-defined literals**"*
+*"This paper generalizes the notion of constant expressions to include constant-expression functions and user-defined literals"*
 
 *"The goal is ... to **increase C99 compatibility.**"*
 
@@ -306,11 +308,11 @@ f(&(struct foo) { 1,2 });
 // the &x forces x into memory
 ```
 
-*"When the initializer for an ordinary variable (i.e. not a constexpr) happens to be a constant, the compiler can choose to do dynamic or static initialization (as ever)."*
+***"When the initializer for an ordinary variable (i.e. not a constexpr) happens to be a constant, the compiler can choose to do dynamic or static initialization (as ever)."***
 
-*"Declaring a constructor constexpr will help compilers to identify static initialization and perform appropriate optimizations (like putting literals in read-only memory.) Note that since “ROM” isn’t a concept of the C++ Standard and what to put into ROM is often a quite subtle design decision, this proposal simply allows the programmer to indicate what might be put into ROM (constant-expression data) rather than trying to specify what actually goes into ROM in a particular implementation."*
+***"Declaring a constructor constexpr will help compilers to identify static initialization and perform appropriate optimizations (like putting literals in read-only memory.) Note that since “ROM” isn’t a concept of the C++ Standard and what to put into ROM is often a quite subtle design decision, this proposal simply allows the programmer to indicate what might be put into ROM (constant-expression data) rather than trying to specify what actually goes into ROM in a particular implementation."***
 
-*"We do not propose to make constexpr a storage-class-specifier because it can be combined with either static or extern or register, much like const."*
+***"We do not propose to make constexpr a storage-class-specifier because it can be combined with either static or extern or register, much like const."***
 
 </td>
 </tr>
@@ -333,7 +335,7 @@ int main() {
 }
 ```
 
-It's a shame that mutable is permitted to be used in constant expressions as it is rarely used, actively discouraged and potentially disabled by future safety enhancements. It is barely rational to have mutation associated with something associated with ROM as that typically brings about segmentation faults. It is also unnatural since template, constexpr and consteval functions are C++'s closest thing to pure functions. One can hardly say in the example f() is pure if it sometimes return 1 and another time returns 2 given the same arguments. The damage is done but also mostly irrelevant with respect to this proposal. We'll see this in the next point but before moving on to it, keep in mind that the example is not an example of taking a reference to constexpr variable, more less a const reference to constexpr variable.
+It's a shame that mutable is permitted to be used in constant expressions as it is rarely used, actively discouraged and potentially disabled by future safety enhancements. It is barely rational to have mutation associated with something associated with ROM as that typically brings about segmentation faults. It is also unnatural since template, constexpr and consteval functions are C++'s closest thing to pure functions. One can hardly say in the example f() is pure if it sometimes return 1 and another time returns 2, given the same arguments. The damage is done but also mostly irrelevant, with respect to this proposal. We'll see this in the next point but before moving on to it, keep in mind that the example is not an example of taking a reference to constexpr variable, more less a const reference to constexpr variable.
 
 ### *"We could make constexpr static only in some cases to alleviate some of the breakages or even make only constexpr bindings static, not other variables, but this option feels like a hack rather than an actual solution."*
 
@@ -402,7 +404,13 @@ This already accepted solution to the mutable problem could also be used as the 
 
 ## Safer
 
-Besides simplicity, why does this proposal recommend that const references to constexpr variables have static storage duration? One word, safety. These objects would be impossible to dangle and also would be thread safe. This also fixes one of C++'s most embarassing forms of dangling; dangling constants. This problem is unique to C++. Practically all languages, except C++, doesn't immediately dangle their constants, not even assembly, C, or even the earliest version of C++, cfront. Things are even worse in C++ because as programmers we can't look at the code and know for sure whether an object is static or not. This requires C++ programmers even beginners to have to look at machine code to see how the compiler decided where to store the object. Not only does this vary from compiler to compiler, it also varies within any given compiler. Frequently in optimized release builds these constant objects are given static duration but made a dangling local in debug builds. This is totally backwards, as the increased safety is expected in debug builds. Futher if the optimized is the safest and the better performant than why shouldn't it be available always! Dangling constants is like returning from a function using an input parameter before C++11 because programmers did not have sufficient assurance that "return value optimization" would occur. Similarly, programmers have to name the currently unnamed temporary and move it far from the point of use, just to ensure dangling doesn't occur in both debug and release builds. This habit works against the recommendation to use unnamed [temporary] variables and move semantics. 
+Besides simplicity, why does this proposal recommend that const references to constexpr variables have static storage duration? One word, safety. These objects would be impossible to dangle and also would be thread safe. This also fixes one of C++'s most embarassing forms of dangling; dangling constants. This problem is unique to C++. Practically all languages, except C++, doesn't immediately dangle their constants, not even assembly, C, or even the earliest version of C++, cfront.
+
+Things are even worse in C++ because as programmers we can't look at the code and know for sure whether an object is static or not. This requires C++ programmers even beginners to have to look at machine code to see how the compiler decided where to store the object. Not only does this vary from compiler to compiler, it also varies within any given compiler. Frequently in optimized release builds these constant objects are given static duration but made a dangling local in debug builds. This is totally backwards, as the increased safety is expected in debug builds.
+
+Futher if the optimized build is both the safest and the better performant then why shouldn't it be available always! Dangling constants is like returning from a function using an input parameter in pre C++11 because programmers did not have sufficient assurance that "return value optimization" would occur.
+
+Similarly, programmers have to name the currently unnamed temporary and move it far from the point of use, just to ensure dangling doesn't occur in both debug and release builds. This habit works against the recommendation to use unnamed [temporary] variables and move semantics.
 
 ## Relationship to constexpr wrapper
 
@@ -494,7 +502,7 @@ More verbose information on the motivation for this proposed feature also exists
 
 ## Summary
     
-"Making constexpr implicitly static" [^p2686r3] for constants make the language simpler and at least for constant references makes the language safer. Like the `Static storage for braced initializers` [^p2752r3] proposal it would minimize "CPU cycles", "stack space" and heap allocations caused by types that dynamically allocate such `std::string` and `std::vector` when they are better off being a constant.
+"Making constexpr implicitly static" [^p2686r3] for constants makes the language simpler and at least for constant references makes the language safer. Like the `Static storage for braced initializers` [^p2752r3] proposal it would minimize "CPU cycles", "stack space" and heap allocations caused by types that dynamically allocate such `std::string` and `std::vector` when they are better off being a constant.
 
 ## Frequently Asked Questions
 
@@ -518,7 +526,11 @@ In `C++`, we use `const` parameters alot. This is the first of three requirement
 - **`C++20`**: `std::pair`, `std::tuple`, `std::string`, `std::vector`
 - **`C++23`**: `std::optional`, `std::variant`, `std::unique_ptr`
 
-As their was sufficient use to justify making the constructors of any one of these listed above types to be `constexpr` than their would be sufficient use of the `implicit constant initialization` feature which would use them all as this satisfies its second and third requirement that the instances be constructable at compile time and `constant-initialized`.
+As their was sufficient use to justify making the constructors of any one of these listed above types to be `constexpr` than their would be sufficient use of the `implicit constant initialization` feature which would use them all as this satisfies its first and second of the three requirements that the instances be constructable at compile time and that they `const`.
+
+1. **The programmer of the type must have provided a means for the type to be constructed at compile time likely by having a `constexpr` constructor.**
+1. **The programmer of the variable or function parameter must have stated that they want a `const`.**
+1. The end programmer have `const-initialized` the variable or argument.
 
 ### Doesn't this make C++ harder to teach?
 
