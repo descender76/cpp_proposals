@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2024-05-05</td>
+<td>2024-05-09</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -65,6 +65,7 @@ a code
     - [optional](#optional)
   - [Motivation](#Motivation)
   - [More Potential Examples](#More-Potential-Examples)
+  - [Should've, Could've, Would've](#Shouldve-Couldve-Wouldve)
   - [References](#References)
 
 ## Abstract
@@ -150,6 +151,11 @@ class f mutable(false){};// same as class c const {};
 ```
 
 While at a minimum, only adding `const` to a class definition is needed, the other examples would be beneficial for completeness and to ease their usage in library definitions.
+
+##  Should've, Could've, Would've
+
+While not a part of this proposal, there are places in the standard library where types are implicitly const by default. For instance, adding the const by default class modifier to `source_location`, `initializer_list`, `numeric_limits`, `integer_sequence`, `ration` and all of the type traits would not have negative consequences as all of its member access is currently `const` only. It should also be noted that `stacktrace_entry`, `span`, `mdspan`, `locale` and all of the exceptions would also have been ideal candidates if it was not for their assignment operator. This is especially true of exeptions since they are usually thrown by value, catched by reference and rarely if ever reassigned mutably. The `span` class would also have been ideal since it is a lightweight pure reference type like `function_ref` and `optional<&>`. The `basic_string_view` is also in a similar situation of `span`, if it wasn't for its assignment operator, `remove_prefix`, `remove_suffix` and `swap` member functions. The last three member functions just as easily could have created a new `basic_string_view` since it is a cheap stack type like `span`.
+
 
 ## References
 <!--function_ref: a type-erased callable reference-->
