@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2024-06-10</td>
+<td>2024-06-13</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -109,7 +109,7 @@ optional<int&> oi3 = dangler(42/* unnecessary error */, oi1, oi1);
 ```cpp
 // just added ", favors::ease" to the first parameter
 // since 'other' nor any component of 'other' is returned
-// in other words the return is only dependent of left and right
+// in other words, the return is only dependent upon left and right
 optional<int&> dangler(optional<const int&, favors::ease> other,
                        optional<int&> left,
                        optional<int&> right)
@@ -187,17 +187,17 @@ class /*std::*/optional<T&, favor> {
 
 ## `favors::safety` vs `favors::ease` usage
 
-### favors::safety
+### favors::safety (i.e. the default)
 
 * local variables
-* return parameters
+* return parameters just like `p2748r5` [^p2748r5]
 * member variables that are dependent upon constructor arguments
 * input parameters that will be returned in whole or in part
 
 ### favors::ease
 
-* functions that return void
-* functions that return values
+* input parameters of functions that return void
+* input parameters of functions that return values
 * input parameters that will NOT be returned in whole or in part
 
 ##  Should've, Could've, Would've
@@ -214,7 +214,7 @@ std::string_view sv1 = "42"s;// should be error
 
 ### function_ref
 
-It can be difficult to implement as parameter packs and default parameter values both lives at the end of the template parameter list. 
+It can be difficult to implement as parameter packs and default parameter values both live at the end of the template parameter list. 
 
 ### reference_wrapper
 
@@ -222,10 +222,12 @@ It can be difficult to implement as parameter packs and default parameter values
 
 ## Summary
 
-This proposal identifies with Arthur O’Dwyer's article `Value category is not lifetime` [^value-category-is-not-lifetime]. While `safety by default` is paramount, requiring that all libraries that use `std::optional<&>` [^p2988r5] be needlessly difficult to use is detrimental the clarity of our programs.
+This proposal identifies with Arthur O’Dwyer's article `Value category is not lifetime` [^value-category-is-not-lifetime]. While `safety by default` is paramount, requiring that all libraries that use `std::optional<&>` [^p2988r5] be needlessly difficult to use is detrimental to the clarity of our programs.
 
 ## References
 <!--std::optional<T&>-->
 [^p2988r5]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p2988r5.pdf>
 <!--Value category is not lifetime-->
 [^value-category-is-not-lifetime]: <https://quuxplusone.github.io/blog/2019/03/11/value-category-is-not-lifetime/>
+<!--Disallow Binding a Returned Glvalue to a Temporary-->
+[^p2748r5]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p2748r5.html>
