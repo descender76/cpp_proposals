@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2024-07-05</td>
+<td>2024-07-07</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -100,6 +100,115 @@ int main()
 }
 ```
 
+### non_invalidating_vector_ref
+
+```cpp
+template<
+    class T,
+    class Allocator = std::allocator<T>
+>
+class non_invalidating_vector_ref
+{
+private:
+    actual_type& ref;
+public:
+    // constructors reflect this being just a pure reference type
+    constexpr non_invalidating_vector_ref() = delete;
+    constexpr non_invalidating_vector_ref(const non_invalidating_vector_ref&) = default;
+    constexpr non_invalidating_vector_ref(non_invalidating_vector_ref&&) = default;
+    constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&) = delete;
+    constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&&) = delete;
+
+    constexpr non_invalidating_vector_ref(actual_type& reference) : ref{reference} {}
+    // all non invalidating methods are proxied
+    constexpr reference operator[]( size_type pos )
+    {
+        return ref[pos];
+    }
+    constexpr const_reference operator[]( size_type pos ) const
+    {
+        return ref[pos];
+    }
+    constexpr size_type size() const
+    {
+        return ref.size();
+    }
+    // all invalidating methods are deleted
+    constexpr void resize( size_type count ) = delete;
+    // can narrow scope to just the const members
+    operator const actual_type&() const
+    {
+        return ref;
+    }
+};
+```
+
+### non_invalidating_vector
+
+```cpp
+template<
+    class T,
+    class Allocator = std::allocator<T>,
+    class Container = std::vector<T, Allocator>
+>
+class non_invalidating_vector
+{
+private:
+    actual_type inner;
+public:
+    // has all of the std::vector constructors
+    constexpr non_invalidating_vector() noexcept(noexcept(Allocator()))
+        : inner() {}
+    constexpr explicit non_invalidating_vector( const Allocator& alloc ) noexcept
+        : inner(alloc) {}
+    constexpr non_invalidating_vector( size_type count, const T& value, const Allocator& alloc = Allocator() )
+        : inner(count, value, alloc) {}
+    explicit non_invalidating_vector( size_type count, const Allocator& alloc = Allocator() )
+        : inner(count, alloc) {}
+    template< class InputIt >
+    constexpr non_invalidating_vector( InputIt first, InputIt last, const Allocator& alloc = Allocator() )
+        : inner(first, last, alloc) {}
+    constexpr non_invalidating_vector( const non_invalidating_vector& other )
+        : inner(other) {}
+    constexpr non_invalidating_vector( const non_invalidating_vector& other, const Allocator& alloc )
+        : inner(other, alloc) {}
+    constexpr non_invalidating_vector( non_invalidating_vector&& other ) noexcept
+        : inner(other) {}
+    constexpr non_invalidating_vector( non_invalidating_vector&& other, const Allocator& alloc )
+        : inner(other, alloc) {}
+    constexpr non_invalidating_vector( std::initializer_list<T> init, const Allocator& alloc = Allocator() )
+        : inner(init, alloc) {}
+    template< class R >
+    constexpr non_invalidating_vector( std::from_range_t, R&& rg, const Allocator& alloc = Allocator() )
+        : inner(std::from_range, rg, alloc) {}
+    // all non invalidating methods are proxied
+    constexpr reference operator[]( size_type pos )
+    {
+        return inner[pos];
+    }
+    constexpr const_reference operator[]( size_type pos ) const
+    {
+        return inner[pos];
+    }
+    constexpr size_type size() const
+    {
+        return inner.size();
+    }
+    // all invalidating methods are deleted
+    constexpr void resize( size_type count ) = delete;
+    // compatible with non_invalidating_vector_ref
+    operator non_invalidating_vector_ref<T, Allocator>()
+    {
+        return non_invalidating_vector_ref<T, Allocator>{inner};
+    }
+    // can narrow scope to just the const members
+    operator const actual_type&() const
+    {
+        return inner;
+    }
+};
+```
+
 ## Prior Work
 
 <table>
@@ -129,6 +238,152 @@ int main()
 </tr>    
    
 </table>
+
+## Potential Improvements
+
+Given any container it would be good to know what is its non_invalidating type and given a container instance, a consistently named member function to get an instance of or reference to the non_invalidating type.
+
+```cpp
+namespace std {
+    template<class T, class Allocator = allocator<T>>
+    class vector {
+    public:
+        using non_invalidating_type = non_invalidating_vector<T, Allocator>;
+        non_invalidating_type non_invalidating_view() const noexcept
+        {
+            return non_invalidating_type(*this);
+        }
+    }
+}
+```
+
+This would allow the user of the container to autocomplete their way to the invalidation free safety.
+
+## Alternative
+
+### Refactor vector
+
+Instead of adding two classes to any container, effectively tripling portions of the specification, inheritance could be used instead to split any given container its invalidating and non invalidating variants 
+
+<table>
+<tr>
+<th colspan="2">
+
+current `std::vector`
+
+</th>
+</tr>
+<tr>
+<th>
+
+`non_invalidating_vector` base class
+
+</th>
+<th>
+
+future `std::vector`
+
+</th>
+</tr>
+<tr>
+<td>
+
+- get_allocator
+- at
+- operator[]
+- front
+- back
+- data
+- begin
+- cbegin
+- end
+- cend
+- rbegin
+- crbegin
+- rend
+- crend
+- empty
+- size
+- max_size
+- capacity
+
+</td>
+<td>
+
+- `operator=`
+- assign
+- assign_range
+- shrink_to_fit
+- clear
+- insert
+- insert_range
+- emplace
+- erase
+- push_back
+- emplace_back
+- append_range
+- pop_back
+- resize
+- swap
+
+</td>
+</tr>
+</table>
+
+This would elevate the usage of this base class as being just a cast thus making it more consistent with a `const` cast.
+
+<table>
+<tr>
+<th>&nbsp;</th>
+<th>
+
+non_invalidating_vector<br/>non_invalidating_vector_ref
+
+</th>
+<th>
+
+inheritance<br/>
+non_invalidating_vector base class
+
+</th>
+</tr>
+<tr>
+<th>
+
+PRO(s)
+
+</th>
+<td>
+
+- pure addition
+
+</td>
+<td>
+
+- split one class in two
+
+</td>
+</tr>
+<tr>
+<th>
+
+CON(s)
+
+</th>
+<td>
+
+- requires 2 full classes
+
+</td>
+<td>
+
+- modifies collection class
+
+</td>
+</tr>
+</table>
+
+This would require refactoring any given collection by injecting a base class and relocating the non invalidating member functions to said base class. Since the resolved collection of methods would remain the same in the final collection, no breakage is expected.
 
 ## Wording
 
@@ -514,10 +769,10 @@ private:
     actual_type& ref;
 public:
     constexpr non_invalidating_vector_ref() = delete;
-	constexpr non_invalidating_vector_ref(const non_invalidating_vector_ref&) = default;
-	constexpr non_invalidating_vector_ref(non_invalidating_vector_ref&&) = default;
-	constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&) = delete;
-	constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&&) = delete;
+    constexpr non_invalidating_vector_ref(const non_invalidating_vector_ref&) = default;
+    constexpr non_invalidating_vector_ref(non_invalidating_vector_ref&&) = default;
+    constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&) = delete;
+    constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&&) = delete;
 
     constexpr non_invalidating_vector_ref(actual_type& reference) : ref{reference} {}
 
