@@ -28,7 +28,7 @@ anonymous constants: past, present and future
 
 ## embarrassing (Part 1)
 
-Most if not all programming languages in use don't immediately dangle their constants/literals.
+Most if not all programming languages in use, except C++, don't immediately dangle something as simple and beginner as constants/literals.
 
 ---
 
@@ -39,8 +39,8 @@ Most if not all programming languages in use don't immediately dangle their cons
 Guaranteed static and const
 
 ```asm
-     .globl a
-    .section    .rodata
+    .global a
+    .section   .rodata
     .align 4
     .type   a, @object
     .size   a, 4
@@ -73,18 +73,18 @@ mov <memory>,<constant>
 
 ### C++ was easier and safer
 
-CFront i.e. C with classes because C++ was preprocessed to C code which didn't immediately dangle their constants/literals.
+CFront i.e. C with classes because C++ was preprocessed to C code, which didn't immediately dangle their constants/literals.
 
 ---
 
 ## Requirements
 
-1. const
+1. const [&]
 1. constexpr; can be constructed at compile time
-1. consteval
+1. consteval; was constructed at compile time
 
 Result
-- constinit; sensible lifetime extension of a temporary to a global
+- constinit; constant initialization, sensible lifetime extension of a temporary to a global
 
 ---
 
@@ -206,6 +206,238 @@ const X: &'static T = &<constexpr foo>;
 **CON(s)** (explicit)
 - not really a automatic promotion as it must be requested
 - like C++, a tool that must be used, not default
+
+---
+
+## Breakage? (Part 1)
+
+<table>
+<tr>
+<th>
+
+&nbsp;
+
+</th>
+<th colspan="2" style="text-align:center">
+
+with static
+
+</th>
+</tr>
+<tr>
+<th style="width:25ex">
+
+code
+
+</th>
+<th>
+
+safer
+
+</th>
+<th>
+
+simpler
+
+</th>
+</tr>
+<tr>
+<td>
+
+```cpp
+auto [](const std::string& s) {
+    return s;
+}("HWs");
+```
+
+</td>
+<td style="text-align:center">
+
+<span style="color:green">&#x2713;</span>
+
+</td>
+<td style="text-align:center">
+
+<span style="color:green">&#x2713;</span>
+
+</td>
+</tr>
+<tr>
+<td>
+
+```cpp
+const std::string& s = "HW"s;
+```
+
+</td>
+<td style="text-align:center">
+
+<span style="color:green">?</span>
+
+</td>
+<td style="text-align:center">
+
+<span style="color:green">&#x2713;</span>
+
+</td>
+</tr>
+<tr>
+<td>
+
+```cpp
+const std::string s = "HW"s;
+```
+
+</td>
+<td style="text-align:center">
+
+<span style="color:red">&#x2717;</span>
+
+</td>
+<td style="text-align:center">
+
+<span style="color:green">&#x2713;</span>
+
+</td>
+</tr>
+</table>
+
+---
+
+## Breakage? (Part 2)
+
+### The point
+
+- While the consistency is appreciated for simplicity
+- Only temporaries passed to function calls need it
+
+---
+
+## Breakage? (Part 3)
+
+### The point
+
+- Lifetime extending temporary constants passed to functions is not expected to cause problems as the function knows not whether the argument is global, local or temporary.
+
+---
+
+## Breakage? (Part 4)
+
+### What about the other two?
+
+<table>
+<tr>
+<td>
+
+`Working Draft, Standard for Programming Language C++` [n4910]
+
+***6.9.3.2 Static initialization [basic.start.static]***
+
+<sup>3</sup>*"An implementation is permitted to perform the initialization of a variable with static or thread storage duration as a static initialization even if such initialization is not required to be done statically ..."*
+
+</td>
+</tr>
+</table>
+
+---
+
+## Performance (Part 1)
+
+https://en.cppreference.com/w/c/language/const
+
+### const type qualifier
+
+*"Objects declared with const-qualified types may be placed in read-only memory by the compiler, and if the address of a const object is never taken in a program, it may not be stored at all."*
+
+---
+
+## Performance (Part 2)
+
+- avoids repeated stack [and heap] allocations every time function called in one thread
+- avoids repeated stack [and heap] allocations every time function called by multiple threads
+- assembly inline constants / embedded in instruction
+- potential deduplication
+- potential referencing component of larger constant
+
+---
+
+## Teachability (Part 1)
+
+### Requirements
+
+1. const [&]
+1. constexpr; can be constructed at compile time
+1. consteval; was constructed at compile time
+
+---
+
+## Teachability (Part 2)
+
+### Requirement #1 const [&]
+
+**C++ Core Guidelines**<br/>`F.16: For “in” parameters, pass cheaply-copied types by value and others by reference to const` [cppcgrf42]
+
+---
+
+## Teachability (Part 3)
+
+### Requirement #2 constexpr
+
+#### Make everything constexpr
+
+- As the limit of constexpr approach 100%, the programmer only need to concern themselves with requirement #3
+
+---
+
+## Teachability (Part 4)
+
+### Requirement #2 consteval
+
+- Was the constant initiated with only constants?
+
+---
+
+## Teachability (Part 5)
+
+```cpp
+auto whatever = {
+    {1, 2, 3},
+    {4, 2, 5},
+    {3, 2, 1},
+}
+```
+
+- How easy is it for the programmer to tell that this was only initialized with constants? VERY EASY
+
+---
+
+## Teachability (Part 6)
+
+```cpp
+const auto i = 2;
+auto whatever = {
+    {1, i, 3},
+    {4, i, 5},
+    {3, i, 1},
+}
+```
+
+- How easy is it for the programmer to tell that this was only initialized with constants? EASY
+
+---
+
+## Teachability (Part 7)
+
+```cpp
+auto whatever = {
+    {1, i, 3},
+    {4, i, 5},
+    {3, i, 1},
+}
+```
+
+- How easy is it for the programmer to tell that this was NOT initialized completely with constants? EASY. Even if `i` was far away, the variable is an indicator of it not likely being constant. After all, it is variable. 
+
 <!--
 ---
 
