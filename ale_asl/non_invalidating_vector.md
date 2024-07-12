@@ -812,15 +812,15 @@ constexpr const T* data() const noexcept;
 
 ## Alternate Wording
 
-### 24.3.11 Class template non_invalidating_vector [non_invalidating_vector]
+### ++24.3.11 Class template non_invalidating_vector [non_invalidating_vector]++
 
-#### 24.3.11.1 Overview [non_invalidating_vector.overview]
+#### ++24.3.11.1 Overview [non_invalidating_vector.overview]++
 
-<sup>1</sup> A `non_invalidating_vector` is a sequence container. Storage management is handled automatically, though hints can be given to improve efficiency.
+++<sup>1</sup> A `non_invalidating_vector` is a sequence container. Storage management is handled automatically, though hints can be given to improve efficiency.++
 
-<sup>2</sup> A `non_invalidating_vector` meets all of the requirements of a container (24.2.2.2), of a reversible container (24.2.2.3), of an allocator-aware container (24.2.2.5), of a sequence container, including most of the optional sequence container requirements (24.2.4), and, for an element type other than `bool`, of a contiguous container (24.2.2.2). The exceptions are the `push_front`, `prepend_range`, `pop_front`, and `emplace_front` member functions, which are not provided. Descriptions are provided here only for operations on `non_invalidating_vector` that are not described in one of these tables or for operations where there is additional semantic information.
+++<sup>2</sup> A `non_invalidating_vector` meets all of the requirements of a container (24.2.2.2), of a reversible container (24.2.2.3), of an allocator-aware container (24.2.2.5), of a sequence container, including most of the optional sequence container requirements (24.2.4), and, for an element type other than `bool`, of a contiguous container (24.2.2.2). The exceptions are the `push_front`, `prepend_range`, `pop_front`, and `emplace_front` member functions, which are not provided. Descriptions are provided here only for operations on `non_invalidating_vector` that are not described in one of these tables or for operations where there is additional semantic information.++
 
-<sup>3</sup> The types `iterator` and `const_iterator` meet the constexpr iterator requirements (25.3.1).
+++<sup>3</sup> The types `iterator` and `const_iterator` meet the constexpr iterator requirements (25.3.1).++
 
 ```cpp
 namespace std {
@@ -904,7 +904,7 @@ non_invalidating_vector(from_range_t, R&&, Allocator = Allocator())
 }
 ```
 
-<sup>4</sup> An incomplete type T may be used when instantiating `non_invalidating_vector` if the allocator meets the allocator completeness requirements (16.4.4.6.2). T shall be complete before any member of the resulting specialization of `non_invalidating_vector` is referenced.
+++<sup>4</sup> An incomplete type T may be used when instantiating `non_invalidating_vector` if the allocator meets the allocator completeness requirements (16.4.4.6.2). T shall be complete before any member of the resulting specialization of `non_invalidating_vector` is referenced.++
 
 #### 24.3.11.2 Constructors [non_invalidating_vector.cons]
 
@@ -912,30 +912,30 @@ non_invalidating_vector(from_range_t, R&&, Allocator = Allocator())
 constexpr explicit non_invalidating_vector(const Allocator&) noexcept;
 ```
 
-<sup>1</sup> *Eﬀects*: Constructs an empty `non_invalidating_vector`, using the specifed allocator.
+++<sup>1</sup> *Eﬀects*: Constructs an empty `non_invalidating_vector`, using the specifed allocator.++
 
-<sup>2</sup> *Complexity*: Constant.
+++<sup>2</sup> *Complexity*: Constant.++
 
 ```cpp
 constexpr explicit non_invalidating_vector(size_type n, const Allocator& = Allocator());
 ```
 
-<sup>3</sup> *Preconditions*: T is `Cpp17DefaultInsertable` into `*this`.
+++<sup>3</sup> *Preconditions*: T is `Cpp17DefaultInsertable` into `*this`.++
 
-<sup>4</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n default-inserted elements using the specifed allocator.
+++<sup>4</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n default-inserted elements using the specifed allocator.++
 
-<sup>5</sup> *Complexity*: Linear in n.
+++<sup>5</sup> *Complexity*: Linear in n.++
 
 ```cpp
 constexpr non_invalidating_vector(size_type n, const T& value,
     const Allocator& = Allocator());
 ```
 
-<sup>6</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.
+++<sup>6</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.++
 
-<sup>7</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n copies of value, using the specifed allocator.
+++<sup>7</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n copies of value, using the specifed allocator.++
 
-<sup>8</sup> *Complexity*: Linear in n.
+++<sup>8</sup> *Complexity*: Linear in n.++
 
 ```cpp
 template<class InputIterator>
@@ -943,18 +943,18 @@ constexpr non_invalidating_vector(InputIterator first, InputIterator last,
     const Allocator& = Allocator());
 ```
 
-<sup>9</sup> *Eﬀects*: Constructs a non_invalidating_vector equal to the range `[first, last)`, using the specifed allocator.
+++<sup>9</sup> *Eﬀects*: Constructs a non_invalidating_vector equal to the range `[first, last)`, using the specifed allocator.++
 
-<sup>10</sup> *Complexity*: Makes only N calls to the copy constructor of T (where N is the distance between first and last) and no reallocations if iterators first and last are of forward, bidirectional, or random access categories. It makes order N calls to the copy constructor of T and order log N reallocations if they are just input iterators.
+++<sup>10</sup> *Complexity*: Makes only N calls to the copy constructor of T (where N is the distance between first and last) and no reallocations if iterators first and last are of forward, bidirectional, or random access categories. It makes order N calls to the copy constructor of T and order log N reallocations if they are just input iterators.++
 
 ```cpp
 template<container-compatible-range <T> R>
 constexpr non_invalidating_vector(from_range_t, R&& rg, const Allocator& = Allocator());
 ```
 
-<sup>11</sup> *Eﬀects*: Constructs a `non_invalidating_vector` object with the elements of the range rg, using the specifed allocator.
+++<sup>11</sup> *Eﬀects*: Constructs a `non_invalidating_vector` object with the elements of the range `rg`, using the specifed allocator.++
 
-<sup>12</sup> *Complexity*: Initializes exactly N elements from the results of dereferencing successive iterators of rg, where N is `ranges::distance(rg)`. Performs no reallocations if R models ranges::forward_range or `ranges::sized_range`; otherwise, performs order log N reallocations and order N calls to the copy or move constructor of T.
+++<sup>12</sup> *Complexity*: Initializes exactly N elements from the results of dereferencing successive iterators of `rg`, where N is `ranges::distance(rg)`. Performs no reallocations if R models ranges::forward_range or `ranges::sized_range`; otherwise, performs order log N reallocations and order N calls to the copy or move constructor of T.++
 
 #### 24.3.11.3 Capacity [non_invalidating_vector.capacity]
 
@@ -962,9 +962,9 @@ constexpr non_invalidating_vector(from_range_t, R&& rg, const Allocator& = Alloc
 constexpr size_type capacity() const noexcept;
 ```
 
-<sup>1</sup> *Returns*: The total number of elements that the `non_invalidating_vector` can hold without requiring reallocation.
+++<sup>1</sup> *Returns*: The total number of elements that the `non_invalidating_vector` can hold without requiring reallocation.++
 
-<sup>2</sup> *Complexity*: Constant time.
+++<sup>2</sup> *Complexity*: Constant time.++
 
 #### 24.3.11.4 Data [non_invalidating_vector.data]
 
@@ -973,9 +973,9 @@ constexpr T* data() noexcept;
 constexpr const T* data() const noexcept;
 ```
 
-<sup>1</sup> *Returns*: A pointer such that `[data(), data() + size())` is a valid range. For a non-empty `non_invalidating_vector`, `data() == addressof(front())` is `true`.
+++<sup>1</sup> *Returns*: A pointer such that `[data(), data() + size())` is a valid range. For a non-empty `non_invalidating_vector`, `data() == addressof(front())` is `true`.++
 
-<sup>2</sup> *Complexity*: Constant time.
+++<sup>2</sup> *Complexity*: Constant time.++
 
 ### 24.3.11 Class template vector [vector]
 
@@ -1059,23 +1059,79 @@ vector(from_range_t, R&&, Allocator = Allocator())
 
 #### 24.3.11.2 Constructors [vector.cons]
 
-`vector` inherits the constructors of `non_invalidating_vector`.
+```cpp
+constexpr explicit vector(const Allocator&) noexcept;
+```
+
+~~<sup>1</sup> *Eﬀects*: Constructs an empty `vector`, using the specifed allocator.~~
+
+~~<sup>2</sup> *Complexity*: Constant.~~
+
+```cpp
+constexpr explicit vector(size_type n, const Allocator& = Allocator());
+```
+
+~~<sup>3</sup> *Preconditions*: T is `Cpp17DefaultInsertable` into `*this`.~~
+
+~~<sup>4</sup> *Eﬀects*: Constructs a `vector` with n default-inserted elements using the specifed allocator.~~
+
+~~<sup>5</sup> *Complexity* Linear in n.~~
+
+```cpp
+constexpr vector(size_type n, const T& value,
+    const Allocator& = Allocator());
+```
+
+~~<sup>6</sup> *Preconditions*: T is `Cpp17CopyInsertable` into `*this`.~~
+
+~~<sup>7</sup> *Eﬀects*: Constructs a `vector` with n copies of value, using the specifed allocator.~~
+
+~~<sup>8</sup> *Complexity*: Linear in n.~~
+
+```cpp
+template<class InputIterator>
+constexpr vector(InputIterator first, InputIterator last,
+    const Allocator& = Allocator());
+```
+
+~~<sup>9</sup> *Eﬀects*: Constructs a `vector` equal to the range [`first`, `last`), using the specifed allocator.~~
+
+~~<sup>10</sup> *Complexity*: Makes only N calls to the copy constructor of T (where N is the distance between `first` and `last`) and no reallocations if iterators `first` and `last` are of forward, bidirectional, or random access categories. It makes order N calls to the copy constructor of T and order log N reallocations if they are just input iterators.~~
+
+```cpp
+template<container-compatible-range <T> R>
+constexpr vector(from_range_t, R&& rg, const Allocator& = Allocator());
+```
+
+<sup>11</sup> *Eﬀects*: Constructs a `vector` object with the elements of the range `rg`, using the specifed allocator.
+
+<sup>12</sup> *Complexity*: Initializes exactly N elements from the results of dereferencing successive iterators of `rg`, where N is `ranges::distance(rg)`. Performs no reallocations if R models `ranges::forward_range` or `ranges::sized_range`; otherwise, performs order log N reallocations and order N calls to the copy or move constructor of T.
+
+++`vector` inherits the constructors of `non_invalidating_vector`.++
 
 #### 24.3.11.3 Capacity [vector.capacity]
+
+```cpp
+constexpr size_type capacity() const noexcept;
+```
+
+~~<sup>1</sup> *Returns*: The total number of elements that the `vector` can hold without requiring reallocation.~~
+
+~~<sup>2</sup> *Complexity*: Constant time.~~
 
 ```cpp
 constexpr void reserve(size_type n);
 ```
 
-<sup>1</sup> *Preconditions*: T is `Cpp17MoveInsertable` into *this.
+<sup>~~3~~++1++</sup> *Preconditions*: T is `Cpp17MoveInsertable` into *this.
 
-<sup>2</sup> *Eﬀects*: A directive that informs a vector of a planned change in size, so that it can manage the storage allocation accordingly. After `reserve()`, `capacity()` is greater or equal to the argument of reserve if reallocation happens; and equal to the previous value of `capacity()` otherwise. Reallocation happens at this point if and only if the current capacity is less than the argument of `reserve()`. If an exception is thrown other than by the move constructor of a non-`Cpp17CopyInsertable` type, there are no eﬀects.
+<sup>~~4~~++2++</sup> *Eﬀects*: A directive that informs a vector of a planned change in size, so that it can manage the storage allocation accordingly. After `reserve()`, `capacity()` is greater or equal to the argument of reserve if reallocation happens; and equal to the previous value of `capacity()` otherwise. Reallocation happens at this point if and only if the current capacity is less than the argument of `reserve()`. If an exception is thrown other than by the move constructor of a non-`Cpp17CopyInsertable` type, there are no eﬀects.
 
-<sup>3</sup> *Throws*: length_error if `n > max_size()`.<sup>207</sup>
+<sup>~~5~~++3++</sup> *Throws*: length_error if `n > max_size()`.<sup>207</sup>
 
-<sup>4</sup> *Complexity*: It does not change the size of the sequence and takes at most linear time in the size of the sequence.
+<sup>~~6~~++4++</sup> *Complexity*: It does not change the size of the sequence and takes at most linear time in the size of the sequence.
 
-<sup>5</sup> *Remarks*: Reallocation invalidates all the references, pointers, and iterators referring to the elements in the sequence, as well as the past-the-end iterator.
+<sup>~~7~~++5++</sup> *Remarks*: Reallocation invalidates all the references, pointers, and iterators referring to the elements in the sequence, as well as the past-the-end iterator.
 
 [*Note 1*: If no reallocation happens, they remain valid. — *end note*]
 
@@ -1085,17 +1141,17 @@ No reallocation shall take place during insertions that happen after a call to `
 constexpr void shrink_to_fit();
 ```
 
-<sup>6</sup> *Preconditions*: T is `Cpp17MoveInsertable` into *this.
+<sup>~~8~~++6++</sup> *Preconditions*: T is `Cpp17MoveInsertable` into *this.
 
-<sup>7</sup> *Eﬀects*: shrink_to_fit is a non-binding request to reduce `capacity()` to `size()`.
+<sup>~~9~~++7++</sup> *Eﬀects*: shrink_to_fit is a non-binding request to reduce `capacity()` to `size()`.
 
 [*Note 2*: The request is non-binding to allow latitude for implementation-specifc optimizations. — *end note*]
 
 It does not increase `capacity()`, but may reduce `capacity()` by causing reallocation. If an exception is thrown other than by the move constructor of a non-`Cpp17CopyInsertable` T there are no eﬀects.
 
-<sup>8</sup> *Complexity*: If reallocation happens, linear in the size of the sequence.
+<sup>~~10~~++8++</sup> *Complexity*: If reallocation happens, linear in the size of the sequence.
 
-<sup>9</sup> *Remarks*: Reallocation invalidates all the references, pointers, and iterators referring to the elements in the sequence as well as the past-the-end iterator.
+<sup>~~11~~++9++</sup> *Remarks*: Reallocation invalidates all the references, pointers, and iterators referring to the elements in the sequence as well as the past-the-end iterator.
 
 [*Note 3*: If no reallocation happens, they remain valid. — *end note*]
 
@@ -1105,31 +1161,45 @@ noexcept(allocator_traits<Allocator>::propagate_on_container_swap::value ||
     allocator_traits<Allocator>::is_always_equal::value);
 ```
 
-<sup>10</sup> *Eﬀects*: Exchanges the contents and `capacity()` of `*this` with that of x.
+<sup>~~12~~++10++</sup> *Eﬀects*: Exchanges the contents and `capacity()` of `*this` with that of x.
 
-<sup>11</sup> *Complexity*: Constant time.
+<sup>~~13~~++11++</sup> *Complexity*: Constant time.
 
 ```cpp
 constexpr void resize(size_type sz);
 ```
 
-<sup>12</sup> *Preconditions*: T is `Cpp17MoveInsertable` and `Cpp17DefaultInsertable` into `*this`.
+<sup>~~14~~++12++</sup> *Preconditions*: T is `Cpp17MoveInsertable` and `Cpp17DefaultInsertable` into `*this`.
 
-<sup>13</sup> *Eﬀects*: If `sz < size()`, erases the last `size() - sz` elements from the sequence. Otherwise, appends `sz - size()` default-inserted elements to the sequence.
+<sup>~~15~~++13++</sup> *Eﬀects*: If `sz < size()`, erases the last `size() - sz` elements from the sequence. Otherwise, appends `sz - size()` default-inserted elements to the sequence.
 
-<sup>14</sup> *Remarks*: If an exception is thrown other than by the move constructor of a non-`Cpp17CopyInsertable` T there are no eﬀects.
+<sup>~~16~~++14++</sup> *Remarks*: If an exception is thrown other than by the move constructor of a non-`Cpp17CopyInsertable` T there are no eﬀects.
 
 ```cpp
 constexpr void resize(size_type sz, const T& c);
 ```
 
-<sup>15</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.
+<sup>~~17~~++15++</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.
 
-<sup>16</sup> *Eﬀects*: If `sz < size()`, erases the last `size() - sz` elements from the sequence. Otherwise, appends `sz - size()` copies of c to the sequence.
+<sup>~~18~~++16++</sup> *Eﬀects*: If `sz < size()`, erases the last `size() - sz` elements from the sequence. Otherwise, appends `sz - size()` copies of c to the sequence.
 
-<sup>17</sup> *Remarks*: If an exception is thrown there are no eﬀects.
+<sup>~~19~~++17++</sup> *Remarks*: If an exception is thrown there are no eﬀects.
 
-#### 24.3.11.4 Modifers [vector.modifers]
+#### ~~24.3.11.4 Data [vector.data]~~
+
+```cpp
+constexpr T* data() noexcept;
+constexpr const T* data() const noexcept;
+```
+
+~~<sup>1</sup> *Returns*: A pointer such that `[data(), data() + size())` is a valid range. For a non-empty vector, `data() == addressof(front())` is true.~~
+
+~~<sup>2</sup> *Complexity*: Constant time.~~
+
+---
+~~207) `reserve()` uses `Allocator::allocate()` which can throw an appropriate exception.~~
+
+#### 24.3.11.~~5~~++4++ Modifers [vector.modifers]
 
 ```cpp
 constexpr iterator insert(const_iterator position, const T& x);
@@ -1164,7 +1234,7 @@ constexpr void pop_back();
     
 <sup>5</sup> *Complexity*: The destructor of T is called the number of times equal to the number of the elements erased, but the assignment operator of T is called the number of times equal to the number of elements in the `vector` after the erased elements.
 
-### 24.3.11.5 Erasure [vector.erasure]
+### 24.3.11.~~6~~++5++ Erasure [vector.erasure]
 
 ```cpp
 template<class T, class Allocator, class U = T>
