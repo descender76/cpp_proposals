@@ -438,6 +438,20 @@ auto whatever = {
 
 - How easy is it for the programmer to tell that this was NOT initialized completely with constants? EASY. Even if `i` was far away, the variable is an indicator of it not likely being constant. After all, it is variable. 
 
+---
+
+## MAY vs MUST
+
+### May be static vs Must be static
+
+- How does a programmer know whether the compiler made it static?
+- How does a programmer know whether they even have a dangle?
+- Pessimism = uglier, harder to maintain code.
+- Have to look at assembly code to know.
+- Expect beginners to look at assembly code.
+- Varies among compilers
+- Varies among a single compiler's flags
+
 <!--
 ---
 
