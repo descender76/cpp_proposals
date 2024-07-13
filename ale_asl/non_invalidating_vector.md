@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>PTODOR0</td>
+<td>P3356R0</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2024-07-09</td>
+<td>2024-07-13</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -396,15 +396,15 @@ This would require refactoring any given collection by injecting a base class an
 
 ## Wording
 
-### 24.3.11 Class template non_invalidating_vector_ref [non_invalidating_vector_ref]
+### ++24.3.11 Class template non_invalidating_vector_ref [non_invalidating_vector_ref]++
 
-#### 24.3.11.1 Overview [non_invalidating_vector_ref.overview]
+#### ++24.3.11.1 Overview [non_invalidating_vector_ref.overview]++
 
-<sup>1</sup> A `non_invalidating_vector_ref` is a sequence container that supports (amortized) constant time `insert` and `erase` operations at the end; `insert` and `erase` in the middle take linear time. Storage management is handled automatically, though hints can be given to improve efficiency.
+++<sup>1</sup> A `non_invalidating_vector_ref` is a sequence container that supports (amortized) constant time `insert` and `erase` operations at the end; `insert` and `erase` in the middle take linear time. Storage management is handled automatically, though hints can be given to improve efficiency.++
 
-<sup>2</sup> A `non_invalidating_vector_ref` meets all of the requirements of a container (24.2.2.2), of a reversible container (24.2.2.3), of an allocator-aware container (24.2.2.5), of a sequence container, including most of the optional sequence container requirements (24.2.4), and, for an element type other than `bool`, of a contiguous container (24.2.2.2). The exceptions are the `push_front`, `prepend_range`, `pop_front`, and `emplace_front` member functions, which are not provided. Descriptions are provided here only for operations on `non_invalidating_vector_ref` that are not described in one of these tables or for operations where there is additional semantic information.
+++<sup>2</sup> A `non_invalidating_vector_ref` meets all of the requirements of a container (24.2.2.2), of a reversible container (24.2.2.3), of an allocator-aware container (24.2.2.5), of a sequence container, including most of the optional sequence container requirements (24.2.4), and, for an element type other than `bool`, of a contiguous container (24.2.2.2). The exceptions are the `push_front`, `prepend_range`, `pop_front`, and `emplace_front` member functions, which are not provided. Descriptions are provided here only for operations on `non_invalidating_vector_ref` that are not described in one of these tables or for operations where there is additional semantic information.++
 
-<sup>3</sup> The types `iterator` and `const_iterator` meet the constexpr iterator requirements (25.3.1).
+++<sup>3</sup> The types `iterator` and `const_iterator` meet the constexpr iterator requirements (25.3.1).++
 
 ```cpp
 namespace std {
@@ -412,6 +412,7 @@ namespace std {
     class non_invalidating_vector_ref {
     public:
         // types
+        using actual_type = std::vector<T, Allocator>;
         using value_type = T;
         using allocator_type = Allocator;
         using pointer = typename allocator_traits<Allocator>::pointer;
@@ -426,25 +427,13 @@ namespace std {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         // 24.3.11.2, construct/copy/destroy
-        constexpr non_invalidating_vector_ref() noexcept(noexcept(Allocator())) : non_invalidating_vector_ref(Allocator()) { }
-        constexpr explicit non_invalidating_vector_ref(const Allocator&) noexcept;
-        constexpr explicit non_invalidating_vector_ref(size_type n, const Allocator& = Allocator());
-        constexpr non_invalidating_vector_ref(size_type n, const T& value, const Allocator& = Allocator());
-        template<class InputIterator>
-        constexpr non_invalidating_vector_ref(InputIterator first, InputIterator last, const Allocator& = Allocator());
-        template<container-compatible-range <T> R>
-        constexpr non_invalidating_vector_ref(from_range_t, R&& rg, const Allocator& = Allocator());
-        constexpr non_invalidating_vector_ref(const non_invalidating_vector_ref& x);
-        constexpr non_invalidating_vector_ref(non_invalidating_vector_ref&&) noexcept;
-        constexpr non_invalidating_vector_ref(const non_invalidating_vector_ref&, const type_identity_t<Allocator>&);
-        constexpr non_invalidating_vector_ref(non_invalidating_vector_ref&&, const type_identity_t<Allocator>&);
-        constexpr non_invalidating_vector_ref(initializer_list<T>, const Allocator& = Allocator());
+        constexpr non_invalidating_vector_ref() = delete;
+        constexpr non_invalidating_vector_ref(const non_invalidating_vector_ref&) = default;
+        constexpr non_invalidating_vector_ref(non_invalidating_vector_ref&&) = default;
+        constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&) = delete;
+        constexpr non_invalidating_vector_ref operator=(const non_invalidating_vector_ref&&) = delete;
+        constexpr non_invalidating_vector_ref(actual_type& reference);
         constexpr ~non_invalidating_vector_ref();
-        constexpr non_invalidating_vector_ref& operator=(const non_invalidating_vector_ref& x) = delete;
-        constexpr non_invalidating_vector_ref& operator=(non_invalidating_vector_ref&& x)
-            noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
-            allocator_traits<Allocator>::is_always_equal::value) = delete;
-        constexpr non_invalidating_vector_ref& operator=(initializer_list<T>) = delete;
         template<class InputIterator>
         constexpr void assign(InputIterator first, InputIterator last) = delete;
         template<container-compatible-range <T> R>
@@ -517,6 +506,8 @@ namespace std {
             allocator_traits<Allocator>::is_always_equal::value) = delete;
 
         constexpr void clear() noexcept = delete;
+        
+        operator const actual_type&() const;
 };
 
 template<class InputIterator, class Allocator = allocator<iter-value-type <InputIterator>>>
@@ -529,38 +520,38 @@ non_invalidating_vector_ref(from_range_t, R&&, Allocator = Allocator())
 }
 ```
 
-<sup>4</sup> An incomplete type T may be used when instantiating `non_invalidating_vector_ref` if the allocator meets the allocator completeness requirements (16.4.4.6.2). T shall be complete before any member of the resulting specialization of `non_invalidating_vector_ref` is referenced.
+++<sup>4</sup> An incomplete type T may be used when instantiating `non_invalidating_vector_ref` if the allocator meets the allocator completeness requirements (16.4.4.6.2). T shall be complete before any member of the resulting specialization of `non_invalidating_vector_ref` is referenced.++
 
-#### 24.3.11.2 Constructors [non_invalidating_vector_ref.cons]
+#### ++24.3.11.2 Constructors [non_invalidating_vector_ref.cons]++
 
 ```cpp
 constexpr explicit non_invalidating_vector_ref(const Allocator&) noexcept;
 ```
 
-<sup>1</sup> *Eﬀects*: Constructs an empty `non_invalidating_vector_ref`, using the specifed allocator.
+++<sup>1</sup> *Eﬀects*: Constructs an empty `non_invalidating_vector_ref`, using the specifed allocator.++
 
-<sup>2</sup> *Complexity*: Constant.
+++<sup>2</sup> *Complexity*: Constant.++
 
 ```cpp
 constexpr explicit non_invalidating_vector_ref(size_type n, const Allocator& = Allocator());
 ```
 
-<sup>3</sup> *Preconditions*: T is `Cpp17DefaultInsertable` into `*this`.
+++<sup>3</sup> *Preconditions*: T is `Cpp17DefaultInsertable` into `*this`.++
 
-<sup>4</sup> *Eﬀects*: Constructs a `non_invalidating_vector_ref` with n default-inserted elements using the specifed allocator.
+++<sup>4</sup> *Eﬀects*: Constructs a `non_invalidating_vector_ref` with n default-inserted elements using the specifed allocator.++
 
-<sup>5</sup> *Complexity*: Linear in n.
+++<sup>5</sup> *Complexity*: Linear in n.++
 
 ```cpp
 constexpr non_invalidating_vector_ref(size_type n, const T& value,
     const Allocator& = Allocator());
 ```
 
-<sup>6</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.
+++<sup>6</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.++
 
-<sup>7</sup> *Eﬀects*: Constructs a `non_invalidating_vector_ref` with n copies of value, using the specifed allocator.
+++<sup>7</sup> *Eﬀects*: Constructs a `non_invalidating_vector_ref` with n copies of value, using the specifed allocator.++
 
-<sup>8</sup> *Complexity*: Linear in n.
+++<sup>8</sup> *Complexity*: Linear in n.++
 
 ```cpp
 template<class InputIterator>
@@ -568,49 +559,49 @@ constexpr non_invalidating_vector_ref(InputIterator first, InputIterator last,
     const Allocator& = Allocator());
 ```
 
-<sup>9</sup> *Eﬀects*: Constructs a non_invalidating_vector_ref equal to the range `[first, last)`, using the specifed allocator.
+++<sup>9</sup> *Eﬀects*: Constructs a non_invalidating_vector_ref equal to the range `[first, last)`, using the specifed allocator.++
 
-<sup>10</sup> *Complexity*: Makes only N calls to the copy constructor of T (where N is the distance between first and last) and no reallocations if iterators first and last are of forward, bidirectional, or random access categories. It makes order N calls to the copy constructor of T and order log N reallocations if they are just input iterators.
+++<sup>10</sup> *Complexity*: Makes only N calls to the copy constructor of T (where N is the distance between first and last) and no reallocations if iterators first and last are of forward, bidirectional, or random access categories. It makes order N calls to the copy constructor of T and order log N reallocations if they are just input iterators.++
 
 ```cpp
 template<container-compatible-range <T> R>
 constexpr non_invalidating_vector_ref(from_range_t, R&& rg, const Allocator& = Allocator());
 ```
 
-<sup>11</sup> *Eﬀects*: Constructs a `non_invalidating_vector_ref` object with the elements of the range rg, using the specifed allocator.
+++<sup>11</sup> *Eﬀects*: Constructs a `non_invalidating_vector_ref` object with the elements of the range rg, using the specifed allocator.++
 
-<sup>12</sup> *Complexity*: Initializes exactly N elements from the results of dereferencing successive iterators of rg, where N is `ranges::distance(rg)`. Performs no reallocations if R models ranges::forward_range or `ranges::sized_range`; otherwise, performs order log N reallocations and order N calls to the copy or move constructor of T.
+++<sup>12</sup> *Complexity*: Initializes exactly N elements from the results of dereferencing successive iterators of rg, where N is `ranges::distance(rg)`. Performs no reallocations if R models ranges::forward_range or `ranges::sized_range`; otherwise, performs order log N reallocations and order N calls to the copy or move constructor of T.++
 
-#### 24.3.11.3 Capacity [non_invalidating_vector_ref.capacity]
+#### ++24.3.11.3 Capacity [non_invalidating_vector_ref.capacity]++
 
 ```cpp
 constexpr size_type capacity() const noexcept;
 ```
 
-<sup>1</sup> *Returns*: The total number of elements that the `non_invalidating_vector_ref` can hold without requiring reallocation.
+++<sup>1</sup> *Returns*: The total number of elements that the `non_invalidating_vector_ref` can hold without requiring reallocation.++
 
-<sup>2</sup> *Complexity*: Constant time.
+++<sup>2</sup> *Complexity*: Constant time.++
 
-#### 24.3.11.4 Data [non_invalidating_vector_ref.data]
+#### ++24.3.11.4 Data [non_invalidating_vector_ref.data]++
 
 ```cpp
 constexpr T* data() noexcept;
 constexpr const T* data() const noexcept;
 ```
 
-<sup>1</sup> *Returns*: A pointer such that `[data(), data() + size())` is a valid range. For a non-empty non_invalidating_vector_ref, `data() == addressof(front())` is `true`.
+++<sup>1</sup> *Returns*: A pointer such that `[data(), data() + size())` is a valid range. For a non-empty non_invalidating_vector_ref, `data() == addressof(front())` is `true`.++
 
-<sup>2</sup> *Complexity*: Constant time.
+++<sup>2</sup> *Complexity*: Constant time.++
 
-### 24.3.11 Class template non_invalidating_vector [non_invalidating_vector]
+### ++24.3.11 Class template non_invalidating_vector [non_invalidating_vector]++
 
-#### 24.3.11.1 Overview [non_invalidating_vector.overview]
+#### ++24.3.11.1 Overview [non_invalidating_vector.overview]++
 
-<sup>1</sup> A `non_invalidating_vector` is a sequence container that supports (amortized) constant time `insert` and `erase` operations at the end; `insert` and `erase` in the middle take linear time. Storage management is handled automatically, though hints can be given to improve efficiency.
+++<sup>1</sup> A `non_invalidating_vector` is a sequence container that supports (amortized) constant time `insert` and `erase` operations at the end; `insert` and `erase` in the middle take linear time. Storage management is handled automatically, though hints can be given to improve efficiency.++
 
-<sup>2</sup> A `non_invalidating_vector` meets all of the requirements of a container (24.2.2.2), of a reversible container (24.2.2.3), of an allocator-aware container (24.2.2.5), of a sequence container, including most of the optional sequence container requirements (24.2.4), and, for an element type other than `bool`, of a contiguous container (24.2.2.2). The exceptions are the `push_front`, `prepend_range`, `pop_front`, and `emplace_front` member functions, which are not provided. Descriptions are provided here only for operations on `non_invalidating_vector` that are not described in one of these tables or for operations where there is additional semantic information.
+++<sup>2</sup> A `non_invalidating_vector` meets all of the requirements of a container (24.2.2.2), of a reversible container (24.2.2.3), of an allocator-aware container (24.2.2.5), of a sequence container, including most of the optional sequence container requirements (24.2.4), and, for an element type other than `bool`, of a contiguous container (24.2.2.2). The exceptions are the `push_front`, `prepend_range`, `pop_front`, and `emplace_front` member functions, which are not provided. Descriptions are provided here only for operations on `non_invalidating_vector` that are not described in one of these tables or for operations where there is additional semantic information.++
 
-<sup>3</sup> The types `iterator` and `const_iterator` meet the constexpr iterator requirements (25.3.1).
+++<sup>3</sup> The types `iterator` and `const_iterator` meet the constexpr iterator requirements (25.3.1).++
 
 ```cpp
 namespace std {
@@ -618,6 +609,7 @@ namespace std {
     class non_invalidating_vector {
     public:
         // types
+        using actual_type = std::vector<T, Allocator>;
         using value_type = T;
         using allocator_type = Allocator;
         using pointer = typename allocator_traits<Allocator>::pointer;
@@ -723,6 +715,9 @@ namespace std {
             allocator_traits<Allocator>::is_always_equal::value) = delete;
 
         constexpr void clear() noexcept = delete;
+
+        operator non_invalidating_vector_ref<T, Allocator>();
+        operator const actual_type&() const;
 };
 
 template<class InputIterator, class Allocator = allocator<iter-value-type <InputIterator>>>
@@ -735,38 +730,38 @@ non_invalidating_vector(from_range_t, R&&, Allocator = Allocator())
 }
 ```
 
-<sup>4</sup> An incomplete type T may be used when instantiating `non_invalidating_vector` if the allocator meets the allocator completeness requirements (16.4.4.6.2). T shall be complete before any member of the resulting specialization of `non_invalidating_vector` is referenced.
+++<sup>4</sup> An incomplete type T may be used when instantiating `non_invalidating_vector` if the allocator meets the allocator completeness requirements (16.4.4.6.2). T shall be complete before any member of the resulting specialization of `non_invalidating_vector` is referenced.++
 
-#### 24.3.11.2 Constructors [non_invalidating_vector.cons]
+#### ++24.3.11.2 Constructors [non_invalidating_vector.cons]++
 
 ```cpp
 constexpr explicit non_invalidating_vector(const Allocator&) noexcept;
 ```
 
-<sup>1</sup> *Eﬀects*: Constructs an empty `non_invalidating_vector`, using the specifed allocator.
+++<sup>1</sup> *Eﬀects*: Constructs an empty `non_invalidating_vector`, using the specifed allocator.++
 
-<sup>2</sup> *Complexity*: Constant.
+++<sup>2</sup> *Complexity*: Constant.++
 
 ```cpp
 constexpr explicit non_invalidating_vector(size_type n, const Allocator& = Allocator());
 ```
 
-<sup>3</sup> *Preconditions*: T is `Cpp17DefaultInsertable` into `*this`.
+++<sup>3</sup> *Preconditions*: T is `Cpp17DefaultInsertable` into `*this`.++
 
-<sup>4</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n default-inserted elements using the specifed allocator.
+++<sup>4</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n default-inserted elements using the specifed allocator.++
 
-<sup>5</sup> *Complexity*: Linear in n.
+++<sup>5</sup> *Complexity*: Linear in n.++
 
 ```cpp
 constexpr non_invalidating_vector(size_type n, const T& value,
     const Allocator& = Allocator());
 ```
 
-<sup>6</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.
+++<sup>6</sup> *Preconditions*: T is `Cpp17CopyInsertable` into *this.++
 
-<sup>7</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n copies of value, using the specifed allocator.
+++<sup>7</sup> *Eﬀects*: Constructs a `non_invalidating_vector` with n copies of value, using the specifed allocator.++
 
-<sup>8</sup> *Complexity*: Linear in n.
+++<sup>8</sup> *Complexity*: Linear in n.++
 
 ```cpp
 template<class InputIterator>
@@ -774,41 +769,43 @@ constexpr non_invalidating_vector(InputIterator first, InputIterator last,
     const Allocator& = Allocator());
 ```
 
-<sup>9</sup> *Eﬀects*: Constructs a non_invalidating_vector equal to the range `[first, last)`, using the specifed allocator.
+++<sup>9</sup> *Eﬀects*: Constructs a non_invalidating_vector equal to the range `[first, last)`, using the specifed allocator.++
 
-<sup>10</sup> *Complexity*: Makes only N calls to the copy constructor of T (where N is the distance between first and last) and no reallocations if iterators first and last are of forward, bidirectional, or random access categories. It makes order N calls to the copy constructor of T and order log N reallocations if they are just input iterators.
+++<sup>10</sup> *Complexity*: Makes only N calls to the copy constructor of T (where N is the distance between first and last) and no reallocations if iterators first and last are of forward, bidirectional, or random access categories. It makes order N calls to the copy constructor of T and order log N reallocations if they are just input iterators.++
 
 ```cpp
 template<container-compatible-range <T> R>
 constexpr non_invalidating_vector(from_range_t, R&& rg, const Allocator& = Allocator());
 ```
 
-<sup>11</sup> *Eﬀects*: Constructs a `non_invalidating_vector` object with the elements of the range rg, using the specifed allocator.
+++<sup>11</sup> *Eﬀects*: Constructs a `non_invalidating_vector` object with the elements of the range rg, using the specifed allocator.++
 
-<sup>12</sup> *Complexity*: Initializes exactly N elements from the results of dereferencing successive iterators of rg, where N is `ranges::distance(rg)`. Performs no reallocations if R models ranges::forward_range or `ranges::sized_range`; otherwise, performs order log N reallocations and order N calls to the copy or move constructor of T.
+++<sup>12</sup> *Complexity*: Initializes exactly N elements from the results of dereferencing successive iterators of rg, where N is `ranges::distance(rg)`. Performs no reallocations if R models ranges::forward_range or `ranges::sized_range`; otherwise, performs order log N reallocations and order N calls to the copy or move constructor of T.++
 
-#### 24.3.11.3 Capacity [non_invalidating_vector.capacity]
+#### ++24.3.11.3 Capacity [non_invalidating_vector.capacity]++
 
 ```cpp
 constexpr size_type capacity() const noexcept;
 ```
 
-<sup>1</sup> *Returns*: The total number of elements that the `non_invalidating_vector` can hold without requiring reallocation.
+++<sup>1</sup> *Returns*: The total number of elements that the `non_invalidating_vector` can hold without requiring reallocation.++
 
-<sup>2</sup> *Complexity*: Constant time.
+++<sup>2</sup> *Complexity*: Constant time.++
 
-#### 24.3.11.4 Data [non_invalidating_vector.data]
+#### ++24.3.11.4 Data [non_invalidating_vector.data]++
 
 ```cpp
 constexpr T* data() noexcept;
 constexpr const T* data() const noexcept;
 ```
 
-<sup>1</sup> *Returns*: A pointer such that `[data(), data() + size())` is a valid range. For a non-empty non_invalidating_vector, `data() == addressof(front())` is `true`.
+++<sup>1</sup> *Returns*: A pointer such that `[data(), data() + size())` is a valid range. For a non-empty non_invalidating_vector, `data() == addressof(front())` is `true`.++
 
-<sup>2</sup> *Complexity*: Constant time.
+++<sup>2</sup> *Complexity*: Constant time.++
 
-207) `reserve()` uses `Allocator::allocate()` which can throw an appropriate exception.
+---
+
+++<sup>207)</sup> `reserve()` uses `Allocator::allocate()` which can throw an appropriate exception.++
 
 ## Alternate Wording
 
@@ -828,6 +825,7 @@ namespace std {
     class non_invalidating_vector {
     public:
         // types
+        using actual_type = std::vector<T, Allocator>;
         using value_type = T;
         using allocator_type = Allocator;
         using pointer = typename allocator_traits<Allocator>::pointer;
