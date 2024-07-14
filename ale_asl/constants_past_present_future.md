@@ -8,7 +8,7 @@ anonymous constants: past, present and future
 
 ## Why anonymous constants?
 
-1. Naming everything is not solution otherwise we wouldn't have lambdas i.e. anonymous functions
+1. Naming everything is not the solution, otherwise we wouldn't have lambdas i.e. anonymous functions
 1. Requires name
 1. Excessively wordy
 1. Moved far from point of use
@@ -18,9 +18,9 @@ anonymous constants: past, present and future
 
 ## Why should anonymous constants be static?
 
-- programmer expectation that constants are static like string "Hello World" and assembly inline/local constants
+- programmer expectation that constants are static like string literal "Hello World" and assembly inline/local constants
 - temporaries can immediately dangle; dangling constants are embarrassing
-- want ROM guarantee or at least next best thing const and static
+- want `ROM` guarantee or at least next best thing `const` and `static`
 - memory safe
 - thread safe
 
@@ -71,20 +71,21 @@ mov <memory>,<constant>
 
 ## embarrassing (Part 4)
 
-### C++ was easier and safer
+### C++ `WAS` easier and safer
 
-CFront i.e. C with classes because C++ was preprocessed to C code, which didn't immediately dangle their constants/literals.
+CFront i.e. C with classes, because C++ was preprocessed to C code, which didn't immediately dangle their constants/literals.
 
 ---
 
 ## Requirements
 
-1. const [&]
-1. constexpr; can be constructed at compile time
-1. consteval; was constructed at compile time
+1. `const` [&]; will only be used in a constant fashion
+1. `constexpr`; can be constructed at compile time
+1. `consteval`; was constructed at compile time
 
-Result
-- constinit; constant initialization, sensible lifetime extension of a temporary to a global
+## Result
+
+- `constinit`; constant initialization, sensible lifetime extension of a temporary to a global
 
 ---
 
@@ -365,7 +366,7 @@ https://en.cppreference.com/w/c/language/const
 
 ### Requirements
 
-1. const [&]
+1. const [&]; will only be used in a constant fashion
 1. constexpr; can be constructed at compile time
 1. consteval; was constructed at compile time
 
@@ -391,7 +392,7 @@ https://en.cppreference.com/w/c/language/const
 
 ## Teachability (Part 4)
 
-### Requirement #2 consteval
+### Requirement #3 consteval
 
 - Was the constant initiated with only constants?
 
@@ -445,7 +446,7 @@ auto whatever = {
 ### May be static vs Must be static
 
 - How does a programmer know whether the compiler made it static?
-- How does a programmer know whether they even have a dangle?
+- How does a programmer know whether they even have a dangle that needs fixing?
 - Pessimism = uglier, harder to maintain code.
 - Have to look at assembly code to know.
 - Expect beginners to look at assembly code.
