@@ -18,7 +18,7 @@ anonymous constants: past, present and future
 
 ## Why should anonymous constants be static?
 
-- programmer expectation that constants are static like string literal "Hello World" and assembly inline/local constants
+- programmer expectation that constants are static like string literals, ex. "Hello World", and assembly inline/local constants
 - temporaries can immediately dangle; dangling constants are embarrassing
 - want `ROM` guarantee or at least next best thing `const` and `static`
 - memory safe
@@ -248,7 +248,7 @@ simpler
 ```cpp
 auto [](const std::string& s) {
     return s;
-}("HWs");
+}("HW"s);
 ```
 
 </td>
@@ -273,7 +273,7 @@ const std::string& s = "HW"s;
 </td>
 <td style="text-align:center">
 
-<span style="color:green">?</span>
+<span style="color:green">~<!--?--></span>
 
 </td>
 <td style="text-align:center">
@@ -292,7 +292,7 @@ const std::string s = "HW"s;
 </td>
 <td style="text-align:center">
 
-<span style="color:red">&#x2717;</span>
+<span style="color:red">~<!--&#x2717;--></span>
 
 </td>
 <td style="text-align:center">
@@ -310,7 +310,7 @@ const std::string s = "HW"s;
 ### The point
 
 - While the consistency is appreciated for simplicity
-- Only temporaries passed to function calls need it
+- Only temporaries passed to function calls need it due to immediate dangling. The other two would benefit for instance if & was returned.
 
 ---
 
