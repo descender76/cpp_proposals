@@ -217,7 +217,7 @@ The proposed changes are relative to the current working draft `N5008` [^n5008].
 
 ### Wasn't the return type of `try_push_back` and `try_emplace_back` settled in R6 and R7?
 
-According to `NB-Commenting is Not a Vehicle for Redesigning inplace_vector` [^p3830r0] `R6` [^p0843r6] discussed `optional<T>` not `optional<T&>`. According to `NB-Commenting is Not a Vehicle for Redesigning inplace_vector` [^p3830r0] `R7` [^p0843r7] discussed bool and pointer but not `optional<T&>`. Using `optional<T&>` was discussed during the March 2024 WG21 meeting in Tokyo, Japan at the Library Working Group during the consideration of `R11` [^p0843r11]. It was known that optional<&> was coming at some point and when it does that it would need to be considered revising the return parameters of `try_push_back` and `try_emplace_back`. `optional<T&>` did come and it does need to be considered on both safety and on internal `C++26` consistency grounds.
+According to `NB-Commenting is Not a Vehicle for Redesigning inplace_vector`, [^p3830r0] `R6` [^p0843r6] discussed `optional<T>`, not `optional<T&>`. According to `NB-Commenting is Not a Vehicle for Redesigning inplace_vector`, [^p3830r0] `R7` [^p0843r7] discussed bool and pointer but not `optional<T&>`. Using `optional<T&>` was discussed during the March 2024 WG21 meeting in Tokyo, Japan at the Library Working Group during the consideration of `R11` [^p0843r11]. It was known that optional<&> was coming at some point and when it does that it would need to be considered revising the return parameters of `try_push_back` and `try_emplace_back`. `optional<T&>` did come and it does need to be considered on both safety and on internal `C++26` consistency grounds.
 
 ### Why `const <optional&>`?
 
@@ -272,7 +272,7 @@ op10 = op11;// optional<const &> = const optional<const &>
 Sure and programmers are raising safety issues with inplace_vector<T>. National Body Comments is about fixing issues.
 
 `LWG4299` [^LWG4299] and `LWG4300` [^LWG4300] are tiny clarifications.
-`LWG4299` [^LWG4299], `LWG4300` [^LWG4300] and `LWG4300` [^LWG4300] does not impact the public interface of `optional<&>` nor does it have safety impacts. Further these issues could be fixed in `C++29` without it being breaking change. Waiting till `C++29` to correct the return type of `try_emplace_back` and `try_push_back` would be a breaking change, which is why it needs to be addressed now. 
+`LWG4299` [^LWG4299], `LWG4300` [^LWG4300] and `LWG4300` [^LWG4300] does not impact the public interface of `optional<&>` nor does it have safety impacts. Further these issues could be fixed in `C++29` without it being a breaking change. Waiting till `C++29` to correct the return type of `try_emplace_back` and `try_push_back` would be a breaking change, which is why it needs to be addressed now. 
 
 ### Isn't optional<T&> NOT trivially copyable?
 
