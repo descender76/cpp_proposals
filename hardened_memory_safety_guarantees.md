@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P3810R0</td>
+<td>P3810R1</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2025-08-14</td>
+<td>2025-10-03</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -58,12 +58,19 @@ a code
 
 ## Table of contents
 
-- [Standard Library Hardening - using std::optional<T&>](#Standard-Library-Hardening-using-std-optional-T)
+- [hardened memory safety guarantees](#hardened-memory-safety-guarantees)
+  - [Changelog](#Changelog)
   - [Abstract](#Abstract)
   - [Motivation](#Motivation)
   - [Wording](#Wording)
   - [Impact on the standard](#Impact-on-the-standard)
   - [References](#References)
+
+## Changelog
+
+### R1
+
+- fixed copy paste errors
 
 ## Abstract
 
