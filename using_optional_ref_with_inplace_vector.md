@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2025-10-03</td>
+<td>2025-10-05</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -221,22 +221,29 @@ According to `NB-Commenting is Not a Vehicle for Redesigning inplace_vector`, [^
 
 ### Why `const <optional&>`?
 
-Either `const <optional&>` or `<optional&>` will mitigate the spatial memory errors such as null pointer dereference, pointer arithmetic and pointer indexing associated with superfluous pointer usage. So removing `const` doesn't negate the safety advantages of providing `<optional&>`. So why `const`? We are talking about references which essentially are `const` pointers. Consequently, `const <optional&>` should be the default usage when one is expecting reference semantics. Why do many programmers prefer reference semantics over pointer semantics! Besides the spatial safety benefits already mentioned, reference semantics also helps temporal safety because once a reference aliases an object with global, stack or heap lifetime it always does so, which makes it easier for programmers to reason about lifetimes at compile time. Due to the mutability of non `const` pointers, reasoning about lifetimes are runtime in nature. Further, no functionality is lost by have reference semantics because `const` pointers are implicitly convertible to non `const` pointers just as `const` optional<&> is implicitly convertible to optional<&>.
+Either `const <optional&>` or `<optional&>` will mitigate the spatial memory errors such as null pointer dereference, pointer arithmetic and pointer indexing associated with superfluous pointer usage. So removing `const` doesn't negate the safety advantages of providing `<optional&>`. So why `const`? We are talking about references which essentially are `const` pointers. Consequently, `const <optional&>` should be the default usage when one is expecting reference semantics. Why do many programmers prefer reference semantics over pointer semantics! Besides the spatial safety benefits already mentioned, reference semantics also helps temporal safety because once a reference aliases an object with global, stack or heap lifetime it always does so, which makes it easier for programmers to reason about lifetimes at compile time. Due to the mutability of non `const` pointers, reasoning about lifetimes are runtime in nature. Further, no functionality is lost by having reference semantics because `const` optional<&> is implicitly convertible to optional<&> just as `const` pointers are implicitly convertible to non `const` pointers.
 
 ```cpp
 int value = 0;
-int * p00 = &value;//optional<&>
-int const * p10 = &value;//optional<const &>
-int * const p01 = &value;//const optional<&> i.e. optional_ref<T>
-int const * const p11 = &value;//const optional<const &> i.e. optional_ref<const T>
-p00 = p00;// optional<&> = optional<&>
+```
+
+<table>
+<tr>
+<td>
+
+```cpp=
+int * p00 = &value;
+int const * p10 = &value;
+int * const p01 = &value;
+int const * const p11 = &value;
+p00 = p00;
 //p00 = p10;
-p00 = p01;// optional<&> = const optional<&>
+p00 = p01;
 //p00 = p11;
-p10 = p00;// optional<const &> = optional<&>
-p10 = p10;// optional<const &> = optional<const &>
-p10 = p01;// optional<const &> = const optional<&>
-p10 = p11;// optional<const &> = const optional<const &>
+p10 = p00;
+p10 = p10;
+p10 = p01;
+p10 = p11;
 //p01 = p00;
 //p01 = p10;
 //p01 = p01;
@@ -245,18 +252,24 @@ p10 = p11;// optional<const &> = const optional<const &>
 //p11 = p10;
 //p11 = p01;
 //p11 = p11;
+```
+
+</td>
+<td>
+
+```cpp=
 optional<int&> op00{value};
 optional<const int&> op10{value};
-optional_ref<int> op01{value};//const optional<int&> op01{value};
-optional_ref<const int> op11{value};//const optional<const int&> op11{value};
-op00 = op00;// optional<&> = optional<&>
+const optional<int> op01{value};
+const optional<const int> op11{value};
+op00 = op00;
 //op00 = op10;
-op00 = op01;// optional<&> = const optional<&>
+op00 = op01;
 //op00 = op11;
-op10 = op00;// optional<const &> = optional<&>
-op10 = op10;// optional<const &> = optional<const &>
-op10 = op01;// optional<const &> = const optional<&>
-op10 = op11;// optional<const &> = const optional<const &>
+op10 = op00;
+op10 = op10;
+op10 = op01;
+op10 = op11;
 //op01 = op00;
 //op01 = op10;
 //op01 = op01;
@@ -266,6 +279,10 @@ op10 = op11;// optional<const &> = const optional<const &>
 //op11 = op01;
 //op11 = op11;
 ```
+
+</td>
+</tr>
+</table>
 
 ### Doesn't `optional<T&>` have issues?
 
@@ -285,6 +302,23 @@ According to `NB-Commenting is Not a Vehicle for Redesigning inplace_vector` [^p
 ### Shouldn’t we not be adding any more overhead to an object that is likely to be used briefly as a temporary and thrown away?
 
 YES, that is why `optional<&>` [^p2988r12] should eventually be made `trivially copyable` [^p3836r0] and more important "additionally constrain its layout so it actually becomes a wrapper for a T*". [^p3836r0]
+
+### Why `const T&` instead of `const T*`?
+
+If the referent is non null, as it should be when dealing with objects of both static storage duration and automatic storage duration, then a reference should be used instead of a pointer. Beside that, `const T&` is ready to be consumed as input arguments.
+
+<table>
+<tr>
+<td>
+
+**C++ Core Guidelines**
+***F.16: For "in" parameters, pass** cheaply-copied types by value and others **by reference to const*** [^cppcgrfin]
+
+</td>
+</tr>
+</table>
+
+We can have functions like `define_static_object` dereference the pointer a constant number of times, once per return, or we can have all programmers dereference the return every time the function is used as an input argument. In other words, a very large number that grows with time. The default choice seems clear.
 
 ## References
 <!-- C++ Core Guidelines -->
@@ -323,3 +357,5 @@ YES, that is why `optional<&>` [^p2988r12] should eventually be made `trivially 
 [^LWG4300]: <https://cplusplus.github.io/LWG/issue4300>
 <!-- std::optional<T&>::iterator can't be a contiguous iterator for some T -->
 [^LWG4308]: <https://cplusplus.github.io/LWG/issue4308>
+<!-- F.16: For “in” parameters, pass cheaply-copied types by value and others by reference to const -->
+[^cppcgrfin]: <https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rf-in>
