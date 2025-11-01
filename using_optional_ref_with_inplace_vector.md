@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P3739R3</td>
+<td>P3739R4</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2025-10-05</td>
+<td>2025-11-01</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -69,6 +69,11 @@ a code
 
 ## Changelog
 
+### R4
+
+- realign references from N5008 to N5014 [^n5014]
+- added more wording
+
 ### R3
 
 - added more context to historical discussion
@@ -83,7 +88,7 @@ a code
 
 ## Abstract
 
-Utilize `std::optional<T&>` [^p2988r12] and `T&` in the `C++26` standard instead of `T*`  order to harden it against null pointer dereference errors for similar memory safety reasons as `Standard Library Hardening` [^p3471r4] and `Minor additions to C++26 standard library hardening` [^p3697r0].
+Utilize `std::optional<T&>` [^p2988r12] and `T&` in the `C++26` standard instead of `T*` in order to harden it against null pointer dereference errors for similar memory safety reasons as `Standard Library Hardening` [^p3471r4] and `Minor additions to C++26 standard library hardening` [^p3697r0].
 
 This was discussed during the March 2024 WG21 meeting in Tokyo, Japan at the Library Working Group during the standardization of `inplace_vector` [^p0843r11] but could not be adopted since `std::optional<T&>` [^p2988r12] was not sufficiently along in the `C++26` standardization process. Now that `std::optional<T&>` [^p2988r12] was adopted during the June 2025 Sophia meeting, it would be ideal that `inplace_vector` [^p0843r14] and other superfluous instances of `T*` underwent minor revisions to better align it with the rest of `C++26` and consequently provide a more robust interface.
 
@@ -152,6 +157,29 @@ There are equivalent benefits for `exception_ptr_cast` [^p2927r3] [^P3748R0] and
 
 ## Wording
 
+#### 17.9.2 Header <exception> synopsis [exception.syn]
+
+...
+
+template<class E> constexpr ~~const E*~~++const optional<const T&>++ exception_ptr_cast(const exception_ptr& p) noexcept;
+
+...
+
+#### 17.9.7 Exception propagation [propagation]
+
+template<class E> constexpr ~~const E*~~++const optional<const T&>++ exception_ptr_cast(const exception_ptr& p) noexcept;
+
+...
+
+#### 21.4.1 Header <meta> synopsis [meta.syn]
+
+...
+
+template<class T>
+consteval const ~~remove_cvref_t<T>*~~++T&++ define_static_object(T&& t);
+
+...
+
 ### 23.3.16 Class template inplace_vector [inplace.vector]
 
 
@@ -211,7 +239,7 @@ constexpr ~~pointer~~++const optional<T&>++  try_push_back(T&& x);<br/>
 
 Other than `inplace_vector`[^p0843r14], `Inspecting exception_ptr` [^p2927r3] [^P3748R0] and `define_static_{string,object,array}` [^p3491r3] which are all three completely new to the standard, there are no other changes to the library standard and since `C++26` has not be released, this tweak is not expected to cause any problems.
 
-The proposed changes are relative to the current working draft `N5008` [^n5008].
+The proposed changes are relative to the current working draft `N5014` [^n5014].
 
 ## Frequently Asked Questions
 
@@ -340,7 +368,7 @@ We can have functions like `define_static_object` dereference the pointer a cons
 <!-- Standard Library Hardening -->
 [^p3471r4]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p3471r4.html>
 <!-- Working Draft, Programming Languages -- C++ -->
-[^n5008]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/n5008.pdf>
+[^n5014]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/n5014.pdf>
 <!-- Inspecting exception_ptr -->
 [^p2927r3]: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p2927r3.html>
 <!-- Inspecting exception_ptr should be constexpr -->
