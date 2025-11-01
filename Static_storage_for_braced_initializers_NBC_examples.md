@@ -7,11 +7,11 @@ blockquote { color: inherit !important }
 <table>
 <tr>
 <td>Document number</td>
-<td>P3824R1</td>
+<td>P3824R2</td>
 </tr>
 <tr>
 <td>Date</td>
-<td>2025-10-4</td>
+<td>2025-11-1</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -67,6 +67,10 @@ a code
   - [References](#References)
 
 ## Changelog
+
+### R2
+
+- wording clarifications
 
 ### R1
 
@@ -283,7 +287,7 @@ void i() {
 }
 ```
 
-While it would be ideal if both function `h` and function `i` examples had `static storage duration`, since `f({1, x, x, x, 3});` requires analysis of additional lines of code it could make sense, on the short term, that it MAY have `static storage duration`. Hopefully, even this scenario would be strengthened in future `C++` releases since it is needed for the deduplication of constants in order to fulfill DRY, don't repeat yourself, and ODR, one definition rule. At least with requiring `static storage duration` on function `h`, their would be a fallback plan that would still allow the programmer to use this feature. Without even this minimal guarantee, programmers have to fallback on to esoteric workaround code.
+While it would be ideal if both function `h` and function `i` examples had `static storage duration`, since `f({1, x, x, x, 3});` requires analysis of additional lines of code it could make sense, on the short term, that it MAY have `static storage duration`. Hopefully, even this scenario would be strengthened in future `C++` releases since it is needed for the deduplication of constants in order to fulfill DRY, don't repeat yourself<!--, and ODR, one definition rule-->. At least with requiring `static storage duration` on function `h`, their would be a fallback plan that would still allow the programmer to use this feature. Without even this minimal guarantee, programmers have to fallback on to esoteric workaround code.
 
 Initializer lists are a pure reference type. Shouldn't other standard pure reference types also have similar functionality, such as `std::span<const T>` and `std::string_view`.
 
@@ -418,7 +422,7 @@ arguable should be error regardless of `const`
 </tr>
 </table>
 
-**NOTE:** The first and the third would be logically safe had the object had `static storage duration`. The second would be caught as an error if compilers such as clang and gcc would correctly implement/deploy `Simpler implicit move` [^p2266r3]. If the bonus solution is accepted, than hopefully future standards could require some local analysis so that the second could be made as safe as the first and third.
+**NOTE:** The first and the third would be logically safe had the object had `static storage duration`. The second would be caught as an error if compilers such as clang and gcc would implement/deploy `Simpler implicit move` [^p2266r3] such that returning a reference to an xvalue is ill-formed. If the bonus solution is accepted, than hopefully future standards could require some local analysis so that the second could be made as safe as the first and third.
 
 ```cpp
 const int& first(const int& passthrough)
@@ -469,15 +473,15 @@ Further, some verbiage to this effect would be in order.
 
 ...
 
-<sup>6</sup> The third context is when a ~~reference~~++pure alias type++ binds to a temporary object.<sup>25</sup>
+<sup>6</sup> The third context is when a ~~reference~~++pure alias++ binds to a temporary object.<sup>25</sup>
     
-++Pure alias types are types that consist of only references, pointers and no value members other than the size of referenced memory. The set of pure alias types includes known pure alias types such as reference, pointer, `initializer_list`, `reference_wrapper`, `basic_string_view`, `span`, `mdspan`, `function_ref`, `optional<&>`, most if not all iterators, most if not all range views and aggregates of only pure alias types.++
+++Pure alias types are types that consist of only references, pointers and no value members other than the size of referenced memory. The set of pure alias types includes known pure alias types such as reference, pointer, `initializer_list`, `reference_wrapper`, `basic_string_view`, `span`, `mdspan`, `function_ref`, `optional<&>`, many iterators since they are just pointers, many range views since they are just pairs of pointers and aggregates of only pure alias types.++
 
-++A type `is definitely NOT lifetime extendable` when extending the lifetime of said object would change the semantic meaning of a program. Known types that would fall into this category are locks, lock guards, files, sockets, transactions; pretty much any non memory only OS resource.++
+++A type `is definitely NOT lifetime extendable` when extending the lifetime of said object would change the semantic meaning of a program. Known types that would fall into this category are `jthread`, `lock_guard`, `scoped_lock`, `unique_lock`, `shared_lock`, `basic_ifstream`, `basic_ofstream`, `basic_fstream`; pretty much any type in which its destructor `closes` a non memory only OS resource.++
 
 ++A type `is lifetime extendable` when it is `is_trivially_destructible` or the destructor just frees memory by calling `delete` or `free`. The type must not be or composed of types that are definitely NOT lifetime extendable. Known types that fall into this category are those types that are `is_trivially_destructible`, also `Container` and `AssociativeContainer` when their contents are `lifetime extendable` and the collection itself doesn't have a functioning lock as that would make it definitely NOT lifetime extendable.++
 
-++When the `pure alias type` is `const`, the type of the temporary `is lifetime extendable`, the temporary is being constructed via a `constexpr` or `consteval` constructor and all of the arguments to that constructor are entirely composed of `const` literals, then the lifetime of the temporary is static storage duration otherwise when a reference binds to a temporary object, t++~~T~~he temporary object to which the reference is bound or the temporary object that is the complete object of a subobject to which the reference is bound persists for the lifetime of the reference if the glvalue to which the reference is bound was obtained through one of the following:
+++When the `pure alias type` is `const`, the type of the temporary `is lifetime extendable`, the temporary is being constructed via a `constexpr` or `consteval` constructor and all of the arguments to that constructor are entirely composed of `const` literals, then the lifetime of the temporary is static storage duration otherwise when a `pure alias` binds to a temporary object, t++~~T~~he temporary object to which the ~~reference~~++`pure alias`++ is bound or the temporary object that is the complete object of a subobject to which the ~~reference~~++`pure alias`++ is bound persists for the lifetime of the ~~reference~~++`pure alias`++ if the glvalue to which the ~~reference~~++`pure alias`++ is bound was obtained through one of the following:
 
 ...
 ...
