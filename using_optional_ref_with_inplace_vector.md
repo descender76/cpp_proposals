@@ -11,7 +11,7 @@ blockquote { color: inherit !important }
 </tr>
 <tr>
 <td>Date</td>
-<td>2025-11-01</td>
+<td>2025-11-06</td>
 </tr>
 <tr>
 <td>Reply-to</td>
@@ -177,6 +177,34 @@ template<class E> constexpr ~~const E*~~++const optional<const T&>++ exception_p
 
 template<class T>
 consteval const ~~remove_cvref_t<T>*~~++T&++ define_static_object(T&& t);
+
+...
+
+#### 21.4.3 Promoting to static storage strings [meta.define.static]
+
+...
+
+```cpp
+template<class T>
+```
+`consteval const`
+~~remove_cvref_t<T>*~~++T&++ `define_static_object(T&& t);`<br/>
+<sup>4</sup> <i>Effects</i>: Equivalent to:<br/>
+```cpp
+using U = remove_cvref_t<T>;
+if constexpr (is_class_type(^^U)) {
+```
+&nbsp;&nbsp;&nbsp;&nbsp;`return` <span style="background-color:lightgreen">\*(</span>`addressof(extract<const U&>(meta::reflect_constant(std::forward<T>(t))))`<span style="background-color:lightgreen">)</span>`;`<br/>
+```cpp
+} else {
+```
+&nbsp;&nbsp;&nbsp;&nbsp;`return` <span style="background-color:lightgreen">\*(</span>`define_static_array(span(addressof(t), 1)).data()`<span style="background-color:lightgreen">)</span>`;`<br/>
+```cpp
+}
+```
+<br/>
+    
+<sup>5</sup> \[*Note 1*: For class types, **define_static_object** provides the ~~address~~++reference++ of the template parameter object (13.2)<br/>that is template-argument equivalent to t. — *end note*\]
 
 ...
 
